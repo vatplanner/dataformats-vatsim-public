@@ -25,15 +25,15 @@ public class NetworkInformation {
     
     private String whazzUpString = null;
     private final List<String> startupMessages = new ArrayList<>();
-    protected Map<String, List<URL>> urlsByParameter = new HashMap<>();
+    Map<String, List<URL>> urlsByParameter = new HashMap<>();
     
-    public static final String PARAMETER_KEY_MESSAGE_STARTUP = "msg0";
-    public static final String PARAMETER_KEY_URL_DATA_FILE = "url0";
-    public static final String PARAMETER_KEY_URL_SERVERS_FILE = "url1";
-    public static final String PARAMETER_KEY_URL_MOVED = "moveto0";
-    public static final String PARAMETER_KEY_URL_METAR = "metar0";
-    public static final String PARAMETER_KEY_URL_ATIS = "atis0";
-    public static final String PARAMETER_KEY_URL_USER_STATISTICS = "user0";
+    static final String PARAMETER_KEY_MESSAGE_STARTUP = "msg0";
+    static final String PARAMETER_KEY_URL_DATA_FILE = "url0";
+    static final String PARAMETER_KEY_URL_SERVERS_FILE = "url1";
+    static final String PARAMETER_KEY_URL_MOVED = "moveto0";
+    static final String PARAMETER_KEY_URL_METAR = "metar0";
+    static final String PARAMETER_KEY_URL_ATIS = "atis0";
+    static final String PARAMETER_KEY_URL_USER_STATISTICS = "user0";
     
     /**
      * Returns a list of all URLs for the given key.
@@ -41,7 +41,7 @@ public class NetworkInformation {
      * @param key key to retrieve URLs for
      * @return URLs in order
      */
-    public List<URL> getUrlsByKey(final String key) {
+    List<URL> getUrlsByKey(final String key) {
         List<URL> urls = urlsByParameter.get(key);
         
         if (urls == null) {
@@ -58,7 +58,7 @@ public class NetworkInformation {
      * @param value URL string to parse
      * @return Could the URL be parsed and has it been registered to the given key?
      */
-    public boolean addAsUrl(final String key, final String value) {
+    boolean addAsUrl(final String key, final String value) {
         URL url = null;
         try {
             url = new URL(value);
