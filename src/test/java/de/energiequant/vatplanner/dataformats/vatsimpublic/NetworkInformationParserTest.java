@@ -8,17 +8,17 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static org.hamcrest.Matchers.*;
-import org.hamcrest.junit.ExpectedException;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.runner.RunWith;
 import uk.org.lidalia.slf4jtest.LoggingEvent;
 import uk.org.lidalia.slf4jtest.TestLogger;
@@ -197,7 +197,17 @@ public class NetworkInformationParserTest {
     }
     
     @Test
-    public void testParse_msg0DefinedByFullExample1_resultContainsExpectedStartupMessages() {
+    public void testParse_fullExample1_resultContainsExpectedWhazzUpString() {
+        BufferedReader br = getBufferedReaderForTestResource("fullexample1.txt");
+        
+        NetworkInformation res = NetworkInformationParser.parse(br);
+        
+        String whazzUpString = res.getWhazzUpString();
+        assertThat(whazzUpString, is("1234:TEST"));
+    }
+    
+    @Test
+    public void testParse_fullExample1_resultContainsExpectedStartupMessages() {
         BufferedReader br = getBufferedReaderForTestResource("fullexample1.txt");
         
         NetworkInformation res = NetworkInformationParser.parse(br);
@@ -208,7 +218,83 @@ public class NetworkInformationParserTest {
     }
     
     @Test
-    public void testParse_msg0NotDefined_resultHasNoStartupMessages() {
+    public void testParse_fullExample1_resultContainsExpectedAtisURLs() throws MalformedURLException {
+        BufferedReader br = getBufferedReaderForTestResource("fullexample1.txt");
+        
+        NetworkInformation res = NetworkInformationParser.parse(br);
+        
+        List<URL> atisUrls = res.getAtisUrls();
+        
+        assertThat(atisUrls.size(), is(1));
+        assertThat(atisUrls.get(0), is(equalTo(new URL("http://www.could-be-anywhere.local/test.html"))));
+    }
+    
+    @Test
+    public void testParse_fullExample1_resultContainsExpectedDataFileURLs() throws MalformedURLException {
+        BufferedReader br = getBufferedReaderForTestResource("fullexample1.txt");
+        
+        NetworkInformation res = NetworkInformationParser.parse(br);
+        
+        List<URL> dataFileUrls = res.getDataFileUrls();
+        
+        assertThat(dataFileUrls.size(), is(3));
+        assertThat(dataFileUrls.get(0), is(equalTo(new URL("http://where-ever.com/fetchme.txt"))));
+        assertThat(dataFileUrls.get(1), is(equalTo(new URL("http://some.where.else/fetchme2.txt"))));
+        assertThat(dataFileUrls.get(2), is(equalTo(new URL("http://checking-misplaced.out.of.group/"))));
+    }
+    
+    @Test
+    public void testParse_fullExample1_resultContainsExpectedMetarURLs() throws MalformedURLException {
+        BufferedReader br = getBufferedReaderForTestResource("fullexample1.txt");
+        
+        NetworkInformation res = NetworkInformationParser.parse(br);
+        
+        List<URL> metarUrls = res.getMetarUrls();
+        
+        assertThat(metarUrls.size(), is(1));
+        assertThat(metarUrls.get(0), is(equalTo(new URL("http://someurl.com/test"))));
+    }
+    
+    @Test
+    public void testParse_fullExample1_resultContainsExpectedMovedToURLs() throws MalformedURLException {
+        BufferedReader br = getBufferedReaderForTestResource("fullexample1.txt");
+        
+        NetworkInformation res = NetworkInformationParser.parse(br);
+        
+        List<URL> movedToUrls = res.getMovedToUrls();
+        
+        assertThat(movedToUrls.size(), is(1));
+        assertThat(movedToUrls.get(0), is(equalTo(new URL("http://go-and-ask.there/"))));
+    }
+    
+    @Test
+    public void testParse_fullExample1_resultContainsExpectedServerFileURLs() throws MalformedURLException {
+        BufferedReader br = getBufferedReaderForTestResource("fullexample1.txt");
+        
+        NetworkInformation res = NetworkInformationParser.parse(br);
+        
+        List<URL> serverFileUrls = res.getServersFileUrls();
+        
+        assertThat(serverFileUrls.size(), is(3));
+        assertThat(serverFileUrls.get(0), is(equalTo(new URL("https://theres-more.com/another-file.txt"))));
+        assertThat(serverFileUrls.get(1), is(equalTo(new URL("http://and-again.de/check-this.dat"))));
+        assertThat(serverFileUrls.get(2), is(equalTo(new URL("http://after-a-blank-line.de/we-continue.txt"))));
+    }
+    
+    @Test
+    public void testParse_fullExample1_resultContainsExpectedUserStatisticsURLs() throws MalformedURLException {
+        BufferedReader br = getBufferedReaderForTestResource("fullexample1.txt");
+        
+        NetworkInformation res = NetworkInformationParser.parse(br);
+        
+        List<URL> userStatsUrls = res.getUserStatisticsUrls();
+        
+        assertThat(userStatsUrls.size(), is(1));
+        assertThat(userStatsUrls.get(0), is(equalTo(new URL("https://stats-here.and.now/getStats.php"))));
+    }
+    
+    @Test
+    public void testParse_startupMessagesNotDefined_resultHasNoStartupMessages() {
         NetworkInformation res = NetworkInformationParser.parse("");
         
         List<String> messagesStartup = res.getStartupMessages();

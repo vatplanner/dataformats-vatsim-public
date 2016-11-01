@@ -3,12 +3,7 @@ package de.energiequant.vatplanner.dataformats.vatsimpublic;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,9 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Holds dynamic meta information about the VATSIM network.
- * Parses status.txt which mainly defines reference URLs to fetch other
- * information from.
+ * Parses status.txt which defines meta information such as reference URLs to
+ * fetch other information from.
  * The policy is to fetch that information only once "on application start" to
  * reduce server load.
  */
