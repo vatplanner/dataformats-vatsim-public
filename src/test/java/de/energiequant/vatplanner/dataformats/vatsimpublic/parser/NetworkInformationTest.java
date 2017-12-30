@@ -1,4 +1,4 @@
-package de.energiequant.vatplanner.dataformats.vatsimpublic;
+package de.energiequant.vatplanner.dataformats.vatsimpublic.parser;
 
 import com.google.common.collect.ImmutableList;
 import java.net.MalformedURLException;

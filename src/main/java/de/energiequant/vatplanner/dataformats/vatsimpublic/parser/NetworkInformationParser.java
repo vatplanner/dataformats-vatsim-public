@@ -1,4 +1,4 @@
-package de.energiequant.vatplanner.dataformats.vatsimpublic;
+package de.energiequant.vatplanner.dataformats.vatsimpublic.parser;
 
 import java.io.BufferedReader;
 import java.io.IOException;

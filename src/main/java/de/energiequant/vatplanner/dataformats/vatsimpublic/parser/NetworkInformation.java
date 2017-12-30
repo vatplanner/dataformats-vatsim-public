@@ -1,4 +1,4 @@
-package de.energiequant.vatplanner.dataformats.vatsimpublic;
+package de.energiequant.vatplanner.dataformats.vatsimpublic.parser;
 
 import java.net.MalformedURLException;
 import java.net.URL;
