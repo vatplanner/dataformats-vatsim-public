@@ -1,0 +1,136 @@
+@startuml
+
+Connection "1" -- Flight
+Connection "1" -- Facility
+
+Member "1" -- "*" Flight
+Member "1" -- "*" Facility
+
+Flight "1" -- "*" Flightplan
+Flight "1" -- "*" TrackPoint
+
+Facility "1" -- "*" Message
+
+GeoCoordinates "1" -- TrackPoint
+GeoCoordinates "1" -- Facility
+
+class Member {
+      vatsimID : int
+      
+      flights : Collection<Flight>
+      facilities : Collection<Facility>
+}
+
+class Connection {
+      member : Member
+      lastSeen : Instant
+
+      .. from data file ..
+      logonTime : Instant
+      realName : String
+      homeBase : String
+      rating : int
+
+      .. technical details ..
+      serverId : String
+      protocolVersion : int
+}
+
+note as Note_atis_message
+     decode "atis_message":
+     first line prefixed "$ " => voice URL
+     rest of lines => message
+     multi-line formatting with "^" and special character as CR LF?
+end note
+
+Facility .. Note_atis_message
+Message .. Note_atis_message
+
+class Facility {
+      member : Member
+      connection : Connection
+      callsign : String
+      facilityType : int
+      frequencyKilohertz : int
+      messagesByUpdateTime : NavigableMap<Instant, Message>
+      visualRange : int
+
+      .. connection info ..
+      voiceUrl : String
+}
+
+class Message {
+      facility : Facility
+      time : Instant
+      message : String
+}
+
+class Flight {
+      member : Member
+      connection : Connection
+      flightplanByRevision : NavigableMap<Integer, Flightplan>
+      callsign : String
+      departureTimeActual : Instant
+
+      track : SortedSet<TrackPoint>
+}
+
+class GeoCoordinates {
+      latitude : double
+      longitude : double
+      altitude : int          
+}
+
+class TrackPoint {
+      reportTime : Instant
+      flight : Flight
+      
+      .. tracking ..
+      geoCoordinates : GeoCoordinates
+      heading : int
+      groundSpeed : int
+      transponderCode : int
+
+      .. QNH ..
+      qnhInchMercury : double
+      qnhHectopascal : double
+}
+
+class Flightplan {
+      flight : Flight
+      revisionFirstSeen : Instant
+
+      .. basic information ..
+      revision : int
+      flightPlanType : String
+      departureTimePlanned : Instant
+
+      .. tracking ..
+      route : String
+      remarks : String
+      
+      .. aircraft and performance ..
+      aircraftType : String
+      trueAirSpeed : int
+      altitude : int
+      estimatedTimeEnroute : Duration
+      estimatedTimeFuel : Duration
+
+      .. airport information ..
+      departureAirportCode : String
+      destinationAirportCode : String
+      alternateAirportCode : String
+      departureAirportLatitude : double
+      departureAirportLongitude : double
+      destinationAirportLatitude : double
+      destinationAirportLongitude : double
+}
+
+/'
+skinparam Arrow {
+          Color #white
+          FontColor #white
+}
+'/
+
+@enduml
