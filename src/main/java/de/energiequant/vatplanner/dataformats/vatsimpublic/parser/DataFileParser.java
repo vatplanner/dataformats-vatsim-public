@@ -83,6 +83,8 @@ public class DataFileParser {
         DataFile dataFile = new DataFile();
         dataFile.setMetaData(generalSectionParser.parse(relevantLinesBySection.get(SECTION_NAME_GENERAL)));
         
+        // TODO: log warning if data format is unexpected (currently implemented format version 8)
+        
         Stream<Client> onlineClientsStream = relevantLinesBySection.getOrDefault(SECTION_NAME_CLIENTS, new ArrayList<>()).stream().map(onlineClientParser::parse);
         Stream<Client> prefileClientsStream = relevantLinesBySection.getOrDefault(SECTION_NAME_PREFILE, new ArrayList<>()).stream().map(prefileClientParser::parse);
         Stream<Client> allClientsStream = Stream.concat(onlineClientsStream, prefileClientsStream);
