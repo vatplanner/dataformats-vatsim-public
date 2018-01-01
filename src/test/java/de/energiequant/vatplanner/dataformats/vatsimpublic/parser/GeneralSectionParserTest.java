@@ -8,16 +8,23 @@ import java.util.Arrays;
 import java.util.Collection;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(DataProviderRunner.class)
 public class GeneralSectionParserTest {
+    private GeneralSectionParser parser;
+    
+    @Before
+    public void setUp() {
+        parser = new GeneralSectionParser();
+    }
+        
     @Test
     @DataProvider({"8", "123"})
     public void testParse_withVersion_returnsDataFileMetaDataWithExpectedFormatVersion(int expectedVersion) {
         // Arrange
-        GeneralSectionParser parser = new GeneralSectionParser();
         Collection<String> lines = Arrays.asList(
             String.format("VERSION = %d", expectedVersion)
         );
@@ -32,7 +39,6 @@ public class GeneralSectionParserTest {
     @Test
     public void testParse_withoutVersion_returnsDataFileMetaDataWithNegativeValueForFormatVersion() {
         // Arrange
-        GeneralSectionParser parser = new GeneralSectionParser();
         Collection<String> lines = Arrays.asList(
             String.format("RELOAD = 123")
         );
@@ -48,7 +54,6 @@ public class GeneralSectionParserTest {
     @DataProvider({"2", "100"})
     public void testParse_withReload_returnsDataFileMetaDataWithExpectedMinimumDataFileRetrievalInterval(int minimumIntervalMinutes) {
         // Arrange
-        GeneralSectionParser parser = new GeneralSectionParser();
         Collection<String> lines = Arrays.asList(
             String.format("RELOAD = %d", minimumIntervalMinutes)
         );
@@ -63,7 +68,6 @@ public class GeneralSectionParserTest {
     @Test
     public void testParse_withoutReload_returnsDataFileMetaDataWithNullForMinimumDataFileRetrievalInterval() {
         // Arrange
-        GeneralSectionParser parser = new GeneralSectionParser();
         Collection<String> lines = Arrays.asList(
             String.format("VERSION = 123")
         );
@@ -79,7 +83,6 @@ public class GeneralSectionParserTest {
     @DataProvider({"5", "100"})
     public void testParse_withAtisAllowMin_returnsDataFileMetaDataWithExpectedMinimumAtisRetrievalInterval(int minimumIntervalMinutes) {
         // Arrange
-        GeneralSectionParser parser = new GeneralSectionParser();
         Collection<String> lines = Arrays.asList(
             String.format("ATIS ALLOW MIN = %d", minimumIntervalMinutes)
         );
@@ -94,7 +97,6 @@ public class GeneralSectionParserTest {
     @Test
     public void testParse_withoutAtisAllowMin_returnsDataFileMetaDataWithNullForMinimumAtisRetrievalInterval() {
         // Arrange
-        GeneralSectionParser parser = new GeneralSectionParser();
         Collection<String> lines = Arrays.asList(
             String.format("VERSION = 123")
         );
@@ -110,7 +112,6 @@ public class GeneralSectionParserTest {
     @DataProvider({"5", "100"})
     public void testParse_withConnectedClients_returnsDataFileMetaDataWithExpectedNumberOfConnectedClients(int connectedClients) {
         // Arrange
-        GeneralSectionParser parser = new GeneralSectionParser();
         Collection<String> lines = Arrays.asList(
             String.format("CONNECTED CLIENTS = %d", connectedClients)
         );
@@ -126,7 +127,6 @@ public class GeneralSectionParserTest {
     @DataProvider({"5", "100"})
     public void testParse_withoutConnectedClients_returnsDataFileMetaDataWithNegativeValueForNumberOfConnectedClients(int connectedClients) {
         // Arrange
-        GeneralSectionParser parser = new GeneralSectionParser();
         Collection<String> lines = Arrays.asList(
             String.format("VERSION = 123", connectedClients)
         );
@@ -142,7 +142,6 @@ public class GeneralSectionParserTest {
     @DataProvider({"20170625232105, 1498432865", "20161105184253, 1478371373"})
     public void testParse_withUpdate_returnsDataFileMetaDataWithExpectedTimestamp(String value, int valueEpochSeconds) {
         // Arrange
-        GeneralSectionParser parser = new GeneralSectionParser();
         Collection<String> lines = Arrays.asList(
             String.format("UPDATE = %s", value)
         );
@@ -158,7 +157,6 @@ public class GeneralSectionParserTest {
     @Test
     public void testParse_withoutUpdate_returnsDataFileMetaDataWithNullForTimestamp() {
         // Arrange
-        GeneralSectionParser parser = new GeneralSectionParser();
         Collection<String> lines = Arrays.asList(
             String.format("VERSION = 123")
         );
