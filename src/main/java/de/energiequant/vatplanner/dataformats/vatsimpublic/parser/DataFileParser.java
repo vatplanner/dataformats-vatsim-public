@@ -72,6 +72,8 @@ public class DataFileParser {
      * @return all parsed information collected in one {@link DataFile} object
      */
     public DataFile parse(BufferedReader br) {
+        // TODO: catch IllegalArgumentExceptions thrown by parsers (collect failed lines per section for analysis and indicate general presence/absence of errors)
+        
         GeneralSectionParser generalSectionParser = getGeneralSectionParser();
         ClientParser onlineClientParser = getOnlineClientParser();
         ClientParser prefileClientParser = getPrefileClientParser();
