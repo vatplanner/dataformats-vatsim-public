@@ -10,48 +10,73 @@ package de.energiequant.vatplanner.dataformats.vatsimpublic.parser;
  */
 public class FSDServer {
     private String id;
-    private String hostname;
+    private String address;
     private String location;
     private String name;
     private boolean clientConnectionAllowed;
 
+    /**
+     * Returns the identification ("system name") of the described server.
+     * @return identification ("system name") of described server
+     */
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
+    void setId(String id) {
         this.id = id;
     }
 
-    public String getHostname() {
-        return hostname;
+    /**
+     * Returns the server's address.
+     * May be a host name or IP address.
+     * May be invalid (although highly unlikely), as no validation is being
+     * performed on parsing.
+     * @return server address (host name or IP address)
+     */
+    public String getAddress() {
+        return address;
     }
 
-    public void setHostname(String hostname) {
-        this.hostname = hostname;
+    void setAddress(String address) {
+        this.address = address;
     }
 
+    /**
+     * Returns the server's location name.
+     * @return server's location name
+     */
     public String getLocation() {
         return location;
     }
 
-    public void setLocation(String location) {
+    void setLocation(String location) {
         this.location = location;
     }
 
+    /**
+     * Returns the server name.
+     * The name is not the server's address/host name or ID but may actually
+     * contain a longer description text.
+     * @return server name (not address or ID, used as a description text)
+     */
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * Returns if clients are allowed to connect to this server.
+     * @return Are clients allowed to connect to this server? (true = allowed, false = not allowed)
+     */
     public boolean isClientConnectionAllowed() {
         return clientConnectionAllowed;
     }
 
-    public void setClientConnectionAllowed(boolean clientConnectionAllowed) {
+    void setClientConnectionAllowed(boolean clientConnectionAllowed) {
         this.clientConnectionAllowed = clientConnectionAllowed;
     }
     
