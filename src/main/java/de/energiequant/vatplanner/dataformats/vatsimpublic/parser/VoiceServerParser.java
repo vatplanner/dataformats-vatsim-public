@@ -10,12 +10,12 @@ import java.util.regex.Pattern;
  * parsed from an actual complete {@link DataFile}.
  */
 public class VoiceServerParser {
-    private static final Pattern PATTERN_LINE = Pattern.compile("([^:]+):([^:]+):([^:]+):([01]):([^:]*):");
+    private static final Pattern PATTERN_LINE = Pattern.compile("([^:]+):([^:]+):([^:]+):([01]):(([^:]*):|)");
     private static final int PATTERN_LINE_HOSTNAME_OR_IP = 1;
     private static final int PATTERN_LINE_LOCATION = 2;
     private static final int PATTERN_LINE_NAME = 3;
     private static final int PATTERN_LINE_CLIENTS_CONNECTION_ALLOWED = 4;
-    private static final int PATTERN_LINE_TYPE_OF_VOICE_SERVER = 5;
+    private static final int PATTERN_LINE_TYPE_OF_VOICE_SERVER = 6;
     
     private static final String CLIENTS_CONNECTION_ALLOWED_TRUE = "1";
     

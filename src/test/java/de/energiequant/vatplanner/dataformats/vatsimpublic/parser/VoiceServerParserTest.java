@@ -2,9 +2,8 @@ package de.energiequant.vatplanner.dataformats.vatsimpublic.parser;
 
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -138,7 +137,7 @@ public class VoiceServerParserTest {
     
     @Test
     @DataProvider({"", "A", "1", "abc123", "-.,#!\"§$%&"})
-    public void testParse_typeOfVoiceServer_returnsObjectWithExpectedRawType(String rawType) {
+    public void testParse_withTypeOfVoiceServer_returnsObjectWithExpectedRawType(String rawType) {
         // Arrange
         String line = String.format("hostname:location:name:1:%s:", rawType);
         
@@ -147,6 +146,18 @@ public class VoiceServerParserTest {
         
         // Assert
         assertThat(result.getRawServerType(), is(equalTo(rawType)));
+    }
+    
+    @Test
+    public void testParse_withoutTypeOfVoiceServer_returnsObjectWithNullForRawType() {
+        // Arrange
+        String line = "hostname:location:name:1:";
+        
+        // Act
+        VoiceServer result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getRawServerType(), is(nullValue()));
     }
     
 }
