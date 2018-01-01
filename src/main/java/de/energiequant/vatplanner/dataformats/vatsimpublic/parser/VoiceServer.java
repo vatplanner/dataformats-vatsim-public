@@ -76,7 +76,8 @@ public class VoiceServer {
      * Unfortunately, there is no publicly documented information on what this
      * means, so expect this to be anything and of no use unless you are writing
      * a pilot/ATC client and have the required protocol documentation.
-     * @return raw (uninterpreted) information about the type of voice server
+     * Will be null if type has not been specified.
+     * @return raw (uninterpreted) information about the type of voice server; may be null if missing
      */
     public String getRawServerType() {
         return rawServerType;
