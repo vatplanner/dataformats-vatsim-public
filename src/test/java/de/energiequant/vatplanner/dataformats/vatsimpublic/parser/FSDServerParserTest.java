@@ -149,9 +149,9 @@ public class FSDServerParserTest {
     
     @Test
     @DataProvider({"", "-1", "2", "a", "10", "01"})
-    public void testParse_invalidFlagsForClientsConnectionAllowed_throwsIllegalArgumentException(String invalidFlags) {
+    public void testParse_invalidFlagsForClientsConnectionAllowed_throwsIllegalArgumentException(String invalidFlag) {
         // Arrange
-        String erroneousLine = String.format("someId:hostname:location:name:%s:", invalidFlags);
+        String erroneousLine = String.format("someId:hostname:location:name:%s:", invalidFlag);
         thrown.expect(IllegalArgumentException.class);
         
         // Act
