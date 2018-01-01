@@ -28,11 +28,11 @@ public class FSDServer {
     }
 
     /**
-     * Returns the server's address.
+     * Returns the server's network address.
      * May be a host name or IP address.
      * May be invalid (although highly unlikely), as no validation is being
      * performed on parsing.
-     * @return server address (host name or IP address)
+     * @return server network address (host name or IP address)
      */
     public String getAddress() {
         return address;
@@ -43,8 +43,8 @@ public class FSDServer {
     }
 
     /**
-     * Returns the server's location name.
-     * @return server's location name
+     * Returns the server's physical location name.
+     * @return server's physical location name
      */
     public String getLocation() {
         return location;
