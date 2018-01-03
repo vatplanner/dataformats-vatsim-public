@@ -14,6 +14,8 @@ import org.junit.runner.RunWith;
 public class ClientParserTest {
     private ClientParser parser;
     
+    private static final double ALLOWED_DOUBLE_ERROR = 0.000001;
+    
     @Rule
     public ExpectedException thrown = ExpectedException.none();
     
@@ -291,7 +293,7 @@ public class ClientParserTest {
     
     @Test
     @DataProvider({"", "Some Name", "Name", "Name ESSA", "A Full Name ESSA"})
-    public void testParse_atc_returnsObjectWithExpectedVatsimID(String expectedRealName) {
+    public void testParse_atc_returnsObjectWithExpectedRealName(String expectedRealName) {
         // Arrange
         String line = String.format("EDDT_TWR:123456:%s:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", expectedRealName);
         parser.setIsParsingPrefileSection(false);
@@ -304,8 +306,7 @@ public class ClientParserTest {
     }
     // </editor-fold>
 
-    
-    // <editor-fold defaultstate="collapsed" desc="real name">
+    // <editor-fold defaultstate="collapsed" desc="client type">
     @Test
     public void testParse_connectedPilotWithClientTypePilot_returnsObjectWithClientTypePilotConnected() {
         // Arrange
@@ -393,4 +394,412 @@ public class ClientParserTest {
         // Assert (nothing to do)
     }
     // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="frequency">
+    @Test
+    public void testParse_connectedPilotWithoutFrequency_returnsObjectWithNegativeServedFrequency() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getServedFrequencyKilohertz(), is(lessThan(0)));
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithFrequency_throwsIllegalArgumentException() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT:121.750:12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithoutFrequency_returnsObjectWithNegativeServedFrequency() {
+        // Arrange
+        String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getServedFrequencyKilohertz(), is(lessThan(0)));
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithFrequency_throwsIllegalArgumentException() {
+        // Arrange
+        String line = "ABC123:123456:realname::121.750:::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"118.500, 118500", "118.50, 118500", "118.5, 118500", "121.725, 121725", "1.21725e2, 121725", "100.0001, 100000", "99.9999, 100000"})
+    public void testParse_atcWithValidFrequency_returnsObjectWithExpectedServedFrequency(String input, int expectedFrequencyKilohertz) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:%s:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getServedFrequencyKilohertz(), is(equalTo(expectedFrequencyKilohertz)));
+    }
+    
+    @Test
+    @DataProvider({"-1", "0", "0000", "0.000", "1e-10"})
+    public void testParse_atcWithInvalidFrequency_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:%s:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_atcWithoutFrequency_returnsObjectWithNegativeServedFrequency() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC::12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getServedFrequencyKilohertz(), is(lessThan(0)));
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="latitude">
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_connectedPilotWithLatitude_returnsObjectWithExpectedLatitude(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::%s:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        double expectedOutput = Double.parseDouble(input);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getLatitude(), is(closeTo(expectedOutput, ALLOWED_DOUBLE_ERROR)));
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutLatitude_returnsObjectWithNaNAsLatitude() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT:::12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getLatitude(), is(equalTo(Double.NaN)));
+    }
+    
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_prefiledPilotWithLatitude_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::%s::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_prefiledPilotWithoutLatitude_returnsObjectWithNaNAsLatitude(String input) {
+        // Arrange
+        String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getLatitude(), is(equalTo(Double.NaN)));
+    }
+    
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_atcWithLatitude_returnsObjectWithExpectedLatitude(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:%s:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        double expectedOutput = Double.parseDouble(input);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getLatitude(), is(closeTo(expectedOutput, ALLOWED_DOUBLE_ERROR)));
+    }
+    
+    @Test
+    public void testParse_atcWithoutLatitude_returnsObjectWithNaNAsLatitude() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500::12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getLatitude(), is(equalTo(Double.NaN)));
+    }
+    // </editor-fold>
+
+
+    // <editor-fold defaultstate="collapsed" desc="longitude">
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_connectedPilotWithLongitude_returnsObjectWithExpectedLongitude(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:%s:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        double expectedOutput = Double.parseDouble(input);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getLongitude(), is(closeTo(expectedOutput, ALLOWED_DOUBLE_ERROR)));
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutLongitude_returnsObjectWithNaNAsLongitude() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567::12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getLongitude(), is(equalTo(Double.NaN)));
+    }
+    
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_prefiledPilotWithLongitude_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname::::%s:::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_prefiledPilotWithoutLongitude_returnsObjectWithNaNAsLongitude(String input) {
+        // Arrange
+        String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getLongitude(), is(equalTo(Double.NaN)));
+    }
+    
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_atcWithLongitude_returnsObjectWithExpectedLongitude(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:%s:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        double expectedOutput = Double.parseDouble(input);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getLongitude(), is(closeTo(expectedOutput, ALLOWED_DOUBLE_ERROR)));
+    }
+    
+    @Test
+    public void testParse_atcWithoutLongitude_returnsObjectWithNaNAsLongitude() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567::0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getLongitude(), is(equalTo(Double.NaN)));
+    }
+    // </editor-fold>
+
+    
+    // <editor-fold defaultstate="collapsed" desc="altitude">
+    @Test
+    @DataProvider({"0", "100000", "-5000"})
+    public void testParse_connectedPilotWithValidAltitude_returnsObjectWithExpectedAltitude(int expectedAltitude) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:%d:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedAltitude);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getAltitudeFeet(), is(equalTo(expectedAltitude)));
+    }
+    
+    @Test
+    @DataProvider({"abc", "1a", "a1"})
+    public void testParse_connectedPilotWithInvalidAltitude_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:%s:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutAltitude_returnsObjectWithZeroAltitude() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567::123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getAltitudeFeet(), is(equalTo(0)));
+    }
+    
+    @Test
+    @DataProvider({"100000", "-5000"})
+    public void testParse_prefiledPilotWithNonZeroAltitude_throwsIllegalArgumentException(int altitude) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::%d::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", altitude);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"abc", "1a", "a1"})
+    public void testParse_prefiledPilotWithInvalidAltitude_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::%s::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithoutAltitude_returnsObjectWithZeroAltitude() {
+        // Arrange
+        String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getAltitudeFeet(), is(equalTo(0)));
+    }
+    
+    @Test
+    @DataProvider({"0", "100000", "-5000"})
+    public void testParse_atcWithValidAltitude_returnsObjectWithExpectedAltitude(int expectedAltitude) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:%d:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", expectedAltitude);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getAltitudeFeet(), is(equalTo(expectedAltitude)));
+    }
+    
+    @Test
+    @DataProvider({"abc", "1a", "a1"})
+    public void testParse_atcWithInvalidAltitude_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:%s:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_atcWithoutAltitude_returnsObjectWithZeroAltitude() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567::::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getAltitudeFeet(), is(equalTo(0)));
+    }
+    // </editor-fold>
+    
 }

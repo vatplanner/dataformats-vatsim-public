@@ -81,6 +81,8 @@ public class ClientParser {
     private static final String CLIENT_TYPE_ATC = "ATC";
     private static final String CLIENT_TYPE_PILOT = "PILOT";
     
+    private static final int DEFAULT_ALTITUDE = 0;
+    
     private boolean isParsingPrefileSection = false;
     
     /**
@@ -109,12 +111,21 @@ public class ClientParser {
         
         Client client = new Client();
         
+        ClientType clientType = parseClientType(matcher.group(PATTERN_LINE_CLIENTTYPE));
+        client.setClientType(clientType);
+        
+        // TODO: guess client type if null from other available data of this line (e.g. only ATC may define a frequency, only online pilots have a heading or GS >0)
+        
+        boolean isOnline = (clientType != null) && (clientType != ClientType.PILOT_PREFILED);
+        boolean isAllowedToServeFrequency = (clientType == ClientType.ATC_CONNECTED);
+        
         client.setCallsign(matcher.group(PATTERN_LINE_CALLSIGN));
         client.setVatsimID(parseIntWithDefault(matcher.group(PATTERN_LINE_CID), -1)); // TODO: log details if ID is missing
         client.setRealName(matcher.group(PATTERN_LINE_REALNAME));
-        client.setClientType(parseClientType(matcher.group(PATTERN_LINE_CLIENTTYPE)));
-        
-        // TODO: post-processing should check for client type null and guess from other available data what this line was describing (ATC, connected pilot or prefiling)
+        client.setServedFrequencyKilohertz(parseServedFrequencyMegahertzToKilohertz(matcher.group(PATTERN_LINE_FREQUENCY), isAllowedToServeFrequency));
+        client.setLatitude(parseOnlineGeoCoordinate(matcher.group(PATTERN_LINE_LATITUDE), isOnline));
+        client.setLongitude(parseOnlineGeoCoordinate(matcher.group(PATTERN_LINE_LONGITUDE), isOnline));
+        client.setAltitudeFeet(parseOnlineAltitude(matcher.group(PATTERN_LINE_ALTITUDE), isOnline));
         
         return client;
     }
@@ -140,4 +151,78 @@ public class ClientParser {
         
         return null;
     }
+    
+    /**
+     * Parses the given frequency assumed to be a floating number in MHz to an
+     * integer describing the frequency in kHz.
+     * Returned value will be negative if no frequency is provided.
+     * If serving is not allowed but a frequency is still being provided,
+     * an {@link IllegalArgumentException} will be thrown.
+     * An {@link IllegalArgumentException} will also be thrown if the specified
+     * frequency does not make any sense, for example if it is negative or zero.
+     * @param s string to be parsed, formatted as floating number in MHz
+     * @param allowServing Is serving a frequency allowed?
+     * @return frequency in kHz
+     * @throws IllegalArgumentException if serving a frequency while not allowed or frequency does not make any sense
+     */
+    private int parseServedFrequencyMegahertzToKilohertz(String s, boolean allowServing) throws IllegalArgumentException {
+        if (s.isEmpty()) {
+            return -1;
+        } else if (!allowServing) {
+            throw new IllegalArgumentException("serving a frequency is not allowed but still encountered \""+s+"\" as being served by client");
+        } else {
+            int frequencyKilohertz = (int) Math.round(Double.parseDouble(s) * 1000.0);
+            
+            if (frequencyKilohertz <= 0) {
+                throw new IllegalArgumentException("served frequency is given as \""+s+"\" which does not make any sense");
+            }
+            
+            return frequencyKilohertz;
+        }
+    }
+
+    /**
+     * Parses a geo coordinate from the given string.
+     * Result of {@link Double#NaN} indicates that no coordinate was available
+     * (empty string).
+     * Offline (prefiled) clients are not permitted to define a coordinate; only
+     * empty strings are allowed in that case, any other input will throw an
+     * {@link IllegalArgumentException}.
+     * @param s string to be parsed
+     * @param isOnline Is the client we are parsing for online?
+     * @return geo coordinate or {@link Double#NaN} if not available
+     * @throws IllegalArgumentException if client is not online but still provides a geo coordinate
+     */
+    private double parseOnlineGeoCoordinate(String s, boolean isOnline) throws IllegalArgumentException {
+        if (s.isEmpty()) {
+            return Double.NaN;
+        } else if (isOnline) {
+            return Double.parseDouble(s);
+        } else {
+            throw new IllegalArgumentException("client is not online but still provides a geo coordinate (latitude/longitude)");
+        }
+    }
+    
+    /**
+     * Parses an altitude from the given string specified integer format.
+     * If no value can be parsed (including parsing errors),
+     * {@link #DEFAULT_ALTITUDE} will be assumed.
+     * If the client is not online but parsing still reveals an altitude other
+     * than {@link #DEFAULT_ALTITUDE} an {@link IllegalArgumentException} will
+     * be thrown.
+     * @param s string to be parsed, plain integer
+     * @param isOnline Is the client we are parsing for online?
+     * @return altitude; {@link #DEFAULT_ALTITUDE} if not specified or number parsing error
+     * @throws IllegalArgumentException if client is not online but still defines an altitude other than our default value
+     */
+    private int parseOnlineAltitude(String s, boolean isOnline) throws IllegalArgumentException {
+        int altitude = parseIntWithDefault(s, DEFAULT_ALTITUDE);
+        
+        if (!isOnline && altitude != DEFAULT_ALTITUDE) {
+            throw new IllegalArgumentException("client is not online (prefiled flight plan?) but still defines altitude \""+s+"\"");
+        }
+        
+        return altitude;
+    }
+    
 }

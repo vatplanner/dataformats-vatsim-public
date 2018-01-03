@@ -14,7 +14,7 @@ import java.time.Instant;
  * <li>ATC only:
  * <ul>
  * <li>{@link #facilityType}</li>
- * <li>{@link #frequencyKilohertz}</li>
+ * <li>{@link #servedFrequencyKilohertz}</li>
  * <li>{@link #lastMessageUpdate}</li>
  * <li>{@link #message}</li>
  * <li>{@link #rating}</li>
@@ -25,7 +25,7 @@ import java.time.Instant;
  * <ul>
  * <li>{@link #aircraftType}</li>
  * <li>{@link #alternateAirportCode}</li>
- * <li>{@link #altitude} (always 0 for ATCs)</li>
+ * <li>{@link #altitudeFeet} (always 0 for ATCs)</li>
  * <li>{@link #departureAirportCode}</li>
  * <li>{@link #departureTimePlanned}</li>
  * <li>{@link #departureTimeActual}</li>
@@ -68,10 +68,10 @@ public class Client {
     private int vatsimID; // also on prefiling
     private String realName; // may include home base for pilots; also on prefiling
     private ClientType clientType;
-    private int frequencyKilohertz; // ATC only
+    private int servedFrequencyKilohertz; // ATC only
     private double latitude;
     private double longitude;
-    private int altitude;
+    private int altitudeFeet;
     private int groundSpeed;
     
     // filing
@@ -134,9 +134,17 @@ public class Client {
     /**
      * Returns the VATSIM user ID the client belongs to.
      * <p>
-     * Although policy forbids regular users to connect multiple session using
-     * the same user ID this may not be enforced server-side. Also, some users
-     * such as supervisors, administrators or "promotional accounts" may
+     * Although policy generally forbids regular users to connect multiple
+     * sessions using the same user ID this is not enforced server-side (at
+     * least not for ATC).
+     * </p>
+     * <p>
+     * One permitted use of multiple sessions is for ATC to provide
+     * ATIS service additional to a controlling session (requires two logins
+     * at once for technical reasons).
+     * </p>
+     * <p>
+     * Also, some users such as supervisors, administrators or "promotional accounts" may
      * in fact have permission to connect multiple sessions at the same time, so
      * this ID alone should not be expected to uniquely identify clients on a
      * data file.
@@ -194,14 +202,44 @@ public class Client {
         this.clientType = clientType;
     }
 
-    public int getFrequencyKilohertz() {
-        return frequencyKilohertz;
+    /**
+     * Returns the frequency this client provides ATC service on.
+     * Pilots are not able to provide services so they can never indicate a
+     * served frequency.
+     * ATC clients can connect without serving a frequency, for example when
+     * connecting as an observer.
+     * If no frequency is being served by this client, a negative number will be
+     * returned.
+     * @return frequency this client provides ATC service on; negative if not serving
+     */
+    public int getServedFrequencyKilohertz() {
+        return servedFrequencyKilohertz;
     }
 
-    void setFrequencyKilohertz(int frequencyKilohertz) {
-        this.frequencyKilohertz = frequencyKilohertz;
+    void setServedFrequencyKilohertz(int servedFrequencyKilohertz) {
+        this.servedFrequencyKilohertz = servedFrequencyKilohertz;
     }
 
+    /**
+     * Returns the latitude (north/south coordinate) the client is currently
+     * located at.
+     * <p>
+     * Online clients are actually not required to provide a location
+     * (maybe while connected in observer mode?). Prefiled flight plans
+     * are not permitted to include a location.
+     * </p>
+     * <p>
+     * If no latitude is available, {@link Double#NaN} will be returned.
+     * </p>
+     * <p>
+     * Positive latitude is north of equator, negative latitude is south.
+     * While only a value range of -90..90&deg; makes sense (spherical
+     * coordinate system), returned values should still be assumed to exceed
+     * that range because parser only checks for syntax and does not
+     * unify to a strict coordinate system.
+     * </p>
+     * @return latitude the client is currently located at; {@link Double#NaN} if unavailable
+     */
     public double getLatitude() {
         return latitude;
     }
@@ -210,6 +248,27 @@ public class Client {
         this.latitude = latitude;
     }
 
+
+    /**
+     * Returns the longitude (east/west coordinate) the client is currently
+     * located at.
+     * <p>
+     * Online clients are actually not required to provide a location
+     * (maybe while connected in observer mode?). Prefiled flight plans
+     * are not permitted to include a location.
+     * </p>
+     * <p>
+     * If no longitude is available, {@link Double#NaN} will be returned.
+     * </p>
+     * <p>
+     * Positive longitude is east of Prime Meridian, negative longitude is west.
+     * While only a value range of -180..180&deg; makes sense (spherical
+     * coordinate system), returned values should still be assumed to exceed
+     * that range because parser only checks for syntax and does not
+     * unify to a strict coordinate system.
+     * </p>
+     * @return longitude the client is currently located at; {@link Double#NaN} if unavailable
+     */
     public double getLongitude() {
         return longitude;
     }
@@ -218,12 +277,25 @@ public class Client {
         this.longitude = longitude;
     }
 
-    public int getAltitude() {
-        return altitude;
+    /**
+     * Returns the altitude (measured in feet) the client is currently located
+     * at.
+     * <p>
+     * Online clients are actually not required to provide a location
+     * (maybe while connected in observer mode?). Prefiled flight plans
+     * are not permitted to include a location.
+     * </p>
+     * <p>
+     * If no altitude is available, 0 will be assumed.
+     * </p>
+     * @return longitude the client is currently located at; 0 if unavailable
+     */
+    public int getAltitudeFeet() {
+        return altitudeFeet;
     }
 
-    void setAltitude(int altitude) {
-        this.altitude = altitude;
+    void setAltitudeFeet(int altitudeFeet) {
+        this.altitudeFeet = altitudeFeet;
     }
 
     public int getGroundSpeed() {
