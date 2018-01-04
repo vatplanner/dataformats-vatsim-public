@@ -126,6 +126,7 @@ public class ClientParser {
         client.setLatitude(parseOnlineGeoCoordinate(matcher.group(PATTERN_LINE_LATITUDE), isOnline));
         client.setLongitude(parseOnlineGeoCoordinate(matcher.group(PATTERN_LINE_LONGITUDE), isOnline));
         client.setAltitudeFeet(parseOnlineAltitude(matcher.group(PATTERN_LINE_ALTITUDE), isOnline));
+        client.setGroundSpeed(parseGroundSpeed(matcher.group(PATTERN_LINE_GROUNDSPEED), clientType));
         
         return client;
     }
@@ -223,6 +224,37 @@ public class ClientParser {
         }
         
         return altitude;
+    }
+    
+    /**
+     * Parses ground speed from given string, taking into account
+     * client type for validation.
+     * <p>
+     * Only pilots connected to the network are supposed to be moving and thus
+     * indicate a ground speed. Prefiled flight plans and ATC are not allowed
+     * to have a GS > 0 and throw an {@link IllegalArgumentException} on
+     * violation.
+     * </p>
+     * <p>
+     * Only positive values make sense.
+     * Unknown speeds (including ATC & prefiles indicating 0) will return a
+     * negative value.
+     * </p>
+     * @param s string to parse
+     * @param clientType type of client the string belongs to
+     * @return ground speed >= 0 for connected pilots; negative value if unspecified, only prefiled or ATC
+     * @throws IllegalArgumentException if client is not a connected pilot but still indicates movement
+     */
+    private int parseGroundSpeed(String s, ClientType clientType) throws IllegalArgumentException {
+        int groundSpeed = parseIntWithDefault(s, -1);
+        
+        if (clientType == ClientType.PILOT_CONNECTED) {
+            return groundSpeed;
+        } else if (groundSpeed > 0) {
+            throw new IllegalArgumentException(clientType.name()+" must not have a ground speed greater zero (was: \""+s+"\")");
+        }
+        
+        return -1;
     }
     
 }

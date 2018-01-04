@@ -582,7 +582,6 @@ public class ClientParserTest {
     }
     // </editor-fold>
 
-
     // <editor-fold defaultstate="collapsed" desc="longitude">
     @Test
     @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
@@ -671,7 +670,6 @@ public class ClientParserTest {
         assertThat(result.getLongitude(), is(equalTo(Double.NaN)));
     }
     // </editor-fold>
-
     
     // <editor-fold defaultstate="collapsed" desc="altitude">
     @Test
@@ -799,6 +797,162 @@ public class ClientParserTest {
         
         // Assert
         assertThat(result.getAltitudeFeet(), is(equalTo(0)));
+    }
+    // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="ground speed">
+    @Test
+    @DataProvider({"0", "422"})
+    public void testParse_connectedPilotWithValidGroundSpeed_returnsObjectWithExpectedGroundSpeed(int expectedGroundSpeed) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:%d:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedGroundSpeed);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getGroundSpeed(), is(equalTo(expectedGroundSpeed)));
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1"})
+    public void testParse_connectedPilotWithInvalidGroundSpeed_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:%s:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutGroundSpeed_returnsObjectWithNegativeGroundSpeed() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345::B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getGroundSpeed(), is(lessThan(0)));
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithZeroGroundSpeed_returnsObjectWithNegativeGroundSpeed() {
+        // Arrange
+        String line = "ABC123:123456:realname::::::0:B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getGroundSpeed(), is(lessThan(0)));
+    }
+    
+    @Test
+    @DataProvider({"15", "321"})
+    public void testParse_prefiledPilotWithNonZeroGroundSpeed_throwsIllegalArgumentException(int groundSpeed) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname::::::%d:B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", groundSpeed);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1"})
+    public void testParse_prefiledPilotWithInvalidGroundSpeed_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname::::::%s:B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithoutGroundSpeed_returnsObjectWithNegativeGroundSpeed() {
+        // Arrange
+        String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getGroundSpeed(), is(lessThan(0)));
+    }
+    
+    @Test
+    public void testParse_atcWithZeroGroundSpeed_returnsObjectWithNegativeGroundSpeed() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:0::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getGroundSpeed(), is(lessThan(0)));
+    }
+    
+    @Test
+    @DataProvider({"15", "321"})
+    public void testParse_atcWithNonZeroGroundSpeed_throwsIllegalArgumentException(int groundSpeed) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:%d::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", groundSpeed);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1"})
+    public void testParse_atcWithInvalidGroundSpeed_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:%s::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_atcWithoutGroundSpeed_returnsObjectWithNegativeGroundSpeed() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567::::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getGroundSpeed(), is(lessThan(0)));
     }
     // </editor-fold>
     

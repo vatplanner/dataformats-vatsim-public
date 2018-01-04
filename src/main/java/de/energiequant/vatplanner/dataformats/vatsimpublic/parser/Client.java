@@ -298,6 +298,19 @@ public class Client {
         this.altitudeFeet = altitudeFeet;
     }
 
+    /**
+     * Returns the ground speed (measured in knots) the client is currently
+     * moving at.
+     * <p>
+     * Ground speed is supposed to always be a positive value. Negative values
+     * are used to indicate that no ground speed was available.
+     * </p>
+     * <p>
+     * Prefiled flight plans and ATC are stationary and thus do not move by
+     * principle. They will always return a negative value.
+     * </p>
+     * @return ground speed in knots (valid: >= 0); negative value if unavailable
+     */
     public int getGroundSpeed() {
         return groundSpeed;
     }
@@ -379,6 +392,7 @@ public class Client {
     }
 
     public int getFacilityType() {
+        // FIXME: should be an enum
         return facilityType;
     }
 
