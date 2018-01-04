@@ -117,7 +117,9 @@ public class ClientParser {
         // TODO: guess client type if null from other available data of this line (e.g. only ATC may define a frequency, only online pilots have a heading or GS >0)
         
         boolean isOnline = (clientType != null) && (clientType != ClientType.PILOT_PREFILED);
-        boolean isAllowedToServeFrequency = (clientType == ClientType.ATC_CONNECTED);
+        boolean isATC = (clientType == ClientType.ATC_CONNECTED);
+        boolean isAllowedToServeFrequency = isATC;
+        boolean isAllowedToHaveFlightPlan = !isATC;
         
         client.setCallsign(matcher.group(PATTERN_LINE_CALLSIGN));
         client.setVatsimID(parseIntWithDefault(matcher.group(PATTERN_LINE_CID), -1)); // TODO: log details if ID is missing
@@ -127,6 +129,7 @@ public class ClientParser {
         client.setLongitude(parseOnlineGeoCoordinate(matcher.group(PATTERN_LINE_LONGITUDE), isOnline));
         client.setAltitudeFeet(parseOnlineAltitude(matcher.group(PATTERN_LINE_ALTITUDE), isOnline));
         client.setGroundSpeed(parseGroundSpeed(matcher.group(PATTERN_LINE_GROUNDSPEED), clientType));
+        client.setAircraftType(filterFlightPlanField(matcher.group(PATTERN_LINE_PLANNED_AIRCRAFT), isAllowedToHaveFlightPlan));
         
         return client;
     }
@@ -255,6 +258,30 @@ public class ClientParser {
         }
         
         return -1;
+    }
+    
+    /**
+     * If filling flight plan fields is not allowed, value is returned null if
+     * empty. Non-empty values will throw an {@link IllegalArgumentException}
+     * if not permitted. Returns verbatim value if filling flight plan fields is
+     * allowed.
+     * @param flightPlanValue value of flight plan field to filter
+     * @param isAllowedToFillFlightPlan Is client permitted to fill this flight plan field?
+     * @return original value if allowed, null if not allowed and empty
+     * @throws IllegalArgumentException if not allowed and not empty
+     */
+    private String filterFlightPlanField(String flightPlanValue, boolean isAllowedToFillFlightPlan) throws IllegalArgumentException {
+        if (isAllowedToFillFlightPlan) {
+            return flightPlanValue;
+        }
+        
+        boolean fieldIsEmpty = flightPlanValue.trim().isEmpty();
+        
+        if (fieldIsEmpty) {
+            return null;
+        } else {
+            throw new IllegalArgumentException("client is not permitted to fill flight plan fields but shows \""+flightPlanValue+"\"");
+        }
     }
     
 }

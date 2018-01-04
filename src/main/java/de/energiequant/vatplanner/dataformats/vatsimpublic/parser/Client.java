@@ -319,6 +319,27 @@ public class Client {
         this.groundSpeed = groundSpeed;
     }
 
+    /**
+     * Returns the aircraft type.
+     * <p>
+     * Pilots provide their aircraft type when prefiling a flight plan and
+     * a second time when they connect to the network. ATC may be able to change
+     * pilot's aircraft types while logged in as part of revising the flight
+     * plan (not sure).
+     * </p>
+     * <p>
+     * While ICAO aircraft type codes are supposed to be used with equipment
+     * code as suffix and optional wake category as prefix (separated by forward
+     * slashes) the actual format and value of this field is not reliable as it
+     * is an informal free-text field and sometimes contains alternate/IATA
+     * codes or common mistakes (such as B77W for a Boeing 777 which is neither
+     * a valid ICAO nor IATA code).
+     * </p>
+     * <p>
+     * <strong>Example values:</strong> B738/M, H/A332/X, B737
+     * </p>
+     * @return aircraft type; may deviate from wake/ICAO-type/equipment syntax and value
+     */
     public String getAircraftType() {
         return aircraftType;
     }
