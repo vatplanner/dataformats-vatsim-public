@@ -136,6 +136,7 @@ public class ClientParser {
         client.setFiledDestinationAirportCode(matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT));
         client.setServerId(filterServerId(matcher.group(PATTERN_LINE_SERVER), isOnline));
         client.setProtocolVersion(parseOnlineProtocolVersion(matcher.group(PATTERN_LINE_PROTREVISION), isOnline));
+        client.setControllerRating(parseControllerRating(matcher.group(PATTERN_LINE_RATING), clientType));
         
         return client;
     }
@@ -361,4 +362,34 @@ public class ClientParser {
         
         return Integer.parseInt(s);
     }
+
+    /**
+     * Parses the given string to a controller rating.
+     * If the rating does not match expectations for the selected client type
+     * an {@link IllegalArgumentException} will be thrown.
+     * Only {@link ClientType#PILOT_PREFILED} is allowed not to specify any
+     * rating, so only prefilings can return null.
+     * @param s string to be parsed into controller rating
+     * @param clientType session client type
+     * @return controller rating; null on prefiling
+     * @throws IllegalArgumentException if specified rating does not match expectations for client type
+     */
+    private ControllerRating parseControllerRating(String s, ClientType clientType) throws IllegalArgumentException {
+        if (clientType == ClientType.PILOT_PREFILED) {
+            if (!s.isEmpty()) {
+                throw new IllegalArgumentException("prefiled flight plans are not expected to indicate any controller rating but rating is \""+s+"\"");
+            }
+            
+            return null;
+        }
+
+        ControllerRating rating = ControllerRating.resolveStatusFileId(Integer.parseInt(s));
+        
+        if ((clientType == ClientType.PILOT_CONNECTED) && (rating != ControllerRating.OBS)) {
+            throw new IllegalArgumentException("connected pilots are not expected to indicate any controller rating except observer/pilot but actual rating is \""+s+"\"");
+        }
+        
+        return rating;
+    }
+    
 }

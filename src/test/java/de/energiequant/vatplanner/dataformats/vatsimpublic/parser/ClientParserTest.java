@@ -2,6 +2,7 @@ package de.energiequant.vatplanner.dataformats.vatsimpublic.parser;
 
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -18,6 +19,26 @@ public class ClientParserTest {
     
     @Rule
     public ExpectedException thrown = ExpectedException.none();
+    
+    @DataProvider
+    public static Object[][] dataProviderControllerRatingIdAndEnumWithoutOBS() {
+        Object[][] allIdsAndEnums = ControllerRatingTest.dataProviderIdAndEnum();
+        
+        Object[][] exceptOBS = new Object[allIdsAndEnums.length - 1][2];
+        int i = 0;
+        for (Object[] idAndEnum : allIdsAndEnums) {
+            int ratingId = (int) idAndEnum[0];
+            ControllerRating ratingEnum = (ControllerRating) idAndEnum[1];
+            
+            if (ratingEnum != ControllerRating.OBS) {
+                exceptOBS[i++] = idAndEnum;
+            }
+        }
+        
+        assert(i == exceptOBS.length); // all filled (omitting exactly one)
+        
+        return exceptOBS;
+    }
     
     @Before
     public void setUp() {
@@ -1498,4 +1519,150 @@ public class ClientParserTest {
         // Assert (nothing to do)
     }
     // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="controller rating">
+    @Test
+    public void testParse_connectedPilotWithRatingOBS_returnsObjectWithOBSControllerRating() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getControllerRating(), is(equalTo(ControllerRating.OBS)));
+    }
+    
+    @Test
+    @UseDataProvider("dataProviderControllerRatingIdAndEnumWithoutOBS")
+    public void testParse_connectedPilotWithRatingOtherThanOBS_throwsIllegalArgumentException(int controllerRatingId, ControllerRating _controllerRating) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:%d:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", controllerRatingId);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutRating_throwsIllegalArgumentException() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1::1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1", "0", "99"})
+    public void testParse_connectedPilotWithInvalidRating_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:%s:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithoutRating_returnsObjectWithNullForControllerRating() {
+        // Arrange
+        String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getControllerRating(), is(nullValue()));
+    }
+    
+    @Test
+    @UseDataProvider(value = "dataProviderIdAndEnum", location = ControllerRatingTest.class)
+    public void testParse_prefiledPilotWithValidRating_throwsIllegalArgumentException(int controllerRatingId, ControllerRating _controllerRating) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::%d::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", controllerRatingId);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1", "0", "99"})
+    public void testParse_prefiledPilotWithInvalidRating_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::%s::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @UseDataProvider(value = "dataProviderIdAndEnum", location = ControllerRatingTest.class)
+    public void testParse_atcWithValidRating_returnsObjectWithExpectedControllerRating(int controllerRatingId, ControllerRating expectedControllerRating) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:%d::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", controllerRatingId);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getControllerRating(), is(equalTo(expectedControllerRating)));
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1", "0", "99"})
+    public void testParse_atcWithInvalidRating_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:%s::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_atcWithoutRating_throwsIllegalArgumentException() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    // </editor-fold>
+    
 }

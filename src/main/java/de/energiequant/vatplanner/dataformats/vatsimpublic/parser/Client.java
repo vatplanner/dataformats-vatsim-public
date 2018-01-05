@@ -457,6 +457,21 @@ public class Client {
         this.protocolVersion = protocolVersion;
     }
 
+    /**
+     * Returns the client's effective controller rating for this session.
+     * <p>
+     * Controller rating is being used as ATC/network permission level, see
+     * {@link ControllerRating} for details.
+     * </p>
+     * <p>
+     * This is only meaningful for ATC clients and only for one session.
+     * If an ATC-permitted user is connected as a pilot, rating will always be
+     * {@link ControllerRating#OBS} for the pilot session regardless of user's
+     * actual controller rating. Prefiled flight plans do not indicate any
+     * controller rating and thus return null.
+     * </p>
+     * @return client's controller rating during this session; null for prefiled flight plans
+     */
     public ControllerRating getControllerRating() {
         return controllerRating;
     }

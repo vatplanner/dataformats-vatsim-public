@@ -38,9 +38,12 @@ import java.util.TreeMap;
  */
 public enum ControllerRating {
     /**
-     * Observer is the default rating, all accounts may connect as observers.
+     * Observer/pilot is the default rating, all accounts may connect as
+     * observers in ATC clients or as pilots in pilot clients.
      * This is the lowest and only rating available without having started
-     * ATC training.
+     * ATC training. It is meaningless while clients are logged in as pilot as
+     * it is also transmitted by any controlling-enabled user of higher rank who
+     * is currently logged in as pilot instead of ATC.
      */
     OBS(1),
     
