@@ -1283,5 +1283,219 @@ public class ClientParserTest {
         assertThat(result.getFiledDestinationAirportCode(), is(equalTo(expectedAirportCode)));
     }
     // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="server ID">
+    @Test
+    @DataProvider({"SERVER 1", "some-other-server"})
+    public void testParse_connectedPilotWithServerId_returnsObjectWithExpectedServerId(String expectedServerId) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:%s:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedServerId);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getServerId(), is(equalTo(expectedServerId)));
+    }
     
+    @Test
+    public void testParse_connectedPilotWithoutServerId_throwsIllegalArgumentException() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM::1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"SERVER 1", "some-other-server"})
+    public void testParse_prefiledPilotWithServerId_throwsIllegalArgumentException(String serverId) {
+        // Arrange
+        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM:%s::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", serverId);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithoutServerId_returnsObjectWithNullForServerId() {
+        // Arrange
+        String line = "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getServerId(), is(nullValue()));
+    }
+    
+    @Test
+    @DataProvider({"SERVER 1", "some-other-server"})
+    public void testParse_atcWithServerId_returnsObjectWithExpectedServerId(String expectedServerId) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::%s:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", expectedServerId);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getServerId(), is(equalTo(expectedServerId)));
+    }
+    
+    @Test
+    public void testParse_atcWithoutServerId_throwsIllegalArgumentException() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0:::::100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="protocol version">
+    @Test
+    @DataProvider({"0", "10", "100"})
+    public void testParse_connectedPilotWithValidProtocolRevision_returnsObjectWithExpectedProtocolVersion(int expectedProtocolVersion) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:%d:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedProtocolVersion);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getProtocolVersion(), is(equalTo(expectedProtocolVersion)));
+    }
+    
+    @Test
+    @DataProvider({"-123", "abc", "1a", "a1"})
+    public void testParse_connectedPilotWithInvalidProtocolRevision_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:%s:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutProtocolRevision_throwsIllegalArgumentException() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver::1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-123", "abc", "1a", "a1"})
+    public void testParse_prefiledPilotWithInvalidProtocolRevision_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM::%s:::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"0", "10", "100"})
+    public void testParse_prefiledPilotWithValidProtocolRevision_throwsIllegalArgumentException(int protocolVersion) {
+        // Arrange
+        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM::%d:::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", protocolVersion);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithoutProtocolRevision_returnsObjectWithNegativeProtocolVersion() {
+        // Arrange
+        String line = "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getProtocolVersion(), is(lessThan(0)));
+    }
+    
+    @Test
+    @DataProvider({"0", "10", "100"})
+    public void testParse_atcWithValidProtocolRevision_returnsObjectWithExpectedProtocolVersion(int expectedProtocolVersion) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:%d:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", expectedProtocolVersion);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getProtocolVersion(), is(equalTo(expectedProtocolVersion)));
+    }
+    
+    @Test
+    @DataProvider({"-123", "abc", "1a", "a1"})
+    public void testParse_atcWithInvalidProtocolRevision_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:%s:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_atcWithoutProtocolRevision_throwsIllegalArgumentException() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver::3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    // </editor-fold>
 }

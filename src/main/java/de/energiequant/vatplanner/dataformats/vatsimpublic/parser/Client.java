@@ -429,6 +429,11 @@ public class Client {
         this.filedDestinationAirportCode = filedDestinationAirportCode;
     }
 
+    /**
+     * Returns the ID of the server the client is currently connected to.
+     * Returns null for clients not being online (prefiled flight plans).
+     * @return ID of server currently connected to; null if offline
+     */
     public String getServerId() {
         return serverId;
     }
@@ -437,6 +442,13 @@ public class Client {
         this.serverId = serverId;
     }
 
+    /**
+     * Returns the protocol version the client is using for communication with
+     * servers.
+     * Negative if not available (prefiled flight plans). All online clients
+     * return a positive number.
+     * @return protocol version of client; negative if not connected
+     */
     public int getProtocolVersion() {
         return protocolVersion;
     }

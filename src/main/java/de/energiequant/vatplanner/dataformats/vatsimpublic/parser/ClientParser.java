@@ -134,6 +134,8 @@ public class ClientParser {
         client.setFiledDepartureAirportCode(matcher.group(PATTERN_LINE_PLANNED_DEPAIRPORT));
         client.setRawFiledAltitude(matcher.group(PATTERN_LINE_PLANNED_ALTITUDE));
         client.setFiledDestinationAirportCode(matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT));
+        client.setServerId(filterServerId(matcher.group(PATTERN_LINE_SERVER), isOnline));
+        client.setProtocolVersion(parseOnlineProtocolVersion(matcher.group(PATTERN_LINE_PROTREVISION), isOnline));
         
         return client;
     }
@@ -288,4 +290,75 @@ public class ClientParser {
         }
     }
     
+    /**
+     * Checks if definition of server ID matches online state of client and
+     * returns only valid values.
+     * <p>
+     * Only if a client is online, it is expected to have a server ID assigned.
+     * Likewise, a client who is offline (prefiled flight plan) is expected
+     * not to have any server ID as it is not connected to the network.
+     * </p>
+     * <p>
+     * If expectation does not match, {@link IllegalArgumentException} will be
+     * thrown.
+     * </p>
+     * <p>
+     * If expectation matches, null will be returned if client is offline,
+     * otherwise the original server ID will be returned.
+     * </p>
+     * @param serverId server ID
+     * @param isOnline Is the client online?
+     * @return server ID if expectation matches, null for offline clients
+     * @throws IllegalArgumentException if expectation of server ID is violated
+     */
+    private String filterServerId(String serverId, boolean isOnline) throws IllegalArgumentException {
+        boolean hasNoServerId = serverId.isEmpty();
+        
+        boolean availabilityMatchesOnlineState = isOnline ^ hasNoServerId;
+        if (!availabilityMatchesOnlineState) {
+            throw new IllegalArgumentException("client is "+(isOnline ? "" : "not ")+"online but has "+(hasNoServerId ? "no" : "a")+" server ID assigned: \""+serverId+"\"");
+        }
+        
+        if (!isOnline) {
+            return null;
+        }
+        
+        return serverId;
+    }
+    
+    /**
+     * Parses and checks if definition of protocol version matches online state
+     * of client and returns only valid values.
+     * <p>
+     * Only if a client is online, it is expected to indicate a protocol version.
+     * Likewise, a client who is offline (prefiled flight plan) is expected
+     * not to have any protocol version as it is not connected to the network.
+     * </p>
+     * <p>
+     * If expectation does not match, {@link IllegalArgumentException} will be
+     * thrown.
+     * </p>
+     * <p>
+     * If expectation matches, negative value will be returned if client is
+     * offline, otherwise the parsed value will be returned.
+     * </p>
+     * @param s protocol version as string
+     * @param isOnline Is the client online?
+     * @return protocol version number if expectation matches, negative number for offline clients
+     * @throws IllegalArgumentException if expectation of server ID is violated or error occurs while parsing the value
+     */
+    private int parseOnlineProtocolVersion(String s, boolean isOnline) throws IllegalArgumentException {
+        boolean hasNoProtocolVersion = s.isEmpty();
+        
+        boolean availabilityMatchesOnlineState = isOnline ^ hasNoProtocolVersion;
+        if (!availabilityMatchesOnlineState) {
+            throw new IllegalArgumentException("client is "+(isOnline ? "" : "not ")+"online but indicates "+(hasNoProtocolVersion ? "no" : "a")+" protocol revision: \""+s+"\"");
+        }
+        
+        if (!isOnline) {
+            return -1;
+        }
+        
+        return Integer.parseInt(s);
+    }
 }
