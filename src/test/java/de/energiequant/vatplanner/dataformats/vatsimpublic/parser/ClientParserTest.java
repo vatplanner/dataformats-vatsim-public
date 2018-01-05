@@ -1005,4 +1005,283 @@ public class ClientParserTest {
         assertThat(result.getAircraftType(), is(equalTo(expectedAircraftType)));
     }
     // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="planned TAS cruise">
+    @Test
+    @DataProvider({"0", "90", "420"})
+    public void testParse_connectedPilotWithPlannedTASCruise_returnsObjectWithExpectedFiledTrueAirSpeed(int expectedTAS) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:%d:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedTAS);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledTrueAirSpeed(), is(equalTo(expectedTAS)));
+    }
+    
+    @Test
+    @DataProvider({"0", "90", "420"})
+    public void testParse_prefiledPilotWithPlannedTASCruise_returnsObjectWithExpectedFiledTrueAirSpeed(int expectedTAS) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:%d:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", expectedTAS);
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledTrueAirSpeed(), is(equalTo(expectedTAS)));
+    }
+    
+    @Test
+    @DataProvider({"123456", "987654321"})
+    public void testParse_atcWithPlannedTASCruise_returnsObjectWithExpectedFiledTrueAirSpeed(int expectedTAS) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::%d::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", expectedTAS);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledTrueAirSpeed(), is(equalTo(expectedTAS)));
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutPlannedTASCruise_returnsObjectWithZeroFiledTrueAirSpeed() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738::EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledTrueAirSpeed(), is(equalTo(0)));
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithoutPlannedTASCruise_returnsObjectWithZeroFiledTrueAirSpeed() {
+        // Arrange
+        String line = "ABC123:123456:realname:::::::B738::EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledTrueAirSpeed(), is(equalTo(0)));
+    }
+    
+    @Test
+    public void testParse_atcWithoutPlannedTASCruise_returnsObjectWithZeroFiledTrueAirSpeed() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledTrueAirSpeed(), is(equalTo(0)));
+    }
+    
+    @Test
+    @DataProvider({"-123", "abc", "1a", "a1"})
+    public void testParse_connectedPilotWithInvalidPlannedTASCruise_throwsIllegalArgumentException(String invalidInput) {
+        // Arrange
+        String erroneousLine = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:%s:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", invalidInput);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(erroneousLine);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-123", "abc", "1a", "a1"})
+    public void testParse_prefiledPilotWithInvalidPlannedTASCruise_throwsIllegalArgumentException(String invalidInput) {
+        // Arrange
+        String erroneousLine = String.format("ABC123:123456:realname:::::::B738:%s:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", invalidInput);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(erroneousLine);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-123", "abc", "1a", "a1"})
+    public void testParse_atcWithInvalidPlannedTASCruise_throwsIllegalArgumentException(String invalidInput) {
+        // Arrange
+        String erroneousLine = String.format("ABC123:123456:realname:ATC:118.500:12.34567:12.34567:0:::%s::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", invalidInput);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(erroneousLine);
+        
+        // Assert (nothing to do)
+    }
+    // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="filed departure airport">
+    @Test
+    @DataProvider({"", "EDDT", "05S"})
+    public void testParse_connectedPilot_returnsObjectWithExpectedFiledDepartureAirportCode(String expectedAirportCode) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:%s:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedAirportCode);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledDepartureAirportCode(), is(equalTo(expectedAirportCode)));
+    }
+    
+    @Test
+    @DataProvider({"", "EDDT", "05S"})
+    public void testParse_prefiledPilot_returnsObjectWithExpectedFiledDepartureAirportCode(String expectedAirportCode) {
+        // Arrange
+        String line = String.format("ABC123:123456::::::::B738:420:%s:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", expectedAirportCode);
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledDepartureAirportCode(), is(equalTo(expectedAirportCode)));
+    }
+    
+    @Test
+    @DataProvider({"", "EDDT", "05S"})
+    public void testParse_atc_returnsObjectWithExpectedFiledDepartureAirportCode(String expectedAirportCode) {
+        // An ATC with a flight plan doesn't make any sense but can actually be
+        // found on data files...
+        // Needs to be parseable but resulting data should be ignored
+        // nevertheless unless there really is some strange use case that makes
+        // sense.
+        
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0:%s:::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", expectedAirportCode);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledDepartureAirportCode(), is(equalTo(expectedAirportCode)));
+    }
+    // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="filed altitude">
+    @Test
+    @DataProvider({"", "30000", "FL300", "F300", "0", "F", "F 300"})
+    public void testParse_connectedPilot_returnsObjectWithExpectedRawFiledAltitude(String expectedRawFiledAltitude) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:%s:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedRawFiledAltitude);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getRawFiledAltitude(), is(equalTo(expectedRawFiledAltitude)));
+    }
+    
+    @Test
+    @DataProvider({"", "30000", "FL300", "F300", "0", "F", "F 300"})
+    public void testParse_prefiledPilot_returnsObjectWithExpectedRawFiledAltitude(String expectedRawFiledAltitude) {
+        // Arrange
+        String line = String.format("ABC123:123456::::::::B738:420:EDDT:%s:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", expectedRawFiledAltitude);
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getRawFiledAltitude(), is(equalTo(expectedRawFiledAltitude)));
+    }
+    
+    @Test
+    @DataProvider({"", "30000", "FL300", "F300", "0", "F", "F 300"})
+    public void testParse_atc_returnsObjectWithExpectedRawFiledAltitude(String expectedRawFiledAltitude) {
+        // An ATC with a flight plan doesn't make any sense but can actually be
+        // found on data files...
+        // Needs to be parseable but resulting data should be ignored
+        // nevertheless unless there really is some strange use case that makes
+        // sense.
+        
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::%s::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", expectedRawFiledAltitude);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getRawFiledAltitude(), is(equalTo(expectedRawFiledAltitude)));
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="filed destination airport">
+    @Test
+    @DataProvider({"", "EDDT", "05S"})
+    public void testParse_connectedPilot_returnsObjectWithExpectedFiledDestinationAirportCode(String expectedAirportCode) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:%s:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedAirportCode);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledDestinationAirportCode(), is(equalTo(expectedAirportCode)));
+    }
+    
+    @Test
+    @DataProvider({"", "EDDT", "05S"})
+    public void testParse_prefiledPilot_returnsObjectWithExpectedFiledDestinationAirportCode(String expectedAirportCode) {
+        // Arrange
+        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:%s:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", expectedAirportCode);
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledDestinationAirportCode(), is(equalTo(expectedAirportCode)));
+    }
+    
+    @Test
+    @DataProvider({"", "EDDT", "05S"})
+    public void testParse_atc_returnsObjectWithExpectedFiledDestinationAirportCode(String expectedAirportCode) {
+        // An ATC with a flight plan doesn't make any sense but can actually be
+        // found on data files...
+        // Needs to be parseable but resulting data should be ignored
+        // nevertheless unless there really is some strange use case that makes
+        // sense.
+        
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0:::%s:SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", expectedAirportCode);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledDestinationAirportCode(), is(equalTo(expectedAirportCode)));
+    }
+    // </editor-fold>
+    
 }

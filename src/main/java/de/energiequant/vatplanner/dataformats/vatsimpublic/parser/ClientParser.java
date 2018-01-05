@@ -130,6 +130,10 @@ public class ClientParser {
         client.setAltitudeFeet(parseOnlineAltitude(matcher.group(PATTERN_LINE_ALTITUDE), isOnline));
         client.setGroundSpeed(parseGroundSpeed(matcher.group(PATTERN_LINE_GROUNDSPEED), clientType));
         client.setAircraftType(matcher.group(PATTERN_LINE_PLANNED_AIRCRAFT));
+        client.setFiledTrueAirSpeed(parseIntWithDefault(matcher.group(PATTERN_LINE_PLANNED_TASCRUISE), 0));
+        client.setFiledDepartureAirportCode(matcher.group(PATTERN_LINE_PLANNED_DEPAIRPORT));
+        client.setRawFiledAltitude(matcher.group(PATTERN_LINE_PLANNED_ALTITUDE));
+        client.setFiledDestinationAirportCode(matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT));
         
         return client;
     }

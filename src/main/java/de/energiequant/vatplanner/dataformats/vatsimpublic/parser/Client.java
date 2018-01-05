@@ -24,12 +24,12 @@ import java.time.Instant;
  * <li>Pilot and prefiled flight plans only:
  * <ul>
  * <li>{@link #aircraftType}</li>
- * <li>{@link #alternateAirportCode}</li>
+ * <li>{@link #filedAlternateAirportCode}</li>
  * <li>{@link #altitudeFeet} (always 0 for ATCs)</li>
- * <li>{@link #departureAirportCode}</li>
+ * <li>{@link #filedDepartureAirportCode}</li>
  * <li>{@link #departureTimePlanned}</li>
  * <li>{@link #departureTimeActual}</li>
- * <li>{@link #destinationAirportCode}</li>
+ * <li>{@link #filedDestinationAirportCode}</li>
  * <li>{@link #rawFiledAltitude}</li>
  * <li>{@link #filedTimeEnroute}</li>
  * <li>{@link #filedTimeFuel}</li>
@@ -77,9 +77,9 @@ public class Client {
     // filing
     private String aircraftType; // B738/M, H/A332/X, B737
     private int filedTrueAirSpeed;
-    private String departureAirportCode;
+    private String filedDepartureAirportCode;
     private String rawFiledAltitude; // 30000, FL300, F300, maybe even worse raw user input (don't pilot clients validate this field?!)
-    private String destinationAirportCode;
+    private String filedDestinationAirportCode;
     
     // actual data
     private String serverId;
@@ -96,7 +96,7 @@ public class Client {
     private Instant departureTimeActual; // may be 0, may be equal, may be actual value - who or what sets this? Values can omit leading zeros!
     private Duration filedTimeEnroute; // data: two fields, hours + minutes
     private Duration filedTimeFuel; // data: two fields, hours + minutes
-    private String alternateAirportCode;
+    private String filedAlternateAirportCode;
     private String remarks;
     private String route;
     private double departureAirportLatitude; // seems unused, always 0
@@ -338,6 +338,11 @@ public class Client {
      * <p>
      * <strong>Example values:</strong> B738/M, H/A332/X, B737
      * </p>
+     * <p>
+     * While it does not make any sense for ATC to file flight plans, such data
+     * can actually be found on the network. If this field is filled for ATC it
+     * should be ignored unless an actual use case becomes known.
+     * </p>
      * @return aircraft type; may deviate from wake/ICAO-type/equipment syntax and value
      */
     public String getAircraftType() {
@@ -348,6 +353,20 @@ public class Client {
         this.aircraftType = aircraftType;
     }
 
+    /**
+     * Returns the true air speed (TAS, measured in knots) listed on flight plan
+     * of this client.
+     * <p>
+     * If no TAS was provided, 0 will be returned. Only positive values are
+     * valid.
+     * </p>
+     * <p>
+     * While it does not make any sense for ATC to file flight plans, such data
+     * can actually be found on the network. If this field is filled for ATC it
+     * should be ignored unless an actual use case becomes known.
+     * </p>
+     * @return true air speed (TAS, measured in knots) listed on flight plan; 0 if unavailable
+     */
     public int getFiledTrueAirSpeed() {
         return filedTrueAirSpeed;
     }
@@ -356,14 +375,36 @@ public class Client {
         this.filedTrueAirSpeed = filedTrueAirSpeed;
     }
 
-    public String getDepartureAirportCode() {
-        return departureAirportCode;
+    /**
+     * Returns the departure airport code listed on flight plan of this client.
+     * <p>
+     * While these are usually ICAO codes, they could be anything
+     * else as this is a free-text field.
+     * </p>
+     * @return departure airport code listed on flight plan of this client
+     */
+    public String getFiledDepartureAirportCode() {
+        return filedDepartureAirportCode;
     }
 
-    void setDepartureAirportCode(String departureAirportCode) {
-        this.departureAirportCode = departureAirportCode;
+    void setFiledDepartureAirportCode(String filedDepartureAirportCode) {
+        this.filedDepartureAirportCode = filedDepartureAirportCode;
     }
 
+    /**
+     * Returns the unprocessed planned altitude listed on flight plan of this
+     * client.
+     * <p>
+     * Unfortunately, this field is free-text and not strictly numeric, so
+     * pilots are free to file some strings which require further
+     * interpretation. No interpretation is attempted by parser, so this is the
+     * raw unprocessed value as available from data file.
+     * </p>
+     * <p>
+     * <strong>Example values:</strong> 30000, FL300, F300
+     * </p>
+     * @return unprocessed planned altitude listed on flight plan
+     */
     public String getRawFiledAltitude() {
         return rawFiledAltitude;
     }
@@ -372,12 +413,20 @@ public class Client {
         this.rawFiledAltitude = rawFiledAltitude;
     }
 
-    public String getDestinationAirportCode() {
-        return destinationAirportCode;
+    /**
+     * Returns the destination airport code listed on flight plan of this client.
+     * <p>
+     * While these are usually ICAO codes, they could be anything
+     * else as this is a free-text field.
+     * </p>
+     * @return destination airport code listed on flight plan of this client
+     */
+    public String getFiledDestinationAirportCode() {
+        return filedDestinationAirportCode;
     }
 
-    void setDestinationAirportCode(String destinationAirportCode) {
-        this.destinationAirportCode = destinationAirportCode;
+    void setFiledDestinationAirportCode(String filedDestinationAirportCode) {
+        this.filedDestinationAirportCode = filedDestinationAirportCode;
     }
 
     public String getServerId() {
@@ -477,12 +526,12 @@ public class Client {
         this.filedTimeFuel = filedTimeFuel;
     }
 
-    public String getAlternateAirportCode() {
-        return alternateAirportCode;
+    public String getFiledAlternateAirportCode() {
+        return filedAlternateAirportCode;
     }
 
-    void setAlternateAirportCode(String alternateAirportCode) {
-        this.alternateAirportCode = alternateAirportCode;
+    void setFiledAlternateAirportCode(String filedAlternateAirportCode) {
+        this.filedAlternateAirportCode = filedAlternateAirportCode;
     }
 
     public String getRemarks() {
