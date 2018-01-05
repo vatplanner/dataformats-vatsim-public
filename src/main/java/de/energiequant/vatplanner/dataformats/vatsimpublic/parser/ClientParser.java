@@ -119,7 +119,7 @@ public class ClientParser {
         boolean isOnline = (clientType != null) && (clientType != ClientType.PILOT_PREFILED);
         boolean isATC = (clientType == ClientType.ATC_CONNECTED);
         boolean isAllowedToServeFrequency = isATC;
-        boolean isAllowedToHaveFlightPlan = !isATC;
+        //boolean isAllowedToHaveFlightPlan = !isATC;
         
         client.setCallsign(matcher.group(PATTERN_LINE_CALLSIGN));
         client.setVatsimID(parseIntWithDefault(matcher.group(PATTERN_LINE_CID), -1)); // TODO: log details if ID is missing
@@ -129,7 +129,7 @@ public class ClientParser {
         client.setLongitude(parseOnlineGeoCoordinate(matcher.group(PATTERN_LINE_LONGITUDE), isOnline));
         client.setAltitudeFeet(parseOnlineAltitude(matcher.group(PATTERN_LINE_ALTITUDE), isOnline));
         client.setGroundSpeed(parseGroundSpeed(matcher.group(PATTERN_LINE_GROUNDSPEED), clientType));
-        client.setAircraftType(filterFlightPlanField(matcher.group(PATTERN_LINE_PLANNED_AIRCRAFT), isAllowedToHaveFlightPlan));
+        client.setAircraftType(matcher.group(PATTERN_LINE_PLANNED_AIRCRAFT));
         
         return client;
     }

@@ -986,30 +986,23 @@ public class ClientParserTest {
     }
     
     @Test
-    public void testParse_atcWithoutAircraftType_returnsNullForAircraftType() {
+    @DataProvider({"", "B738/M", "H/A332/X", "DH8D"})
+    public void testParse_atc_returnsObjectWithExpectedAircraftType(String expectedAircraftType) {
+        // An ATC with a flight plan doesn't make any sense but can actually be
+        // found on data files...
+        // Needs to be parseable but resulting data should be ignored
+        // nevertheless unless there really is some strange use case that makes
+        // sense.
+        
         // Arrange
-        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0::%s:0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", expectedAircraftType);
         parser.setIsParsingPrefileSection(false);
         
         // Act
         Client result = parser.parse(line);
         
         // Assert
-        assertThat(result.getAircraftType(), is(nullValue()));
-    }
-    
-    @Test
-    public void testParse_atcWithAircraftType_throwsIllegalArgumentException() {
-        // Arrange
-        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0::A320:0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
-        parser.setIsParsingPrefileSection(false);
-        
-        thrown.expect(IllegalArgumentException.class);
-        
-        // Act
-        parser.parse(line);
-        
-        // Assert (nothing to do)
+        assertThat(result.getAircraftType(), is(equalTo(expectedAircraftType)));
     }
     // </editor-fold>
 }
