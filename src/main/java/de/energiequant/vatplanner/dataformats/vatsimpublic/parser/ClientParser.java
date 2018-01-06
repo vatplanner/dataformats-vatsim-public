@@ -139,6 +139,7 @@ public class ClientParser {
         client.setControllerRating(parseControllerRating(matcher.group(PATTERN_LINE_RATING), clientType));
         client.setTransponderCodeDecimal(parseTransponderCodeDecimal(matcher.group(PATTERN_LINE_TRANSPONDER), clientType));
         client.setFacilityType(parseFacilityType(matcher.group(PATTERN_LINE_FACILITYTYPE), clientType));
+        client.setVisualRange(parseVisualRange(matcher.group(PATTERN_LINE_VISUALRANGE), clientType));
         
         return client;
     }
@@ -449,6 +450,35 @@ public class ClientParser {
             return FacilityType.resolveStatusFileId(Integer.parseInt(s));
         } else {
             throw new IllegalArgumentException("Only ATC stations are allowed to list a facility type but type was: \""+s+"\"");
+        }
+    }
+
+    /**
+     * Parses the given string to a visual range.
+     * <p>
+     * Visual range field is only available to ATC but not mandatory.
+     * {@link IllegalArgumentException} will be thrown if invalid
+     * or a non-ATC client (pilot/flight plan) attempts to define a visual range.
+     * </p>
+     * <p>
+     * Returns negative value if undefined.
+     * </p>
+     * @param s string to parse
+     * @param clientType type of client
+     * @return visual range; negative if unavailable
+     * @throws IllegalArgumentException if set although not allowed or parsing error
+     */
+    private int parseVisualRange(String s, ClientType clientType) throws IllegalArgumentException {
+        boolean isATC = (clientType == ClientType.ATC_CONNECTED);
+        
+        if (s.isEmpty()) {
+            return -1;
+        }
+        
+        if (isATC) {
+            return Integer.parseInt(s);
+        } else {
+            throw new IllegalArgumentException("Only ATC stations are allowed to indicate a visual range; found: \""+s+"\"");
         }
     }
 }

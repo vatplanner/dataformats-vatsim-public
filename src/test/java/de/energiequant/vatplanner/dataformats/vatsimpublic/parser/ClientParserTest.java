@@ -1924,4 +1924,133 @@ public class ClientParserTest {
         assertThat(result.getFacilityType(), is(nullValue()));
     }
     // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="visual range">
+    @Test
+    @DataProvider({"0", "5", "50", "200", "1000"})
+    public void testParse_connectedPilotWithValidVisualRange_throwsIllegalArgumentException(int visualRange) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234::%d:1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", visualRange);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-123", "abc", "1a", "a1"})
+    public void testParse_connectedPilotWithInvalidVisualRange_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234::%s:1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutVisualRange_returnsObjectWithNegativeVisualRange() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getVisualRange(), is(lessThan(0)));
+    }
+    
+    @Test
+    @DataProvider({"0", "5", "50", "200", "1000"})
+    public void testParse_prefiledPilotWithValidVisualRange_throwsIllegalArgumentException(int visualRange) {
+        // Arrange
+        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM::::::%d:1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", visualRange);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-123", "abc", "1a", "a1"})
+    public void testParse_prefiledPilotWithInvalidVisualRange_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM::::::%s:1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithoutVisualRange_returnsObjectWithNegativeVisualRange() {
+        // Arrange
+        String line = "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getVisualRange(), is(lessThan(0)));
+    }
+    
+    @Test
+    @DataProvider({"0", "5", "50", "200", "1000"})
+    public void testParse_atcWithValidVisualRange_returnsObjectWithExpectedVisualRange(int expectedVisualRange) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:%d::::::::::::::::atis message:20180101160000:20180101150000::::", expectedVisualRange);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getVisualRange(), is(equalTo(expectedVisualRange)));
+    }
+    
+    @Test
+    @DataProvider({"-123", "abc", "1a", "a1"})
+    public void testParse_atcWithInvalidVisualRange_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:%s::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_atcWithoutVisualRange_returnsObjectWithNegativeVisualRange() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:::::::::::::::::atis message:20180101160000:20180101150000::::";
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getVisualRange(), is(lessThan(0)));
+    }
+    // </editor-fold>
 }

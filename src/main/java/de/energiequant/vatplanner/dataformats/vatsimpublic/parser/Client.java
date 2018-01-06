@@ -537,6 +537,18 @@ public class Client {
         this.facilityType = facilityType;
     }
 
+    /**
+     * Returns the client's visual range in nautical miles (nm).
+     * <p>
+     * Visual range is only available and relevant to ATC stations and
+     * describes the radar range. If defined, range is always positive.
+     * </p>
+     * <p>
+     * This field is not mandatory. If missing, a negative value will be
+     * returned.
+     * </p>
+     * @return visual (radar) range of ATC station; negative value if unavailable
+     */
     public int getVisualRange() {
         return visualRange;
     }
