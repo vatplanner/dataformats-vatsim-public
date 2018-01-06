@@ -86,7 +86,7 @@ public class Client {
     private int protocolVersion;
     private ControllerRating controllerRating;
     private int transponderCodeDecimal;
-    private int facilityType; // TODO: decode
+    private FacilityType facilityType;
     private int visualRange; // nm
     
     // filing
@@ -523,12 +523,17 @@ public class Client {
         this.transponderCodeDecimal = transponderCodeDecimal;
     }
 
-    public int getFacilityType() {
-        // FIXME: should be an enum
+    /**
+     * Returns the type of ATC facility.
+     * Returns null if unavailable.
+     * See {@link FacilityType} for a detailed description.
+     * @return facility type; null if unavailable
+     */
+    public FacilityType getFacilityType() {
         return facilityType;
     }
 
-    void setFacilityType(int facilityType) {
+    void setFacilityType(FacilityType facilityType) {
         this.facilityType = facilityType;
     }
 

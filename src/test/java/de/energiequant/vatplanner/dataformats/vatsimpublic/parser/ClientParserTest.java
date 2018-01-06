@@ -1794,4 +1794,134 @@ public class ClientParserTest {
         assertThat(result.getTransponderCodeDecimal(), is(lessThan(0)));
     }
     // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="facility type">
+    @Test
+    @UseDataProvider(value="dataProviderIdAndEnum", location=FacilityTypeTest.class)
+    public void testParse_connectedPilotWithValidFacilityType_throwsIllegalArgumentException(int id, FacilityType _facilityType) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:%d::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", id);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1", "7", "100"})
+    public void testParse_connectedPilotWithInvalidFacilityType_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:%s::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutFacilityType_returnsObjectWithNullForFacilityType() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFacilityType(), is(nullValue()));
+    }
+    
+    @Test
+    @UseDataProvider(value="dataProviderIdAndEnum", location=FacilityTypeTest.class)
+    public void testParse_prefiledPilotWithValidFacilityType_throwsIllegalArgumentException(int id, FacilityType _facilityType) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::%d::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", id);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1", "7", "100"})
+    public void testParse_prefiledPilotWithInvalidFacilityType_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::%s::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithoutFacilityType_returnsObjectWithNullForFacilityType() {
+        // Arrange
+        String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFacilityType(), is(nullValue()));
+    }
+    
+    @Test
+    @UseDataProvider(value="dataProviderIdAndEnum", location=FacilityTypeTest.class)
+    public void testParse_atcPilotWithValidFacilityType_returnsObjectWithExpectedFacilityType(int id, FacilityType expectedFacilityType) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::%d:50::::::::::::::::atis message:20180101160000:20180101150000::::", id);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFacilityType(), is(equalTo(expectedFacilityType)));
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1", "7", "100"})
+    public void testParse_atcPilotWithInvalidFacilityType_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::%s:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_atcPilotWithoutFacilityType_returnsObjectWithNullForFacilityType() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3:::50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFacilityType(), is(nullValue()));
+    }
+    // </editor-fold>
 }

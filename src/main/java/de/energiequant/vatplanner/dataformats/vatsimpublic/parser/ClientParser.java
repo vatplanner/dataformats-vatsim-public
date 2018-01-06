@@ -138,6 +138,7 @@ public class ClientParser {
         client.setProtocolVersion(parseOnlineProtocolVersion(matcher.group(PATTERN_LINE_PROTREVISION), isOnline));
         client.setControllerRating(parseControllerRating(matcher.group(PATTERN_LINE_RATING), clientType));
         client.setTransponderCodeDecimal(parseTransponderCodeDecimal(matcher.group(PATTERN_LINE_TRANSPONDER), clientType));
+        client.setFacilityType(parseFacilityType(matcher.group(PATTERN_LINE_FACILITYTYPE), clientType));
         
         return client;
     }
@@ -419,6 +420,35 @@ public class ClientParser {
             return Integer.parseInt(s);
         } else {
             throw new IllegalArgumentException("Only connected pilots are allowed to list a transponder code but code was: \""+s+"\"");
+        }
+    }
+    
+    /**
+     * Parses the given string to a facility type.
+     * <p>
+     * Facility types are only available to ATC.
+     * {@link IllegalArgumentException} will be thrown if the type ID is unknown
+     * or a non-ATC client (pilot/flight plan) attempts to define a facility type.
+     * </p>
+     * <p>
+     * Returns null if undefined.
+     * </p>
+     * @param s string to parse
+     * @param clientType type of client
+     * @return facility type; null if unavailable
+     * @throws IllegalArgumentException if set although not allowed, unknown ID or parsing error
+     */
+    private FacilityType parseFacilityType(String s, ClientType clientType) throws IllegalArgumentException {
+        boolean isATC = (clientType == ClientType.ATC_CONNECTED);
+        
+        if (s.isEmpty()) {
+            return null;
+        }
+        
+        if (isATC) {
+            return FacilityType.resolveStatusFileId(Integer.parseInt(s));
+        } else {
+            throw new IllegalArgumentException("Only ATC stations are allowed to list a facility type but type was: \""+s+"\"");
         }
     }
 }
