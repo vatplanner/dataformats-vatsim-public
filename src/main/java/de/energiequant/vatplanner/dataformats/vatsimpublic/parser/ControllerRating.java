@@ -108,16 +108,9 @@ public enum ControllerRating {
     private static final Map<Integer, ControllerRating> ratingById = new TreeMap<>();
     
     static {
-        ratingById.put(OBS.statusFileId, OBS);
-        ratingById.put(S1.statusFileId, S1);
-        ratingById.put(S2.statusFileId, S2);
-        ratingById.put(S3.statusFileId, S3);
-        ratingById.put(C1.statusFileId, C1);
-        ratingById.put(C3.statusFileId, C3);
-        ratingById.put(I.statusFileId, I);
-        ratingById.put(I3.statusFileId, I3);
-        ratingById.put(SUP.statusFileId, SUP);
-        ratingById.put(ADM.statusFileId, ADM);
+        for (ControllerRating rating : values()) {
+            ratingById.put(rating.statusFileId, rating);
+        }
     }
     
     private ControllerRating(int statusFileId) {
@@ -129,8 +122,9 @@ public enum ControllerRating {
      * corresponding {@link ControllerRating} enum.
      * @param statusFileId ID as used on data.txt status file
      * @return resolved enumeration object or null if unknown
+     * @throws IllegalArgumentException if the ID is unknown and could not be resolved
      */
-    public static ControllerRating resolveStatusFileId(int statusFileId) {
+    public static ControllerRating resolveStatusFileId(int statusFileId) throws IllegalArgumentException {
         ControllerRating resolved = ratingById.get(statusFileId);
         
         if (resolved != null) {

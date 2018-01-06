@@ -52,7 +52,7 @@ public class ControllerRatingTest {
         thrown.expect(IllegalArgumentException.class);
         
         // Act
-        ControllerRating result = ControllerRating.resolveStatusFileId(unknownId);
+        ControllerRating.resolveStatusFileId(unknownId);
         
         // Assert (nothing to do)
     }
