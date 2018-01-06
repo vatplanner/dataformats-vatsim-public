@@ -1665,4 +1665,133 @@ public class ClientParserTest {
     }
     // </editor-fold>
     
+    // <editor-fold defaultstate="collapsed" desc="transponder code">
+    @Test
+    @DataProvider({"0", "1", "123", "2143", "7000", "9999"})
+    public void testParse_connectedPilotWithValidTransponderCode_returnsObjectWithExpectedTransponderCodeDecimal(int expectedTransponderCodeDecimal) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:%d:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedTransponderCodeDecimal);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getTransponderCodeDecimal(), is(equalTo(expectedTransponderCodeDecimal)));
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1", "10000"})
+    public void testParse_connectedPilotWithInvalidTransponderCode_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:%s:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutTransponderCode_returnsObjectWithNegativeTransponderCodeDecimal() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1::::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getTransponderCodeDecimal(), is(lessThan(0)));
+    }
+    
+    @Test
+    @DataProvider({"0", "1", "123", "2143", "7000", "9999"})
+    public void testParse_prefiledPilotWithValidTransponderCode_throwsIllegalArgumentException(int transponderCodeNumeric) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM::::%d:::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", transponderCodeNumeric);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1", "10000"})
+    public void testParse_prefiledPilotWithInvalidTransponderCode_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM::::%s:::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithoutTransponderCode_returnsObjectWithNegativeTransponderCodeDecimal() {
+        // Arrange
+        String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getTransponderCodeDecimal(), is(lessThan(0)));
+    }
+    
+    @Test
+    @DataProvider({"0", "1", "123", "2143", "7000", "9999"})
+    public void testParse_atcWithValidTransponderCode_throwsIllegalArgumentException(int transponderCodeNumeric) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::::::SERVER1:100:3:%d:4:50::::::::::::::::atis message:20180101160000:20180101150000::::", transponderCodeNumeric);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1", "10000"})
+    public void testParse_atcWithInvalidTransponderCode_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::::::SERVER1:100:3:%s:4:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_atcWithoutTransponderCode_returnsObjectWithNegativeTransponderCodeDecimal() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getTransponderCodeDecimal(), is(lessThan(0)));
+    }
+    // </editor-fold>
 }

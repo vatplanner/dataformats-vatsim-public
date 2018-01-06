@@ -21,12 +21,12 @@ public class ClientParser {
     
     // TODO: airport lat/lon should be geocoordinates subpattern with optional 0
     private static final Pattern PATTERN_LINE = Pattern.compile(
-    //    1       2      3       4            5                                6                                7
+    //    1       2       3       4            5                                6                                7
         "([^:]+):(\\d+|):([^:]*):(PILOT|ATC|):("+SUBPATTERN_FLOAT_UNSIGNED+"|):("+SUBPATTERN_GEOCOORDINATES+"|):("+SUBPATTERN_GEOCOORDINATES+"|):"+
     //    8           9       10      11      12      13      14      15      16      17
         "(\\-?\\d+|):(\\d+|):([^:]*):(\\d+|):([^:]*):([^:]*):([^:]*):([^:]*):(\\d+|):(\\d+|):"+
-    //    18      19      20      21      22      23      24      25      26      27      28
-        "(\\d+|):(\\d+|):(\\d+|):(\\d+|):([^:]*):(\\d+|):(\\d+|):(\\d+|):(\\d+|):(\\d+|):(\\d+|):"+
+    //    18         19      20      21      22      23      24      25      26      27      28
+        "(\\d{0,4}):(\\d+|):(\\d+|):(\\d+|):([^:]*):(\\d+|):(\\d+|):(\\d+|):(\\d+|):(\\d+|):(\\d+|):"+
     //    29      30      31      32      33      34      35
         "([^:]*):([^:]*):([^:]*):(\\d+|):(\\d+|):(\\d+|):(\\d+|):"+
     //    36   37                         38                         39
@@ -137,6 +137,7 @@ public class ClientParser {
         client.setServerId(filterServerId(matcher.group(PATTERN_LINE_SERVER), isOnline));
         client.setProtocolVersion(parseOnlineProtocolVersion(matcher.group(PATTERN_LINE_PROTREVISION), isOnline));
         client.setControllerRating(parseControllerRating(matcher.group(PATTERN_LINE_RATING), clientType));
+        client.setTransponderCodeDecimal(parseTransponderCodeDecimal(matcher.group(PATTERN_LINE_TRANSPONDER), clientType));
         
         return client;
     }
@@ -391,5 +392,33 @@ public class ClientParser {
         
         return rating;
     }
-    
+
+    /**
+     * Parses the given string as a transponder code in numeric decimal
+     * representation.
+     * <p>
+     * Only connected pilots are allowed to set a transponder code. Having a
+     * transponder code while being connected is not mandatory.
+     * </p>
+     * <p>
+     * ATC or prefiled flight plans are never allowed to set a transponder code
+     * and thus return a negative value if not set and throw an
+     * {@link IllegalArgumentException} if set.
+     * </p>
+     * @param s string to parse
+     * @param clientType type of client
+     * @return positive transponder code in decimal numeric representation; negative value if unavailable
+     * @throws IllegalArgumentException if set although not allowed or parsing error
+     */
+    private int parseTransponderCodeDecimal(String s, ClientType clientType) throws IllegalArgumentException {
+        if (s.isEmpty()) {
+            return -1;
+        }
+        
+        if (clientType == ClientType.PILOT_CONNECTED) {
+            return Integer.parseInt(s);
+        } else {
+            throw new IllegalArgumentException("Only connected pilots are allowed to list a transponder code but code was: \""+s+"\"");
+        }
+    }
 }

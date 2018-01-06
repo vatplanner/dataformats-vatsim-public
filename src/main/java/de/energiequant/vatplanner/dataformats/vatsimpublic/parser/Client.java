@@ -85,7 +85,7 @@ public class Client {
     private String serverId;
     private int protocolVersion;
     private ControllerRating controllerRating;
-    private int transponderCode;
+    private int transponderCodeDecimal;
     private int facilityType; // TODO: decode
     private int visualRange; // nm
     
@@ -480,12 +480,47 @@ public class Client {
         this.controllerRating = controllerRating;
     }
 
-    public int getTransponderCode() {
-        return transponderCode;
+    /**
+     * Returns the transponder code in numeric decimal representation currently
+     * used by client.
+     * <p>
+     * The actual, spoken transponder code can be resolved from the numeric by
+     * left-padding it with 0 to a length of 4 digits.
+     * </p>
+     * <p>
+     * Only in real world digits would be limited to a range of 0..7 as
+     * transponder codes are encoded octal. Numeric values returned by this
+     * getter however are decimal and pilot clients are
+     * actually submitting decimal digits 8 and 9 which would not be possible
+     * in real aviation. Such excessive values are to be expected on this
+     * representation. However, only 4 digits should ever be returned, meaning
+     * a value of 9999 is the highest and 0 is the lowest pilot-settable code.
+     * </p>
+     * <p>
+     * Only if transponder code is not available, a negative value will be
+     * returned.
+     * </p>
+     * <p>
+     * Transponder codes are initially selected on pilot's discretion and
+     * requested to be changed by ATC upon clearance and sometimes mid-flight.
+     * Connected pilots list transponder codes regardless of actual
+     * transponder mode selected on aircraft (even if transponder on aircraft is
+     * turned off, clients may still list a code). The listed code is always
+     * the code set by pilots, not set by ATC. ATC only requests pilots to enter
+     * an assigned code, but it cannot be set by ATC. Connected pilots without
+     * a transponder code can be encountered.
+     * </p>
+     * <p>
+     * Prefiled flight plans and ATC are never setting transponder codes.
+     * </p>
+     * @return decimal numeric transponder code, needs left-padding to 4 digits to reconstruct spoken code; negative if unavailable
+     */
+    public int getTransponderCodeDecimal() {
+        return transponderCodeDecimal;
     }
 
-    void setTransponderCode(int transponderCode) {
-        this.transponderCode = transponderCode;
+    void setTransponderCodeDecimal(int transponderCodeDecimal) {
+        this.transponderCodeDecimal = transponderCodeDecimal;
     }
 
     public int getFacilityType() {
