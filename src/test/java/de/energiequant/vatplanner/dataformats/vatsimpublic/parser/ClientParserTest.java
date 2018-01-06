@@ -2053,4 +2053,190 @@ public class ClientParserTest {
         assertThat(result.getVisualRange(), is(lessThan(0)));
     }
     // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="flight plan revision">
+    @Test
+    @DataProvider({"0", "1", "200"})
+    public void testParse_connectedPilotWithValidPlannedRevision_returnsObjectWithExpectedFlightPlanRevision(int expectedRevision) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::%d:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedRevision);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFlightPlanRevision(), is(equalTo(expectedRevision)));
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1"})
+    public void testParse_connectedPilotWithInvalidPlannedRevision_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::%s:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutPlannedRevision_returnsObjectWithNegativeFlightPlanRevision() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234::::I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFlightPlanRevision(), is(lessThan(0)));
+    }
+    
+    @Test
+    @DataProvider({"0", "1", "200"})
+    public void testParse_prefiledPilotWithValidPlannedRevision_returnsObjectWithExpectedFlightPlanRevision(int expectedRevision) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::%d:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", expectedRevision);
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFlightPlanRevision(), is(equalTo(expectedRevision)));
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1"})
+    public void testParse_prefiledPilotWithInvalidPlannedRevision_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::%s:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithoutPlannedRevision_throwsIllegalArgumentException() {
+        // Arrange
+        String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM::::::::I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"0", "1", "200"})
+    public void testParse_atcWithValidPlannedRevision_returnsObjectWithExpectedFlightPlanRevision(int expectedRevision) {
+        // An ATC with a flight plan doesn't make any sense but can actually be
+        // found on data files...
+        // Needs to be parseable but resulting data should be ignored
+        // nevertheless unless there really is some strange use case that makes
+        // sense.
+        
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:%d:::::::::::::::atis message:20180101160000:20180101150000::::", expectedRevision);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFlightPlanRevision(), is(equalTo(expectedRevision)));
+    }
+    
+    @Test
+    @DataProvider({"abc", "1a", "a1"})
+    public void testParse_atcWithInvalidPlannedRevision_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567::::0::::SERVER1:100:3::4:50:%s:::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_atcWithoutPlannedRevision_returnsObjectWithNegativeFlightPlanRevision() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFlightPlanRevision(), is(lessThan(0)));
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="flight plan type">
+    @Test
+    @DataProvider({"", "V", "I", "Y", "Z", "something else 123-ABC"})
+    public void testParse_connectedPilot_returnsObjectWithExpectedRawFlightPlanType(String expectedRawFlightPlanType) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:%s:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedRawFlightPlanType);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getRawFlightPlanType(), is(equalTo(expectedRawFlightPlanType)));
+    }
+    
+    @Test
+    @DataProvider({"", "V", "I", "Y", "Z", "something else 123-ABC"})
+    public void testParse_prefiledPilot_returnsObjectWithExpectedRawFlightPlanType(String expectedRawFlightPlanType) {
+        // Arrange
+        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:%s:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", expectedRawFlightPlanType);
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getRawFlightPlanType(), is(equalTo(expectedRawFlightPlanType)));
+    }
+    
+    @Test
+    @DataProvider({"", "V", "I", "Y", "Z", "something else 123-ABC"})
+    public void testParse_atc_returnsObjectWithExpectedRawFlightPlanType(String expectedRawFlightPlanType) {
+        // An ATC with a flight plan doesn't make any sense but can actually be
+        // found on data files...
+        // Needs to be parseable but resulting data should be ignored
+        // nevertheless unless there really is some strange use case that makes
+        // sense.
+        
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::%s::::::::::::::atis message:20180101160000:20180101150000::::", expectedRawFlightPlanType);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getRawFlightPlanType(), is(equalTo(expectedRawFlightPlanType)));
+    }
+    // </editor-fold>
+
 }

@@ -34,8 +34,8 @@ import java.time.Instant;
  * <li>{@link #filedTimeEnroute}</li>
  * <li>{@link #filedTimeFuel}</li>
  * <li>{@link #filedTrueAirSpeed}</li>
- * <li>{@link #fileRevision}</li>
- * <li>{@link #flightPlanType}</li>
+ * <li>{@link #flightPlanRevision}</li>
+ * <li>{@link #rawFlightPlanType}</li>
  * <li>{@link #groundSpeed}</li>
  * <li>{@link #heading}</li>
  * <li>{@link #qnhHectopascal}</li>
@@ -57,7 +57,7 @@ import java.time.Instant;
  * <ul>
  * <li>{@link #aircraftType}: ICAO aircraft type code. Should include equipment code as suffix, may include wake category as prefix (examples: B738/M, H/A332/X, B737). Not reliable as this is an informal free-text field and sometimes contains alternate/IATA codes or common mistakes (such as B77W for a Boeing 777 which is neither a valid ICAO nor IATA code).</li>
  * <li>{@link #callsign}: Callsigns can be chosen freely by pilots although some codes may be reserved for virtual airlines by convention. Callsigns on VATSIM omit hyphens which would be used in the real-world to separate country prefixes for plane registrations (e.g. all non-airline flights).</li>
- * <li>{@link #fileRevision}: Flights passing through online controlled airspace will usually see many revisions of their original flight plan (mostly {@link #route}) as edited by ATC when the plane changes airspace or an initial clearance is given by departure airport. Flight plan revisions are tracked by this counter.
+ * <li>{@link #flightPlanRevision}: Flights passing through online controlled airspace will usually see many revisions of their original flight plan (mostly {@link #route}) as edited by ATC when the plane changes airspace or an initial clearance is given by departure airport. Flight plan revisions are tracked by this counter.
  * <li>{@link #message}: Multi-line string containing ATIS message for ATIS stations, otherwise general remarks about ATC stations such as contact information, controller's estimated online times or station's spatial coverage. May contain a URL to the voice room on first line if prefixed with "$ ". Update timestamps are provided by {@link #lastMessageUpdate}.</li>
  * <li>{@link #realName}: By convention, pilots should add a 4-letter ICAO code for their "home base". Pilots often choose the closest airport to their actual home.</li>
  * <li>{@link #remarks}: Pilot clients add voice capability flags (T = Text only; R = Receive voice, send text; V = full voice). Other than that, pilots are free to enter any remarks they may find useful. Pilots sometimes attach full ICAO field 18 information which provides highly detailed information generally not needed for simulation (for example PBN/..., DOF/... etc.).</li>
@@ -90,8 +90,8 @@ public class Client {
     private int visualRange; // nm
     
     // filing
-    private int fileRevision;
-    private String flightPlanType; // I = IFR, V = VFR; unfortunately user-defined, e.g. also seen: S (scheduled)
+    private int flightPlanRevision;
+    private String rawFlightPlanType; // I = IFR, V = VFR; unfortunately user-defined, e.g. also seen: S (scheduled)
     private Instant departureTimePlanned; // may be 0; values can omit leading zeros!
     private Instant departureTimeActual; // may be 0, may be equal, may be actual value - who or what sets this? Values can omit leading zeros!
     private Duration filedTimeEnroute; // data: two fields, hours + minutes
@@ -557,20 +557,44 @@ public class Client {
         this.visualRange = visualRange;
     }
 
-    public int getFileRevision() {
-        return fileRevision;
+    /**
+     * Returns the flight plan revision number.
+     * <p>
+     * Every time a flight plan gets updated, the revision number will be
+     * increased by 1. First revision starts counting at 0.
+     * </p>
+     * <p>
+     * The revision number is mandatory for prefiled flight plans, otherwise
+     * it is optional. If revision number is undefined, a negative value will be
+     * returned.
+     * </p>
+     * @return revision of currently listed flight plan, counting starts at 0; negative if unavailable
+     */
+    public int getFlightPlanRevision() {
+        return flightPlanRevision;
     }
 
-    void setFileRevision(int fileRevision) {
-        this.fileRevision = fileRevision;
+    void setFlightPlanRevision(int flightPlanRevision) {
+        this.flightPlanRevision = flightPlanRevision;
     }
 
-    public String getFlightPlanType() {
-        return flightPlanType;
+    /**
+     * Returns the raw flight plan type as chosen by user.
+     * <p>
+     * While flight plan types are well-defined in real world aviation (most
+     * common are I, V, Y, Z) the data field on VATSIM can unfortunately contain
+     * any other unexpected value such as S (I guess that is supposed to stand
+     * for "scheduled" which belongs in a company preflight briefing but not an
+     * ICAO flight plan).
+     * </p>
+     * @return raw flight plan type as chosen by user
+     */
+    public String getRawFlightPlanType() {
+        return rawFlightPlanType;
     }
 
-    void setFlightPlanType(String flightPlanType) {
-        this.flightPlanType = flightPlanType;
+    void setRawFlightPlanType(String rawFlightPlanType) {
+        this.rawFlightPlanType = rawFlightPlanType;
     }
 
     public Instant getDepartureTimePlanned() {

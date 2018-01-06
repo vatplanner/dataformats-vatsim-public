@@ -140,6 +140,8 @@ public class ClientParser {
         client.setTransponderCodeDecimal(parseTransponderCodeDecimal(matcher.group(PATTERN_LINE_TRANSPONDER), clientType));
         client.setFacilityType(parseFacilityType(matcher.group(PATTERN_LINE_FACILITYTYPE), clientType));
         client.setVisualRange(parseVisualRange(matcher.group(PATTERN_LINE_VISUALRANGE), clientType));
+        client.setFlightPlanRevision(parseFlightPlanRevision(matcher.group(PATTERN_LINE_PLANNED_REVISION), clientType));
+        client.setRawFlightPlanType(matcher.group(PATTERN_LINE_PLANNED_FLIGHTTYPE));
         
         return client;
     }
@@ -480,5 +482,32 @@ public class ClientParser {
         } else {
             throw new IllegalArgumentException("Only ATC stations are allowed to indicate a visual range; found: \""+s+"\"");
         }
+    }
+
+    /**
+     * Parses the given string to a flight plan revision.
+     * <p>
+     * Flight plan revision is mandatory for prefiled flight plans.
+     * </p>
+     * <p>
+     * Returns negative value if undefined.
+     * </p>
+     * @param s string to parse
+     * @param clientType type of client
+     * @return flight plan revision; negative if unavailable
+     * @throws IllegalArgumentException if missing although mandatory or parsing error
+     */
+    private int parseFlightPlanRevision(String s, ClientType clientType) throws IllegalArgumentException {
+        boolean isPrefiling = (clientType == ClientType.PILOT_PREFILED);
+        
+        if (s.isEmpty()) {
+            if (isPrefiling) {
+                throw new IllegalArgumentException("flight plan was prefiled but is missing revision");
+            }
+            
+            return -1;
+        }
+        
+        return Integer.parseInt(s);
     }
 }
