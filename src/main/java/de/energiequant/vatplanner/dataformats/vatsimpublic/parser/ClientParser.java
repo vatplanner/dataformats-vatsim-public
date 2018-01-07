@@ -148,6 +148,7 @@ public class ClientParser {
         client.setFlightPlanRevision(parseFlightPlanRevision(matcher.group(PATTERN_LINE_PLANNED_REVISION), clientType));
         client.setRawFlightPlanType(matcher.group(PATTERN_LINE_PLANNED_FLIGHTTYPE));
         client.setRawDepartureTimePlanned(parseIntWithDefault(matcher.group(PATTERN_LINE_PLANNED_DEPTIME), -1));
+        client.setRawDepartureTimeActual(parseIntWithDefault(matcher.group(PATTERN_LINE_PLANNED_ACTDEPTIME), -1));
         
         return client;
     }

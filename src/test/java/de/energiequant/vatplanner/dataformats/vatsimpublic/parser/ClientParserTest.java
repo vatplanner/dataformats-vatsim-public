@@ -2367,4 +2367,132 @@ public class ClientParserTest {
         assertThat(result.getRawDepartureTimePlanned(), is(lessThan(0)));
     }
     // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="departure time actual">
+    @Test
+    @DataProvider({"0", "30", "2359", "123456789"})
+    public void testParse_connectedPilotWithValidActualDeparture_returnsObjectWithExpectedRawDepartureTimeActual(int rawValue) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:%d:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", rawValue);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getRawDepartureTimeActual(), is(equalTo(rawValue)));
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1"})
+    public void testParse_connectedPilotWithInvalidActualDeparture_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:%s:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutActualDeparture_returnsObjectWithNegativeRawDepartureTimeActual() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000::1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getRawDepartureTimeActual(), is(lessThan(0)));
+    }
+    
+    @Test
+    @DataProvider({"0", "30", "2359", "123456789"})
+    public void testParse_prefiledPilotWithValidActualDeparture_returnsObjectWithExpectedRawDepartureTimeActual(int rawValue) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:%d:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", rawValue);
+        parser.setIsParsingPrefileSection(true);
+        
+        // ActPlanned
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getRawDepartureTimeActual(), is(equalTo(rawValue)));
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1"})
+    public void testParse_prefiledPilotWithInvalidActualDeparture_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:%s:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithoutActualDeparture_returnsObjectWithNegativeRawDepartureTimeActual() {
+        // Arrange
+        String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000::1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getRawDepartureTimeActual(), is(lessThan(0)));
+    }
+    
+    @Test
+    @DataProvider({"0", "30", "2359", "123456789"})
+    public void testParse_atcWithValidActualDeparture_returnsObjectWithExpectedRawDepartureTimeActual(int rawValue) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::%d::::::::::::atis message:20180101160000:20180101150000::::", rawValue);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getRawDepartureTimeActual(), is(equalTo(rawValue)));
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1"})
+    public void testParse_atcWithInvalidActualDeparture_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::%s::::::::::::atis message:20180101160000:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_atcWithoutActualDeparture_returnsObjectWithNegativeRawDepartureTimeActual() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567::::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getRawDepartureTimeActual(), is(lessThan(0)));
+    }
+    // </editor-fold>
 }
