@@ -174,6 +174,7 @@ public class ClientParser {
         client.setControllerMessage(decodeControllerMessage(matcher.group(PATTERN_LINE_ATIS_MESSAGE), isATC));
         client.setControllerMessageLastUpdated(parseFullTimestamp(matcher.group(PATTERN_LINE_TIME_LAST_ATIS_RECEIVED), isATC));
         client.setLogonTime(requireNonNullIf("logon time", isOnline, parseFullTimestamp(matcher.group(PATTERN_LINE_TIME_LOGON), isOnline)));
+        client.setHeading(parseHeading(matcher.group(PATTERN_LINE_HEADING), clientType));
         
         return client;
     }
@@ -688,6 +689,33 @@ public class ClientParser {
         }
         
         return obj;
+    }
+    
+    /**
+     * Parses the given string as a heading in degrees.
+     * Returns negative value if not set.
+     * @param s string to be parsed
+     * @param clientType client type string is to be parsed for
+     * @return heading value; negative if not set
+     * @throws IllegalArgumentException if not permitted but still defined or value is out of range
+     */
+    private int parseHeading(String s, ClientType clientType) throws IllegalArgumentException {
+        if (s.isEmpty()) {
+            return -1;
+        }
+        
+        boolean isAllowed = (clientType == ClientType.PILOT_CONNECTED);
+        if (!isAllowed) {
+            throw new IllegalArgumentException("heading is only allowed to be set by connected pilots");
+        }
+        
+        int heading = Integer.parseInt(s);
+        
+        if (heading > 359) {
+            throw new IllegalArgumentException("heading is out of range: \""+s+"\"");
+        }
+        
+        return heading;
     }
     
     // TODO: remove unused methods

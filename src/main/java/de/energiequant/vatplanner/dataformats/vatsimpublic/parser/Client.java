@@ -870,6 +870,12 @@ public class Client {
         this.logonTime = logonTime;
     }
 
+    /**
+     * Returns the heading a pilot is currently oriented towards.
+     * Returns a negative value if no heading is available.
+     * Valid positive value range is 0..359 as heading is measured in degrees.
+     * @return heading oriented towards; negative if unavailable
+     */
     public int getHeading() {
         return heading;
     }
