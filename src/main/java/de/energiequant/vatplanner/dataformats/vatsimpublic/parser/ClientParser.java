@@ -2,7 +2,10 @@ package de.energiequant.vatplanner.dataformats.vatsimpublic.parser;
 
 import java.nio.charset.Charset;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.regex.Matcher;
@@ -91,7 +94,8 @@ public class ClientParser {
     private static final int DEFAULT_ALTITUDE = 0;
     
     private static final DateTimeFormatter LOCAL_TIME_FORMATTER = DateTimeFormatter.ofPattern("HHmm");
-    
+    private static final DateTimeFormatter LOCAL_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+
     private static final String CONTROLLER_MESSAGE_LINEBREAK = new String(new byte[]{(byte) 0x5E, (byte) 0xA7}, Charset.forName("ISO-8859-1"));
     private static final String LINEBREAK = "\n";
     
@@ -168,6 +172,8 @@ public class ClientParser {
         client.setDestinationAirportLatitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT_LAT)));
         client.setDestinationAirportLongitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT_LON)));
         client.setControllerMessage(decodeControllerMessage(matcher.group(PATTERN_LINE_ATIS_MESSAGE), isATC));
+        client.setControllerMessageLastUpdated(parseFullTimestamp(matcher.group(PATTERN_LINE_TIME_LAST_ATIS_RECEIVED), isATC));
+        client.setLogonTime(requireNonNullIf("logon time", isOnline, parseFullTimestamp(matcher.group(PATTERN_LINE_TIME_LOGON), isOnline)));
         
         return client;
     }
@@ -645,5 +651,44 @@ public class ClientParser {
         return s;
     }
 
+    /**
+     * Parses a UTC timestamp in full date/time format to an {@link Instant}.
+     * Returns null if not set.
+     * If no timestamp is allowed but still set, an
+     * {@link IllegalArgumentException} will be thrown.
+     * @param s string to parse
+     * @param isAllowed Is a timestamp allowed?
+     * @return timestamp as {@link Instant} referenced to UTC
+     * @throws IllegalArgumentException if not allowed but set or parsing error
+     */
+    private Instant parseFullTimestamp(String s, boolean isAllowed) throws IllegalArgumentException {
+        if (s.isEmpty()) {
+            return null;
+        }
+        
+        if (!isAllowed) {
+            throw new IllegalArgumentException("timestamp is not allowed but was \""+s+"\"");
+        }
+        
+        return LocalDateTime.parse(s, LOCAL_DATE_TIME_FORMATTER).toInstant(ZoneOffset.UTC);
+    }
+    
+    /**
+     * Requires the given object to be not null if condition is true.
+     * @param <T> class of object to be checked
+     * @param description description of object value (used for exception message)
+     * @param condition condition which has to be true for object to be required not to be null
+     * @param obj object to be checked
+     * @return original object
+     * @throws IllegalArgumentException if condition is true and object is null
+     */
+    private <T> T requireNonNullIf(String description, boolean condition, T obj) throws IllegalArgumentException {
+        if (condition && (obj == null)) {
+            throw new IllegalArgumentException("expected "+description+" not to be null");
+        }
+        
+        return obj;
+    }
+    
     // TODO: remove unused methods
 }

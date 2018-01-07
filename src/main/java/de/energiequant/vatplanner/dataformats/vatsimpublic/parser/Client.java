@@ -2,7 +2,6 @@ package de.energiequant.vatplanner.dataformats.vatsimpublic.parser;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalTime;
 
 /**
  * Combines information about VATSIM online pilots, prefiled flight plans and
@@ -16,7 +15,7 @@ import java.time.LocalTime;
  * <ul>
  * <li>{@link #facilityType}</li>
  * <li>{@link #servedFrequencyKilohertz}</li>
- * <li>{@link #lastMessageUpdate}</li>
+ * <li>{@link #controllerMessageLastUpdated}</li>
  * <li>{@link #controllerMessage}</li>
  * <li>{@link #rating}</li>
  * <li>{@link #visualRange}</li>
@@ -59,7 +58,7 @@ import java.time.LocalTime;
  * <li>{@link #aircraftType}: ICAO aircraft type code. Should include equipment code as suffix, may include wake category as prefix (examples: B738/M, H/A332/X, B737). Not reliable as this is an informal free-text field and sometimes contains alternate/IATA codes or common mistakes (such as B77W for a Boeing 777 which is neither a valid ICAO nor IATA code).</li>
  * <li>{@link #callsign}: Callsigns can be chosen freely by pilots although some codes may be reserved for virtual airlines by convention. Callsigns on VATSIM omit hyphens which would be used in the real-world to separate country prefixes for plane registrations (e.g. all non-airline flights).</li>
  * <li>{@link #flightPlanRevision}: Flights passing through online controlled airspace will usually see many revisions of their original flight plan (mostly {@link #filedRoute}) as edited by ATC when the plane changes airspace or an initial clearance is given by departure airport. Flight plan revisions are tracked by this counter.
- * <li>{@link #controllerMessage}: Multi-line string containing ATIS controllerMessage for ATIS stations, otherwise general flightPlanRemarks about ATC stations such as contact information, controller's estimated online times or station's spatial coverage. May contain a URL to the voice room on first line if prefixed with "$ ". Update timestamps are provided by {@link #lastMessageUpdate}.</li>
+ * <li>{@link #controllerMessage}: Multi-line string containing ATIS controllerMessage for ATIS stations, otherwise general flightPlanRemarks about ATC stations such as contact information, controller's estimated online times or station's spatial coverage. May contain a URL to the voice room on first line if prefixed with "$ ". Update timestamps are provided by {@link #controllerMessageLastUpdated}.</li>
  * <li>{@link #realName}: By convention, pilots should add a 4-letter ICAO code for their "home base". Pilots often choose the closest airport to their actual home.</li>
  * <li>{@link #flightPlanRemarks}: Pilot clients add voice capability flags (T = Text only; R = Receive voice, send text; V = full voice). Other than that, pilots are free to enter any flightPlanRemarks they may find useful. Pilots sometimes attach full ICAO field 18 information which provides highly detailed information generally not needed for simulation (for example PBN/..., DOF/... etc.).</li>
  * </ul>
@@ -107,7 +106,7 @@ public class Client {
     
     // ATC only
     private String controllerMessage; // decode "atis_message": first line prefixed "$ " => voice URL; multi-line formatting with "^" and special character as CR LF?
-    private Instant lastMessageUpdate; // time_last_atis_received
+    private Instant controllerMessageLastUpdated; // time_last_atis_received
     
     // all connected
     private Instant logonTime;
@@ -845,14 +844,24 @@ public class Client {
         this.controllerMessage = controllerMessage;
     }
 
-    public Instant getLastMessageUpdate() {
-        return lastMessageUpdate;
+    /**
+     * Returns the timestamp of last {@link #controllerMessage} update.
+     * Returns null if unavailable.
+     * @return timestamp of last {@link #controllerMessage} update; null if unavailable
+     */
+    public Instant getControllerMessageLastUpdated() {
+        return controllerMessageLastUpdated;
     }
 
-    void setLastMessageUpdate(Instant lastMessageUpdate) {
-        this.lastMessageUpdate = lastMessageUpdate;
+    void setControllerMessageLastUpdated(Instant controllerMessageLastUpdated) {
+        this.controllerMessageLastUpdated = controllerMessageLastUpdated;
     }
 
+    /**
+     * Returns the timestamp when client has logged into this session.
+     * Returns null if unavailable.
+     * @return timestamp of client's login to this session; null if unavailable
+     */
     public Instant getLogonTime() {
         return logonTime;
     }

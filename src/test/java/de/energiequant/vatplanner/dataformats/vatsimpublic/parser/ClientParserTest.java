@@ -5,6 +5,9 @@ import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import java.nio.charset.Charset;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -64,6 +67,14 @@ public class ClientParserTest {
             new Object[] { ":colons : :: are:valid::", ":colons : :: are:valid::" },
             new Object[] { "first line"+CONTROLLER_MESSAGE_LINEBREAK+"second line"+CONTROLLER_MESSAGE_LINEBREAK, "first line\nsecond line\n" },
             // FIXME: charset detection & decoding, Russian controllers send windows-1251 encapsulated in UTF-8
+        };
+    }
+    
+    @DataProvider
+    public static Object[][] dataProviderFullTimestampStringAndObject() {
+        return new Object[][] {
+            new Object[] { "20171014170050", LocalDateTime.of(2017, 10, 14, 17, 0, 50).toInstant(ZoneOffset.UTC) },
+            new Object[] { "20180101000000", LocalDateTime.of(2018, 1, 1, 0, 0, 0).toInstant(ZoneOffset.UTC) },
         };
     }
     
@@ -3639,6 +3650,265 @@ public class ClientParserTest {
         
         // Assert
         assertThat(result.getControllerMessage(), is(emptyString()));
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="controller message last updated">
+    @Test
+    @UseDataProvider("dataProviderFullTimestampStringAndObject")
+    public void testParse_connectedPilotWithValidLastAtisReceived_throwsIllegalArgumentException(String input, Instant _instant) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0::%s:20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-123", "abc", "1a", "a1"})
+    public void testParse_connectedPilotWithInvalidLastAtisReceived_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0::%s:20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutLastAtisReceived_returnsObjectWithNullForControllerMessageLastUpdated() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getControllerMessageLastUpdated(), is(nullValue()));
+    }
+    
+    @Test
+    @UseDataProvider("dataProviderFullTimestampStringAndObject")
+    public void testParse_prefiledPilotWithValidLastAtisReceived_throwsIllegalArgumentException(String input, Instant _instant) {
+        // Arrange
+        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::%s:::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-123", "abc", "1a", "a1"})
+    public void testParse_prefiledPilotWithInvalidLastAtisReceived_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::%s:::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithoutLastAtisReceived_returnsObjectWithNullForControllerMessageLastUpdated() {
+        // Arrange
+        String line = "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getControllerMessageLastUpdated(), is(nullValue()));
+    }
+    
+    @Test
+    @UseDataProvider("dataProviderFullTimestampStringAndObject")
+    public void testParse_atcWithValidLastAtisReceived_returnsObjectWithExpectedControllerMessageLastUpdated(String input, Instant expectedInstant) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:%s:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getControllerMessageLastUpdated(), is(equalTo(expectedInstant)));
+    }
+    
+    @Test
+    @DataProvider({"-123", "abc", "1a", "a1"})
+    public void testParse_atcWithInvalidLastAtisReceived_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:%s:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_atcWithoutLastAtisReceived_returnsObjectWithNullForControllerMessageLastUpdated() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message::20180101150000::::";
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getControllerMessageLastUpdated(), is(nullValue()));
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="logon time">
+    @Test
+    @UseDataProvider("dataProviderFullTimestampStringAndObject")
+    public void testParse_connectedPilotWithValidLogonTime_throwsIllegalArgumentException(String input, Instant expectedInstant) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::%s:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getLogonTime(), is(equalTo(expectedInstant)));
+    }
+    
+    @Test
+    @DataProvider({"-123", "abc", "1a", "a1"})
+    public void testParse_connectedPilotWithInvalidLogonTime_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::%s:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutLogonTime_throwsIllegalArgumentException() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0::::270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @UseDataProvider("dataProviderFullTimestampStringAndObject")
+    public void testParse_prefiledPilotWithValidLogonTime_throwsIllegalArgumentException(String input, Instant _instant) {
+        // Arrange
+        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::%s::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-123", "abc", "1a", "a1"})
+    public void testParse_prefiledPilotWithInvalidLogonTime_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::%s::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithoutLogonTime_returnsObjectWithNullForLogonTime() {
+        // Arrange
+        String line = "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getLogonTime(), is(nullValue()));
+    }
+    
+    @Test
+    @UseDataProvider("dataProviderFullTimestampStringAndObject")
+    public void testParse_atcWithValidLogonTime_returnsObjectWithExpectedLogonTime(String input, Instant expectedInstant) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:20180101160000:%s::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getLogonTime(), is(equalTo(expectedInstant)));
+    }
+    
+    @Test
+    @DataProvider({"-123", "abc", "1a", "a1"})
+    public void testParse_atcWithInvalidLogonTime_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:20180101160000:%s::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_atcWithoutLastAtisReceived_throwsIllegalArgumentException() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:20180101160000:::::";
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
     }
     // </editor-fold>
 }
