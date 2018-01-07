@@ -57,6 +57,7 @@ public class DataFileParser {
     
     /**
      * Parses a whole file given as the provided CharSequence (or String).
+     * Original file is expected to have been read with ISO8859-1 character set.
      * @param s CharSequence containing the complete file to be parsed
      * @return all parsed information collected in one {@link DataFile} object
      */
@@ -68,6 +69,7 @@ public class DataFileParser {
     
     /**
      * Parses a whole file by reading from the given {@link BufferedReader}.
+     * Content is expected to have been opened with ISO8859-1 character set.
      * @param br {@link BufferedReader} providing access to the complete file contents to be parsed
      * @return all parsed information collected in one {@link DataFile} object
      */

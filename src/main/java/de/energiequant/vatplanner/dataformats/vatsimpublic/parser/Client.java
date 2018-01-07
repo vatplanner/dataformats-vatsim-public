@@ -17,7 +17,7 @@ import java.time.LocalTime;
  * <li>{@link #facilityType}</li>
  * <li>{@link #servedFrequencyKilohertz}</li>
  * <li>{@link #lastMessageUpdate}</li>
- * <li>{@link #message}</li>
+ * <li>{@link #controllerMessage}</li>
  * <li>{@link #rating}</li>
  * <li>{@link #visualRange}</li>
  * </ul>
@@ -59,7 +59,7 @@ import java.time.LocalTime;
  * <li>{@link #aircraftType}: ICAO aircraft type code. Should include equipment code as suffix, may include wake category as prefix (examples: B738/M, H/A332/X, B737). Not reliable as this is an informal free-text field and sometimes contains alternate/IATA codes or common mistakes (such as B77W for a Boeing 777 which is neither a valid ICAO nor IATA code).</li>
  * <li>{@link #callsign}: Callsigns can be chosen freely by pilots although some codes may be reserved for virtual airlines by convention. Callsigns on VATSIM omit hyphens which would be used in the real-world to separate country prefixes for plane registrations (e.g. all non-airline flights).</li>
  * <li>{@link #flightPlanRevision}: Flights passing through online controlled airspace will usually see many revisions of their original flight plan (mostly {@link #filedRoute}) as edited by ATC when the plane changes airspace or an initial clearance is given by departure airport. Flight plan revisions are tracked by this counter.
- * <li>{@link #message}: Multi-line string containing ATIS message for ATIS stations, otherwise general flightPlanRemarks about ATC stations such as contact information, controller's estimated online times or station's spatial coverage. May contain a URL to the voice room on first line if prefixed with "$ ". Update timestamps are provided by {@link #lastMessageUpdate}.</li>
+ * <li>{@link #controllerMessage}: Multi-line string containing ATIS controllerMessage for ATIS stations, otherwise general flightPlanRemarks about ATC stations such as contact information, controller's estimated online times or station's spatial coverage. May contain a URL to the voice room on first line if prefixed with "$ ". Update timestamps are provided by {@link #lastMessageUpdate}.</li>
  * <li>{@link #realName}: By convention, pilots should add a 4-letter ICAO code for their "home base". Pilots often choose the closest airport to their actual home.</li>
  * <li>{@link #flightPlanRemarks}: Pilot clients add voice capability flags (T = Text only; R = Receive voice, send text; V = full voice). Other than that, pilots are free to enter any flightPlanRemarks they may find useful. Pilots sometimes attach full ICAO field 18 information which provides highly detailed information generally not needed for simulation (for example PBN/..., DOF/... etc.).</li>
  * </ul>
@@ -106,7 +106,7 @@ public class Client {
     private double destinationAirportLongitude; // seems unused, always 0
     
     // ATC only
-    private String message; // decode "atis_message": first line prefixed "$ " => voice URL; multi-line formatting with "^" and special character as CR LF?
+    private String controllerMessage; // decode "atis_message": first line prefixed "$ " => voice URL; multi-line formatting with "^" and special character as CR LF?
     private Instant lastMessageUpdate; // time_last_atis_received
     
     // all connected
@@ -820,12 +820,29 @@ public class Client {
         this.destinationAirportLongitude = destinationAirportLongitude;
     }
 
-    public String getMessage() {
-        return message;
+    /**
+     * Returns the message set by a controller.
+     * Empty if unavailable.
+     * <p>
+     * The message usually consists of a voice server URL prefixed with "$ "
+     * on first line. Remainder is generally known as "info lines" or
+     * "controller info".
+     * </p>
+     * <p>
+     * Multiple lines are separated by LF (\n).
+     * </p>
+     * <p>
+     * The character set used for encoding the message does unfortunately vary
+     * and needs to be guessed.
+     * </p>
+     * @return message set by controller
+     */
+    public String getControllerMessage() {
+        return controllerMessage;
     }
 
-    void setMessage(String message) {
-        this.message = message;
+    void setControllerMessage(String controllerMessage) {
+        this.controllerMessage = controllerMessage;
     }
 
     public Instant getLastMessageUpdate() {

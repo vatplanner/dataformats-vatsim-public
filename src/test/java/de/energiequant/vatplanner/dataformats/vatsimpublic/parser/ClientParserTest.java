@@ -3,6 +3,7 @@ package de.energiequant.vatplanner.dataformats.vatsimpublic.parser;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import java.nio.charset.Charset;
 import java.time.Duration;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -17,6 +18,8 @@ public class ClientParserTest {
     private ClientParser parser;
     
     private static final double ALLOWED_DOUBLE_ERROR = 0.000001;
+    
+    private static final String CONTROLLER_MESSAGE_LINEBREAK = new String(new byte[]{(byte) 0x5E, (byte) 0xA7}, Charset.forName("ISO-8859-1"));
     
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -54,6 +57,16 @@ public class ClientParserTest {
         };
     }
 
+    @DataProvider
+    public static Object[][] dataProviderControllerMessageRawAndDecoded() {
+        return new Object[][] {
+            new Object[] { "simple one-liner with /-.$,#\\ special characters", "simple one-liner with /-.$,#\\ special characters" },
+            new Object[] { ":colons : :: are:valid::", ":colons : :: are:valid::" },
+            new Object[] { "first line"+CONTROLLER_MESSAGE_LINEBREAK+"second line"+CONTROLLER_MESSAGE_LINEBREAK, "first line\nsecond line\n" },
+            // FIXME: charset detection & decoding, Russian controllers send windows-1251 encapsulated in UTF-8
+        };
+    }
+    
     @Before
     public void setUp() {
         parser = new ClientParser();
@@ -3544,6 +3557,88 @@ public class ClientParserTest {
         
         // Assert
         assertThat(result.getDestinationAirportLongitude(), is(equalTo(Double.NaN)));
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="controller message">
+    @Test
+    public void testParse_connectedPilotWithControllerMessage_throwsIllegalArgumentException() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:controller message::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutControllerMessage_returnsObjectWithEmptyControllerMessage() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getControllerMessage(), is(emptyString()));
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithControllerMessage_throwsIllegalArgumentException() {
+        // Arrange
+        String line = "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:controller message::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithoutControllerMessage_returnsObjectWithEmptyControllerMessage() {
+        // Arrange
+        String line = "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getControllerMessage(), is(emptyString()));
+    }
+    
+    @Test
+    @UseDataProvider("dataProviderControllerMessageRawAndDecoded")
+    public void testParse_atcWithControllerMessage_returnsObjectWithExpectedControllerMessage(String rawMessage, String expectedMessage) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::%s:20180101160000:20180101150000::::", rawMessage);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getControllerMessage(), is(equalTo(expectedMessage)));
+    }
+    
+    @Test
+    public void testParse_atcWithoutControllerMessage_returnsObjectWithEmptyControllerMessage() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50:::::::::::::::::20180101160000:20180101150000::::";
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getControllerMessage(), is(emptyString()));
     }
     // </editor-fold>
 }

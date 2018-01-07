@@ -1,5 +1,6 @@
 package de.energiequant.vatplanner.dataformats.vatsimpublic.parser;
 
+import java.nio.charset.Charset;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -91,6 +92,9 @@ public class ClientParser {
     
     private static final DateTimeFormatter LOCAL_TIME_FORMATTER = DateTimeFormatter.ofPattern("HHmm");
     
+    private static final String CONTROLLER_MESSAGE_LINEBREAK = new String(new byte[]{(byte) 0x5E, (byte) 0xA7}, Charset.forName("ISO-8859-1"));
+    private static final String LINEBREAK = "\n";
+    
     private boolean isParsingPrefileSection = false;
     
     /**
@@ -163,7 +167,8 @@ public class ClientParser {
         client.setDepartureAirportLongitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DEPAIRPORT_LON)));
         client.setDestinationAirportLatitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT_LAT)));
         client.setDestinationAirportLongitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT_LON)));
-                
+        client.setControllerMessage(decodeControllerMessage(matcher.group(PATTERN_LINE_ATIS_MESSAGE), isATC));
+        
         return client;
     }
     
@@ -617,4 +622,28 @@ public class ClientParser {
         
         return Duration.ofMinutes(hours * 60 + minutes);
     }
+    
+    /**
+     * Decodes a controller message from encoding used in data.txt to an easily
+     * readable Java String.
+     * If messages are not allowed, anything but empty messages will throw an
+     * {@link IllegalArgumentException}.
+     * @param s original representation as in data.txt file
+     * @param allowMessage Is a non-empty message allowed?
+     * @return controller message decoded to a Java String
+     * @throws IllegalArgumentException if a message is not allowed but not empty
+     */
+    private String decodeControllerMessage(String s, boolean allowMessage) throws IllegalArgumentException {
+        if (!allowMessage && !s.isEmpty()) {
+            throw new IllegalArgumentException("controller message is not allowed but was: \""+s+"\"");
+        }
+        
+        s = s.replace(CONTROLLER_MESSAGE_LINEBREAK, LINEBREAK);
+        
+        // TODO: guess character set and recode
+        
+        return s;
+    }
+
+    // TODO: remove unused methods
 }
