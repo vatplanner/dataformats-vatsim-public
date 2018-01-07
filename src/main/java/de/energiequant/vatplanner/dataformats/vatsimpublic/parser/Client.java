@@ -28,8 +28,8 @@ import java.time.LocalTime;
  * <li>{@link #filedAlternateAirportCode}</li>
  * <li>{@link #altitudeFeet} (always 0 for ATCs)</li>
  * <li>{@link #filedDepartureAirportCode}</li>
- * <li>{@link #departureTimePlanned}</li>
- * <li>{@link #departureTimeActual}</li>
+ * <li>{@link #rawDepartureTimePlanned}</li>
+ * <li>{@link #rawDepartureTimeActual}</li>
  * <li>{@link #filedDestinationAirportCode}</li>
  * <li>{@link #rawFiledAltitude}</li>
  * <li>{@link #filedTimeEnroute}</li>
@@ -93,8 +93,8 @@ public class Client {
     // filing
     private int flightPlanRevision;
     private String rawFlightPlanType; // I = IFR, V = VFR; unfortunately user-defined, e.g. also seen: S (scheduled)
-    private LocalTime departureTimePlanned; // may be 0; values can omit leading zeros! may contain garbage
-    private LocalTime departureTimeActual; // may be 0, may be equal, may be actual value - who or what sets this? Values can omit leading zeros! may contain garbage
+    private int rawDepartureTimePlanned; // may be 0; values can omit leading zeros! may contain garbage
+    private int rawDepartureTimeActual; // may be 0, may be equal, may be actual value - who or what sets this? Values can omit leading zeros! may contain garbage
     private Duration filedTimeEnroute; // data: two fields, hours + minutes
     private Duration filedTimeFuel; // data: two fields, hours + minutes
     private String filedAlternateAirportCode;
@@ -599,51 +599,78 @@ public class Client {
     }
 
     /**
-     * Returns the planned time of departure in UTC as entered into flight plan.
+     * Returns the planned time of departure as it may have been entered into
+     * flight plan.
+     * This is a supposed to be a rough estimation of the time a pilot plans the
+     * aircraft to become airborne. The time is supposed to be entered in UTC
+     * in format HHmm, represented as unsigned integer and thus omitting leading
+     * zeros (30 => 0:30 UTC, 1340 => 13:40 UTC).
      * <p>
-     * This is a rough estimation of the time a pilot plans the
-     * aircraft to become airborne.
+     * Returns a negative value if unavailable.
      * </p>
      * <p>
-     * Being {@link LocalTime} this is a "clock-style" time without a date.
-     * The date can be reconstructed using the data file timestamp
-     * ({@link DataFileMetaData#timestamp}) and some interpretation.
-     * When adding a date, keep in mind that flight plans are only retained for
-     * a maximum of 2 hours after filing which can be taken as a clue for
-     * choosing the correct day.
+     * Unfortunately, this field as available from data.txt status file exhibits
+     * a number of issues and should thus only be seen informal with a risk of
+     * containing false information:
      * </p>
+     * <ul>
+     * <li>0 can be interpreted in multiple ways:
+     * <ul>
+     * <li>it could mean an intended departure time of 0000z (which is prime time in American time zones)</li>
+     * <li>more often it seems to be used where no departure time has been entered at all</li>
+     * </ul>
+     * </li>
+     * <li>24xx may have been used to work around the 0000z misinterpretation issue</li>
+     * <li>pilots may simply enter wrong/invalid information</li>
+     * <li>The field could just contain numeric garbage such as 6000, 9400, 78408692, 1709907214 (all seen in the wild).</li>
+     * </ul>
      * <p>
-     * Returns null if no planned time is available.
+     * As a result, even if validated against other information such as the
+     * actual time of departure (analyzed from tracking points, not
+     * {@link #rawDepartureTimeActual} which has the same issues) this may not
+     * be what the pilot has actually filed on the flight plan.
      * </p>
-     * <p>
-     * Unfortunately, some otherwise valid records on data.txt files contain
-     * just garbage for this field. While {@link ClientParser} usually rejects
-     * invalid records, garbage on this field had to be tolerated. Garbage input
-     * will result in null being returned (just as if no time was entered at
-     * all).
-     * </p>
-     * <p>
-     * Note: This also means that there may be occasions where garbage has
-     * randomly resulted in a valid but meaningless {@link LocalTime} object.
-     * This field should thus not be relied upon. Departure time should be
-     * checked for plausibility using other data before use.
-     * </p>
-     * @return planned time of departure in UTC; null if unavailable
+     * @return (unreliable) planned time of departure in UTC; negative if unavailable; see full description for issues
      */
-    public LocalTime getDepartureTimePlanned() {
-        return departureTimePlanned;
+    public int getRawDepartureTimePlanned() {
+        return rawDepartureTimePlanned;
     }
 
-    public void setDepartureTimePlanned(LocalTime departureTimePlanned) {
-        this.departureTimePlanned = departureTimePlanned;
+    public void setRawDepartureTimePlanned(int rawDepartureTimePlanned) {
+        this.rawDepartureTimePlanned = rawDepartureTimePlanned;
     }
 
-    public LocalTime getDepartureTimeActual() {
-        return departureTimeActual;
+    /**
+     * Returns what has been entered as actual time of departure.
+     * Values seem to be in UTC and in format HHmm, represented as unsigned
+     * integer and thus omitting leading zeros (30 => 0:30 UTC,
+     * 1340 => 13:40 UTC). 
+     * <p>
+     * <strong>It is not known who or what sets this field and when.</strong>
+     * Instead of relying
+     * on this field it is advisable to determine the time of departure by
+     * searching the actual track for first occurence of
+     * high {@link #groundSpeed} (>80 kt) and a
+     * simultaneous significant (for example >200 ft/min) increase of
+     * {@link #altitudeFeet} (high speed + intentional climb => takeoff).
+     * </p>
+     * <p>
+     * Additional to not knowing who sets this field, it exhibits a number of
+     * issues described in detail for {@link #getRawDepartureTimePlanned()}.
+     * So, unfortunately, this value may not be of any use at all in current
+     * data format.
+     * </p>
+     * <p>
+     * Returns a negative value if unavailable.
+     * </p>
+     * @return (unreliable) actual time of departure; negative if unavailable; see full description for issues
+     */
+    public int getRawDepartureTimeActual() {
+        return rawDepartureTimeActual;
     }
 
-    public void setDepartureTimeActual(LocalTime departureTimeActual) {
-        this.departureTimeActual = departureTimeActual;
+    public void setRawDepartureTimeActual(int rawDepartureTimeActual) {
+        this.rawDepartureTimeActual = rawDepartureTimeActual;
     }
 
     public Duration getFiledTimeEnroute() {

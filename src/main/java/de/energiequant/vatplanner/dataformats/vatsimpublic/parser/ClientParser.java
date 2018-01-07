@@ -147,8 +147,8 @@ public class ClientParser {
         client.setVisualRange(parseVisualRange(matcher.group(PATTERN_LINE_VISUALRANGE), clientType));
         client.setFlightPlanRevision(parseFlightPlanRevision(matcher.group(PATTERN_LINE_PLANNED_REVISION), clientType));
         client.setRawFlightPlanType(matcher.group(PATTERN_LINE_PLANNED_FLIGHTTYPE));
-        client.setDepartureTimePlanned(parseLocalTimeGraceful(matcher.group(PATTERN_LINE_PLANNED_DEPTIME)));
-
+        client.setRawDepartureTimePlanned(parseIntWithDefault(matcher.group(PATTERN_LINE_PLANNED_DEPTIME), -1));
+        
         return client;
     }
     

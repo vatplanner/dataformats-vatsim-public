@@ -40,17 +40,6 @@ public class ClientParserTest {
         
         return exceptOBS;
     }
-    
-    @DataProvider
-    public static Object[][] dataProviderLocalTimeStringAndExpectedTimeApiObjects() {
-        return new Object[][]{
-            new Object[]{ "0", LocalTime.of(0, 0) },
-            new Object[]{ "1", LocalTime.of(0, 1) },
-            new Object[]{ "100", LocalTime.of(1, 0) },
-            new Object[]{ "1221", LocalTime.of(12, 21) },
-            new Object[]{ "2359", LocalTime.of(23, 59) },
-        };
-    }
 
     @Before
     public void setUp() {
@@ -2253,36 +2242,22 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="departure time planned">
     @Test
-    @UseDataProvider("dataProviderLocalTimeStringAndExpectedTimeApiObjects")
-    public void testParse_connectedPilotWithValidPlannedDepartureTime_returnsObjectWithExpectedDepartureTimePlanned(String input, LocalTime expectedTime) {
+    @DataProvider({"0", "30", "2359", "123456789"})
+    public void testParse_connectedPilotWithValidPlannedDeparture_returnsObjectWithExpectedRawDepartureTimePlanned(int rawValue) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:%s:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:%d:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", rawValue);
         parser.setIsParsingPrefileSection(false);
         
         // Act
         Client result = parser.parse(line);
         
         // Assert
-        assertThat(result.getDepartureTimePlanned(), is(equalTo(expectedTime)));
-    }
-    
-    @Test
-    @DataProvider({"2400", "60", "1709907214"})
-    public void testParse_connectedPilotWithInvalidUnsignedNumericPlannedDepartureTime_returnsObjectWithNullForDepartureTimePlanned(String input) {
-        // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:%s:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
-        parser.setIsParsingPrefileSection(false);
-        
-        // Act
-        Client result = parser.parse(line);
-        
-        // Assert
-        assertThat(result.getDepartureTimePlanned(), is(nullValue()));
+        assertThat(result.getRawDepartureTimePlanned(), is(equalTo(rawValue)));
     }
     
     @Test
     @DataProvider({"-1", "abc", "1a", "a1"})
-    public void testParse_connectedPilotWithInvalidAlphaNumericPlannedDepartureTime_throwsIllegalArgumentException(String input) {
+    public void testParse_connectedPilotWithInvalidPlannedDeparture_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:%s:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
         parser.setIsParsingPrefileSection(false);
@@ -2296,7 +2271,7 @@ public class ClientParserTest {
     }
     
     @Test
-    public void testParse_connectedPilotWithoutPlannedDepartureTime_returnsObjectWithNullForDepartureTimePlanned() {
+    public void testParse_connectedPilotWithoutPlannedDeparture_returnsObjectWithNegativeRawDepartureTimePlanned() {
         // Arrange
         String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I::1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
         parser.setIsParsingPrefileSection(false);
@@ -2305,42 +2280,28 @@ public class ClientParserTest {
         Client result = parser.parse(line);
         
         // Assert
-        assertThat(result.getDepartureTimePlanned(), is(nullValue()));
+        assertThat(result.getRawDepartureTimePlanned(), is(lessThan(0)));
     }
     
     @Test
-    @UseDataProvider("dataProviderLocalTimeStringAndExpectedTimeApiObjects")
-    public void testParse_prefiledPilotWithValidPlannedDepartureTime_returnsObjectWithExpectedDepartureTimePlanned(String input, LocalTime expectedTime) {
+    @DataProvider({"0", "30", "2359", "123456789"})
+    public void testParse_prefiledPilotWithValidPlannedDeparture_returnsObjectWithExpectedRawDepartureTimePlanned(int rawValue) {
         // Arrange
-        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:%s:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:%d:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", rawValue);
         parser.setIsParsingPrefileSection(true);
         
         // Act
         Client result = parser.parse(line);
         
         // Assert
-        assertThat(result.getDepartureTimePlanned(), is(equalTo(expectedTime)));
+        assertThat(result.getRawDepartureTimePlanned(), is(equalTo(rawValue)));
     }
     
-    @Test
-    @DataProvider({"2400", "60", "1709907214"})
-    public void testParse_prefiledPilotWithInvalidUnsignedNumericPlannedDepartureTime_returnsObjectWithNullForDepartureTimePlanned(String input) {
-        // Arrange
-        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:%s:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
-        parser.setIsParsingPrefileSection(true);
-        
-        // Act
-        Client result = parser.parse(line);
-        
-        // Assert
-        assertThat(result.getDepartureTimePlanned(), is(nullValue()));
-    }
-
     @Test
     @DataProvider({"-1", "abc", "1a", "a1"})
-    public void testParse_prefiledPilotWithInvalidAlphaNumericPlannedDepartureTime_throwsIllegalArgumentException(String input) {
+    public void testParse_prefiledPilotWithInvalidPlannedDeparture_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:%s:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:%s:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
         parser.setIsParsingPrefileSection(true);
         
         thrown.expect(IllegalArgumentException.class);
@@ -2350,57 +2311,37 @@ public class ClientParserTest {
         
         // Assert (nothing to do)
     }
-
+    
     @Test
-    public void testParse_prefiledPilotWithoutPlannedDepartureTime_returnsObjectWithNullForDepartureTimePlanned() {
+    public void testParse_prefiledPilotWithoutPlannedDeparture_returnsObjectWithNegativeRawDepartureTimePlanned() {
         // Arrange
-        String line = "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I::1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I::1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
         parser.setIsParsingPrefileSection(true);
         
         // Act
         Client result = parser.parse(line);
         
         // Assert
-        assertThat(result.getDepartureTimePlanned(), is(nullValue()));
+        assertThat(result.getRawDepartureTimePlanned(), is(lessThan(0)));
     }
     
     @Test
-    @UseDataProvider("dataProviderLocalTimeStringAndExpectedTimeApiObjects")
-    public void testParse_atcWithValidPlannedDepartureTime_returnsObjectWithExpectedDepartureTimePlanned(String input, LocalTime expectedTime) {
-        // An ATC with a flight plan doesn't make any sense but can actually be
-        // found on data files...
-        // Needs to be parseable but resulting data should be ignored
-        // nevertheless unless there really is some strange use case that makes
-        // sense.
-        
+    @DataProvider({"0", "30", "2359", "123456789"})
+    public void testParse_atcWithValidPlannedDeparture_returnsObjectWithExpectedRawDepartureTimePlanned(int rawValue) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::%s:::::::::::::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::%d:::::::::::::atis message:20180101160000:20180101150000::::", rawValue);
         parser.setIsParsingPrefileSection(false);
         
         // Act
         Client result = parser.parse(line);
         
         // Assert
-        assertThat(result.getDepartureTimePlanned(), is(equalTo(expectedTime)));
+        assertThat(result.getRawDepartureTimePlanned(), is(equalTo(rawValue)));
     }
     
-    @Test
-    @DataProvider({"2400", "60", "1709907214"})
-    public void testParse_atcWithInvalidUnsignedNumericPlannedDepartureTime_returnsObjectWithNullForDepartureTimePlanned(String input) {
-        // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::%s:::::::::::::atis message:20180101160000:20180101150000::::", input);
-        parser.setIsParsingPrefileSection(false);
-        
-        // Act
-        Client result = parser.parse(line);
-        
-        // Assert
-        assertThat(result.getDepartureTimePlanned(), is(nullValue()));
-    }
-
     @Test
     @DataProvider({"-1", "abc", "1a", "a1"})
-    public void testParse_atcWithInvalidAlphaNumericPlannedDepartureTime_throwsIllegalArgumentException(String input) {
+    public void testParse_atcWithInvalidPlannedDeparture_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::%s:::::::::::::atis message:20180101160000:20180101150000::::", input);
         parser.setIsParsingPrefileSection(false);
@@ -2412,18 +2353,18 @@ public class ClientParserTest {
         
         // Assert (nothing to do)
     }
-
+    
     @Test
-    public void testParse_atcWithoutPlannedDepartureTime_returnsObjectWithNullForDepartureTimePlanned() {
+    public void testParse_atcWithoutPlannedDeparture_returnsObjectWithNegativeRawDepartureTimePlanned() {
         // Arrange
-        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567::::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
         parser.setIsParsingPrefileSection(false);
         
         // Act
         Client result = parser.parse(line);
         
         // Assert
-        assertThat(result.getDepartureTimePlanned(), is(nullValue()));
+        assertThat(result.getRawDepartureTimePlanned(), is(lessThan(0)));
     }
     // </editor-fold>
 }
