@@ -1,8 +1,10 @@
 # Data Format Parsers & Entities for Publicly Available VATSIM Information
 
-This library's goal is to provide parsers for data formats used by [VATSIM](https://www.vatsim.net/) and provided *publicly*. It's *not* possible to connect to the actual network using this library as VATSIM uses an undisclosed (NDA'd) network protocol and the network is only permitted to be connected to with authorized software. Actually, this library doesn't connect at all, it just parses and you will require you to fetch all source data and feed it into the parser yourself... :simple_smile:
+[![Build Status](https://travis-ci.org/vatplanner/dataformats-vatsim-public.svg?branch=master)](https://travis-ci.org/vatplanner/dataformats-vatsim-public)
 
-The scope of this project is rather small but an essential part of a bigger project I'm working on. It still seemed like a good idea to split the data parsers & entities apart to be easily reusable if needed in other projects.
+This library's goal is to provide parsers and entities for data formats used by [VATSIM](https://www.vatsim.net/) and provided *publicly*. It's *not* possible to connect to the actual network using this library as VATSIM uses an undisclosed (NDA'd) network protocol and the network is only permitted to be connected to with authorized software. Actually, this library doesn't connect at all, it just parses and you will require you to fetch all source data and feed it into the parser yourself... :)
+
+The scope of this project is rather small but an essential part of a bigger project I'm working on (VATPlanner). It still seemed like a good idea to split the data parsers & entities apart to be easily reusable if needed in other projects.
 
 ## Supported Data Formats
 
@@ -11,6 +13,10 @@ Currently supported are:
  * Network status:
    * the initial `status.txt` file (providing URLs to fetch further information from)
    * the publicly accessible `vatsim-data.txt` file (in particular containing all stations & pilots currently online as well as pre-filed flight plans)
+
+## Current API State
+
+API is currently not stable and may change without notice.
 
 ## License
 
