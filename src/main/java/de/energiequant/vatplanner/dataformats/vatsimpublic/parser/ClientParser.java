@@ -1,5 +1,6 @@
 package de.energiequant.vatplanner.dataformats.vatsimpublic.parser;
 
+import java.time.Duration;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -123,8 +124,10 @@ public class ClientParser {
         
         boolean isOnline = (clientType != null) && (clientType != ClientType.PILOT_PREFILED);
         boolean isATC = (clientType == ClientType.ATC_CONNECTED);
+        boolean isPrefiling = (clientType == ClientType.PILOT_PREFILED);
         boolean isAllowedToServeFrequency = isATC;
         //boolean isAllowedToHaveFlightPlan = !isATC;
+        boolean isFiledTimeMandatory = isPrefiling;
         
         client.setCallsign(matcher.group(PATTERN_LINE_CALLSIGN));
         client.setVatsimID(parseIntWithDefault(matcher.group(PATTERN_LINE_CID), -1)); // TODO: log details if ID is missing
@@ -149,6 +152,8 @@ public class ClientParser {
         client.setRawFlightPlanType(matcher.group(PATTERN_LINE_PLANNED_FLIGHTTYPE));
         client.setRawDepartureTimePlanned(parseIntWithDefault(matcher.group(PATTERN_LINE_PLANNED_DEPTIME), -1));
         client.setRawDepartureTimeActual(parseIntWithDefault(matcher.group(PATTERN_LINE_PLANNED_ACTDEPTIME), -1));
+        client.setFiledTimeEnroute(parseDuration(matcher.group(PATTERN_LINE_PLANNED_HRSENROUTE), matcher.group(PATTERN_LINE_PLANNED_MINENROUTE), isFiledTimeMandatory));
+        client.setFiledTimeFuel(parseDuration(matcher.group(PATTERN_LINE_PLANNED_HRSFUEL), matcher.group(PATTERN_LINE_PLANNED_MINFUEL), isFiledTimeMandatory));
         
         return client;
     }
@@ -549,5 +554,43 @@ public class ClientParser {
             // no need to throw/log the resulting exception...
             return null;
         }
+    }
+    
+    /**
+     * Parses the given strings for hours and minutes to a {@link Duration}
+     * object.
+     * If both strings are empty, null is returned.
+     * If only one string is empty, an {@link IllegalArgumentException} will be thrown.
+     * If duration is mandatory, strings must not be empty or {@link IllegalArgumentException} will be thrown.
+     * Excessive values for minutes (>59) are valid and add to hours.
+     * @param hoursString string containing hours to be parsed
+     * @param minutesString string containing minutes to be parsed
+     * @param isMandatory Is the duration mandatory?
+     * @return strings interpreted as duration; null if unavailable
+     * @throws IllegalArgumentException if mandatory but not available, only one string is empty or parsing error
+     */
+    private Duration parseDuration(String hoursString, String minutesString, boolean isMandatory) throws IllegalArgumentException {
+        boolean emptyHours = hoursString.isEmpty();
+        boolean emptyMinutes = minutesString.isEmpty();
+        boolean oneEmptyButNotTheOther = emptyHours ^ emptyMinutes;
+        
+        if (oneEmptyButNotTheOther) {
+            throw new IllegalArgumentException("either hours (\""+hoursString+"\") or minutes (\""+minutesString+"\") was empty but not the other; such inconsistency is not allowed");
+        }
+        
+        boolean bothEmpty = emptyHours && emptyMinutes;
+        
+        if (bothEmpty) {
+            if (isMandatory) {
+                throw new IllegalArgumentException("hours and minutes are mandatory but both strings were empty");
+            }
+            
+            return null;
+        }
+        
+        int hours = Integer.parseInt(hoursString);
+        int minutes = Integer.parseInt(minutesString);
+        
+        return Duration.ofMinutes(hours * 60 + minutes);
     }
 }

@@ -673,6 +673,12 @@ public class Client {
         this.rawDepartureTimeActual = rawDepartureTimeActual;
     }
 
+    /**
+     * Returns the flight's estimated time enroute (airborne) as filed on
+     * flight plan.
+     * Returns null if unavailable.
+     * @return estimated time enroute; null if unavailable
+     */
     public Duration getFiledTimeEnroute() {
         return filedTimeEnroute;
     }
@@ -681,6 +687,12 @@ public class Client {
         this.filedTimeEnroute = filedTimeEnroute;
     }
 
+    /**
+     * Returns the flight's estimated time of fuel on board as filed on
+     * flight plan.
+     * Returns null if unavailable.
+     * @return estimated time of fuel on board; null if unavailable
+     */
     public Duration getFiledTimeFuel() {
         return filedTimeFuel;
     }

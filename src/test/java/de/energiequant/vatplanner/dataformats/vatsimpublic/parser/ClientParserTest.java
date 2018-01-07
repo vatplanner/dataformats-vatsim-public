@@ -3,7 +3,7 @@ package de.energiequant.vatplanner.dataformats.vatsimpublic.parser;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
-import java.time.LocalTime;
+import java.time.Duration;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -39,6 +39,19 @@ public class ClientParserTest {
         assert(i == exceptOBS.length); // all filled (omitting exactly one)
         
         return exceptOBS;
+    }
+    
+    @DataProvider
+    public static Object[][] dataProviderHoursAndMinutesAndDuration() {
+        return new Object[][] {
+            new Object[] { 0, 0, Duration.ofMinutes(0) },
+            new Object[] { 0, 1, Duration.ofMinutes(1) },
+            new Object[] { 1, 0, Duration.ofHours(1) },
+            new Object[] { 2, 59, Duration.ofMinutes(179) },
+            new Object[] { 2, 60, Duration.ofMinutes(180) }, // excessive minutes (>59) are valid
+            new Object[] { 13, 7, Duration.ofMinutes(787) },
+            new Object[] { 0, 787, Duration.ofMinutes(787) }, // excessive minutes (>59) are valid
+        };
     }
 
     @Before
@@ -2418,7 +2431,7 @@ public class ClientParserTest {
         String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:%d:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", rawValue);
         parser.setIsParsingPrefileSection(true);
         
-        // ActPlanned
+        // Act
         Client result = parser.parse(line);
         
         // Assert
@@ -2493,6 +2506,534 @@ public class ClientParserTest {
         
         // Assert
         assertThat(result.getRawDepartureTimeActual(), is(lessThan(0)));
+    }
+    // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="filed time enroute">
+    @Test
+    @UseDataProvider("dataProviderHoursAndMinutesAndDuration")
+    public void testParse_connectedPilotWithValidPlannedEnroute_returnsObjectWithExpectedFiledTimeEnroute(int hours, int minutes, Duration expectedDuration) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:%d:%d:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", hours, minutes);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledTimeEnroute(), is(equalTo(expectedDuration)));
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1"})
+    public void testParse_connectedPilotWithInvalidPlannedHoursEnroute_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:%s:0:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1"})
+    public void testParse_connectedPilotWithInvalidPlannedMinutesEnroute_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:0:%s:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"0", "1"})
+    public void testParse_connectedPilotWithPlannedHoursEnrouteButWithoutPlannedMinutesEnroute_throwsIllegalArgumentException(int hours) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:%d::3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", hours);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"0", "1"})
+    public void testParse_connectedPilotWithPlannedMinutesEnrouteButWithoutPlannedHoursEnroute_throwsIllegalArgumentException(int minutes) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000::%d:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", minutes);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutPlannedEnroute_returnsObjectWithNullForFiledTimeEnroute() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000::::3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledTimeEnroute(), is(nullValue()));
+    }
+    
+    @Test
+    @UseDataProvider("dataProviderHoursAndMinutesAndDuration")
+    public void testParse_prefiledPilotWithValidPlannedEnroute_returnsObjectWithExpectedFiledTimeEnroute(int hours, int minutes, Duration expectedDuration) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:%d:%d:3:0:EDDW:remark:DCT:0:0:0:0:::::::", hours, minutes);
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledTimeEnroute(), is(equalTo(expectedDuration)));
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1"})
+    public void testParse_prefiledPilotWithInvalidPlannedHoursEnroute_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:%s:0:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1"})
+    public void testParse_prefiledPilotWithInvalidPlannedMinutesEnroute_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:0:%s:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"0", "1"})
+    public void testParse_prefiledPilotWithPlannedHoursEnrouteButWithoutPlannedMinutesEnroute_throwsIllegalArgumentException(int hours) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:%d::3:0:EDDW:remark:DCT:0:0:0:0:::::::", hours);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"0", "1"})
+    public void testParse_prefiledPilotWithPlannedMinutesEnrouteButWithoutPlannedHoursEnroute_throwsIllegalArgumentException(int minutes) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000::%d:3:0:EDDW:remark:DCT:0:0:0:0:::::::", minutes);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithoutPlannedEnroute_throwsIllegalArgumentException() {
+        // Arrange
+        String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:::3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @UseDataProvider("dataProviderHoursAndMinutesAndDuration")
+    public void testParse_atcWithValidPlannedEnroute_returnsObjectWithExpectedFiledTimeEnroute(int hours, int minutes, Duration expectedDuration) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::%d:%d::::::::::atis message:20180101160000:20180101150000::::", hours, minutes);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledTimeEnroute(), is(equalTo(expectedDuration)));
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1"})
+    public void testParse_atcWithInvalidPlannedHoursEnroute_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::%s:0::::::::::atis message:20180101160000:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1"})
+    public void testParse_atcWithInvalidPlannedMinutesEnroute_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::0:%s::::::::::atis message:20180101160000:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"0", "1"})
+    public void testParse_atcWithPlannedHoursEnrouteButWithoutPlannedMinutesEnroute_throwsIllegalArgumentException(int hours) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::%d:::::::::::atis message:20180101160000:20180101150000::::", hours);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"0", "1"})
+    public void testParse_atcWithPlannedMinutesEnrouteButWithoutPlannedHoursEnroute_throwsIllegalArgumentException(int minutes) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::%d::::::::::atis message:20180101160000:20180101150000::::", minutes);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_atcWithoutPlannedEnroute_returnsObjectWithNullForFiledTimeEnroute() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledTimeEnroute(), is(nullValue()));
+    }
+    // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="filed time fuel">
+    @Test
+    @UseDataProvider("dataProviderHoursAndMinutesAndDuration")
+    public void testParse_connectedPilotWithValidPlannedFuel_returnsObjectWithExpectedFiledTimeFuel(int hours, int minutes, Duration expectedDuration) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:%d:%d:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", hours, minutes);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledTimeFuel(), is(equalTo(expectedDuration)));
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1"})
+    public void testParse_connectedPilotWithInvalidPlannedHoursFuel_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:%s:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1"})
+    public void testParse_connectedPilotWithInvalidPlannedMinutesFuel_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:0:%s:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"0", "1"})
+    public void testParse_connectedPilotWithPlannedHoursFuelButWithoutPlannedMinutesFuel_throwsIllegalArgumentException(int hours) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:%d::EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", hours);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"0", "1"})
+    public void testParse_connectedPilotWithPlannedMinutesFuelButWithoutPlannedHoursFuel_throwsIllegalArgumentException(int minutes) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30::%d:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", minutes);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutPlannedFuel_returnsObjectWithNullForFiledTimeFuel() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000::1:30:::EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledTimeFuel(), is(nullValue()));
+    }
+    
+    @Test
+    @UseDataProvider("dataProviderHoursAndMinutesAndDuration")
+    public void testParse_prefiledPilotWithValidPlannedFuel_returnsObjectWithExpectedFiledTimeFuel(int hours, int minutes, Duration expectedDuration) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:%d:%d:EDDW:remark:DCT:0:0:0:0:::::::", hours, minutes);
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledTimeFuel(), is(equalTo(expectedDuration)));
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1"})
+    public void testParse_prefiledPilotWithInvalidPlannedHoursFuel_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:%s:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1"})
+    public void testParse_prefiledPilotWithInvalidPlannedMinutesFuel_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:0:%s:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"0", "1"})
+    public void testParse_prefiledPilotWithPlannedHoursFuelButWithoutPlannedMinutesFuel_throwsIllegalArgumentException(int hours) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:%d::EDDW:remark:DCT:0:0:0:0:::::::", hours);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"0", "1"})
+    public void testParse_prefiledPilotWithPlannedMinutesFuelButWithoutPlannedHoursFuel_throwsIllegalArgumentException(int minutes) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30::%d:EDDW:remark:DCT:0:0:0:0:::::::", minutes);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithoutPlannedFuel_throwsIllegalArgumentException() {
+        // Arrange
+        String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:::EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @UseDataProvider("dataProviderHoursAndMinutesAndDuration")
+    public void testParse_atcWithValidPlannedFuel_returnsObjectWithExpectedFiledTimeFuel(int hours, int minutes, Duration expectedDuration) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::%d:%d::::::::atis message:20180101160000:20180101150000::::", hours, minutes);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledTimeFuel(), is(equalTo(expectedDuration)));
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1"})
+    public void testParse_atcWithInvalidPlannedHoursFuel_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::%s:0::::::::atis message:20180101160000:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1"})
+    public void testParse_atcWithInvalidPlannedMinutesFuel_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::0:%s::::::::atis message:20180101160000:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"0", "1"})
+    public void testParse_atcWithPlannedHoursFuelButWithoutPlannedMinutesFuel_throwsIllegalArgumentException(int hours) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::%d:::::::::atis message:20180101160000:20180101150000::::", hours);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"0", "1"})
+    public void testParse_atcWithPlannedMinutesFuelButWithoutPlannedHoursFuel_throwsIllegalArgumentException(int minutes) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::%d::::::::atis message:20180101160000:20180101150000::::", minutes);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_atcWithoutPlannedFuel_returnsObjectWithNullForFiledTimeFuel() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledTimeFuel(), is(nullValue()));
     }
     // </editor-fold>
 }
