@@ -1,5 +1,8 @@
 package de.energiequant.vatplanner.dataformats.vatsimpublic.parser;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -83,6 +86,8 @@ public class ClientParser {
     
     private static final int DEFAULT_ALTITUDE = 0;
     
+    private static final DateTimeFormatter LOCAL_TIME_FORMATTER = DateTimeFormatter.ofPattern("HHmm");
+    
     private boolean isParsingPrefileSection = false;
     
     /**
@@ -142,7 +147,8 @@ public class ClientParser {
         client.setVisualRange(parseVisualRange(matcher.group(PATTERN_LINE_VISUALRANGE), clientType));
         client.setFlightPlanRevision(parseFlightPlanRevision(matcher.group(PATTERN_LINE_PLANNED_REVISION), clientType));
         client.setRawFlightPlanType(matcher.group(PATTERN_LINE_PLANNED_FLIGHTTYPE));
-        
+        client.setDepartureTimePlanned(parseLocalTimeGraceful(matcher.group(PATTERN_LINE_PLANNED_DEPTIME)));
+
         return client;
     }
     
@@ -509,5 +515,38 @@ public class ClientParser {
         }
         
         return Integer.parseInt(s);
+    }
+    
+    /**
+     * Attempts to parse the given string as {@link LocalTime} in format "hhmm"
+     * with optional leading zeros.
+     * Null will be returned if string was either empty or if it does not match
+     * the expected time format (thus graceful instead of throwing an exception).
+     * @param s string to attempt parsing
+     * @return {@link LocalTime} if parsed; null if unavailable or invalid
+     * @throws IllegalArgumentException if string is not a number
+     */
+    private LocalTime parseLocalTimeGraceful(String s) throws IllegalArgumentException {
+        if (s.isEmpty()) {
+            return null;
+        }
+        
+        int decimal = Integer.parseInt(s);
+        
+        boolean isExcessive = decimal > 2359;
+        if (isExcessive) {
+            return null;
+        }
+        
+        String padded = String.format("%04d", decimal);
+        
+        try {
+            LocalTime parsed = LocalTime.parse(padded, LOCAL_TIME_FORMATTER);
+            return parsed;
+        } catch (DateTimeParseException ex) {
+            // we know that some data is just garbage we need to tolerate, so
+            // no need to throw/log the resulting exception...
+            return null;
+        }
     }
 }

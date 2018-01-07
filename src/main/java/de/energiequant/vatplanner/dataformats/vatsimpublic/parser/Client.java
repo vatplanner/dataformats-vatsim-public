@@ -2,6 +2,7 @@ package de.energiequant.vatplanner.dataformats.vatsimpublic.parser;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalTime;
 
 /**
  * Combines information about VATSIM online pilots, prefiled flight plans and
@@ -92,8 +93,8 @@ public class Client {
     // filing
     private int flightPlanRevision;
     private String rawFlightPlanType; // I = IFR, V = VFR; unfortunately user-defined, e.g. also seen: S (scheduled)
-    private Instant departureTimePlanned; // may be 0; values can omit leading zeros!
-    private Instant departureTimeActual; // may be 0, may be equal, may be actual value - who or what sets this? Values can omit leading zeros!
+    private LocalTime departureTimePlanned; // may be 0; values can omit leading zeros! may contain garbage
+    private LocalTime departureTimeActual; // may be 0, may be equal, may be actual value - who or what sets this? Values can omit leading zeros! may contain garbage
     private Duration filedTimeEnroute; // data: two fields, hours + minutes
     private Duration filedTimeFuel; // data: two fields, hours + minutes
     private String filedAlternateAirportCode;
@@ -597,19 +598,51 @@ public class Client {
         this.rawFlightPlanType = rawFlightPlanType;
     }
 
-    public Instant getDepartureTimePlanned() {
+    /**
+     * Returns the planned time of departure in UTC as entered into flight plan.
+     * <p>
+     * This is a rough estimation of the time a pilot plans the
+     * aircraft to become airborne.
+     * </p>
+     * <p>
+     * Being {@link LocalTime} this is a "clock-style" time without a date.
+     * The date can be reconstructed using the data file timestamp
+     * ({@link DataFileMetaData#timestamp}) and some interpretation.
+     * When adding a date, keep in mind that flight plans are only retained for
+     * a maximum of 2 hours after filing which can be taken as a clue for
+     * choosing the correct day.
+     * </p>
+     * <p>
+     * Returns null if no planned time is available.
+     * </p>
+     * <p>
+     * Unfortunately, some otherwise valid records on data.txt files contain
+     * just garbage for this field. While {@link ClientParser} usually rejects
+     * invalid records, garbage on this field had to be tolerated. Garbage input
+     * will result in null being returned (just as if no time was entered at
+     * all).
+     * </p>
+     * <p>
+     * Note: This also means that there may be occasions where garbage has
+     * randomly resulted in a valid but meaningless {@link LocalTime} object.
+     * This field should thus not be relied upon. Departure time should be
+     * checked for plausibility using other data before use.
+     * </p>
+     * @return planned time of departure in UTC; null if unavailable
+     */
+    public LocalTime getDepartureTimePlanned() {
         return departureTimePlanned;
     }
 
-    void setDepartureTimePlanned(Instant departureTimePlanned) {
+    public void setDepartureTimePlanned(LocalTime departureTimePlanned) {
         this.departureTimePlanned = departureTimePlanned;
     }
 
-    public Instant getDepartureTimeActual() {
+    public LocalTime getDepartureTimeActual() {
         return departureTimeActual;
     }
 
-    void setDepartureTimeActual(Instant departureTimeActual) {
+    public void setDepartureTimeActual(LocalTime departureTimeActual) {
         this.departureTimeActual = departureTimeActual;
     }
 
