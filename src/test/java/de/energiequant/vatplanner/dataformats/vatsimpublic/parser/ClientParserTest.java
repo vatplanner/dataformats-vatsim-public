@@ -4041,4 +4041,267 @@ public class ClientParserTest {
         assertThat(result.getHeading(), is(lessThan(0)));
     }
     // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="QNH Inch Mercury">
+    @Test
+    @DataProvider({"29.92", "2.992e02", "30", "27.9"})
+    public void testParse_connectedPilotWithValidQnhIHg_returnsObjectWithExpectedQnhInchMercury(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:%s:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        double expectedOutput = Double.parseDouble(input);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getQnhInchMercury(), is(closeTo(expectedOutput, ALLOWED_DOUBLE_ERROR)));
+    }
+    
+    @Test
+    @DataProvider({"-1", "-29.92", "-2.992e02", "abc", "1a", "a1"})
+    public void testParse_connectedPilotWithInvalidQnhIHg_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:%s:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutQnhIHg_returnsObjectWithNaNAsQnhInchMercury() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270::1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getQnhInchMercury(), is(equalTo(Double.NaN)));
+    }
+    
+    @Test
+    @DataProvider({"29.92", "2.992e02", "30", "27.9"})
+    public void testParse_prefiledPilotWithValidQnhIhg_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::%s::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-1", "-29.92", "-2.992e02", "abc", "1a", "a1"})
+    public void testParse_prefiledPilotWithInvalidQnhIHg_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::%s::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithoutQnhIHg_returnsObjectWithNaNAsQnhInchMercury() {
+        // Arrange
+        String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getQnhInchMercury(), is(equalTo(Double.NaN)));
+    }
+    
+    @Test
+    @DataProvider({"29.92", "2.992e02", "30", "27.9"})
+    public void testParse_atcWithValidQnhIHg_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::%s::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-1", "-29.92", "-2.992e02", "abc", "1a", "a1"})
+    public void testParse_atcWithInvalidQnhIHg_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::%s::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_atcWithoutQnhIHg_returnsObjectWithNaNAsQnhInchMercury() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getQnhInchMercury(), is(equalTo(Double.NaN)));
+    }
+    // </editor-fold>
+
+
+    // <editor-fold defaultstate="collapsed" desc="QNH Hectopascal">
+    @Test
+    @DataProvider({"997", "1013", "1030"})
+    public void testParse_connectedPilotWithValidQnhMB_returnsObjectWithExpectedQnhHectopascal(int expectedQnh) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:%d:", expectedQnh);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getQnhHectopascal(), is(equalTo(expectedQnh)));
+    }
+    
+    @Test
+    @DataProvider({"-1", "29.92", "1e03", "abc", "1a", "a1"})
+    public void testParse_connectedPilotWithInvalidQnhMB_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:%s:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutQnhMB_returnsObjectWithNegativeQnhHectopascal() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92::";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getQnhHectopascal(), is(lessThan(0)));
+    }
+    
+    @Test
+    @DataProvider({"997", "1013", "1030"})
+    public void testParse_prefiledPilotWithValidQnhMB_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::::::%s:", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-1", "29.92", "1e03", "abc", "1a", "a1"})
+    public void testParse_prefiledPilotWithInvalidQnhMB_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::::::%s:", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_prefiledPilotWithoutQnhMB_returnsObjectWithNegativeQnhHectopascal() {
+        // Arrange
+        String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getQnhHectopascal(), is(lessThan(0)));
+    }
+    
+    @Test
+    @DataProvider({"997", "1013", "1030"})
+    public void testParse_atcWithValidQnhMB_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000:::%s:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"-1", "29.92", "1e03", "abc", "1a", "a1"})
+    public void testParse_atcWithInvalidQnhMB_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000:::%s:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        thrown.expect(IllegalArgumentException.class);
+        
+        // Act
+        parser.parse(line);
+        
+        // Assert (nothing to do)
+    }
+    
+    @Test
+    public void testParse_atcWithoutQnhMB_returnsObjectWithNegativeQnhHectopascal() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getQnhHectopascal(), is(lessThan(0)));
+    }
+    // </editor-fold>
 }

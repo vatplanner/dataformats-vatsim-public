@@ -114,7 +114,7 @@ public class Client {
     // Pilots only
     private int heading;
     private double qnhInchMercury;
-    private double qnhHectopascal;
+    private int qnhHectopascal;
 
     /**
      * Returns the call sign the client is being identified by.
@@ -884,6 +884,20 @@ public class Client {
         this.heading = heading;
     }
 
+    /**
+     * Returns the local QNH (atmospheric pressure at sea-level) of this client
+     * as measured in inches of mercury.
+     * <p>
+     * Local QNH is specific to a combination of time, location, settings and
+     * client as it is governed by each client's individual local weather
+     * simulation (which may or may not be linked to VATSIM METAR at the given
+     * time).
+     * </p>
+     * <p>
+     * Returns {@link Double#NaN} if unavailable.
+     * </p>
+     * @return local QNH in inches of mercury; {@link Double#NaN} if unavailable
+     */
     public double getQnhInchMercury() {
         return qnhInchMercury;
     }
@@ -892,11 +906,25 @@ public class Client {
         this.qnhInchMercury = qnhInchMercury;
     }
 
-    public double getQnhHectopascal() {
+    /**
+     * Returns the local QNH (atmospheric pressure at sea-level) of this client
+     * as measured in hectopascal (aka millibar).
+     * <p>
+     * Local QNH is specific to a combination of time, location, settings and
+     * client as it is governed by each client's individual local weather
+     * simulation (which may or may not be linked to VATSIM METAR at the given
+     * time).
+     * </p>
+     * <p>
+     * Returns negative value if unavailable.
+     * </p>
+     * @return local QNH in hectopascal; negative if unavailable
+     */
+    public int getQnhHectopascal() {
         return qnhHectopascal;
     }
 
-    void setQnhHectopascal(double qnhHectopascal) {
+    void setQnhHectopascal(int qnhHectopascal) {
         this.qnhHectopascal = qnhHectopascal;
     }
     

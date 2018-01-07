@@ -135,6 +135,7 @@ public class ClientParser {
         boolean isOnline = (clientType != null) && (clientType != ClientType.PILOT_PREFILED);
         boolean isATC = (clientType == ClientType.ATC_CONNECTED);
         boolean isPrefiling = (clientType == ClientType.PILOT_PREFILED);
+        boolean isConnectedPilot = (clientType == ClientType.PILOT_CONNECTED);
         boolean isAllowedToServeFrequency = isATC;
         //boolean isAllowedToHaveFlightPlan = !isATC;
         boolean isFiledTimeMandatory = isPrefiling;
@@ -175,8 +176,25 @@ public class ClientParser {
         client.setControllerMessageLastUpdated(parseFullTimestamp(matcher.group(PATTERN_LINE_TIME_LAST_ATIS_RECEIVED), isATC));
         client.setLogonTime(requireNonNullIf("logon time", isOnline, parseFullTimestamp(matcher.group(PATTERN_LINE_TIME_LOGON), isOnline)));
         client.setHeading(parseHeading(matcher.group(PATTERN_LINE_HEADING), clientType));
+        client.setQnhInchMercury(requireNaNIf("QNH Inch Mercury", !isConnectedPilot, parseDouble(matcher.group(PATTERN_LINE_QNH_IHG))));
+        client.setQnhHectopascal(requireNegativeIf("QNH Hectopascal", !isConnectedPilot, parseIntWithDefault(matcher.group(PATTERN_LINE_QNH_MB), -1)));
         
         return client;
+    }
+    
+    /**
+     * Parses the given string to a {@link Double}.
+     * Returns {@link Double#NaN} if the string is empty.
+     * @param s string to be parsed
+     * @return value of string as {@link Double}
+     * @throws IllegalArgumentException on parsing error
+     */
+    private double parseDouble(String s) throws IllegalArgumentException {
+        if (s.isEmpty()) {
+            return Double.NaN;
+        }
+        
+        return Double.parseDouble(s);
     }
     
     private int parseIntWithDefault(String s, int defaultOnError) {
@@ -716,6 +734,40 @@ public class ClientParser {
         }
         
         return heading;
+    }
+
+    /**
+     * Requires the given value to be {@link Double#NaN} if condition is met.
+     * Violation will cause {@link IllegalArgumentException} to be thrown.
+     * @param description description of value (used for exception message)
+     * @param condition condition which has to be true for value to be required to be {@link Double#NaN}
+     * @param value value to be checked
+     * @return original value
+     * @throws IllegalArgumentException if condition is true and value is not {@link Double#NaN}
+     */
+    private double requireNaNIf(String description, boolean condition, double value) throws IllegalArgumentException {
+        if (condition && !Double.isNaN(value)) {
+            throw new IllegalArgumentException("expected "+description+" to be NaN but was "+Double.toString(value));
+        }
+        
+        return value;
+    }
+
+    /**
+     * Requires the given value to be negative if condition is met.
+     * Violation will cause {@link IllegalArgumentException} to be thrown.
+     * @param description description of value (used for exception message)
+     * @param condition condition which has to be true for value to be required to be negative
+     * @param value value to be checked
+     * @return original value
+     * @throws IllegalArgumentException if condition is true and value is not negative
+     */
+    private int requireNegativeIf(String description, boolean condition, int value) throws IllegalArgumentException {
+        if (condition && (value >= 0)) {
+            throw new IllegalArgumentException("expected "+description+" to be negative but was "+Integer.toString(value));
+        }
+        
+        return value;
     }
     
     // TODO: remove unused methods
