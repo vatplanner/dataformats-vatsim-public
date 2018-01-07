@@ -3036,4 +3036,514 @@ public class ClientParserTest {
         assertThat(result.getFiledTimeFuel(), is(nullValue()));
     }
     // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="filed alternate airport">
+    @Test
+    @DataProvider({"", "EDDT", "05S"})
+    public void testParse_connectedPilot_returnsObjectWithExpectedFiledAlternateAirportCode(String expectedAirportCode) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:%s:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedAirportCode);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledAlternateAirportCode(), is(equalTo(expectedAirportCode)));
+    }
+    
+    @Test
+    @DataProvider({"", "EDDT", "05S"})
+    public void testParse_prefiledPilot_returnsObjectWithExpectedFiledAlternateAirportCode(String expectedAirportCode) {
+        // Arrange
+        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:%s:remark:DCT:0:0:0:0:::::::", expectedAirportCode);
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledAlternateAirportCode(), is(equalTo(expectedAirportCode)));
+    }
+    
+    @Test
+    @DataProvider({"", "EDDT", "05S"})
+    public void testParse_atc_returnsObjectWithExpectedFiledAlternateAirportCode(String expectedAirportCode) {
+        // An ATC with a flight plan doesn't make any sense but can actually be
+        // found on data files...
+        // Needs to be parseable but resulting data should be ignored
+        // nevertheless unless there really is some strange use case that makes
+        // sense.
+        
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::::%s:::::::atis message:20180101160000:20180101150000::::", expectedAirportCode);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledAlternateAirportCode(), is(equalTo(expectedAirportCode)));
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="flight plan remarks">
+    @Test
+    @DataProvider({"", "my remarks", "+-/;.#!\"%&()=_"})
+    public void testParse_connectedPilot_returnsObjectWithExpectedFlightPlanRemarks(String expectedRemarks) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:%s:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedRemarks);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFlightPlanRemarks(), is(equalTo(expectedRemarks)));
+    }
+    
+    @Test
+    @DataProvider({"", "my remarks", "+-/;.#!\"%&()=_"})
+    public void testParse_prefiledPilot_returnsObjectWithExpectedFlightPlanRemarks(String expectedRemarks) {
+        // Arrange
+        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:%s:DCT:0:0:0:0:::::::", expectedRemarks);
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFlightPlanRemarks(), is(equalTo(expectedRemarks)));
+    }
+    
+    @Test
+    @DataProvider({"", "my remarks", "+-/;.#!\"%&()=_"})
+    public void testParse_atc_returnsObjectWithExpectedFlightPlanRemarks(String expectedRemarks) {
+        // An ATC with a flight plan doesn't make any sense but can actually be
+        // found on data files...
+        // Needs to be parseable but resulting data should be ignored
+        // nevertheless unless there really is some strange use case that makes
+        // sense.
+        
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::%s::::::atis message:20180101160000:20180101150000::::", expectedRemarks);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFlightPlanRemarks(), is(equalTo(expectedRemarks)));
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="filed route">
+    @Test
+    @DataProvider({"", "DCT", "SID1A/12L WPT UA123 ANASA DCT ENTRY STAR2B/31R", "just special chars +#-.,%\\"})
+    public void testParse_connectedPilot_returnsObjectWithExpectedFiledRoute(String expectedRoute) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:%s:0:0:0:0:::20180101094500:270:29.92:1013:", expectedRoute);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledRoute(), is(equalTo(expectedRoute)));
+    }
+    
+    @Test
+    @DataProvider({"", "DCT", "SID1A/12L WPT UA123 ANASA DCT ENTRY STAR2B/31R", "just special chars +#-.,%\\"})
+    public void testParse_prefiledPilot_returnsObjectWithExpectedFiledRoute(String expectedRoute) {
+        // Arrange
+        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remarks:%s:0:0:0:0:::::::", expectedRoute);
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledRoute(), is(equalTo(expectedRoute)));
+    }
+    
+    @Test
+    @DataProvider({"", "DCT", "SID1A/12L WPT UA123 ANASA DCT ENTRY STAR2B/31R", "just special chars +#-.,%\\"})
+    public void testParse_atc_returnsObjectWithExpectedFiledRoute(String expectedRoute) {
+        // An ATC with a flight plan doesn't make any sense but can actually be
+        // found on data files...
+        // Needs to be parseable but resulting data should be ignored
+        // nevertheless unless there really is some strange use case that makes
+        // sense.
+        
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::::::%s:::::atis message:20180101160000:20180101150000::::", expectedRoute);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getFiledRoute(), is(equalTo(expectedRoute)));
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="departure airport latitude">
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_connectedPilotWithDepartureAirportLatitude_returnsObjectWithExpectedDepartureAirportLatitude(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:%s:0:0:0:::20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        double expectedOutput = Double.parseDouble(input);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDepartureAirportLatitude(), is(closeTo(expectedOutput, ALLOWED_DOUBLE_ERROR)));
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutDepartureAirportLatitude_returnsObjectWithNaNAsDepartureAirportLatitude() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT::0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDepartureAirportLatitude(), is(equalTo(Double.NaN)));
+    }
+    
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_prefiledPilotWithDepartureAirportLatitude_returnsObjectWithExpectedDepartureAirportLatitude(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:%s:0:0:0:::::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        double expectedOutput = Double.parseDouble(input);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDepartureAirportLatitude(), is(closeTo(expectedOutput, ALLOWED_DOUBLE_ERROR)));
+    }
+    
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_prefiledPilotWithoutDepartureAirportLatitude_returnsObjectWithNaNAsDepartureAirportLatitude(String input) {
+        // Arrange
+        String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT::0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDepartureAirportLatitude(), is(equalTo(Double.NaN)));
+    }
+    
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_atcWithDepartureAirportLatitude_returnsObjectWithExpectedDepartureAirportLatitude(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::%s::::atis message:20180101160000:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        double expectedOutput = Double.parseDouble(input);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDepartureAirportLatitude(), is(closeTo(expectedOutput, ALLOWED_DOUBLE_ERROR)));
+    }
+    
+    @Test
+    public void testParse_atcWithoutDepartureAirportLatitude_returnsObjectWithNaNAsDepartureAirportLatitude() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDepartureAirportLatitude(), is(equalTo(Double.NaN)));
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="departure airport longitude">
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_connectedPilotWithDepartureAirportLongitude_returnsObjectWithExpectedDepartureAirportLongitude(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:%s:0:0:::20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        double expectedOutput = Double.parseDouble(input);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDepartureAirportLongitude(), is(closeTo(expectedOutput, ALLOWED_DOUBLE_ERROR)));
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutDepartureAirportLongitude_returnsObjectWithNaNAsDepartureAirportLongitude() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0::0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDepartureAirportLongitude(), is(equalTo(Double.NaN)));
+    }
+    
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_prefiledPilotWithDepartureAirportLongitude_returnsObjectWithExpectedDepartureAirportLongitude(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:%s:0:0:::::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        double expectedOutput = Double.parseDouble(input);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDepartureAirportLongitude(), is(closeTo(expectedOutput, ALLOWED_DOUBLE_ERROR)));
+    }
+    
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_prefiledPilotWithoutDepartureAirportLongitude_returnsObjectWithNaNAsDepartureAirportLongitude(String input) {
+        // Arrange
+        String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0::0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDepartureAirportLongitude(), is(equalTo(Double.NaN)));
+    }
+    
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_atcWithDepartureAirportLongitude_returnsObjectWithExpectedDepartureAirportLongitude(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::::::::%s:::atis message:20180101160000:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        double expectedOutput = Double.parseDouble(input);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDepartureAirportLongitude(), is(closeTo(expectedOutput, ALLOWED_DOUBLE_ERROR)));
+    }
+    
+    @Test
+    public void testParse_atcWithoutDepartureAirportLongitude_returnsObjectWithNaNAsDepartureAirportLongitude() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDepartureAirportLongitude(), is(equalTo(Double.NaN)));
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="destination airport latitude">
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_connectedPilotWithDestinationAirportLatitude_returnsObjectWithExpectedDestinationAirportLatitude(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:%s:0:::20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        double expectedOutput = Double.parseDouble(input);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDestinationAirportLatitude(), is(closeTo(expectedOutput, ALLOWED_DOUBLE_ERROR)));
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutDestinationAirportLatitude_returnsObjectWithNaNAsDestinationAirportLatitude() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0::0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDestinationAirportLatitude(), is(equalTo(Double.NaN)));
+    }
+    
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_prefiledPilotWithDestinationAirportLatitude_returnsObjectWithExpectedDestinationAirportLatitude(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:%s:0:::::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        double expectedOutput = Double.parseDouble(input);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDestinationAirportLatitude(), is(closeTo(expectedOutput, ALLOWED_DOUBLE_ERROR)));
+    }
+    
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_prefiledPilotWithoutDestinationAirportLatitude_returnsObjectWithNaNAsDestinationAirportLatitude(String input) {
+        // Arrange
+        String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0::0:::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDestinationAirportLatitude(), is(equalTo(Double.NaN)));
+    }
+    
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_atcWithDestinationAirportLatitude_returnsObjectWithExpectedDestinationAirportLatitude(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::%s::atis message:20180101160000:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        double expectedOutput = Double.parseDouble(input);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDestinationAirportLatitude(), is(closeTo(expectedOutput, ALLOWED_DOUBLE_ERROR)));
+    }
+    
+    @Test
+    public void testParse_atcWithoutDestinationAirportLatitude_returnsObjectWithNaNAsDestinationAirportLatitude() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDestinationAirportLatitude(), is(equalTo(Double.NaN)));
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="destination airport longitude">
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_connectedPilotWithDestinationAirportLongitude_returnsObjectWithExpectedDestinationAirportLongitude(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:%s:::20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        double expectedOutput = Double.parseDouble(input);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDestinationAirportLongitude(), is(closeTo(expectedOutput, ALLOWED_DOUBLE_ERROR)));
+    }
+    
+    @Test
+    public void testParse_connectedPilotWithoutDestinationAirportLongitude_returnsObjectWithNaNAsDestinationAirportLongitude() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0::::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDestinationAirportLongitude(), is(equalTo(Double.NaN)));
+    }
+    
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_prefiledPilotWithDestinationAirportLongitude_returnsObjectWithExpectedDestinationAirportLongitude(String input) {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:%s:::::::", input);
+        parser.setIsParsingPrefileSection(true);
+        
+        double expectedOutput = Double.parseDouble(input);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDestinationAirportLongitude(), is(closeTo(expectedOutput, ALLOWED_DOUBLE_ERROR)));
+    }
+    
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_prefiledPilotWithoutDestinationAirportLongitude_returnsObjectWithNaNAsDestinationAirportLongitude(String input) {
+        // Arrange
+        String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0::::::::";
+        parser.setIsParsingPrefileSection(true);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDestinationAirportLongitude(), is(equalTo(Double.NaN)));
+    }
+    
+    @Test
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_atcWithDestinationAirportLongitude_returnsObjectWithExpectedDestinationAirportLongitude(String input) {
+        // Arrange
+        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::::::::::%s:atis message:20180101160000:20180101150000::::", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        double expectedOutput = Double.parseDouble(input);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDestinationAirportLongitude(), is(closeTo(expectedOutput, ALLOWED_DOUBLE_ERROR)));
+    }
+    
+    @Test
+    public void testParse_atcWithoutDestinationAirportLongitude_returnsObjectWithNaNAsDestinationAirportLongitude() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getDestinationAirportLongitude(), is(equalTo(Double.NaN)));
+    }
+    // </editor-fold>
 }

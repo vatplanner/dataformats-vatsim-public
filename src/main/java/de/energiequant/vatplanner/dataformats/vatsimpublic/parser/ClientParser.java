@@ -31,9 +31,11 @@ public class ClientParser {
         "(\\-?\\d+|):(\\d+|):([^:]*):(\\d+|):([^:]*):([^:]*):([^:]*):([^:]*):(\\d+|):(\\d+|):"+
     //    18         19      20      21      22      23      24      25      26      27      28
         "(\\d{0,4}):(\\d+|):(\\d+|):(\\d+|):([^:]*):(\\d+|):(\\d+|):(\\d+|):(\\d+|):(\\d+|):(\\d+|):"+
-    //    29      30      31      32      33      34      35
-        "([^:]*):([^:]*):([^:]*):(\\d+|):(\\d+|):(\\d+|):(\\d+|):"+
-    //    36   37                         38                         39
+    //    29      30      31      32                               33
+        "([^:]*):([^:]*):([^:]*):("+SUBPATTERN_GEOCOORDINATES+"|):("+SUBPATTERN_GEOCOORDINATES+"|):"+
+    //    34                               35
+        "("+SUBPATTERN_GEOCOORDINATES+"|):("+SUBPATTERN_GEOCOORDINATES+"|):"+
+    //    36   37                          38                          39
         "(.*):("+SUBPATTERN_TIMESTAMP+"|):("+SUBPATTERN_TIMESTAMP+"|):(\\d+|):"+
     //    40                               41
         "("+SUBPATTERN_FLOAT_UNSIGNED+"|):(\\d+|):");
@@ -154,7 +156,14 @@ public class ClientParser {
         client.setRawDepartureTimeActual(parseIntWithDefault(matcher.group(PATTERN_LINE_PLANNED_ACTDEPTIME), -1));
         client.setFiledTimeEnroute(parseDuration(matcher.group(PATTERN_LINE_PLANNED_HRSENROUTE), matcher.group(PATTERN_LINE_PLANNED_MINENROUTE), isFiledTimeMandatory));
         client.setFiledTimeFuel(parseDuration(matcher.group(PATTERN_LINE_PLANNED_HRSFUEL), matcher.group(PATTERN_LINE_PLANNED_MINFUEL), isFiledTimeMandatory));
-        
+        client.setFiledAlternateAirportCode(matcher.group(PATTERN_LINE_PLANNED_ALTAIRPORT));
+        client.setFlightPlanRemarks(matcher.group(PATTERN_LINE_PLANNED_REMARKS));
+        client.setFiledRoute(matcher.group(PATTERN_LINE_PLANNED_ROUTE));
+        client.setDepartureAirportLatitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DEPAIRPORT_LAT)));
+        client.setDepartureAirportLongitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DEPAIRPORT_LON)));
+        client.setDestinationAirportLatitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT_LAT)));
+        client.setDestinationAirportLongitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT_LON)));
+                
         return client;
     }
     
@@ -229,6 +238,21 @@ public class ClientParser {
         } else {
             throw new IllegalArgumentException("client is not online but still provides a geo coordinate (latitude/longitude)");
         }
+    }
+    
+    /**
+     * Parses a geo coordinate from the given string.
+     * Result of {@link Double#NaN} indicates that no coordinate was available
+     * (empty string).
+     * @param s string to be parsed
+     * @return geo coordinate or {@link Double#NaN} if not available
+     */
+    private double parseGeoCoordinate(String s) {
+        if (s.isEmpty()) {
+            return Double.NaN;
+        }
+        
+        return Double.parseDouble(s);
     }
     
     /**

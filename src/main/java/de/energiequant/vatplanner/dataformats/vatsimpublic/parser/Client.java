@@ -41,8 +41,8 @@ import java.time.LocalTime;
  * <li>{@link #heading}</li>
  * <li>{@link #qnhHectopascal}</li>
  * <li>{@link #qnhInchMercury}</li>
- * <li>{@link #remarks}</li>
- * <li>{@link #route}</li>
+ * <li>{@link #flightPlanRemarks}</li>
+ * <li>{@link #filedRoute}</li>
  * </ul>
  * </li>
  * <li>Not seen being used in the wild but still defined by format:
@@ -58,10 +58,10 @@ import java.time.LocalTime;
  * <ul>
  * <li>{@link #aircraftType}: ICAO aircraft type code. Should include equipment code as suffix, may include wake category as prefix (examples: B738/M, H/A332/X, B737). Not reliable as this is an informal free-text field and sometimes contains alternate/IATA codes or common mistakes (such as B77W for a Boeing 777 which is neither a valid ICAO nor IATA code).</li>
  * <li>{@link #callsign}: Callsigns can be chosen freely by pilots although some codes may be reserved for virtual airlines by convention. Callsigns on VATSIM omit hyphens which would be used in the real-world to separate country prefixes for plane registrations (e.g. all non-airline flights).</li>
- * <li>{@link #flightPlanRevision}: Flights passing through online controlled airspace will usually see many revisions of their original flight plan (mostly {@link #route}) as edited by ATC when the plane changes airspace or an initial clearance is given by departure airport. Flight plan revisions are tracked by this counter.
- * <li>{@link #message}: Multi-line string containing ATIS message for ATIS stations, otherwise general remarks about ATC stations such as contact information, controller's estimated online times or station's spatial coverage. May contain a URL to the voice room on first line if prefixed with "$ ". Update timestamps are provided by {@link #lastMessageUpdate}.</li>
+ * <li>{@link #flightPlanRevision}: Flights passing through online controlled airspace will usually see many revisions of their original flight plan (mostly {@link #filedRoute}) as edited by ATC when the plane changes airspace or an initial clearance is given by departure airport. Flight plan revisions are tracked by this counter.
+ * <li>{@link #message}: Multi-line string containing ATIS message for ATIS stations, otherwise general flightPlanRemarks about ATC stations such as contact information, controller's estimated online times or station's spatial coverage. May contain a URL to the voice room on first line if prefixed with "$ ". Update timestamps are provided by {@link #lastMessageUpdate}.</li>
  * <li>{@link #realName}: By convention, pilots should add a 4-letter ICAO code for their "home base". Pilots often choose the closest airport to their actual home.</li>
- * <li>{@link #remarks}: Pilot clients add voice capability flags (T = Text only; R = Receive voice, send text; V = full voice). Other than that, pilots are free to enter any remarks they may find useful. Pilots sometimes attach full ICAO field 18 information which provides highly detailed information generally not needed for simulation (for example PBN/..., DOF/... etc.).</li>
+ * <li>{@link #flightPlanRemarks}: Pilot clients add voice capability flags (T = Text only; R = Receive voice, send text; V = full voice). Other than that, pilots are free to enter any flightPlanRemarks they may find useful. Pilots sometimes attach full ICAO field 18 information which provides highly detailed information generally not needed for simulation (for example PBN/..., DOF/... etc.).</li>
  * </ul>
  */
 public class Client {
@@ -98,8 +98,8 @@ public class Client {
     private Duration filedTimeEnroute; // data: two fields, hours + minutes
     private Duration filedTimeFuel; // data: two fields, hours + minutes
     private String filedAlternateAirportCode;
-    private String remarks;
-    private String route;
+    private String flightPlanRemarks;
+    private String filedRoute;
     private double departureAirportLatitude; // seems unused, always 0
     private double departureAirportLongitude; // seems unused, always 0
     private double destinationAirportLatitude; // seems unused, always 0
@@ -701,6 +701,14 @@ public class Client {
         this.filedTimeFuel = filedTimeFuel;
     }
 
+    /**
+     * Returns the alternate airport code listed on flight plan of this client.
+     * <p>
+     * While these are usually ICAO codes, they could be anything
+     * else as this is a free-text field.
+     * </p>
+     * @return alternate airport code listed on flight plan of this client
+     */
     public String getFiledAlternateAirportCode() {
         return filedAlternateAirportCode;
     }
@@ -709,22 +717,56 @@ public class Client {
         this.filedAlternateAirportCode = filedAlternateAirportCode;
     }
 
-    public String getRemarks() {
-        return remarks;
+    /**
+     * Returns the remarks entered on flight plan.
+     * <p>
+     * Pilot clients or prefiling forms add voice capability flags
+     * (T = Text only; R = Receive voice, send text; V = full voice).
+     * Other than that, pilots are free to enter any remarks they may find
+     * useful.
+     * </p>
+     * <p>
+     * Pilots sometimes attach full ICAO field 18 information which provides
+     * highly detailed information generally not needed for simulation
+     * (for example PBN/..., DOF/... etc.).
+     * </p>
+     * @return remarks on flight plan
+     */
+    public String getFlightPlanRemarks() {
+        return flightPlanRemarks;
     }
 
-    void setRemarks(String remarks) {
-        this.remarks = remarks;
+    void setFlightPlanRemarks(String flightPlanRemarks) {
+        this.flightPlanRemarks = flightPlanRemarks;
     }
 
-    public String getRoute() {
-        return route;
+    /**
+     * Returns the route as filed on flight plan.
+     * <p>
+     * This does not represent the actual route taken and may in fact have a
+     * non-uniform invalid/only human-readable format.
+     * </p>
+     * <p>
+     * Online ATC stations may or may not amend the flight plan as they see
+     * need.
+     * </p>
+     * @return route as filed on flight plan
+     */
+    public String getFiledRoute() {
+        return filedRoute;
     }
 
-    void setRoute(String route) {
-        this.route = route;
+    void setFiledRoute(String filedRoute) {
+        this.filedRoute = filedRoute;
     }
 
+    /**
+     * Returns what has been set as departure airport latitude (north/south
+     * coordinate).
+     * This field seems to be unused at the moment (always set to 0).
+     * Returns {@link Double#NaN} if unavailable.
+     * @return departure airport latitude
+     */
     public double getDepartureAirportLatitude() {
         return departureAirportLatitude;
     }
@@ -733,6 +775,13 @@ public class Client {
         this.departureAirportLatitude = departureAirportLatitude;
     }
 
+    /**
+     * Returns what has been set as departure airport longitude (east/west
+     * coordinate).
+     * This field seems to be unused at the moment (always set to 0).
+     * Returns {@link Double#NaN} if unavailable.
+     * @return departure airport longitude
+     */
     public double getDepartureAirportLongitude() {
         return departureAirportLongitude;
     }
@@ -741,6 +790,13 @@ public class Client {
         this.departureAirportLongitude = departureAirportLongitude;
     }
 
+    /**
+     * Returns what has been set as destination airport latitude (north/south
+     * coordinate).
+     * This field seems to be unused at the moment (always set to 0).
+     * Returns {@link Double#NaN} if unavailable.
+     * @return destination airport latitude
+     */
     public double getDestinationAirportLatitude() {
         return destinationAirportLatitude;
     }
@@ -749,6 +805,13 @@ public class Client {
         this.destinationAirportLatitude = destinationAirportLatitude;
     }
 
+    /**
+     * Returns what has been set as destination airport longitude (east/west
+     * coordinate).
+     * This field seems to be unused at the moment (always set to 0).
+     * Returns {@link Double#NaN} if unavailable.
+     * @return destination airport longitude
+     */
     public double getDestinationAirportLongitude() {
         return destinationAirportLongitude;
     }
