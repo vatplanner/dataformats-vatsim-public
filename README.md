@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/vatplanner/dataformats-vatsim-public.svg?branch=master)](https://travis-ci.org/vatplanner/dataformats-vatsim-public)
 
-This library's goal is to provide parsers and entities for data formats used by [VATSIM](https://www.vatsim.net/) and provided *publicly*. It's *not* possible to connect to the actual network using this library as VATSIM uses an undisclosed (NDA'd) network protocol and the network is only permitted to be connected to with authorized software. Actually, this library doesn't connect at all, it just parses and you will require you to fetch all source data and feed it into the parser yourself... :)
+This library's goal is to provide parsers and entities for data formats used by [VATSIM](https://www.vatsim.net/) and provided *publicly*. It's *not* possible to connect to the actual network using this library as VATSIM uses an undisclosed (NDA'd) network protocol and the network is only permitted to be connected to with authorized software. Actually, this library doesn't connect at all, it just parses and will require you to fetch all source data and feed it into the parser yourself... :)
 
 The scope of this project is rather small but an essential part of a bigger project I'm working on (VATPlanner). It still seemed like a good idea to split the data parsers & entities apart to be easily reusable if needed in other projects.
 
