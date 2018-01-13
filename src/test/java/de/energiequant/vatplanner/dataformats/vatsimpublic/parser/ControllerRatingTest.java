@@ -27,6 +27,7 @@ public class ControllerRatingTest {
             new Object[]{ 5, C1 },
             new Object[]{ 7, C3 },
             new Object[]{ 8, I },
+            new Object[]{ 9, I2 },
             new Object[]{ 10, I3 },
             new Object[]{ 11, SUP },
             new Object[]{ 12, ADM },

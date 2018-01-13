@@ -88,6 +88,15 @@ public enum ControllerRating {
     I(8),
     
     /**
+    * I2 rating is called "Instructor 2" by VATSIM statistics center.
+    * Such rating is not mentioned in any recent document and may not be
+    * obtainable any more. However, this rating may occasionally still show
+    * up on data files. By common sense, it would likely be assumed that an I2
+    * rated controller is effectively rated {@link I} by current policy.
+    */
+    I2(9),
+    
+    /**
     * I3 rating is described as "Senior Instructor" by Code of Regulations.
     */
     I3(10),
