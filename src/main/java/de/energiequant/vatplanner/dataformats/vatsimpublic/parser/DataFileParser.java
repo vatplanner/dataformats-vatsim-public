@@ -86,27 +86,34 @@ public class DataFileParser {
         
         DataFile dataFile = new DataFile();
         dataFile.setMetaData(generalSectionParser.parse(relevantLinesBySection.get(SECTION_NAME_GENERAL)));
-        
+
         // TODO: log warning if data format is unexpected (currently implemented format version 8)
-        
-        Stream<Client> onlineClientsStream = relevantLinesBySection.getOrDefault(SECTION_NAME_CLIENTS, new ArrayList<>()).stream().map(onlineClientParser::parse);
-        Stream<Client> prefileClientsStream = relevantLinesBySection.getOrDefault(SECTION_NAME_PREFILE, new ArrayList<>()).stream().map(prefileClientParser::parse);
-        Stream<Client> allClientsStream = Stream.concat(onlineClientsStream, prefileClientsStream);
-        dataFile.setClients(allClientsStream.collect(Collectors.toCollection(ArrayList::new)));
-        
-        dataFile.setFsdServers(
-                relevantLinesBySection.getOrDefault(SECTION_NAME_SERVERS, new ArrayList<>())
-                .stream()
-                .map(fsdServerParser::parse)
-                .collect(Collectors.toCollection(ArrayList::new))
-        );
-        
-        dataFile.setVoiceServers(
-                relevantLinesBySection.getOrDefault(SECTION_NAME_VOICE_SERVERS, new ArrayList<>())
-                .stream()
-                .map(voiceServerParser::parse)
-                .collect(Collectors.toCollection(ArrayList::new))
-        );
+
+        try {
+            Stream<Client> onlineClientsStream = relevantLinesBySection.getOrDefault(SECTION_NAME_CLIENTS, new ArrayList<>()).stream().map(onlineClientParser::parse);
+            Stream<Client> prefileClientsStream = relevantLinesBySection.getOrDefault(SECTION_NAME_PREFILE, new ArrayList<>()).stream().map(prefileClientParser::parse);
+            Stream<Client> allClientsStream = Stream.concat(onlineClientsStream, prefileClientsStream);
+            dataFile.setClients(allClientsStream.collect(Collectors.toCollection(ArrayList::new)));
+
+            dataFile.setFsdServers(
+                    relevantLinesBySection.getOrDefault(SECTION_NAME_SERVERS, new ArrayList<>())
+                    .stream()
+                    .map(fsdServerParser::parse)
+                    .collect(Collectors.toCollection(ArrayList::new))
+            );
+
+            dataFile.setVoiceServers(
+                    relevantLinesBySection.getOrDefault(SECTION_NAME_VOICE_SERVERS, new ArrayList<>())
+                    .stream()
+                    .map(voiceServerParser::parse)
+                    .collect(Collectors.toCollection(ArrayList::new))
+            );
+        } catch (IllegalArgumentException ex) {
+            // TODO: replace by internal collector for erroneous lines
+            DataFileMetaData metaData = dataFile.getMetaData();
+            
+            throw new IllegalArgumentException(String.format("Failed to parse data file, metadata: timestamp=%s, version=%d", metaData.getTimestamp(), metaData.getVersionFormat()), ex);
+        }
         
         return dataFile;
     }
