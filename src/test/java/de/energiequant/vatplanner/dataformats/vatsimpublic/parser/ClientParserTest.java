@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.ZoneOffset;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -1471,17 +1472,16 @@ public class ClientParserTest {
     }
     
     @Test
-    public void testParse_connectedPilotWithoutProtocolRevision_throwsIllegalArgumentException() {
+    public void testParse_connectedPilotWithoutProtocolRevision_returnsObjectWithNegativeProtocolVersion() {
         // Arrange
         String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver::1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
         parser.setIsParsingPrefileSection(false);
         
-        thrown.expect(IllegalArgumentException.class);
-        
         // Act
-        parser.parse(line);
+        Client result = parser.parse(line);
         
-        // Assert (nothing to do)
+        // Assert
+        assertThat(result.getProtocolVersion(), is(lessThan(0)));
     }
     
     @Test
@@ -1557,16 +1557,15 @@ public class ClientParserTest {
     }
     
     @Test
-    public void testParse_atcWithoutProtocolRevision_throwsIllegalArgumentException() {
+    public void testParse_atcWithoutProtocolRevision_returnsObjectWithNegativeProtocolVersion() {
         // Arrange
         String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver::3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
         
-        thrown.expect(IllegalArgumentException.class);
-        
         // Act
-        parser.parse(line);
+        Client result = parser.parse(line);
         
-        // Assert (nothing to do)
+        // Assert
+        assertThat(result.getProtocolVersion(), is(lessThan(0)));
     }
     // </editor-fold>
     
@@ -4186,7 +4185,6 @@ public class ClientParserTest {
     }
     // </editor-fold>
 
-
     // <editor-fold defaultstate="collapsed" desc="QNH Hectopascal">
     @Test
     @DataProvider({"997", "1013", "1030"})
@@ -4315,5 +4313,44 @@ public class ClientParserTest {
         // Assert
         assertThat(result.getQnhHectopascal(), is(lessThan(0)));
     }
+    // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="special: client detection/tolerance">
+    @Test
+    public void testParse_ghostWithPositionHeadingQNHAndTransponderInOnlineSection_returnsObjectAsConnectedPilotWithExpectedData() {
+        // Seen in datafiles from 12 Oct 2017:
+        // Client was briefly connected earlier with incomplete data, then
+        // appears with a new login time and full position, heading, QNH and
+        // transponder information but without VATSIM ID or server protocol.
+        // VATSIM Statistics Center does not list pilot as online from
+        // beginning of ghost login time on data file.
+        // Possible cause: Left-over information after simulator crash on
+        // sim startup?
+        
+        // Arrange
+        String line = "ANY123:::::10.12345:-20.54321:80:0::0::::SOME_SERVER::1:1200::::::::::::::::::::20171012123456:120:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        Instant expectedLogonTime = LocalDateTime.of(2017, Month.OCTOBER, 12, 12, 34, 56).toInstant(ZoneOffset.UTC);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getClientType(), is(equalTo(ClientType.PILOT_CONNECTED)));
+        assertThat(result.getCallsign(), is(equalTo("ANY123")));
+        assertThat(result.getLatitude(), is(closeTo(10.12345, ALLOWED_DOUBLE_ERROR)));
+        assertThat(result.getLongitude(), is(closeTo(-20.54321, ALLOWED_DOUBLE_ERROR)));
+        assertThat(result.getAltitudeFeet(), is(equalTo(80)));
+        assertThat(result.getGroundSpeed(), is(equalTo(0)));
+        assertThat(result.getServerId(), is(equalTo("SOME_SERVER")));
+        assertThat(result.getControllerRating(), is(equalTo(ControllerRating.OBS)));
+        assertThat(result.getTransponderCodeDecimal(), is(equalTo(1200)));
+        assertThat(result.getLogonTime(), is(equalTo(expectedLogonTime)));
+        assertThat(result.getHeading(), is(equalTo(120)));
+        assertThat(result.getQnhInchMercury(), is(closeTo(29.92, ALLOWED_DOUBLE_ERROR)));
+        assertThat(result.getQnhHectopascal(), is(equalTo(1013)));
+    }
+    
     // </editor-fold>
 }

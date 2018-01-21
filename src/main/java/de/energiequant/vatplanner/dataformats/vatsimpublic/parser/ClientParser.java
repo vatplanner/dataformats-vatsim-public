@@ -130,9 +130,14 @@ public class ClientParser {
         
         try {
             ClientType clientType = parseClientType(matcher.group(PATTERN_LINE_CLIENTTYPE));
+            
+            if (clientType == null) {
+                // TODO: log if we have to guess
+                clientType = guessClientType(matcher);
+                // TODO: log if still null after guessing
+            }
+            
             client.setClientType(clientType);
-
-            // TODO: guess client type if null from other available data of this line (e.g. only ATC may define a frequency, only online pilots have a heading or GS >0)
 
             boolean isOnline = (clientType != null) && (clientType != ClientType.PILOT_PREFILED);
             boolean isATC = (clientType == ClientType.ATC_CONNECTED);
@@ -219,6 +224,29 @@ public class ClientParser {
             }
         } else if (rawClientType.isEmpty()) {
             return ClientType.PILOT_PREFILED;
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Guesses client type from available data of currently parsed line.
+     * This is necessary for some lines to be processed because some clients
+     * (due to sim crashes?) do not specify a client type although being listed
+     * in online section of data file.
+     * @param matcher matcher retrieved via {@link #PATTERN_LINE}, containing all field information in matcher groups
+     * @return most-likely client type, null if no decision could be made
+     */
+    private ClientType guessClientType(Matcher matcher) {
+        // TODO: only ATC may define a frequency
+        // TODO: only online pilots have GS >0 (implement only if necessary)
+        
+        if (!isParsingPrefileSection) {
+            // only online pilots have a heading
+            boolean hasHeading = !matcher.group(PATTERN_LINE_HEADING).isEmpty();
+            if (hasHeading) {
+                return ClientType.PILOT_CONNECTED;
+            }
         }
         
         return null;
@@ -407,8 +435,8 @@ public class ClientParser {
      * Parses and checks if definition of protocol version matches online state
      * of client and returns only valid values.
      * <p>
-     * Only if a client is online, it is expected to indicate a protocol version.
-     * Likewise, a client who is offline (prefiled flight plan) is expected
+     * Only if a client is online, it may indicate a protocol version.
+     * A client who is offline (prefiled flight plan) is expected
      * not to have any protocol version as it is not connected to the network.
      * </p>
      * <p>
@@ -427,7 +455,7 @@ public class ClientParser {
     private int parseOnlineProtocolVersion(String s, boolean isOnline) throws IllegalArgumentException {
         boolean hasNoProtocolVersion = s.isEmpty();
         
-        boolean availabilityMatchesOnlineState = isOnline ^ hasNoProtocolVersion;
+        boolean availabilityMatchesOnlineState = isOnline || hasNoProtocolVersion;
         if (!availabilityMatchesOnlineState) {
             throw new IllegalArgumentException("client is "+(isOnline ? "" : "not ")+"online but indicates "+(hasNoProtocolVersion ? "no" : "a")+" protocol revision: \""+s+"\"");
         }
@@ -436,7 +464,7 @@ public class ClientParser {
             return -1;
         }
         
-        return Integer.parseInt(s);
+        return parseIntWithDefault(s, -1);
     }
 
     /**

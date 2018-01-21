@@ -152,7 +152,11 @@ public class Client {
      * <p>
      * In some cases, there may not be a VATSIM ID listed on data file. If that
      * happens, return value will be negative. See parser log messages for
-     * details.
+     * details. This may be the case for "ghost" clients which are still listed
+     * in online section although they do not appear to be actually connected
+     * (also missing {@link #protocolVersion} and being parsed with a guessed
+     * {@link #clientType}). Possible causes could be simulator crashes or
+     * client misbehaviour.
      * </p>
      * @return VATSIM user ID associated with client; negative if missing
      */
@@ -188,11 +192,20 @@ public class Client {
 
     /**
      * Returns the {@link ClientType}.
+     * <p>
      * Unfortunately, there are situations which require guessing the correct
-     * type as it is not in all cases provided by the data file (although it
-     * looks like it should). Expect null if guessing fails (check parser log
-     * messages for any details).
-     * @return type of client
+     * type as it is not in all cases provided by the data file.
+     * Expect null if information was not available and guessing failed (check
+     * parser log messages for any details).
+     * </p>
+     * <p>
+     * Guessing happens for example if the listed client is a "ghost" which
+     * could be caused by simulator crashes or client misbehaviour.
+     * If you need to know if the client is actually online, you may want to
+     * check if {@link #protocolVersion} and {@link #vatsimID} are available
+     * (expected for actual online clients).
+     * </p>
+     * @return type of client, may have been guessed; null if unavailable and guessing failed
      */
     public ClientType getClientType() {
         return clientType;
@@ -445,9 +458,15 @@ public class Client {
     /**
      * Returns the protocol version the client is using for communication with
      * servers.
-     * Negative if not available (prefiled flight plans). All online clients
-     * return a positive number.
-     * @return protocol version of client; negative if not connected
+     * Negative if not available (e.g. on prefiled flight plans).
+     * <p>
+     * If protocol version is negative/unavailable although {@link #clientType}
+     * indicates an online connection, client may be a "ghost" on VATSIM
+     * servers. One possible explanation for such connections is a simulator
+     * crash or client misbehaviour. {@link #clientType} then may have
+     * been guessed by parser.
+     * </p>
+     * @return protocol version of client; negative if unavailable
      */
     public int getProtocolVersion() {
         return protocolVersion;
