@@ -181,7 +181,7 @@ public class ClientParser {
             client.setQnhInchMercury(requireNaNIf("QNH Inch Mercury", !isConnectedPilot, parseDouble(matcher.group(PATTERN_LINE_QNH_IHG))));
             client.setQnhHectopascal(requireNegativeIf("QNH Hectopascal", !isConnectedPilot, parseIntWithDefault(matcher.group(PATTERN_LINE_QNH_MB), -1)));
         } catch (IllegalArgumentException ex) {
-            throw new IllegalArgumentException("unparseable line, error while parsing individual fields: \""+line+"\"", ex);
+            throw new IllegalArgumentException("unparseable line in "+(isParsingPrefileSection ? "preflight" : "online client")+" section, error while parsing individual fields: \""+line+"\"", ex);
         }
         
         return client;
