@@ -512,8 +512,12 @@ public class Client {
      * getter however are decimal and pilot clients are
      * actually submitting decimal digits 8 and 9 which would not be possible
      * in real aviation. Such excessive values are to be expected on this
-     * representation. However, only 4 digits should ever be returned, meaning
-     * a value of 9999 is the highest and 0 is the lowest pilot-settable code.
+     * representation.
+     * </p>
+     * <p>
+     * In rare cases, pilots on VATSIM may actually be listed with a transponder
+     * code which exceeds the usual 4 digits rendering the code effectively
+     * invalid as it may become incompatible with other clients.
      * </p>
      * <p>
      * Only if transponder code is not available, a negative value will be
@@ -532,7 +536,7 @@ public class Client {
      * <p>
      * Prefiled flight plans and ATC are never setting transponder codes.
      * </p>
-     * @return decimal numeric transponder code, needs left-padding to 4 digits to reconstruct spoken code; negative if unavailable
+     * @return decimal numeric transponder code, needs left-padding to 4 digits to reconstruct spoken code; negative if unavailable; may exceed 4 digits (code is supposedly invalid)
      */
     public int getTransponderCodeDecimal() {
         return transponderCodeDecimal;
