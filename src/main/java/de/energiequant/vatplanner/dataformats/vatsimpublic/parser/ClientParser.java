@@ -118,66 +118,71 @@ public class ClientParser {
      * files and not to be empty or a comment.
      * @param line line to be parsed; must not be empty or a comment
      * @return all parsed data in a {@link Client} object
+     * @throws IllegalArgumentException if parsing for given line fails
      */
-    public Client parse(String line) {
+    public Client parse(String line) throws IllegalArgumentException {
         Matcher matcher = PATTERN_LINE.matcher(line);
         if (!matcher.matches()) {
-            throw new IllegalArgumentException("unparseable line: \""+line+"\"");
+            throw new IllegalArgumentException("unparseable line, does not match expected syntax: \""+line+"\"");
         }
         
         Client client = new Client();
         
-        ClientType clientType = parseClientType(matcher.group(PATTERN_LINE_CLIENTTYPE));
-        client.setClientType(clientType);
-        
-        // TODO: guess client type if null from other available data of this line (e.g. only ATC may define a frequency, only online pilots have a heading or GS >0)
-        
-        boolean isOnline = (clientType != null) && (clientType != ClientType.PILOT_PREFILED);
-        boolean isATC = (clientType == ClientType.ATC_CONNECTED);
-        boolean isPrefiling = (clientType == ClientType.PILOT_PREFILED);
-        boolean isConnectedPilot = (clientType == ClientType.PILOT_CONNECTED);
-        boolean isAllowedToServeFrequency = isATC;
-        //boolean isAllowedToHaveFlightPlan = !isATC;
-        boolean isFiledTimeMandatory = isPrefiling;
-        
-        client.setCallsign(matcher.group(PATTERN_LINE_CALLSIGN));
-        client.setVatsimID(parseIntWithDefault(matcher.group(PATTERN_LINE_CID), -1)); // TODO: log details if ID is missing
-        client.setRealName(matcher.group(PATTERN_LINE_REALNAME));
-        client.setServedFrequencyKilohertz(parseServedFrequencyMegahertzToKilohertz(matcher.group(PATTERN_LINE_FREQUENCY), isAllowedToServeFrequency));
-        client.setLatitude(parseOnlineGeoCoordinate(matcher.group(PATTERN_LINE_LATITUDE), isOnline));
-        client.setLongitude(parseOnlineGeoCoordinate(matcher.group(PATTERN_LINE_LONGITUDE), isOnline));
-        client.setAltitudeFeet(parseOnlineAltitude(matcher.group(PATTERN_LINE_ALTITUDE), isOnline));
-        client.setGroundSpeed(parseGroundSpeed(matcher.group(PATTERN_LINE_GROUNDSPEED), clientType));
-        client.setAircraftType(matcher.group(PATTERN_LINE_PLANNED_AIRCRAFT));
-        client.setFiledTrueAirSpeed(parseIntWithDefault(matcher.group(PATTERN_LINE_PLANNED_TASCRUISE), 0));
-        client.setFiledDepartureAirportCode(matcher.group(PATTERN_LINE_PLANNED_DEPAIRPORT));
-        client.setRawFiledAltitude(matcher.group(PATTERN_LINE_PLANNED_ALTITUDE));
-        client.setFiledDestinationAirportCode(matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT));
-        client.setServerId(filterServerId(matcher.group(PATTERN_LINE_SERVER), isOnline));
-        client.setProtocolVersion(parseOnlineProtocolVersion(matcher.group(PATTERN_LINE_PROTREVISION), isOnline));
-        client.setControllerRating(parseControllerRating(matcher.group(PATTERN_LINE_RATING), clientType));
-        client.setTransponderCodeDecimal(parseTransponderCodeDecimal(matcher.group(PATTERN_LINE_TRANSPONDER), clientType));
-        client.setFacilityType(parseFacilityType(matcher.group(PATTERN_LINE_FACILITYTYPE), clientType));
-        client.setVisualRange(parseVisualRange(matcher.group(PATTERN_LINE_VISUALRANGE), clientType));
-        client.setFlightPlanRevision(parseFlightPlanRevision(matcher.group(PATTERN_LINE_PLANNED_REVISION), clientType));
-        client.setRawFlightPlanType(matcher.group(PATTERN_LINE_PLANNED_FLIGHTTYPE));
-        client.setRawDepartureTimePlanned(parseIntWithDefault(matcher.group(PATTERN_LINE_PLANNED_DEPTIME), -1));
-        client.setRawDepartureTimeActual(parseIntWithDefault(matcher.group(PATTERN_LINE_PLANNED_ACTDEPTIME), -1));
-        client.setFiledTimeEnroute(parseDuration(matcher.group(PATTERN_LINE_PLANNED_HRSENROUTE), matcher.group(PATTERN_LINE_PLANNED_MINENROUTE), isFiledTimeMandatory));
-        client.setFiledTimeFuel(parseDuration(matcher.group(PATTERN_LINE_PLANNED_HRSFUEL), matcher.group(PATTERN_LINE_PLANNED_MINFUEL), isFiledTimeMandatory));
-        client.setFiledAlternateAirportCode(matcher.group(PATTERN_LINE_PLANNED_ALTAIRPORT));
-        client.setFlightPlanRemarks(matcher.group(PATTERN_LINE_PLANNED_REMARKS));
-        client.setFiledRoute(matcher.group(PATTERN_LINE_PLANNED_ROUTE));
-        client.setDepartureAirportLatitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DEPAIRPORT_LAT)));
-        client.setDepartureAirportLongitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DEPAIRPORT_LON)));
-        client.setDestinationAirportLatitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT_LAT)));
-        client.setDestinationAirportLongitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT_LON)));
-        client.setControllerMessage(decodeControllerMessage(matcher.group(PATTERN_LINE_ATIS_MESSAGE), isATC));
-        client.setControllerMessageLastUpdated(parseFullTimestamp(matcher.group(PATTERN_LINE_TIME_LAST_ATIS_RECEIVED), isATC));
-        client.setLogonTime(requireNonNullIf("logon time", isOnline, parseFullTimestamp(matcher.group(PATTERN_LINE_TIME_LOGON), isOnline)));
-        client.setHeading(parseHeading(matcher.group(PATTERN_LINE_HEADING), clientType));
-        client.setQnhInchMercury(requireNaNIf("QNH Inch Mercury", !isConnectedPilot, parseDouble(matcher.group(PATTERN_LINE_QNH_IHG))));
-        client.setQnhHectopascal(requireNegativeIf("QNH Hectopascal", !isConnectedPilot, parseIntWithDefault(matcher.group(PATTERN_LINE_QNH_MB), -1)));
+        try {
+            ClientType clientType = parseClientType(matcher.group(PATTERN_LINE_CLIENTTYPE));
+            client.setClientType(clientType);
+
+            // TODO: guess client type if null from other available data of this line (e.g. only ATC may define a frequency, only online pilots have a heading or GS >0)
+
+            boolean isOnline = (clientType != null) && (clientType != ClientType.PILOT_PREFILED);
+            boolean isATC = (clientType == ClientType.ATC_CONNECTED);
+            boolean isPrefiling = (clientType == ClientType.PILOT_PREFILED);
+            boolean isConnectedPilot = (clientType == ClientType.PILOT_CONNECTED);
+            boolean isAllowedToServeFrequency = isATC;
+            //boolean isAllowedToHaveFlightPlan = !isATC;
+            boolean isFiledTimeMandatory = isPrefiling;
+
+            client.setCallsign(matcher.group(PATTERN_LINE_CALLSIGN));
+            client.setVatsimID(parseIntWithDefault(matcher.group(PATTERN_LINE_CID), -1)); // TODO: log details if ID is missing
+            client.setRealName(matcher.group(PATTERN_LINE_REALNAME));
+            client.setServedFrequencyKilohertz(parseServedFrequencyMegahertzToKilohertz(matcher.group(PATTERN_LINE_FREQUENCY), isAllowedToServeFrequency));
+            client.setLatitude(parseOnlineGeoCoordinate(matcher.group(PATTERN_LINE_LATITUDE), isOnline));
+            client.setLongitude(parseOnlineGeoCoordinate(matcher.group(PATTERN_LINE_LONGITUDE), isOnline));
+            client.setAltitudeFeet(parseOnlineAltitude(matcher.group(PATTERN_LINE_ALTITUDE), isOnline));
+            client.setGroundSpeed(parseGroundSpeed(matcher.group(PATTERN_LINE_GROUNDSPEED), clientType));
+            client.setAircraftType(matcher.group(PATTERN_LINE_PLANNED_AIRCRAFT));
+            client.setFiledTrueAirSpeed(parseIntWithDefault(matcher.group(PATTERN_LINE_PLANNED_TASCRUISE), 0));
+            client.setFiledDepartureAirportCode(matcher.group(PATTERN_LINE_PLANNED_DEPAIRPORT));
+            client.setRawFiledAltitude(matcher.group(PATTERN_LINE_PLANNED_ALTITUDE));
+            client.setFiledDestinationAirportCode(matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT));
+            client.setServerId(filterServerId(matcher.group(PATTERN_LINE_SERVER), isOnline));
+            client.setProtocolVersion(parseOnlineProtocolVersion(matcher.group(PATTERN_LINE_PROTREVISION), isOnline));
+            client.setControllerRating(parseControllerRating(matcher.group(PATTERN_LINE_RATING), clientType));
+            client.setTransponderCodeDecimal(parseTransponderCodeDecimal(matcher.group(PATTERN_LINE_TRANSPONDER), clientType));
+            client.setFacilityType(parseFacilityType(matcher.group(PATTERN_LINE_FACILITYTYPE), clientType));
+            client.setVisualRange(parseVisualRange(matcher.group(PATTERN_LINE_VISUALRANGE), clientType));
+            client.setFlightPlanRevision(parseFlightPlanRevision(matcher.group(PATTERN_LINE_PLANNED_REVISION), clientType));
+            client.setRawFlightPlanType(matcher.group(PATTERN_LINE_PLANNED_FLIGHTTYPE));
+            client.setRawDepartureTimePlanned(parseIntWithDefault(matcher.group(PATTERN_LINE_PLANNED_DEPTIME), -1));
+            client.setRawDepartureTimeActual(parseIntWithDefault(matcher.group(PATTERN_LINE_PLANNED_ACTDEPTIME), -1));
+            client.setFiledTimeEnroute(parseDuration(matcher.group(PATTERN_LINE_PLANNED_HRSENROUTE), matcher.group(PATTERN_LINE_PLANNED_MINENROUTE), isFiledTimeMandatory));
+            client.setFiledTimeFuel(parseDuration(matcher.group(PATTERN_LINE_PLANNED_HRSFUEL), matcher.group(PATTERN_LINE_PLANNED_MINFUEL), isFiledTimeMandatory));
+            client.setFiledAlternateAirportCode(matcher.group(PATTERN_LINE_PLANNED_ALTAIRPORT));
+            client.setFlightPlanRemarks(matcher.group(PATTERN_LINE_PLANNED_REMARKS));
+            client.setFiledRoute(matcher.group(PATTERN_LINE_PLANNED_ROUTE));
+            client.setDepartureAirportLatitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DEPAIRPORT_LAT)));
+            client.setDepartureAirportLongitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DEPAIRPORT_LON)));
+            client.setDestinationAirportLatitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT_LAT)));
+            client.setDestinationAirportLongitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT_LON)));
+            client.setControllerMessage(decodeControllerMessage(matcher.group(PATTERN_LINE_ATIS_MESSAGE), isATC));
+            client.setControllerMessageLastUpdated(parseFullTimestamp(matcher.group(PATTERN_LINE_TIME_LAST_ATIS_RECEIVED), isATC));
+            client.setLogonTime(requireNonNullIf("logon time", isOnline, parseFullTimestamp(matcher.group(PATTERN_LINE_TIME_LOGON), isOnline)));
+            client.setHeading(parseHeading(matcher.group(PATTERN_LINE_HEADING), clientType));
+            client.setQnhInchMercury(requireNaNIf("QNH Inch Mercury", !isConnectedPilot, parseDouble(matcher.group(PATTERN_LINE_QNH_IHG))));
+            client.setQnhHectopascal(requireNegativeIf("QNH Hectopascal", !isConnectedPilot, parseIntWithDefault(matcher.group(PATTERN_LINE_QNH_MB), -1)));
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("unparseable line, error while parsing individual fields: \""+line+"\"", ex);
+        }
         
         return client;
     }
