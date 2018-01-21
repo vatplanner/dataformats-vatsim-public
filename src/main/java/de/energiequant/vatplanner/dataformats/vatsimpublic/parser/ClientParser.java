@@ -33,8 +33,8 @@ public class ClientParser {
         "([^:]+):(\\d+|):([^:]*):(PILOT|ATC|):("+SUBPATTERN_FLOAT_UNSIGNED+"|):("+SUBPATTERN_GEOCOORDINATES+"|):("+SUBPATTERN_GEOCOORDINATES+"|):"+
     //    8           9       10      11      12      13      14      15      16      17
         "(\\-?\\d+|):(\\d+|):([^:]*):(\\d+|):([^:]*):([^:]*):([^:]*):([^:]*):(\\d+|):(\\d+|):"+
-    //    18         19      20      21      22      23      24      25      26      27      28
-        "(\\d{0,4}):(\\d+|):(\\d+|):(\\d+|):([^:]*):(\\d+|):(\\d+|):(\\d+|):(\\d+|):(\\d+|):(\\d+|):"+
+    //    18         19      20      21      22      23      24      25          26          27          28
+        "(\\d{0,4}):(\\d+|):(\\d+|):(\\d+|):([^:]*):(\\d+|):(\\d+|):(\\-?\\d+|):(\\-?\\d+|):(\\-?\\d+|):(\\-?\\d+|):"+
     //    29      30      31      32                               33
         "([^:]*):([^:]*):([^:]*):("+SUBPATTERN_GEOCOORDINATES+"|):("+SUBPATTERN_GEOCOORDINATES+"|):"+
     //    34                               35
@@ -644,6 +644,17 @@ public class ClientParser {
         
         int hours = Integer.parseInt(hoursString);
         int minutes = Integer.parseInt(minutesString);
+        
+        // Unfortunately, negative values can be entered. If that happens, we
+        // need to use consistently negative values for hours and minutes. A mix
+        // of a different sign on one part of this calculation could cause
+        // a positive result, making it impossible to filter out such nonsense
+        // at a later stage of processing this information.
+        if ((hours < 0) && (minutes > 0)) {
+            minutes = -minutes;
+        } else if ((hours > 0) && (minutes < 0)) {
+            hours = -hours;
+        }
         
         return Duration.ofMinutes(hours * 60 + minutes);
     }

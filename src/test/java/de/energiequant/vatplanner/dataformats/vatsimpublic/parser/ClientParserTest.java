@@ -57,6 +57,18 @@ public class ClientParserTest {
             new Object[] { 2, 60, Duration.ofMinutes(180) }, // excessive minutes (>59) are valid
             new Object[] { 13, 7, Duration.ofMinutes(787) },
             new Object[] { 0, 787, Duration.ofMinutes(787) }, // excessive minutes (>59) are valid
+            
+            // negative values are (unfortunately) also... valid :/
+            new Object[] { -8, 0, Duration.ofHours(-8) },
+            new Object[] { 0, -2, Duration.ofMinutes(-2) },
+            new Object[] { -8, -2, Duration.ofMinutes(-482) },
+            
+            // Since negative values don't make any sense we need to make sure
+            // that such input does not mix up when using different signs per
+            // hour/minute number. We expect result to remain negative in those
+            // cases.
+            new Object[] { 1, -60, Duration.ofMinutes(-120) },
+            new Object[] { -1, 60, Duration.ofMinutes(-120) },
         };
     }
 
@@ -2549,7 +2561,7 @@ public class ClientParserTest {
     }
     
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({"abc", "1a", "a1"})
     public void testParse_connectedPilotWithInvalidPlannedHoursEnroute_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:%s:0:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
@@ -2564,7 +2576,7 @@ public class ClientParserTest {
     }
     
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({"abc", "1a", "a1"})
     public void testParse_connectedPilotWithInvalidPlannedMinutesEnroute_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:0:%s:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
@@ -2636,7 +2648,7 @@ public class ClientParserTest {
     }
     
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({"abc", "1a", "a1"})
     public void testParse_prefiledPilotWithInvalidPlannedHoursEnroute_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:%s:0:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
@@ -2651,7 +2663,7 @@ public class ClientParserTest {
     }
     
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({"abc", "1a", "a1"})
     public void testParse_prefiledPilotWithInvalidPlannedMinutesEnroute_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:0:%s:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
@@ -2724,7 +2736,7 @@ public class ClientParserTest {
     }
     
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({"abc", "1a", "a1"})
     public void testParse_atcWithInvalidPlannedHoursEnroute_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::%s:0::::::::::atis message:20180101160000:20180101150000::::", input);
@@ -2739,7 +2751,7 @@ public class ClientParserTest {
     }
     
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({"abc", "1a", "a1"})
     public void testParse_atcWithInvalidPlannedMinutesEnroute_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::0:%s::::::::::atis message:20180101160000:20180101150000::::", input);
@@ -2813,7 +2825,7 @@ public class ClientParserTest {
     }
     
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({"abc", "1a", "a1"})
     public void testParse_connectedPilotWithInvalidPlannedHoursFuel_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:%s:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
@@ -2828,7 +2840,7 @@ public class ClientParserTest {
     }
     
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({"abc", "1a", "a1"})
     public void testParse_connectedPilotWithInvalidPlannedMinutesFuel_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:0:%s:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
@@ -2900,7 +2912,7 @@ public class ClientParserTest {
     }
     
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({"abc", "1a", "a1"})
     public void testParse_prefiledPilotWithInvalidPlannedHoursFuel_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:%s:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
@@ -2915,7 +2927,7 @@ public class ClientParserTest {
     }
     
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({"abc", "1a", "a1"})
     public void testParse_prefiledPilotWithInvalidPlannedMinutesFuel_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:0:%s:EDDW:remark:DCT:0:0:0:0:::::::", input);
@@ -2988,7 +3000,7 @@ public class ClientParserTest {
     }
     
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({"abc", "1a", "a1"})
     public void testParse_atcWithInvalidPlannedHoursFuel_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::%s:0::::::::atis message:20180101160000:20180101150000::::", input);
@@ -3003,7 +3015,7 @@ public class ClientParserTest {
     }
     
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({"abc", "1a", "a1"})
     public void testParse_atcWithInvalidPlannedMinutesFuel_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::0:%s::::::::atis message:20180101160000:20180101150000::::", input);

@@ -676,7 +676,9 @@ public class Client {
      * Returns the flight's estimated time enroute (airborne) as filed on
      * flight plan.
      * Returns null if unavailable.
-     * @return estimated time enroute; null if unavailable
+     * May return a negative duration which doesn't make any sense at all and
+     * should be ignored (error on submission of flight plan).
+     * @return estimated time enroute, may be negative; null if unavailable
      */
     public Duration getFiledTimeEnroute() {
         return filedTimeEnroute;
@@ -690,7 +692,9 @@ public class Client {
      * Returns the flight's estimated time of fuel on board as filed on
      * flight plan.
      * Returns null if unavailable.
-     * @return estimated time of fuel on board; null if unavailable
+     * May return a negative duration which doesn't make any sense at all and
+     * should be ignored (error on submission of flight plan).
+     * @return estimated time of fuel on board, may be negative; null if unavailable
      */
     public Duration getFiledTimeFuel() {
         return filedTimeFuel;
