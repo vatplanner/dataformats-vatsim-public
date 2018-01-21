@@ -41,8 +41,8 @@ public class ClientParser {
         "("+SUBPATTERN_GEOCOORDINATES+"|):("+SUBPATTERN_GEOCOORDINATES+"|):"+
     //    36   37                          38                          39
         "(.*):("+SUBPATTERN_TIMESTAMP+"|):("+SUBPATTERN_TIMESTAMP+"|):(\\d+|):"+
-    //    40                               41
-        "("+SUBPATTERN_FLOAT_UNSIGNED+"|):(\\d+|):");
+    //    40                                   41
+        "(\\-?"+SUBPATTERN_FLOAT_UNSIGNED+"|):(\\d+|):");
     
     // TODO: allowed ATIS message to contain ":" in text as seen in the wild... may cause issues, keep an eye on it
     
