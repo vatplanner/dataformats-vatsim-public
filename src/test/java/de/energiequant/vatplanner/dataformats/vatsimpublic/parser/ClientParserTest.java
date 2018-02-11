@@ -4337,8 +4337,8 @@ public class ClientParserTest {
     
     // <editor-fold defaultstate="collapsed" desc="special: client type detection/tolerance">
     @Test
-    public void testParse_ghostWithPositionHeadingQNHAndTransponderInOnlineSection_returnsObjectAsEffectiveConnectedPilotWithExpectedData() {
-        // Seen in datafiles from 12 Oct 2017:
+    public void testParse_ghostWithPositionHeadingQNHTransponderLogonTimeAndServerIdInOnlineSection_returnsObjectAsEffectiveConnectedPilotWithExpectedData() {
+        // Occurence on 12 Oct 2017 (with server ID):
         // Client was briefly connected earlier with incomplete data, then
         // appears with a new login time and full position, heading, QNH and
         // transponder information but without VATSIM ID or server protocol.
@@ -4365,6 +4365,39 @@ public class ClientParserTest {
         assertThat(result.getAltitudeFeet(), is(equalTo(80)));
         assertThat(result.getGroundSpeed(), is(equalTo(0)));
         assertThat(result.getServerId(), is(equalTo("SOME_SERVER")));
+        assertThat(result.getControllerRating(), is(equalTo(ControllerRating.OBS)));
+        assertThat(result.getTransponderCodeDecimal(), is(equalTo(1200)));
+        assertThat(result.getLogonTime(), is(equalTo(expectedLogonTime)));
+        assertThat(result.getHeading(), is(equalTo(120)));
+        assertThat(result.getQnhInchMercury(), is(closeTo(29.92, ALLOWED_DOUBLE_ERROR)));
+        assertThat(result.getQnhHectopascal(), is(equalTo(1013)));
+    }
+    
+    @Test
+    public void testParse_ghostWithPositionHeadingQNHTransponderLogonTimeButWithoutServerIdInOnlineSection_returnsObjectAsEffectiveConnectedPilotWithExpectedData() {
+        // Occurence on 21 Oct 2017 (without server ID):
+        // Client had correct data one retrieval later. It appears like this
+        // incomplete data might have been captured while the client had not
+        // finished connecting?
+        
+        // Arrange
+        String line = "ANY123:::::10.12345:-20.54321:80:0::0::::::1:1200::::::::::::::::::::20171021123456:120:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        Instant expectedLogonTime = LocalDateTime.of(2017, Month.OCTOBER, 21, 12, 34, 56).toInstant(ZoneOffset.UTC);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getRawClientType(), is(nullValue()));
+        assertThat(result.getEffectiveClientType(), is(equalTo(ClientType.PILOT_CONNECTED)));
+        assertThat(result.getCallsign(), is(equalTo("ANY123")));
+        assertThat(result.getLatitude(), is(closeTo(10.12345, ALLOWED_DOUBLE_ERROR)));
+        assertThat(result.getLongitude(), is(closeTo(-20.54321, ALLOWED_DOUBLE_ERROR)));
+        assertThat(result.getAltitudeFeet(), is(equalTo(80)));
+        assertThat(result.getGroundSpeed(), is(equalTo(0)));
+        assertThat(result.getServerId(), is(nullValue()));
         assertThat(result.getControllerRating(), is(equalTo(ControllerRating.OBS)));
         assertThat(result.getTransponderCodeDecimal(), is(equalTo(1200)));
         assertThat(result.getLogonTime(), is(equalTo(expectedLogonTime)));

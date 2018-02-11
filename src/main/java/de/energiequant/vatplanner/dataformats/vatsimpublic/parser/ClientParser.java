@@ -134,8 +134,11 @@ public class ClientParser {
             
             ClientType effectiveClientType = guessClientType(matcher, rawClientType);
             client.setEffectiveClientType(effectiveClientType);
+            
+            boolean isRawClientTypeOnline = isOnlineClientType(rawClientType);
+            boolean isEffectiveClientTypeOnline = isOnlineClientType(effectiveClientType);
+            boolean hasChangedOnlineStateByGuessing = (isRawClientTypeOnline != isEffectiveClientTypeOnline);
 
-            boolean isOnline = (effectiveClientType != null) && (effectiveClientType != ClientType.PILOT_PREFILED);
             boolean isATC = (effectiveClientType == ClientType.ATC_CONNECTED);
             boolean isPrefiling = (effectiveClientType == ClientType.PILOT_PREFILED);
             boolean isConnectedPilot = (effectiveClientType == ClientType.PILOT_CONNECTED);
@@ -147,17 +150,17 @@ public class ClientParser {
             client.setVatsimID(parseIntWithDefault(matcher.group(PATTERN_LINE_CID), -1)); // TODO: log details if ID is missing
             client.setRealName(matcher.group(PATTERN_LINE_REALNAME));
             client.setServedFrequencyKilohertz(parseServedFrequencyMegahertzToKilohertz(matcher.group(PATTERN_LINE_FREQUENCY), isAllowedToServeFrequency));
-            client.setLatitude(parseOnlineGeoCoordinate(matcher.group(PATTERN_LINE_LATITUDE), isOnline));
-            client.setLongitude(parseOnlineGeoCoordinate(matcher.group(PATTERN_LINE_LONGITUDE), isOnline));
-            client.setAltitudeFeet(parseOnlineAltitude(matcher.group(PATTERN_LINE_ALTITUDE), isOnline));
+            client.setLatitude(parseOnlineGeoCoordinate(matcher.group(PATTERN_LINE_LATITUDE), isEffectiveClientTypeOnline));
+            client.setLongitude(parseOnlineGeoCoordinate(matcher.group(PATTERN_LINE_LONGITUDE), isEffectiveClientTypeOnline));
+            client.setAltitudeFeet(parseOnlineAltitude(matcher.group(PATTERN_LINE_ALTITUDE), isEffectiveClientTypeOnline));
             client.setGroundSpeed(parseGroundSpeed(matcher.group(PATTERN_LINE_GROUNDSPEED), effectiveClientType));
             client.setAircraftType(matcher.group(PATTERN_LINE_PLANNED_AIRCRAFT));
             client.setFiledTrueAirSpeed(parseIntWithDefault(matcher.group(PATTERN_LINE_PLANNED_TASCRUISE), 0));
             client.setFiledDepartureAirportCode(matcher.group(PATTERN_LINE_PLANNED_DEPAIRPORT));
             client.setRawFiledAltitude(matcher.group(PATTERN_LINE_PLANNED_ALTITUDE));
             client.setFiledDestinationAirportCode(matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT));
-            client.setServerId(filterServerId(matcher.group(PATTERN_LINE_SERVER), isOnline));
-            client.setProtocolVersion(parseOnlineProtocolVersion(matcher.group(PATTERN_LINE_PROTREVISION), isOnline));
+            client.setServerId(filterServerId(matcher.group(PATTERN_LINE_SERVER), isEffectiveClientTypeOnline, hasChangedOnlineStateByGuessing));
+            client.setProtocolVersion(parseOnlineProtocolVersion(matcher.group(PATTERN_LINE_PROTREVISION), isEffectiveClientTypeOnline));
             client.setControllerRating(parseControllerRating(matcher.group(PATTERN_LINE_RATING), effectiveClientType));
             client.setTransponderCodeDecimal(parseTransponderCodeDecimal(matcher.group(PATTERN_LINE_TRANSPONDER), effectiveClientType));
             client.setFacilityType(parseFacilityType(matcher.group(PATTERN_LINE_FACILITYTYPE), rawClientType));
@@ -177,7 +180,7 @@ public class ClientParser {
             client.setDestinationAirportLongitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT_LON)));
             client.setControllerMessage(decodeControllerMessage(matcher.group(PATTERN_LINE_ATIS_MESSAGE), isATC));
             client.setControllerMessageLastUpdated(parseFullTimestamp(matcher.group(PATTERN_LINE_TIME_LAST_ATIS_RECEIVED), isATC));
-            client.setLogonTime(requireNonNullIf("logon time", isOnline, parseFullTimestamp(matcher.group(PATTERN_LINE_TIME_LOGON), isOnline)));
+            client.setLogonTime(requireNonNullIf("logon time", isEffectiveClientTypeOnline, parseFullTimestamp(matcher.group(PATTERN_LINE_TIME_LOGON), isEffectiveClientTypeOnline)));
             client.setHeading(parseHeading(matcher.group(PATTERN_LINE_HEADING), effectiveClientType));
             client.setQnhInchMercury(requireNaNIf("QNH Inch Mercury", !isConnectedPilot, parseDouble(matcher.group(PATTERN_LINE_QNH_IHG))));
             client.setQnhHectopascal(requireNegativeIf("QNH Hectopascal", !isConnectedPilot, parseIntWithDefault(matcher.group(PATTERN_LINE_QNH_MB), -1)));
@@ -186,6 +189,10 @@ public class ClientParser {
         }
         
         return client;
+    }
+
+    private static boolean isOnlineClientType(ClientType effectiveClientType) {
+        return (effectiveClientType != null) && (effectiveClientType != ClientType.PILOT_PREFILED);
     }
     
     /**
@@ -431,20 +438,29 @@ public class ClientParser {
      * If expectation matches, null will be returned if client is offline,
      * otherwise the original server ID will be returned.
      * </p>
+     * <p>
+     * Expectation is not checked if online state has been changed by guessing
+     * an effective client type which is different from raw client type.
+     * As a result, server ID may not be available although client has been
+     * interpreted to be online.
+     * See {@link Client#getEffectiveClientType()} for an explanation of when
+     * such guessing may occur.
+     * </p>
      * @param serverId server ID
-     * @param isOnline Is the client online?
-     * @return server ID if expectation matches, null for offline clients
+     * @param isEffectiveClientTypeOnline Is the client online by effective client type?
+     * @param hasChangedOnlineStateByGuessing Did online state change by guessing of effective client type?
+     * @return server ID if expectation matches, null for offline clients or if not set
      * @throws IllegalArgumentException if expectation of server ID is violated
      */
-    private String filterServerId(String serverId, boolean isOnline) throws IllegalArgumentException {
+    private String filterServerId(String serverId, boolean isEffectiveClientTypeOnline, boolean hasChangedOnlineStateByGuessing) throws IllegalArgumentException {
         boolean hasNoServerId = serverId.isEmpty();
         
-        boolean availabilityMatchesOnlineState = isOnline ^ hasNoServerId;
-        if (!availabilityMatchesOnlineState) {
-            throw new IllegalArgumentException("client is "+(isOnline ? "" : "not ")+"online but has "+(hasNoServerId ? "no" : "a")+" server ID assigned: \""+serverId+"\"");
+        boolean availabilityMatchesOnlineState = isEffectiveClientTypeOnline ^ hasNoServerId;
+        if (!availabilityMatchesOnlineState && !hasChangedOnlineStateByGuessing) {
+            throw new IllegalArgumentException("client is "+(isEffectiveClientTypeOnline ? "" : "not ")+"online but has "+(hasNoServerId ? "no" : "a")+" server ID assigned: \""+serverId+"\"");
         }
         
-        if (!isOnline) {
+        if (!isEffectiveClientTypeOnline || serverId.isEmpty()) {
             return null;
         }
         

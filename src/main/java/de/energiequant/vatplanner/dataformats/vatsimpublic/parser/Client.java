@@ -501,7 +501,9 @@ public class Client {
     /**
      * Returns the ID of the server the client is currently connected to.
      * Returns null for clients not being online (prefiled flight plans).
-     * @return ID of server currently connected to; null if offline
+     * May also return null if client is a ghost; see
+     * {@link #getEffectiveClientType()} for an explanation.
+     * @return ID of server currently connected to; null if offline or ghost
      */
     public String getServerId() {
         return serverId;
