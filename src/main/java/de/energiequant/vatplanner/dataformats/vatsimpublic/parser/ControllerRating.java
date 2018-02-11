@@ -76,6 +76,15 @@ public enum ControllerRating {
     C1(5),
     
     /**
+    * C2 rating is called "Controller 2" by VATSIM statistics center.
+    * Such rating is not mentioned in any recent document and may not be
+    * obtainable any more. However, this rating may occasionally still show
+    * up on data files. By common sense, it would likely be assumed that an C2
+    * rated controller is effectively rated {@link #C1} by current policy.
+    */
+    C2(6),
+    
+    /**
      * C3 rating is described as "Senior Controller" by both Code of Regulations
      * and Global Ratings Policy.
      * This is one level above {@link #C1}.
@@ -92,7 +101,7 @@ public enum ControllerRating {
     * Such rating is not mentioned in any recent document and may not be
     * obtainable any more. However, this rating may occasionally still show
     * up on data files. By common sense, it would likely be assumed that an I2
-    * rated controller is effectively rated {@link I} by current policy.
+    * rated controller is effectively rated {@link #I} by current policy.
     */
     I2(9),
     
