@@ -16,11 +16,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static de.energiequant.vatplanner.dataformats.vatsimpublic.testutils.ParserLogEntryMatcher.matchesParserLogEntry;
 
 @RunWith(DataProviderRunner.class)
 public class DataFileParserTest {
@@ -193,11 +195,11 @@ public class DataFileParserTest {
         // Assert
         verify(mockResult).setIsParsingPrefileSection(Mockito.eq(true));
     }
-    
+
     @Test
-    public void testParse_clientsSection_returnsDataFileWithResultsFromOnlineClientParser() {
+    public void testParse_clientsSectionThrowsIllegalArgumentException_returnsDataFileWithNonExceptionalResultsFromOnlineClientParser() {
         // Arrange
-        String lines = buildDataFileForSection("CLIENTS", ":expected line:1:", ":expected line:2:");
+        String lines = buildDataFileForSection("CLIENTS", ":expected line:1:", "trigger error 1", ":expected line:2:", "trigger error 2");
         
         Client mockExpected1 = mock(Client.class);
         doReturn(mockExpected1).when(mockOnlineClientParser).parse(Mockito.eq(":expected line:1:"));
@@ -205,6 +207,8 @@ public class DataFileParserTest {
         Client mockExpected2 = mock(Client.class);
         doReturn(mockExpected2).when(mockOnlineClientParser).parse(Mockito.eq(":expected line:2:"));
         
+        doThrow(new IllegalArgumentException("some error")).when(mockOnlineClientParser).parse(Mockito.startsWith("trigger error"));
+        
         // Act
         DataFile dataFile = spyParser.parse(lines);
         
@@ -213,15 +217,61 @@ public class DataFileParserTest {
     }
 
     @Test
-    public void testParse_prefileSection_returnsDataFileWithResultsFromPrefileClientParser() {
+    public void testParse_clientsSectionThrowsIllegalArgumentExceptions_returnsDataFileWithExceptionalResultsLoggedCorrectly() {
         // Arrange
-        String lines = buildDataFileForSection("PREFILE", ":expected line:1:", ":expected line:2:");
+        String section = "CLIENTS";
+        String triggerLine1 = "trigger error 1";
+        String triggerLine2 = "trigger error 2";
+        String lines = buildDataFileForSection(section, ":expected line:1:", triggerLine1, ":expected line:2:", triggerLine2);
+        
+        Client mockExpected1 = mock(Client.class);
+        doReturn(mockExpected1).when(mockOnlineClientParser).parse(Mockito.eq(":expected line:1:"));
+        
+        Client mockExpected2 = mock(Client.class);
+        doReturn(mockExpected2).when(mockOnlineClientParser).parse(Mockito.eq(":expected line:2:"));
+        
+        IllegalArgumentException exception1 = new IllegalArgumentException("some error");
+        doThrow(exception1).when(mockOnlineClientParser).parse(Mockito.eq(triggerLine1));
+        
+        IllegalArgumentException exception2 = new IllegalArgumentException("another error");
+        doThrow(exception2).when(mockOnlineClientParser).parse(Mockito.eq(triggerLine2));
+        
+        // Act
+        DataFile dataFile = spyParser.parse(lines);
+        
+        // Assert
+        Collection<ParserLogEntry> entries = dataFile.getParserLogEntries();
+        assertThat(entries, containsInAnyOrder(
+                matchesParserLogEntry(
+                        equalTo(section),
+                        equalTo(triggerLine1),
+                        equalTo(true),
+                        containsString(exception1.getMessage()),
+                        sameInstance(exception1)
+                ),
+                
+                matchesParserLogEntry(
+                        equalTo(section),
+                        equalTo(triggerLine2),
+                        equalTo(true),
+                        containsString(exception2.getMessage()),
+                        sameInstance(exception2)
+                )
+        ));
+    }
+
+    @Test
+    public void testParse_prefileSectionThrowsIllegalArgumentExceptions_returnsDataFileWithNonExceptionResultsFromPrefileClientParser() {
+        // Arrange
+        String lines = buildDataFileForSection("PREFILE", ":expected line:1:", "trigger error 1", ":expected line:2:", "trigger error 2");
         
         Client mockExpected1 = mock(Client.class);
         doReturn(mockExpected1).when(mockPrefileClientParser).parse(Mockito.eq(":expected line:1:"));
         
         Client mockExpected2 = mock(Client.class);
         doReturn(mockExpected2).when(mockPrefileClientParser).parse(Mockito.eq(":expected line:2:"));
+        
+        doThrow(new IllegalArgumentException("some error")).when(mockPrefileClientParser).parse(Mockito.startsWith("trigger error"));
         
         // Act
         DataFile dataFile = spyParser.parse(lines);
@@ -230,6 +280,50 @@ public class DataFileParserTest {
         assertThat(dataFile.getClients(), containsInAnyOrder(mockExpected1, mockExpected2));
     }
 
+    @Test
+    public void testParse_prefileSectionThrowsIllegalArgumentExceptions_returnsDataFileWithExceptionalResultsLoggedCorrectly() {
+        // Arrange
+        String section = "PREFILE";
+        String triggerLine1 = "trigger error 1";
+        String triggerLine2 = "trigger error 2";
+        String lines = buildDataFileForSection(section, ":expected line:1:", triggerLine1, ":expected line:2:", triggerLine2);
+        
+        Client mockExpected1 = mock(Client.class);
+        doReturn(mockExpected1).when(mockPrefileClientParser).parse(Mockito.eq(":expected line:1:"));
+        
+        Client mockExpected2 = mock(Client.class);
+        doReturn(mockExpected2).when(mockPrefileClientParser).parse(Mockito.eq(":expected line:2:"));
+        
+        IllegalArgumentException exception1 = new IllegalArgumentException("some error");
+        doThrow(exception1).when(mockPrefileClientParser).parse(Mockito.eq(triggerLine1));
+        
+        IllegalArgumentException exception2 = new IllegalArgumentException("another error");
+        doThrow(exception2).when(mockPrefileClientParser).parse(Mockito.eq(triggerLine2));
+        
+        // Act
+        DataFile dataFile = spyParser.parse(lines);
+        
+        // Assert
+        Collection<ParserLogEntry> entries = dataFile.getParserLogEntries();
+        assertThat(entries, containsInAnyOrder(
+                matchesParserLogEntry(
+                        equalTo(section),
+                        equalTo(triggerLine1),
+                        equalTo(true),
+                        containsString(exception1.getMessage()),
+                        sameInstance(exception1)
+                ),
+                
+                matchesParserLogEntry(
+                        equalTo(section),
+                        equalTo(triggerLine2),
+                        equalTo(true),
+                        containsString(exception2.getMessage()),
+                        sameInstance(exception2)
+                )
+        ));
+    }
+    
     @Test
     public void testParse_serversSection_returnsDataFileWithResultsFromFSDServerParser() {
         // Arrange

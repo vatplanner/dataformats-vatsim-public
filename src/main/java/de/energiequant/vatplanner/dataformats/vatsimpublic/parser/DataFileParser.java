@@ -3,10 +3,13 @@ package de.energiequant.vatplanner.dataformats.vatsimpublic.parser;
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -68,6 +71,36 @@ public class DataFileParser {
     }
     
     /**
+     * Wraps given parser function to catch and log exceptions into a {@link ParserLogEntryCollector}.
+     * Caught exceptions result in null being returned instead.
+     * @param <U> output type of wrapped function
+     * @param wrappedFunction function to be wrapped by exception handling
+     * @param section parser section related to wrapped function
+     * @param collector collector for all generated {@link ParserLogEntry}s
+     * @return function adding exception handling to original wrapped function
+     */
+    private <U> Function<String,U> logExceptionsFrom(Function<String,U> wrappedFunction, String section, ParserLogEntryCollector collector) {
+        return (String line) -> {
+            try {
+                return wrappedFunction.apply(line);
+            } catch (IllegalArgumentException ex) {
+                ParserLogEntry logEntry = new ParserLogEntry(section, line, true, ex.getMessage(), ex);
+                collector.addParserLogEntry(logEntry);
+                return null;
+            }
+        };
+    }
+    
+    /**
+     * Generates a new {@link Predicate} checking for values being not null.
+     * @param <T> type of objects to test
+     * @return predicate testing objects type-safe (for use in streams)
+     */
+    private <T> Predicate<T> notNull() {
+        return (T t) -> t != null;
+    }
+    
+    /**
      * Parses a whole file by reading from the given {@link BufferedReader}.
      * Content is expected to have been opened with ISO8859-1 character set.
      * @param br {@link BufferedReader} providing access to the complete file contents to be parsed
@@ -90,8 +123,14 @@ public class DataFileParser {
         // TODO: log warning if data format is unexpected (currently implemented format version 8)
 
         try {
-            Stream<Client> onlineClientsStream = relevantLinesBySection.getOrDefault(SECTION_NAME_CLIENTS, new ArrayList<>()).stream().map(onlineClientParser::parse);
-            Stream<Client> prefileClientsStream = relevantLinesBySection.getOrDefault(SECTION_NAME_PREFILE, new ArrayList<>()).stream().map(prefileClientParser::parse);
+            Stream<Client> onlineClientsStream = relevantLinesBySection.getOrDefault(SECTION_NAME_CLIENTS, new ArrayList<>()).stream()
+                    .map(logExceptionsFrom(onlineClientParser::parse, SECTION_NAME_CLIENTS, dataFile))
+                    .filter(notNull());
+            
+            Stream<Client> prefileClientsStream = relevantLinesBySection.getOrDefault(SECTION_NAME_PREFILE, new ArrayList<>()).stream()
+                    .map(logExceptionsFrom(prefileClientParser::parse, SECTION_NAME_PREFILE, dataFile))
+                    .filter(notNull());
+            
             Stream<Client> allClientsStream = Stream.concat(onlineClientsStream, prefileClientsStream);
             dataFile.setClients(allClientsStream.collect(Collectors.toCollection(ArrayList::new)));
 
