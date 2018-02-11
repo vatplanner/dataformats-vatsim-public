@@ -129,20 +129,16 @@ public class ClientParser {
         Client client = new Client();
         
         try {
-            ClientType clientType = parseClientType(matcher.group(PATTERN_LINE_CLIENTTYPE));
+            ClientType rawClientType = parseRawClientType(matcher.group(PATTERN_LINE_CLIENTTYPE));
+            client.setRawClientType(rawClientType);
             
-            if (clientType == null) {
-                // TODO: log if we have to guess
-                clientType = guessClientType(matcher);
-                // TODO: log if still null after guessing
-            }
-            
-            client.setClientType(clientType);
+            ClientType effectiveClientType = guessClientType(matcher, rawClientType);
+            client.setEffectiveClientType(effectiveClientType);
 
-            boolean isOnline = (clientType != null) && (clientType != ClientType.PILOT_PREFILED);
-            boolean isATC = (clientType == ClientType.ATC_CONNECTED);
-            boolean isPrefiling = (clientType == ClientType.PILOT_PREFILED);
-            boolean isConnectedPilot = (clientType == ClientType.PILOT_CONNECTED);
+            boolean isOnline = (effectiveClientType != null) && (effectiveClientType != ClientType.PILOT_PREFILED);
+            boolean isATC = (effectiveClientType == ClientType.ATC_CONNECTED);
+            boolean isPrefiling = (effectiveClientType == ClientType.PILOT_PREFILED);
+            boolean isConnectedPilot = (effectiveClientType == ClientType.PILOT_CONNECTED);
             boolean isAllowedToServeFrequency = isATC;
             //boolean isAllowedToHaveFlightPlan = !isATC;
             boolean isFiledTimeMandatory = isPrefiling;
@@ -154,7 +150,7 @@ public class ClientParser {
             client.setLatitude(parseOnlineGeoCoordinate(matcher.group(PATTERN_LINE_LATITUDE), isOnline));
             client.setLongitude(parseOnlineGeoCoordinate(matcher.group(PATTERN_LINE_LONGITUDE), isOnline));
             client.setAltitudeFeet(parseOnlineAltitude(matcher.group(PATTERN_LINE_ALTITUDE), isOnline));
-            client.setGroundSpeed(parseGroundSpeed(matcher.group(PATTERN_LINE_GROUNDSPEED), clientType));
+            client.setGroundSpeed(parseGroundSpeed(matcher.group(PATTERN_LINE_GROUNDSPEED), effectiveClientType));
             client.setAircraftType(matcher.group(PATTERN_LINE_PLANNED_AIRCRAFT));
             client.setFiledTrueAirSpeed(parseIntWithDefault(matcher.group(PATTERN_LINE_PLANNED_TASCRUISE), 0));
             client.setFiledDepartureAirportCode(matcher.group(PATTERN_LINE_PLANNED_DEPAIRPORT));
@@ -162,11 +158,11 @@ public class ClientParser {
             client.setFiledDestinationAirportCode(matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT));
             client.setServerId(filterServerId(matcher.group(PATTERN_LINE_SERVER), isOnline));
             client.setProtocolVersion(parseOnlineProtocolVersion(matcher.group(PATTERN_LINE_PROTREVISION), isOnline));
-            client.setControllerRating(parseControllerRating(matcher.group(PATTERN_LINE_RATING), clientType));
-            client.setTransponderCodeDecimal(parseTransponderCodeDecimal(matcher.group(PATTERN_LINE_TRANSPONDER), clientType));
-            client.setFacilityType(parseFacilityType(matcher.group(PATTERN_LINE_FACILITYTYPE), clientType));
-            client.setVisualRange(parseVisualRange(matcher.group(PATTERN_LINE_VISUALRANGE), clientType));
-            client.setFlightPlanRevision(parseFlightPlanRevision(matcher.group(PATTERN_LINE_PLANNED_REVISION), clientType));
+            client.setControllerRating(parseControllerRating(matcher.group(PATTERN_LINE_RATING), effectiveClientType));
+            client.setTransponderCodeDecimal(parseTransponderCodeDecimal(matcher.group(PATTERN_LINE_TRANSPONDER), effectiveClientType));
+            client.setFacilityType(parseFacilityType(matcher.group(PATTERN_LINE_FACILITYTYPE), rawClientType));
+            client.setVisualRange(parseVisualRange(matcher.group(PATTERN_LINE_VISUALRANGE), rawClientType));
+            client.setFlightPlanRevision(parseFlightPlanRevision(matcher.group(PATTERN_LINE_PLANNED_REVISION), effectiveClientType));
             client.setRawFlightPlanType(matcher.group(PATTERN_LINE_PLANNED_FLIGHTTYPE));
             client.setRawDepartureTimePlanned(parseIntWithDefault(matcher.group(PATTERN_LINE_PLANNED_DEPTIME), -1));
             client.setRawDepartureTimeActual(parseIntWithDefault(matcher.group(PATTERN_LINE_PLANNED_ACTDEPTIME), -1));
@@ -182,7 +178,7 @@ public class ClientParser {
             client.setControllerMessage(decodeControllerMessage(matcher.group(PATTERN_LINE_ATIS_MESSAGE), isATC));
             client.setControllerMessageLastUpdated(parseFullTimestamp(matcher.group(PATTERN_LINE_TIME_LAST_ATIS_RECEIVED), isATC));
             client.setLogonTime(requireNonNullIf("logon time", isOnline, parseFullTimestamp(matcher.group(PATTERN_LINE_TIME_LOGON), isOnline)));
-            client.setHeading(parseHeading(matcher.group(PATTERN_LINE_HEADING), clientType));
+            client.setHeading(parseHeading(matcher.group(PATTERN_LINE_HEADING), effectiveClientType));
             client.setQnhInchMercury(requireNaNIf("QNH Inch Mercury", !isConnectedPilot, parseDouble(matcher.group(PATTERN_LINE_QNH_IHG))));
             client.setQnhHectopascal(requireNegativeIf("QNH Hectopascal", !isConnectedPilot, parseIntWithDefault(matcher.group(PATTERN_LINE_QNH_MB), -1)));
         } catch (IllegalArgumentException ex) {
@@ -215,14 +211,20 @@ public class ClientParser {
         }
     }
     
-    private ClientType parseClientType(String rawClientType) {
+    /**
+     * Parses the raw client type as specified by given String in given context.
+     * Returns null for invalid client types.
+     * @param s string to be parsed to client type
+     * @return parsed raw client type; null if invalid
+     */
+    private ClientType parseRawClientType(String s) {
         if (!isParsingPrefileSection) {
-            if (CLIENT_TYPE_PILOT.equals(rawClientType)) {
+            if (CLIENT_TYPE_PILOT.equals(s)) {
                 return ClientType.PILOT_CONNECTED;
-            } else if (CLIENT_TYPE_ATC.equals(rawClientType)) {
+            } else if (CLIENT_TYPE_ATC.equals(s)) {
                 return ClientType.ATC_CONNECTED;
             }
-        } else if (rawClientType.isEmpty()) {
+        } else if (s.isEmpty()) {
             return ClientType.PILOT_PREFILED;
         }
         
@@ -231,13 +233,24 @@ public class ClientParser {
     
     /**
      * Guesses client type from available data of currently parsed line.
-     * This is necessary for some lines to be processed because some clients
-     * (due to sim crashes?) do not specify a client type although being listed
-     * in online section of data file.
+     * This is necessary for some lines to be processed because
+     * <ul>
+     * <li>
+     * some clients (due to sim crashes?) do not specify a client type
+     * although being listed in online section of data file
+     * </li>
+     * <li>
+     * ATC-logged clients may actually be flying as pilots (commonly observed
+     * with {@link ControllerRating#OBS} and {@link ControllerRating#SUP})
+     * which must be - surprisingly - a permitted (or at least unprevented) way
+     * of connecting to the network.
+     * </li>
+     * </ul>
      * @param matcher matcher retrieved via {@link #PATTERN_LINE}, containing all field information in matcher groups
+     * @param rawClientType raw client type as available from data file
      * @return most-likely client type, null if no decision could be made
      */
-    private ClientType guessClientType(Matcher matcher) {
+    private ClientType guessClientType(Matcher matcher, ClientType rawClientType) {
         // TODO: only ATC may define a frequency
         // TODO: only online pilots have GS >0 (implement only if necessary)
         
@@ -249,6 +262,10 @@ public class ClientParser {
             }
         }
         
+        if (rawClientType != null) {
+            return rawClientType;
+        }
+        
         return null;
     }
     
@@ -256,25 +273,28 @@ public class ClientParser {
      * Parses the given frequency assumed to be a floating number in MHz to an
      * integer describing the frequency in kHz.
      * Returned value will be negative if no frequency is provided.
-     * If serving is not allowed but a frequency is still being provided,
-     * an {@link IllegalArgumentException} will be thrown.
+     * If serving is not allowed but a served (non-placeholder) frequency is
+     * still being provided, an {@link IllegalArgumentException} will be thrown.
      * An {@link IllegalArgumentException} will also be thrown if the specified
      * frequency does not make any sense, for example if it is negative or zero.
      * @param s string to be parsed, formatted as floating number in MHz
      * @param allowServing Is serving a frequency allowed?
-     * @return frequency in kHz
+     * @return frequency in kHz (may be an unserved placeholder frequency)
      * @throws IllegalArgumentException if serving a frequency while not allowed or frequency does not make any sense
      */
     private int parseServedFrequencyMegahertzToKilohertz(String s, boolean allowServing) throws IllegalArgumentException {
         if (s.isEmpty()) {
             return -1;
-        } else if (!allowServing) {
-            throw new IllegalArgumentException("serving a frequency is not allowed but still encountered \""+s+"\" as being served by client");
         } else {
             int frequencyKilohertz = (int) Math.round(Double.parseDouble(s) * 1000.0);
             
             if (frequencyKilohertz <= 0) {
                 throw new IllegalArgumentException("served frequency is given as \""+s+"\" which does not make any sense");
+            }
+            
+            boolean isServedFrequency = frequencyKilohertz < Client.FREQUENCY_KILOHERTZ_PLACEHOLDER_MINIMUM;
+            if (isServedFrequency && !allowServing) {
+                throw new IllegalArgumentException("serving a frequency is not allowed but still encountered \""+s+"\" as being served by client");
             }
             
             return frequencyKilohertz;
@@ -528,7 +548,8 @@ public class ClientParser {
     /**
      * Parses the given string to a facility type.
      * <p>
-     * Facility types are only available to ATC.
+     * Facility types are only available to clients logged in as ATC (given by
+     * raw client type).
      * {@link IllegalArgumentException} will be thrown if the type ID is unknown
      * or a non-ATC client (pilot/flight plan) attempts to define a facility type.
      * </p>
@@ -536,12 +557,12 @@ public class ClientParser {
      * Returns null if undefined.
      * </p>
      * @param s string to parse
-     * @param clientType type of client
+     * @param rawClientType raw type of client, must not be effective type
      * @return facility type; null if unavailable
      * @throws IllegalArgumentException if set although not allowed, unknown ID or parsing error
      */
-    private FacilityType parseFacilityType(String s, ClientType clientType) throws IllegalArgumentException {
-        boolean isATC = (clientType == ClientType.ATC_CONNECTED);
+    private FacilityType parseFacilityType(String s, ClientType rawClientType) throws IllegalArgumentException {
+        boolean isATC = (rawClientType == ClientType.ATC_CONNECTED);
         
         if (s.isEmpty()) {
             return null;
@@ -557,7 +578,8 @@ public class ClientParser {
     /**
      * Parses the given string to a visual range.
      * <p>
-     * Visual range field is only available to ATC but not mandatory.
+     * Visual range field is only available to clients logged in as ATC (given
+     * by raw client type). The field is not mandatory.
      * {@link IllegalArgumentException} will be thrown if invalid
      * or a non-ATC client (pilot/flight plan) attempts to define a visual range.
      * </p>
@@ -565,12 +587,12 @@ public class ClientParser {
      * Returns negative value if undefined.
      * </p>
      * @param s string to parse
-     * @param clientType type of client
+     * @param rawClientType raw type of client, must not be effective type
      * @return visual range; negative if unavailable
      * @throws IllegalArgumentException if set although not allowed or parsing error
      */
-    private int parseVisualRange(String s, ClientType clientType) throws IllegalArgumentException {
-        boolean isATC = (clientType == ClientType.ATC_CONNECTED);
+    private int parseVisualRange(String s, ClientType rawClientType) throws IllegalArgumentException {
+        boolean isATC = (rawClientType == ClientType.ATC_CONNECTED);
         
         if (s.isEmpty()) {
             return -1;

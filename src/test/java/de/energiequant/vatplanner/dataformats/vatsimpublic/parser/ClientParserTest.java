@@ -380,7 +380,7 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="client type">
     @Test
-    public void testParse_connectedPilotWithClientTypePilot_returnsObjectWithClientTypePilotConnected() {
+    public void testParse_connectedPilotWithClientTypePilot_returnsObjectWithRawClientTypePilotConnected() {
         // Arrange
         String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
         parser.setIsParsingPrefileSection(false);
@@ -389,11 +389,11 @@ public class ClientParserTest {
         Client result = parser.parse(line);
         
         // Assert
-        assertThat(result.getClientType(), is(equalTo(ClientType.PILOT_CONNECTED)));
+        assertThat(result.getRawClientType(), is(equalTo(ClientType.PILOT_CONNECTED)));
     }
     
     @Test
-    public void testParse_prefiledPilotWithoutClientType_returnsObjectWithClientTypePilotPrefiled() {
+    public void testParse_prefiledPilotWithoutClientType_returnsObjectWithRawClientTypePilotPrefiled() {
         // Arrange
         String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
         parser.setIsParsingPrefileSection(true);
@@ -402,11 +402,11 @@ public class ClientParserTest {
         Client result = parser.parse(line);
         
         // Assert
-        assertThat(result.getClientType(), is(equalTo(ClientType.PILOT_PREFILED)));
+        assertThat(result.getRawClientType(), is(equalTo(ClientType.PILOT_PREFILED)));
     }
     
     @Test
-    public void testParse_atcWithClientTypeATC_returnsObjectWithClientTypeATCConnected() {
+    public void testParse_atcWithClientTypeATC_returnsObjectWithRawClientTypeATCConnected() {
         // Arrange
         String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::";
         parser.setIsParsingPrefileSection(false);
@@ -415,7 +415,7 @@ public class ClientParserTest {
         Client result = parser.parse(line);
         
         // Assert
-        assertThat(result.getClientType(), is(equalTo(ClientType.ATC_CONNECTED)));
+        assertThat(result.getRawClientType(), is(equalTo(ClientType.ATC_CONNECTED)));
     }
     
     // TODO: check for empty client type outside prefile section, should be able to distinguish ATC and PILOT_CONNECTED
@@ -482,9 +482,10 @@ public class ClientParserTest {
     }
     
     @Test
-    public void testParse_connectedPilotWithFrequency_throwsIllegalArgumentException() {
+    @DataProvider({"121.750", "198.999"})
+    public void testParse_connectedPilotWithNonPlaceholderFrequency_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = "ABC123:123456:realname:PILOT:121.750:12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        String line = String.format("ABC123:123456:realname:PILOT:%s:12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
         parser.setIsParsingPrefileSection(false);
         
         thrown.expect(IllegalArgumentException.class);
@@ -493,6 +494,25 @@ public class ClientParserTest {
         parser.parse(line);
         
         // Assert (nothing to do)
+    }
+    
+    @Test
+    @DataProvider({"199.000, 199000", "199.998, 199998"})
+    public void testParse_connectedPilotWithPlaceholderFrequency_throwsIllegalArgumentException(String input, int expectedFrequencyKilohertz) {
+        // This has not actually be seen in the wild but ATC clients may be
+        // interpreted as effectively pilots so the test fit in here.
+        // Placeholder frequencies in general should be allowed, just not active
+        // frequencies.
+        
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT:%s:12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        parser.setIsParsingPrefileSection(false);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getServedFrequencyKilohertz(), is(equalTo(expectedFrequencyKilohertz)));
     }
     
     @Test
@@ -523,7 +543,7 @@ public class ClientParserTest {
     }
     
     @Test
-    @DataProvider({"118.500, 118500", "118.50, 118500", "118.5, 118500", "121.725, 121725", "1.21725e2, 121725", "100.0001, 100000", "99.9999, 100000"})
+    @DataProvider({"118.500, 118500", "118.50, 118500", "118.5, 118500", "121.725, 121725", "1.21725e2, 121725", "199.998, 199998", "100.0001, 100000", "99.9999, 100000"})
     public void testParse_atcWithValidFrequency_returnsObjectWithExpectedServedFrequency(String input, int expectedFrequencyKilohertz) {
         // Arrange
         String line = String.format("EDDT_TWR:123456:realname:ATC:%s:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
@@ -4315,9 +4335,9 @@ public class ClientParserTest {
     }
     // </editor-fold>
     
-    // <editor-fold defaultstate="collapsed" desc="special: client detection/tolerance">
+    // <editor-fold defaultstate="collapsed" desc="special: client type detection/tolerance">
     @Test
-    public void testParse_ghostWithPositionHeadingQNHAndTransponderInOnlineSection_returnsObjectAsConnectedPilotWithExpectedData() {
+    public void testParse_ghostWithPositionHeadingQNHAndTransponderInOnlineSection_returnsObjectAsEffectiveConnectedPilotWithExpectedData() {
         // Seen in datafiles from 12 Oct 2017:
         // Client was briefly connected earlier with incomplete data, then
         // appears with a new login time and full position, heading, QNH and
@@ -4337,7 +4357,8 @@ public class ClientParserTest {
         Client result = parser.parse(line);
         
         // Assert
-        assertThat(result.getClientType(), is(equalTo(ClientType.PILOT_CONNECTED)));
+        assertThat(result.getRawClientType(), is(nullValue()));
+        assertThat(result.getEffectiveClientType(), is(equalTo(ClientType.PILOT_CONNECTED)));
         assertThat(result.getCallsign(), is(equalTo("ANY123")));
         assertThat(result.getLatitude(), is(closeTo(10.12345, ALLOWED_DOUBLE_ERROR)));
         assertThat(result.getLongitude(), is(closeTo(-20.54321, ALLOWED_DOUBLE_ERROR)));
@@ -4348,6 +4369,38 @@ public class ClientParserTest {
         assertThat(result.getTransponderCodeDecimal(), is(equalTo(1200)));
         assertThat(result.getLogonTime(), is(equalTo(expectedLogonTime)));
         assertThat(result.getHeading(), is(equalTo(120)));
+        assertThat(result.getQnhInchMercury(), is(closeTo(29.92, ALLOWED_DOUBLE_ERROR)));
+        assertThat(result.getQnhHectopascal(), is(equalTo(1013)));
+    }
+    
+    @Test
+    public void testParse_atcWithHeadingQNHAndTransponderInOnlineSectionOnPlaceholderFrequency_returnsObjectAsEffectiveConnectedPilotWithExpectedData() {
+        // Seen in datafiles from 6 Oct 2017:
+        // Observer on placeholder frequency but actually moving (GS > 0) so
+        // supposedly the observer was an actual online pilot.
+        
+        // Arrange
+        String line = "ANY123:987654321:some name:ATC:199.998:12.34567:-12.34567:123:1::0::::SOMESERVER:100:1:1200:0:40::::::::::::::::::20171006123456:180:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+        
+        Instant expectedLogonTime = LocalDateTime.of(2017, Month.OCTOBER, 6, 12, 34, 56).toInstant(ZoneOffset.UTC);
+        
+        // Act
+        Client result = parser.parse(line);
+        
+        // Assert
+        assertThat(result.getRawClientType(), is(equalTo(ClientType.ATC_CONNECTED)));
+        assertThat(result.getEffectiveClientType(), is(equalTo(ClientType.PILOT_CONNECTED)));
+        assertThat(result.getCallsign(), is(equalTo("ANY123")));
+        assertThat(result.getLatitude(), is(closeTo(12.34567, ALLOWED_DOUBLE_ERROR)));
+        assertThat(result.getLongitude(), is(closeTo(-12.34567, ALLOWED_DOUBLE_ERROR)));
+        assertThat(result.getAltitudeFeet(), is(equalTo(123)));
+        assertThat(result.getGroundSpeed(), is(equalTo(1)));
+        assertThat(result.getServerId(), is(equalTo("SOMESERVER")));
+        assertThat(result.getControllerRating(), is(equalTo(ControllerRating.OBS)));
+        assertThat(result.getTransponderCodeDecimal(), is(equalTo(1200)));
+        assertThat(result.getLogonTime(), is(equalTo(expectedLogonTime)));
+        assertThat(result.getHeading(), is(equalTo(180)));
         assertThat(result.getQnhInchMercury(), is(closeTo(29.92, ALLOWED_DOUBLE_ERROR)));
         assertThat(result.getQnhHectopascal(), is(equalTo(1013)));
     }

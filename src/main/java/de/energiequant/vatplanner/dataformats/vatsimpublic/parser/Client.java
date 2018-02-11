@@ -5,7 +5,7 @@ import java.time.Instant;
 
 /**
  * Combines information about VATSIM online pilots, prefiled flight plans and
- * online ATC stations, distinguished by {@link #clientType} as read from
+ * online ATC stations, distinguished by {@link #rawClientType} as read from
  * data.txt status file.
  * <p>Combination into a single class follows the original record format on
  * data.txt status files which is identical for all types although some
@@ -17,7 +17,7 @@ import java.time.Instant;
  * <li>{@link #servedFrequencyKilohertz}</li>
  * <li>{@link #controllerMessageLastUpdated}</li>
  * <li>{@link #controllerMessage}</li>
- * <li>{@link #rating}</li>
+ * <li>{@link #controllerRating}</li>
  * <li>{@link #visualRange}</li>
  * </ul>
  * </li>
@@ -55,6 +55,7 @@ import java.time.Instant;
  * </ul>
  * <p>Some fields allow for further interpretation or have a special format:</p>
  * <ul>
+ * <li>{@link #effectiveClientType}: While {@link #rawClientType} is the original {@link ClientType} as defined in original file, it may not match the role of a {@link Client} according to actual data. The perceived role is thus specified as {@link #effectiveClientType}. For more information read the getter JavaDoc below.</li>
  * <li>{@link #aircraftType}: ICAO aircraft type code. Should include equipment code as suffix, may include wake category as prefix (examples: B738/M, H/A332/X, B737). Not reliable as this is an informal free-text field and sometimes contains alternate/IATA codes or common mistakes (such as B77W for a Boeing 777 which is neither a valid ICAO nor IATA code).</li>
  * <li>{@link #callsign}: Callsigns can be chosen freely by pilots although some codes may be reserved for virtual airlines by convention. Callsigns on VATSIM omit hyphens which would be used in the real-world to separate country prefixes for plane registrations (e.g. all non-airline flights).</li>
  * <li>{@link #flightPlanRevision}: Flights passing through online controlled airspace will usually see many revisions of their original flight plan (mostly {@link #filedRoute}) as edited by ATC when the plane changes airspace or an initial clearance is given by departure airport. Flight plan revisions are tracked by this counter.
@@ -64,10 +65,19 @@ import java.time.Instant;
  * </ul>
  */
 public class Client {
+    /**
+     * If this minimum frequency (in kilohertz) is used by an ATC client the
+     * ATC client is believed not to be providing any service.
+     * Such placeholder frequencies can usually be found if a controller
+     * mentors a trainee or a supervisor is flying as a pilot.
+     */
+    public static final int FREQUENCY_KILOHERTZ_PLACEHOLDER_MINIMUM = 199000;
+    
     private String callsign; // also on prefiling
     private int vatsimID; // also on prefiling
     private String realName; // may include home base for pilots; also on prefiling
-    private ClientType clientType;
+    private ClientType rawClientType;
+    private ClientType effectiveClientType;
     private int servedFrequencyKilohertz; // ATC only
     private double latitude;
     private double longitude;
@@ -155,7 +165,7 @@ public class Client {
      * details. This may be the case for "ghost" clients which are still listed
      * in online section although they do not appear to be actually connected
      * (also missing {@link #protocolVersion} and being parsed with a guessed
-     * {@link #clientType}). Possible causes could be simulator crashes or
+     * {@link #effectiveClientType}). Possible causes could be simulator crashes or
      * client misbehaviour.
      * </p>
      * @return VATSIM user ID associated with client; negative if missing
@@ -191,28 +201,74 @@ public class Client {
     }
 
     /**
-     * Returns the {@link ClientType}.
+     * Returns the {@link ClientType} as originally specified in a data file.
+     * <p>
+     * Unless you need to access the actual raw information, consider using the
+     * {@link #effectiveClientType} instead. See JavaDoc on 
+     * {@link #getEffectiveClientType()} for an explanation of issues related to
+     * the raw client type.
+     * </p>
+     * @return raw type of client, may not match actual role of client; null if unavailable
+     * @see #getEffectiveClientType() 
+     */
+    public ClientType getRawClientType() {
+        return rawClientType;
+    }
+    
+    void setRawClientType(ClientType rawClientType) {
+        this.rawClientType = rawClientType;
+    }
+    
+    /**
+     * Returns the perceived effective {@link ClientType}.
      * <p>
      * Unfortunately, there are situations which require guessing the correct
-     * type as it is not in all cases provided by the data file.
+     * type as the {@link #rawClientType} is either missing in data file or
+     * does not match the actual role of a client on the network when perceived
+     * by other clients.
+     * </p>
+     * <p>
      * Expect null if information was not available and guessing failed (check
      * parser log messages for any details).
      * </p>
      * <p>
-     * Guessing happens for example if the listed client is a "ghost" which
-     * could be caused by simulator crashes or client misbehaviour.
+     * Some of the issues which led to the need of guessing an effective client
+     * type from actual data instead of just using raw information:
+     * </p>
+     * <ul>
+     * <li>
+     * {@link #rawClientType} may indicate {@link ClientType#ATC_CONNECTED} for
+     * clients who act as {@link ClientType#PILOT_CONNECTED}. This can be seen
+     * quite frequently for unprivileged {@link ControllerRating#OBS} clients
+     * (shared cockpit or bad login?) as well as {@link ControllerRating#SUP}
+     * (supervisor on duty while flying?). This can be noticed by ATC clients
+     * "leaking" pilot client information into the data file such as
+     * {@link #heading} or {@link #groundSpeed} > 0 while indicating a
+     * placeholder frequency ({@link #servedFrequencyKilohertz}) and no
+     * {@link #controllerMessage} which are clear signs of a pilot client being
+     * connected without providing ATC services at the same time.
+     * The {@link #effectiveClientType} shall correct such clients to
+     * {@link ClientType#PILOT_CONNECTED} according to their actual role on
+     * network.
+     * </li>
+     * <li>
+     * Clients can become listed as "ghosts" without any {@link #rawClientType}
+     * (null).
+     * This might be caused by simulator crashes or some client misbehaviour.
      * If you need to know if the client is actually online, you may want to
      * check if {@link #protocolVersion} and {@link #vatsimID} are available
      * (expected for actual online clients).
-     * </p>
-     * @return type of client, may have been guessed; null if unavailable and guessing failed
+     * </li>
+     * </ul>
+     * @return type of client, may have been guessed from actual data; null if unavailable and guessing failed
+     * @see #getRawClientType() 
      */
-    public ClientType getClientType() {
-        return clientType;
+    public ClientType getEffectiveClientType() {
+        return effectiveClientType;
     }
-
-    void setClientType(ClientType clientType) {
-        this.clientType = clientType;
+    
+    void setEffectiveClientType(ClientType effectiveClientType) {
+        this.effectiveClientType = effectiveClientType;
     }
 
     /**
@@ -460,10 +516,10 @@ public class Client {
      * servers.
      * Negative if not available (e.g. on prefiled flight plans).
      * <p>
-     * If protocol version is negative/unavailable although {@link #clientType}
+     * If protocol version is negative/unavailable although {@link #rawClientType}
      * indicates an online connection, client may be a "ghost" on VATSIM
      * servers. One possible explanation for such connections is a simulator
-     * crash or client misbehaviour. {@link #clientType} then may have
+     * crash or client misbehaviour. {@link #rawClientType} then may have
      * been guessed by parser.
      * </p>
      * @return protocol version of client; negative if unavailable
