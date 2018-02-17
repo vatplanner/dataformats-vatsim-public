@@ -33,10 +33,17 @@ public class GeneralSectionParser {
      * All lines are expected to contain the proper syntax used by VATSIM
      * data.txt files and not to be empty or a comment.
      * @param lines lines to be parsed; lines must not be empty, comments or null
+     * @param logEntryCollector collecting log entries produced by parsing the given lines
+     * @param sectionName section name as read from data file, used to identify log messages
      * @return all parsed data in a {@link DataFileMetaData} object
      */
-    public DataFileMetaData parse(Collection<String> lines) {
+    public DataFileMetaData parse(Collection<String> lines, ParserLogEntryCollector logEntryCollector, String sectionName) {
         DataFileMetaData metaData = new DataFileMetaData();
+        
+        if ((lines == null) || lines.isEmpty()) {
+            logEntryCollector.addParserLogEntry(new ParserLogEntry(sectionName, null, true, "meta data is missing or empty", null));
+            return metaData;
+        }
         
         for (String line : lines) {
             Matcher matcher = PATTERN_KEYVALUE.matcher(line);
@@ -66,7 +73,7 @@ public class GeneralSectionParser {
                         break;
                         
                     default:
-                        // TODO: log unparseable
+                        logEntryCollector.addParserLogEntry(new ParserLogEntry(sectionName, line, true, "key "+key+"is unknown and could not be parsed", null));
                         break;
                 }
             }

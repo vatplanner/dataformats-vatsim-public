@@ -2,8 +2,10 @@ package de.energiequant.vatplanner.dataformats.vatsimpublic.parser;
 
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import static de.energiequant.vatplanner.dataformats.vatsimpublic.testutils.ParserLogEntryMatcher.matchesParserLogEntry;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import static org.hamcrest.Matchers.*;
@@ -15,12 +17,73 @@ import org.junit.runner.RunWith;
 @RunWith(DataProviderRunner.class)
 public class GeneralSectionParserTest {
     private GeneralSectionParser parser;
+    private ParserLogEntryCollector logEntryCollector;
     
     @Before
     public void setUp() {
         parser = new GeneralSectionParser();
-    }
         
+        logEntryCollector = new DataFile();
+    }
+    
+    @Test
+    public void testParse_null_returnsDefaultMetaData() {
+        // Arrange
+        DataFileMetaData defaultMetaData = new DataFileMetaData();
+        
+        // Act
+        DataFileMetaData result = parser.parse(null, logEntryCollector, null);
+        
+        // Assert
+        assertThat(result.getMinimumAtisRetrievalInterval(), is(equalTo(defaultMetaData.getMinimumAtisRetrievalInterval())));
+        assertThat(result.getMinimumDataFileRetrievalInterval(), is(equalTo(defaultMetaData.getMinimumDataFileRetrievalInterval())));
+        assertThat(result.getNumberOfConnectedClients(), is(equalTo(defaultMetaData.getNumberOfConnectedClients())));
+        assertThat(result.getTimestamp(), is(equalTo(defaultMetaData.getTimestamp())));
+        assertThat(result.getVersionFormat(), is(equalTo(defaultMetaData.getVersionFormat())));
+    }
+    
+    @Test
+    public void testParse_null_logsGeneralSectionUnparsable() {
+        // Arrange
+        String expectedSectionName = "section name";
+        
+        // Act
+        parser.parse(null, logEntryCollector, expectedSectionName);
+        
+        // Assert
+        Collection<ParserLogEntry> entries = logEntryCollector.getParserLogEntries();
+        assertThat(entries, containsInAnyOrder(
+                matchesParserLogEntry(
+                        equalTo(expectedSectionName),
+                        is(nullValue(String.class)),
+                        equalTo(true),
+                        matchesPattern(".*meta data.*missing.*empty.*"),
+                        is(nullValue(Throwable.class))
+                )
+        ));
+    }
+    
+    @Test
+    public void testParse_emptyLines_logsGeneralSectionUnparsable() {
+        // Arrange
+        String expectedSectionName = "section name";
+        
+        // Act
+        parser.parse(new ArrayList<>(), logEntryCollector, expectedSectionName);
+        
+        // Assert
+        Collection<ParserLogEntry> entries = logEntryCollector.getParserLogEntries();
+        assertThat(entries, containsInAnyOrder(
+                matchesParserLogEntry(
+                        equalTo(expectedSectionName),
+                        is(nullValue(String.class)),
+                        equalTo(true),
+                        matchesPattern(".*meta data.*missing.*empty.*"),
+                        is(nullValue(Throwable.class))
+                )
+        ));
+    }
+    
     @Test
     @DataProvider({"8", "123"})
     public void testParse_withVersion_returnsDataFileMetaDataWithExpectedFormatVersion(int expectedVersion) {
@@ -30,7 +93,7 @@ public class GeneralSectionParserTest {
         );
         
         // Act
-        DataFileMetaData result = parser.parse(lines);
+        DataFileMetaData result = parser.parse(lines, logEntryCollector, null);
         
         // Assert
         assertThat(result.getVersionFormat(), is(equalTo(expectedVersion)));
@@ -40,11 +103,11 @@ public class GeneralSectionParserTest {
     public void testParse_withoutVersion_returnsDataFileMetaDataWithNegativeValueForFormatVersion() {
         // Arrange
         Collection<String> lines = Arrays.asList(
-            String.format("RELOAD = 123")
+            "RELOAD = 123"
         );
         
         // Act
-        DataFileMetaData result = parser.parse(lines);
+        DataFileMetaData result = parser.parse(lines, logEntryCollector, null);
         
         // Assert
         assertThat(result.getVersionFormat(), is(lessThan(0)));
@@ -59,7 +122,7 @@ public class GeneralSectionParserTest {
         );
         
         // Act
-        DataFileMetaData result = parser.parse(lines);
+        DataFileMetaData result = parser.parse(lines, logEntryCollector, null);
         
         // Assert
         assertThat(result.getMinimumDataFileRetrievalInterval(), is(equalTo(Duration.ofMinutes(minimumIntervalMinutes))));
@@ -69,11 +132,11 @@ public class GeneralSectionParserTest {
     public void testParse_withoutReload_returnsDataFileMetaDataWithNullForMinimumDataFileRetrievalInterval() {
         // Arrange
         Collection<String> lines = Arrays.asList(
-            String.format("VERSION = 123")
+            "VERSION = 123"
         );
         
         // Act
-        DataFileMetaData result = parser.parse(lines);
+        DataFileMetaData result = parser.parse(lines, logEntryCollector, null);
         
         // Assert
         assertThat(result.getMinimumDataFileRetrievalInterval(), is(nullValue()));
@@ -88,7 +151,7 @@ public class GeneralSectionParserTest {
         );
         
         // Act
-        DataFileMetaData result = parser.parse(lines);
+        DataFileMetaData result = parser.parse(lines, logEntryCollector, null);
         
         // Assert
         assertThat(result.getMinimumAtisRetrievalInterval(), is(equalTo(Duration.ofMinutes(minimumIntervalMinutes))));
@@ -98,11 +161,11 @@ public class GeneralSectionParserTest {
     public void testParse_withoutAtisAllowMin_returnsDataFileMetaDataWithNullForMinimumAtisRetrievalInterval() {
         // Arrange
         Collection<String> lines = Arrays.asList(
-            String.format("VERSION = 123")
+            "VERSION = 123"
         );
         
         // Act
-        DataFileMetaData result = parser.parse(lines);
+        DataFileMetaData result = parser.parse(lines, logEntryCollector, null);
         
         // Assert
         assertThat(result.getMinimumAtisRetrievalInterval(), is(nullValue()));
@@ -117,22 +180,21 @@ public class GeneralSectionParserTest {
         );
         
         // Act
-        DataFileMetaData result = parser.parse(lines);
+        DataFileMetaData result = parser.parse(lines, logEntryCollector, null);
         
         // Assert
         assertThat(result.getNumberOfConnectedClients(), is(equalTo(connectedClients)));
     }
     
     @Test
-    @DataProvider({"5", "100"})
-    public void testParse_withoutConnectedClients_returnsDataFileMetaDataWithNegativeValueForNumberOfConnectedClients(int connectedClients) {
+    public void testParse_withoutConnectedClients_returnsDataFileMetaDataWithNegativeValueForNumberOfConnectedClients() {
         // Arrange
         Collection<String> lines = Arrays.asList(
-            String.format("VERSION = 123", connectedClients)
+            "VERSION = 123"
         );
         
         // Act
-        DataFileMetaData result = parser.parse(lines);
+        DataFileMetaData result = parser.parse(lines, logEntryCollector, null);
         
         // Assert
         assertThat(result.getNumberOfConnectedClients(), is(lessThan(0)));
@@ -148,7 +210,7 @@ public class GeneralSectionParserTest {
         Instant expectedInstant = Instant.ofEpochSecond(valueEpochSeconds);
         
         // Act
-        DataFileMetaData result = parser.parse(lines);
+        DataFileMetaData result = parser.parse(lines, logEntryCollector, null);
         
         // Assert
         assertThat(result.getTimestamp(), is(equalTo(expectedInstant)));
@@ -158,13 +220,56 @@ public class GeneralSectionParserTest {
     public void testParse_withoutUpdate_returnsDataFileMetaDataWithNullForTimestamp() {
         // Arrange
         Collection<String> lines = Arrays.asList(
-            String.format("VERSION = 123")
+            "VERSION = 123"
         );
         
         // Act
-        DataFileMetaData result = parser.parse(lines);
+        DataFileMetaData result = parser.parse(lines, logEntryCollector, null);
         
         // Assert
         assertThat(result.getTimestamp(), is(nullValue()));
+    }
+    
+    @Test
+    public void testParse_completeData_doesNotLog() {
+        // Arrange
+        Collection<String> lines = Arrays.asList(
+            "UPDATE = 20161105184253",
+            "VERSION = 123",
+            "CONNECTED CLIENTS = 20",
+            "ATIS ALLOW MIN = 5",
+            "RELOAD = 2"
+        );
+        
+        // Act
+        parser.parse(lines, logEntryCollector, null);
+        
+        // Assert
+        Collection<ParserLogEntry> logEntries = logEntryCollector.getParserLogEntries();
+        assertThat(logEntries, is(empty()));
+    }
+
+    @Test
+    @DataProvider({"ABCDEFG", "ZZZ"})
+    public void testParse_unknownKey_logsKeyUnparsed(String key) {
+        // Arrange
+        String expectedSectionName = "section name";
+        String line = key + " = XYZ";
+        Collection<String> lines = Arrays.asList(line);
+        
+        // Act
+        parser.parse(lines, logEntryCollector, expectedSectionName);
+        
+        // Assert
+        Collection<ParserLogEntry> entries = logEntryCollector.getParserLogEntries();
+        assertThat(entries, containsInAnyOrder(
+                matchesParserLogEntry(
+                        equalTo(expectedSectionName),
+                        equalTo(line),
+                        equalTo(true),
+                        matchesPattern(".*key "+key+".*unknown.*"),
+                        is(nullValue(Throwable.class))
+                )
+        ));
     }
 }

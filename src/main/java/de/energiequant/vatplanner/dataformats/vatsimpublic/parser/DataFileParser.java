@@ -101,6 +101,15 @@ public class DataFileParser {
     }
     
     /**
+     * Creates a new {@link DataFile} instance.
+     * Required for unit testing.
+     * @return new {@link DataFile} instance
+     */
+    DataFile createDataFile() {
+        return new DataFile();
+    }
+    
+    /**
      * Parses a whole file by reading from the given {@link BufferedReader}.
      * Content is expected to have been opened with ISO8859-1 character set.
      * @param br {@link BufferedReader} providing access to the complete file contents to be parsed
@@ -117,8 +126,8 @@ public class DataFileParser {
         
         Map<String, List<String>> relevantLinesBySection = readRelevantLinesBySection(br);
         
-        DataFile dataFile = new DataFile();
-        dataFile.setMetaData(generalSectionParser.parse(relevantLinesBySection.get(SECTION_NAME_GENERAL)));
+        DataFile dataFile = createDataFile();
+        dataFile.setMetaData(generalSectionParser.parse(relevantLinesBySection.get(SECTION_NAME_GENERAL), dataFile, SECTION_NAME_GENERAL));
 
         // TODO: log warning if data format is unexpected (currently implemented format version 8)
 

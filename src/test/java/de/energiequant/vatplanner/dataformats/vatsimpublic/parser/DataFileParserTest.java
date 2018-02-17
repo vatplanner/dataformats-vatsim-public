@@ -19,8 +19,10 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static de.energiequant.vatplanner.dataformats.vatsimpublic.testutils.ParserLogEntryMatcher.matchesParserLogEntry;
 
@@ -142,7 +144,7 @@ public class DataFileParserTest {
     }
     
     @Test
-    public void testParse_generalSection_forwardsCleanedSectionRelevantLinesToGeneralSectionParser() {
+    public void testParse_generalSection_forwardsCleanedSectionRelevantLinesToGeneralSectionParserExactlyOnce() {
         // Arrange
         String lines = buildDataFileForSection("GENERAL", "123", "456");
         
@@ -151,10 +153,67 @@ public class DataFileParserTest {
         
         // Assert
         ArgumentCaptor<Collection<String>> captor = ArgumentCaptor.forClass(Collection.class);
-        verify(mockGeneralSectionParser).parse(captor.capture());
+        verify(mockGeneralSectionParser, times(1)).parse(captor.capture(), any(ParserLogEntryCollector.class), anyString());
         Collection<String> capturedCollection = captor.getValue();
         
         assertThat(capturedCollection, containsInAnyOrder("123", "456"));
+    }
+    
+    @Test
+    public void testParse_generalSection_forwardsDataFileAsLogCollectorToGeneralSectionParserExactlyOnce() {
+        // Arrange
+        String lines = buildDataFileForSection("GENERAL", "123", "456");
+        
+        DataFile mockDataFile = mock(DataFile.class);
+        doReturn(mockDataFile).when(spyParser).createDataFile();
+        
+        // Act
+        spyParser.parse(lines);
+        
+        // Assert
+        verify(mockGeneralSectionParser, times(1)).parse(any(Collection.class), Mockito.same(mockDataFile), anyString());
+    }
+    
+    @Test
+    public void testParse_generalSection_forwardsSectionNameToGeneralSectionParserExactlyOnce() {
+        // Arrange
+        String lines = buildDataFileForSection("GENERAL", "123", "456");
+        
+        DataFile mockDataFile = mock(DataFile.class);
+        doReturn(mockDataFile).when(spyParser).createDataFile();
+        
+        // Act
+        spyParser.parse(lines);
+        
+        // Assert
+        verify(mockGeneralSectionParser, times(1)).parse(any(Collection.class), any(ParserLogEntryCollector.class), Mockito.eq("GENERAL"));
+    }
+    
+    @Test
+    public void testParse_generalSection_returnsExpectedDataFile() {
+        // Arrange
+        String lines = buildDataFileForSection("GENERAL", "123", "456");
+        
+        DataFile mockDataFile = mock(DataFile.class);
+        doReturn(mockDataFile).when(spyParser).createDataFile();
+        
+        // Act
+        DataFile result = spyParser.parse(lines);
+        
+        // Assert
+        assertThat(result, is(sameInstance(mockDataFile)));
+    }
+    
+    @Test
+    public void testParse_generalSection_createsExactlyOneDataFile() {
+        // Arrange
+        String lines = buildDataFileForSection("GENERAL", "123", "456");
+        
+        // Act
+        spyParser.parse(lines);
+        
+        // Assert
+        verify(spyParser, times(1)).createDataFile();
     }
     
     @Test
@@ -163,7 +222,7 @@ public class DataFileParserTest {
         String lines = buildDataFileForSection("GENERAL");
         
         DataFileMetaData expectedMetaData = new DataFileMetaData();
-        doReturn(expectedMetaData).when(mockGeneralSectionParser).parse(any(Collection.class));
+        doReturn(expectedMetaData).when(mockGeneralSectionParser).parse(any(Collection.class), any(ParserLogEntryCollector.class), anyString());
         
         // Act
         DataFile dataFile = spyParser.parse(lines);
