@@ -44,7 +44,7 @@ public class NetworkInformationParser {
         new Object[]{NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, Pattern.compile(".*servers list.*")},
         new Object[]{NetworkInformation.PARAMETER_KEY_URL_MOVED, Pattern.compile(".*more updated status.*")},
         new Object[]{NetworkInformation.PARAMETER_KEY_URL_METAR, Pattern.compile(".*passing a parameter.*\\?id=.*")},
-        new Object[]{NetworkInformation.PARAMETER_KEY_URL_ATIS, Pattern.compile(".*passing a parameter.*\\?callsign=.*")},
+        new Object[]{NetworkInformation.PARAMETER_KEY_URL_ATIS, Pattern.compile(".*no longer available.*")},
         new Object[]{NetworkInformation.PARAMETER_KEY_URL_USER_STATISTICS, Pattern.compile(".*statistics.*page.*")}
     });
 

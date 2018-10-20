@@ -133,6 +133,9 @@ public class NetworkInformation {
      *
      * @return URLs to retrieve ATIS information from by adding
      * <code>?callsign=...</code>
+     * @deprecated as of October 2018 network information file header states
+     * service has been discontinued, controller info and ATIS should be read
+     * from data file instead
      */
     public List<URL> getAtisUrls() {
         return getUrlsByKey(PARAMETER_KEY_URL_ATIS);
@@ -155,8 +158,8 @@ public class NetworkInformation {
      * documentation from the file header, be prepared to choose one randomly if
      * multiple appear.
      *
-     * @return URLs to retrieve ATIS information from by adding
-     * <code>?callsign=...</code>
+     * @return URLs to retrieve METAR information from by adding
+     * <code>?id=...</code>
      */
     public List<URL> getMetarUrls() {
         return getUrlsByKey(PARAMETER_KEY_URL_METAR);

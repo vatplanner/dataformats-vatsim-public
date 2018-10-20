@@ -11,8 +11,7 @@
 ; url1         - URLs where servers list data files are available. Please choose one randomly every time
 ; moveto0      - URL where to retrieve a more updated status.txt file that overrides this one
 ; metar0       - URL where to retrieve metar. Invoke it passing a parameter like for example: http://removed/metar.html?id=KBOS
-; atis0        - URL where to retrieve atis. Invoke it passing a parameter like for example: http://removed/atis.html?callsign=BOS_CTR
-;                WARNING: please don't abuse it. Requests take network bandwidth. If possibile please use atis that are present into satnet-data.txt file
+; atis0        - This service is no longer available and the URL will not work. Controller info and ATISs are available in the main datafeed (url0)
 ; user0        - URL where to retrieve statistics web pages
 1234:TEST
 ;
