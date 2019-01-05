@@ -94,4 +94,16 @@ public class ParserLogEntry {
     public Throwable getThrowable() {
         return throwable;
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "%s [section: %s, line rejected: %b, exception: %s, line: %s]",
+                message,
+                section,
+                isLineRejected,
+                (throwable != null) ? throwable : "none",
+                (lineContent != null) ? "\"" + lineContent + "\"" : "null"
+        );
+    }
 }
