@@ -12,28 +12,29 @@ import org.junit.runner.RunWith;
  */
 @RunWith(DataProviderRunner.class)
 public class ParserLogEntryTest {
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-    
+
     @Test
     public void testConstructor_nullMessage_throwsIllegalArgumentException() {
         // Arrange
         thrown.expect(IllegalArgumentException.class);
-        
+
         // Act
         new ParserLogEntry("abc", "xyz", false, null, null);
-        
+
         // Assert (nothing to do)
     }
-    
+
     @Test
     @DataProvider({"", "abc"})
     public void testConstructor_nonNullMessage_doesNotFail(String message) {
         // Arrange (nothing to do)
-        
+
         // Act
         new ParserLogEntry("abc", "xyz", false, message, null);
-        
+
         // Assert (nothing to do)
     }
 }
