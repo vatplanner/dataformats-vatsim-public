@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -71,9 +71,9 @@ public class DataFileParser {
     }
 
     /**
-     * Wraps given parser function to catch and log exceptions into a
-     * {@link ParserLogEntryCollector}. Caught exceptions result in null being
-     * returned instead.
+     * Wraps given parser function to catch and log IllegalArgumentException
+     * into a {@link ParserLogEntryCollector}. Caught exceptions result in null
+     * being returned instead.
      *
      * @param <U> output type of wrapped function
      * @param wrappedFunction function to be wrapped by exception handling
@@ -82,6 +82,7 @@ public class DataFileParser {
      * @return function adding exception handling to original wrapped function
      */
     private <U> Function<String, U> logExceptionsFrom(Function<String, U> wrappedFunction, String section, ParserLogEntryCollector collector) {
+        // QUESTION: catch any Exception?
         return (String line) -> {
             try {
                 return wrappedFunction.apply(line);
@@ -91,16 +92,6 @@ public class DataFileParser {
                 return null;
             }
         };
-    }
-
-    /**
-     * Generates a new {@link Predicate} checking for values being not null.
-     *
-     * @param <T> type of objects to test
-     * @return predicate testing objects type-safe (for use in streams)
-     */
-    private <T> Predicate<T> notNull() {
-        return (T t) -> t != null;
     }
 
     /**
@@ -121,8 +112,6 @@ public class DataFileParser {
      * @return all parsed information collected in one {@link DataFile} object
      */
     public DataFile parse(BufferedReader br) {
-        // TODO: catch IllegalArgumentExceptions thrown by parsers (collect failed lines per section for analysis and indicate general presence/absence of errors)
-
         GeneralSectionParser generalSectionParser = getGeneralSectionParser();
         ClientParser onlineClientParser = getOnlineClientParser();
         ClientParser prefileClientParser = getPrefileClientParser();
@@ -135,37 +124,32 @@ public class DataFileParser {
         dataFile.setMetaData(generalSectionParser.parse(relevantLinesBySection.get(SECTION_NAME_GENERAL), dataFile, SECTION_NAME_GENERAL));
 
         // TODO: log warning if data format is unexpected (currently implemented format version 8)
-        try {
-            Stream<Client> onlineClientsStream = relevantLinesBySection.getOrDefault(SECTION_NAME_CLIENTS, new ArrayList<>()).stream()
-                    .map(logExceptionsFrom(onlineClientParser::parse, SECTION_NAME_CLIENTS, dataFile))
-                    .filter(notNull());
+        Stream<Client> onlineClientsStream = relevantLinesBySection.getOrDefault(SECTION_NAME_CLIENTS, new ArrayList<>()).stream()
+                .map(logExceptionsFrom(onlineClientParser::parse, SECTION_NAME_CLIENTS, dataFile))
+                .filter(Objects::nonNull);
 
-            Stream<Client> prefileClientsStream = relevantLinesBySection.getOrDefault(SECTION_NAME_PREFILE, new ArrayList<>()).stream()
-                    .map(logExceptionsFrom(prefileClientParser::parse, SECTION_NAME_PREFILE, dataFile))
-                    .filter(notNull());
+        Stream<Client> prefileClientsStream = relevantLinesBySection.getOrDefault(SECTION_NAME_PREFILE, new ArrayList<>()).stream()
+                .map(logExceptionsFrom(prefileClientParser::parse, SECTION_NAME_PREFILE, dataFile))
+                .filter(Objects::nonNull);
 
-            Stream<Client> allClientsStream = Stream.concat(onlineClientsStream, prefileClientsStream);
-            dataFile.setClients(allClientsStream.collect(Collectors.toCollection(ArrayList::new)));
+        Stream<Client> allClientsStream = Stream.concat(onlineClientsStream, prefileClientsStream);
+        dataFile.setClients(allClientsStream.collect(Collectors.toCollection(ArrayList::new)));
 
-            dataFile.setFsdServers(
-                    relevantLinesBySection.getOrDefault(SECTION_NAME_SERVERS, new ArrayList<>())
-                            .stream()
-                            .map(fsdServerParser::parse)
-                            .collect(Collectors.toCollection(ArrayList::new))
-            );
+        dataFile.setFsdServers(
+                relevantLinesBySection.getOrDefault(SECTION_NAME_SERVERS, new ArrayList<>())
+                        .stream()
+                        .map(logExceptionsFrom(fsdServerParser::parse, SECTION_NAME_SERVERS, dataFile))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toCollection(ArrayList::new))
+        );
 
-            dataFile.setVoiceServers(
-                    relevantLinesBySection.getOrDefault(SECTION_NAME_VOICE_SERVERS, new ArrayList<>())
-                            .stream()
-                            .map(voiceServerParser::parse)
-                            .collect(Collectors.toCollection(ArrayList::new))
-            );
-        } catch (IllegalArgumentException ex) {
-            // TODO: replace by internal collector for erroneous lines
-            DataFileMetaData metaData = dataFile.getMetaData();
-
-            throw new IllegalArgumentException(String.format("Failed to parse data file, metadata: timestamp=%s, version=%d", metaData.getTimestamp(), metaData.getVersionFormat()), ex);
-        }
+        dataFile.setVoiceServers(
+                relevantLinesBySection.getOrDefault(SECTION_NAME_VOICE_SERVERS, new ArrayList<>())
+                        .stream()
+                        .map(logExceptionsFrom(voiceServerParser::parse, SECTION_NAME_VOICE_SERVERS, dataFile))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toCollection(ArrayList::new))
+        );
 
         return dataFile;
     }
