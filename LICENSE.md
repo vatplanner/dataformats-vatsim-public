@@ -1,7 +1,3 @@
-This library is released under MIT license, see below for a copy.
-
-Use of data parsed by this library is subject to further policies and restrictions; please refer to official [https://www.vatsim.net/](VATSIM) documents as well as the disclaimer in this project's [readme file](README.md).
-
 # The MIT License (MIT)
 
 Copyright (c) 2016 Daniel Neugebauer

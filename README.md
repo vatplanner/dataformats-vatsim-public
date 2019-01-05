@@ -26,6 +26,8 @@ The implementation and accompanying files are released under [MIT license](LICEN
 
 ## Disclaimer and Policies
 
+**This section is a copy of [DISCLAIMER.md](DISCLAIMER.md).**
+
 Although this implementation is provided under an open license, usage of the data itself, while being publicly available, is subject to restrictions. Please refer to official VATSIM documents regarding any policies associated with its use.
 
 Some technical policies stressed explicitely on the initial `status.txt` file should be repeated here as otherwise they may go unnoticed when using this library:
