@@ -5,7 +5,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 import static org.hamcrest.Matchers.*;
 import org.hamcrest.junit.ExpectedException;
 import static org.junit.Assert.*;
@@ -19,8 +18,7 @@ import uk.org.lidalia.slf4jtest.TestLoggerFactory;
 
 public class NetworkInformationTest {
 
-    private static final Logger logger = Logger.getLogger(NetworkInformationTest.class.getName());
-    TestLogger testLogger = TestLoggerFactory.getTestLogger(NetworkInformation.class);
+    private final TestLogger testLogger = TestLoggerFactory.getTestLogger(NetworkInformation.class);
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();

@@ -13,8 +13,6 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -27,8 +25,7 @@ import uk.org.lidalia.slf4jtest.TestLoggerFactory;
 @RunWith(DataProviderRunner.class)
 public class NetworkInformationParserTest {
 
-    private static final Logger logger = Logger.getLogger(NetworkInformationParserTest.class.getName());
-    TestLogger testLogger = TestLoggerFactory.getTestLogger(NetworkInformationParser.class);
+    private final TestLogger testLogger = TestLoggerFactory.getTestLogger(NetworkInformationParser.class);
 
     /*
     @Rule
@@ -58,8 +55,7 @@ public class NetworkInformationParserTest {
         try {
             return new BufferedReader(new InputStreamReader(new FileInputStream(filePath), Charset.forName("UTF-8")));
         } catch (FileNotFoundException ex) {
-            logger.log(Level.SEVERE, "failed to initialize a BufferedReader for resource " + resourceName, ex);
-            return null;
+            throw new RuntimeException("failed to initialize a BufferedReader for resource " + resourceName, ex);
         }
     }
 
