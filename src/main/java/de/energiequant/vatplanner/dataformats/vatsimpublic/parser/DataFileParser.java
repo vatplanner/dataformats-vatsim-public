@@ -13,6 +13,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Parses a complete VATSIM status data.txt file to {@link DataFile}. File
@@ -21,6 +23,8 @@ import java.util.stream.Stream;
  * {@link DataFileParser} can be reused multiple times, even in parallel.
  */
 public class DataFileParser {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataFileParser.class);
 
     private static final Pattern PATTERN_SECTION_HEAD = Pattern.compile("!([^:]+):");
     private static final int PATTERN_SECTION_HEAD_NAME = 1;
@@ -32,6 +36,8 @@ public class DataFileParser {
     private static final String SECTION_NAME_PREFILE = "PREFILE";
     private static final String SECTION_NAME_SERVERS = "SERVERS";
     private static final String SECTION_NAME_VOICE_SERVERS = "VOICE SERVERS";
+
+    private static final int SUPPORTED_FORMAT_VERSION = 8;
 
     GeneralSectionParser getGeneralSectionParser() {
         return new GeneralSectionParser();
@@ -123,7 +129,8 @@ public class DataFileParser {
         DataFile dataFile = createDataFile();
         dataFile.setMetaData(generalSectionParser.parse(relevantLinesBySection.get(SECTION_NAME_GENERAL), dataFile, SECTION_NAME_GENERAL));
 
-        // TODO: log warning if data format is unexpected (currently implemented format version 8)
+        verifyDataFormatVersion(dataFile);
+
         Stream<Client> onlineClientsStream = relevantLinesBySection.getOrDefault(SECTION_NAME_CLIENTS, new ArrayList<>()).stream()
                 .map(logExceptionsFrom(onlineClientParser::parse, SECTION_NAME_CLIENTS, dataFile))
                 .filter(Objects::nonNull);
@@ -199,5 +206,39 @@ public class DataFileParser {
      */
     private boolean isLineIrrelevant(String line) {
         return line.startsWith(PREFIX_COMMENT) || line.trim().isEmpty();
+    }
+
+    /**
+     * Checks if meta data indicates a supported data format version. If version
+     * does not match expectation, messages are logged to data file as well as
+     * SLF4J.
+     *
+     * @param dataFile data file to check metadata of and log to
+     */
+    private void verifyDataFormatVersion(DataFile dataFile) {
+        DataFileMetaData metaData = dataFile.getMetaData();
+        String msg = null;
+
+        if (metaData == null) {
+            msg = "unable to verify data format version, metadata is unavailable (null)";
+        } else {
+            int actualVersion = metaData.getVersionFormat();
+
+            if (actualVersion != SUPPORTED_FORMAT_VERSION) {
+                msg = "metadata reports unsupported format version " + actualVersion + " (supported: " + SUPPORTED_FORMAT_VERSION + ")";
+            }
+        }
+
+        if (msg != null) {
+            LOGGER.warn(msg);
+
+            dataFile.addParserLogEntry(new ParserLogEntry(
+                    SECTION_NAME_GENERAL,
+                    null,
+                    false,
+                    msg,
+                    null
+            ));
+        }
     }
 }

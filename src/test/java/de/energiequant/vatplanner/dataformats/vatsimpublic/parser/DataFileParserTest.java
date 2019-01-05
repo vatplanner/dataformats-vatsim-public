@@ -25,6 +25,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import uk.org.lidalia.slf4jtest.LoggingEvent;
+import uk.org.lidalia.slf4jtest.TestLogger;
+import uk.org.lidalia.slf4jtest.TestLoggerFactory;
 
 @RunWith(DataProviderRunner.class)
 public class DataFileParserTest {
@@ -36,8 +39,14 @@ public class DataFileParserTest {
     private FSDServerParser mockFSDServerParser;
     private VoiceServerParser mockVoiceServerParser;
 
+    private final TestLogger testLogger = TestLoggerFactory.getTestLogger(DataFileParser.class);
+
+    private static final int SUPPORTED_FORMAT_VERSION = 8;
+
     @Before
     public void setUp() {
+        testLogger.clearAll();
+
         spyParser = spy(DataFileParser.class);
 
         mockGeneralSectionParser = mock(GeneralSectionParser.class);
@@ -233,6 +242,128 @@ public class DataFileParserTest {
     }
 
     @Test
+    public void testParse_generalSectionMissingMetaData_logsWarningToSLF4J() {
+        // Arrange
+        String lines = buildDataFileForSection("GENERAL");
+
+        doReturn(null).when(mockGeneralSectionParser).parse(any(Collection.class), any(ParserLogEntryCollector.class), anyString());
+
+        // Act
+        spyParser.parse(lines);
+
+        // Assert
+        List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
+        LoggingEvent expectedEvent = LoggingEvent.warn("unable to verify data format version, metadata is unavailable (null)");
+        assertThat(loggingEvents, hasItem(expectedEvent));
+    }
+
+    @Test
+    public void testParse_generalSectionMissingMetaData_logsToDataFile() {
+        // Arrange
+        String lines = buildDataFileForSection("GENERAL");
+
+        doReturn(null).when(mockGeneralSectionParser).parse(any(Collection.class), any(ParserLogEntryCollector.class), anyString());
+
+        // Act
+        DataFile dataFile = spyParser.parse(lines);
+
+        // Assert
+        Collection<ParserLogEntry> entries = dataFile.getParserLogEntries();
+        assertThat(entries, hasItem(
+                matchesParserLogEntry(
+                        equalTo("GENERAL"),
+                        nullValue(String.class),
+                        equalTo(false),
+                        equalTo("unable to verify data format version, metadata is unavailable (null)"),
+                        nullValue(Throwable.class)
+                )
+        ));
+    }
+
+    @Test
+    @DataProvider({
+        "-1, metadata reports unsupported format version -1 (supported: 8)",
+        "7, metadata reports unsupported format version 7 (supported: 8)",
+        "9, metadata reports unsupported format version 9 (supported: 8)"
+    })
+    public void testParse_generalSectionListsUnsupportedFormatVersion_logsWarningToSLF4J(int unsupportedFormatVersion, String expectedMessage) {
+        // Arrange
+        String lines = buildDataFileForSection("GENERAL");
+
+        DataFileMetaData mockMetaData = mockMetaDataWithFormatVersion(unsupportedFormatVersion);
+        doReturn(mockMetaData).when(mockGeneralSectionParser).parse(any(Collection.class), any(ParserLogEntryCollector.class), anyString());
+
+        // Act
+        spyParser.parse(lines);
+
+        // Assert
+        List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
+        LoggingEvent expectedEvent = LoggingEvent.warn(expectedMessage);
+        assertThat(loggingEvents, hasItem(expectedEvent));
+    }
+
+    @Test
+    @DataProvider({
+        "-1, metadata reports unsupported format version -1 (supported: 8)",
+        "7, metadata reports unsupported format version 7 (supported: 8)",
+        "9, metadata reports unsupported format version 9 (supported: 8)"
+    })
+    public void testParse_generalSectionListsUnsupportedFormatVersion_logsToDataFile(int unsupportedFormatVersion, String expectedMessage) {
+        // Arrange
+        String lines = buildDataFileForSection("GENERAL");
+
+        DataFileMetaData mockMetaData = mockMetaDataWithFormatVersion(unsupportedFormatVersion);
+        doReturn(mockMetaData).when(mockGeneralSectionParser).parse(any(Collection.class), any(ParserLogEntryCollector.class), anyString());
+
+        // Act
+        DataFile dataFile = spyParser.parse(lines);
+
+        // Assert
+        Collection<ParserLogEntry> entries = dataFile.getParserLogEntries();
+        assertThat(entries, hasItem(
+                matchesParserLogEntry(
+                        equalTo("GENERAL"),
+                        nullValue(String.class),
+                        equalTo(false),
+                        equalTo(expectedMessage),
+                        nullValue(Throwable.class)
+                )
+        ));
+    }
+
+    @Test
+    public void testParse_generalSectionListsSupportedFormatVersion_doesNotLogsWarningToSLF4J() {
+        // Arrange
+        String lines = buildDataFileForSection("GENERAL");
+
+        DataFileMetaData mockMetaData = mockMetaDataWithFormatVersion(SUPPORTED_FORMAT_VERSION);
+        doReturn(mockMetaData).when(mockGeneralSectionParser).parse(any(Collection.class), any(ParserLogEntryCollector.class), anyString());
+
+        // Act
+        spyParser.parse(lines);
+
+        // Assert
+        List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
+        assertThat(loggingEvents, is(empty()));
+    }
+
+    @Test
+    public void testParse_generalSectionListsSupportedFormatVersion_doesNotLogToDataFile() {
+        // Arrange
+        String lines = buildDataFileForSection("GENERAL");
+
+        DataFileMetaData mockMetaData = mockMetaDataWithFormatVersion(SUPPORTED_FORMAT_VERSION);
+        doReturn(mockMetaData).when(mockGeneralSectionParser).parse(any(Collection.class), any(ParserLogEntryCollector.class), anyString());
+
+        // Act
+        DataFile dataFile = spyParser.parse(lines);
+
+        // Assert
+        Collection<ParserLogEntry> entries = dataFile.getParserLogEntries();
+        assertThat(entries, is(empty()));
+    }
+
+    @Test
     public void testGetOnlineClientParser_always_parserIsSetToNotPrefileSection() {
         // Arrange
         doCallRealMethod().when(spyParser).getOnlineClientParser();
@@ -284,6 +415,7 @@ public class DataFileParserTest {
         String triggerLine2 = "trigger error 2";
         String lines = buildDataFileForSection(section, ":expected line:1:", triggerLine1, ":expected line:2:", triggerLine2);
 
+        doReturn(mockMetaDataWithFormatVersion(SUPPORTED_FORMAT_VERSION)).when(mockGeneralSectionParser).parse(Mockito.any(), Mockito.any(), Mockito.anyString());
         doReturn(mock(Client.class)).when(mockOnlineClientParser).parse(Mockito.anyString());
 
         IllegalArgumentException exception1 = new IllegalArgumentException("some error");
@@ -343,6 +475,7 @@ public class DataFileParserTest {
         String triggerLine2 = "trigger error 2";
         String lines = buildDataFileForSection(section, ":expected line:1:", triggerLine1, ":expected line:2:", triggerLine2);
 
+        doReturn(mockMetaDataWithFormatVersion(SUPPORTED_FORMAT_VERSION)).when(mockGeneralSectionParser).parse(Mockito.any(), Mockito.any(), Mockito.anyString());
         doReturn(mock(Client.class)).when(mockPrefileClientParser).parse(Mockito.anyString());
 
         IllegalArgumentException exception1 = new IllegalArgumentException("some error");
@@ -402,6 +535,7 @@ public class DataFileParserTest {
         String triggerLine2 = "trigger error 2";
         String lines = buildDataFileForSection("SERVERS", ":expected line:1:", triggerLine1, ":expected line:2:", triggerLine2);
 
+        doReturn(mockMetaDataWithFormatVersion(SUPPORTED_FORMAT_VERSION)).when(mockGeneralSectionParser).parse(Mockito.any(), Mockito.any(), Mockito.anyString());
         doReturn(mock(FSDServer.class)).when(mockFSDServerParser).parse(Mockito.anyString());
 
         IllegalArgumentException exception1 = new IllegalArgumentException("some error");
@@ -461,6 +595,7 @@ public class DataFileParserTest {
         String triggerLine2 = "trigger error 2";
         String lines = buildDataFileForSection("VOICE SERVERS", ":expected line:1:", "trigger error 1", ":expected line:2:", "trigger error 2");
 
+        doReturn(mockMetaDataWithFormatVersion(SUPPORTED_FORMAT_VERSION)).when(mockGeneralSectionParser).parse(Mockito.any(), Mockito.any(), Mockito.anyString());
         doReturn(mock(VoiceServer.class)).when(mockVoiceServerParser).parse(Mockito.anyString());
 
         IllegalArgumentException exception1 = new IllegalArgumentException("some error");
@@ -521,5 +656,12 @@ public class DataFileParserTest {
         int read = br.read(buffer);
         String brContent = read < 1 ? "" : new String(Arrays.copyOfRange(buffer, 0, read));
         return brContent;
+    }
+
+    private DataFileMetaData mockMetaDataWithFormatVersion(int version) {
+        DataFileMetaData mockMetaData = mock(DataFileMetaData.class);
+        doReturn(version).when(mockMetaData).getVersionFormat();
+
+        return mockMetaData;
     }
 }
