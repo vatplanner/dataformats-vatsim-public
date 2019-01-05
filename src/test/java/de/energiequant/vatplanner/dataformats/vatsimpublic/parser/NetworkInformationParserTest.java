@@ -27,10 +27,6 @@ public class NetworkInformationParserTest {
 
     private final TestLogger testLogger = TestLoggerFactory.getTestLogger(NetworkInformationParser.class);
 
-    /*
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-     */
     @DataProvider
     public static String[] dataProviderExpectedDefinitionComments() {
         return new String[]{
