@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  */
 public class NetworkInformationParser {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetworkInformationParser.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetworkInformationParser.class.getName());
 
     // we don't actually know what that string is trying to tell us but we
     // should exclude it from warnings and, if possible, provide it to users
@@ -81,7 +81,7 @@ public class NetworkInformationParser {
 
                         // check expected format
                         if (!PATTERN_WHAZZ_UP.matcher(whazzUpExample).matches()) {
-                            logger.warn("WhazzUp format may have changed, header definition: \"{}\"", whazzUpExample);
+                            LOGGER.warn("WhazzUp format may have changed, header definition: \"{}\"", whazzUpExample);
                         }
 
                         // line is finished, stop parsing
@@ -97,9 +97,9 @@ public class NetworkInformationParser {
 
                     Pattern expectedDefinitionPattern = expectedDefinitionPatternsByParameterKey.get(key);
                     if (expectedDefinitionPattern == null) {
-                        logger.info("Definition comment found for unknown key \"{}\": \"{}\"", key, description);
+                        LOGGER.info("Definition comment found for unknown key \"{}\": \"{}\"", key, description);
                     } else if (!expectedDefinitionPattern.matcher(description).matches()) {
-                        logger.warn("Mismatch in definition comment for key \"{}\": \"{}\"", key, description);
+                        LOGGER.warn("Mismatch in definition comment for key \"{}\": \"{}\"", key, description);
                     }
 
                     // line is finished, stop parsing
@@ -144,7 +144,7 @@ public class NetworkInformationParser {
                             break;
 
                         default:
-                            logger.warn("Unrecognized key \"{}\", value \"{}\"", key, value);
+                            LOGGER.warn("Unrecognized key \"{}\", value \"{}\"", key, value);
                     }
 
                     // line is finished, stop parsing
@@ -152,10 +152,10 @@ public class NetworkInformationParser {
                 }
 
                 // report all other unmatched lines
-                logger.warn("Uninterpretable line in network file: \"{}\"", line);
+                LOGGER.warn("Uninterpretable line in network file: \"{}\"", line);
             }
         } catch (IOException ex) {
-            logger.warn("Caught IOException while reading lines", ex);
+            LOGGER.warn("Caught IOException while reading lines", ex);
         }
 
         return info;

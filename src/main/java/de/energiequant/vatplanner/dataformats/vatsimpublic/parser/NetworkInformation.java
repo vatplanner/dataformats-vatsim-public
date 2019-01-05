@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  */
 public class NetworkInformation {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetworkInformation.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetworkInformation.class.getName());
 
     private String whazzUpString = null;
     private final List<String> startupMessages = new ArrayList<>();
@@ -66,7 +66,7 @@ public class NetworkInformation {
         try {
             url = new URL(value);
         } catch (MalformedURLException ex) {
-            logger.warn("URL for key \"{}\" is malformed: \"{}\"", new Object[]{key, value}, ex);
+            LOGGER.warn("URL for key \"{}\" is malformed: \"{}\"", new Object[]{key, value}, ex);
         }
 
         if (url == null) {
