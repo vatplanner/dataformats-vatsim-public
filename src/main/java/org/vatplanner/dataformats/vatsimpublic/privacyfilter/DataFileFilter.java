@@ -187,17 +187,11 @@ public class DataFileFilter {
     /**
      * Checks if both voice server objects hold the same information.
      *
-     * @param a first voice server object
-     * @param b second voice server object
+     * @param a first voice server object; must not be null
+     * @param b second voice server object; must not be null
      * @return Are both voice server objects equal?
      */
     boolean checkEqualVoiceServer(VoiceServer a, VoiceServer b) {
-        if (a == null) {
-            return (b == null);
-        } else if (b == null) {
-            return false;
-        }
-
         // QUESTION: move to .equals in VoiceServer?
         boolean isAddressEqual = equalsNullSafe(a, b, VoiceServer::getAddress);
         boolean isLocationEqual = equalsNullSafe(a, b, VoiceServer::getLocation);
@@ -213,17 +207,11 @@ public class DataFileFilter {
     /**
      * Checks if both FSD server objects hold the same information.
      *
-     * @param a first FSD server object
-     * @param b second FSD server object
+     * @param a first FSD server object; must not be null
+     * @param b second FSD server object; must not be null
      * @return Are both FSD server objects equal?
      */
     boolean checkEqualFSDServer(FSDServer a, FSDServer b) {
-        if (a == null) {
-            return (b == null);
-        } else if (b == null) {
-            return false;
-        }
-
         // QUESTION: move to .equals in FSDServer?
         boolean isIdEqual = equalsNullSafe(a, b, FSDServer::getId);
         boolean isAddressEqual = equalsNullSafe(a, b, FSDServer::getAddress);

@@ -304,46 +304,6 @@ public class DataFileFilterTest {
     }
 
     @Test
-    public void testCheckEqualVoiceServer_nullBoth_returnsTrue() {
-        // Arrange
-        DataFileFilter filter = createDefaultConfigFilter();
-
-        // Act
-        boolean result = filter.checkEqualVoiceServer(null, null);
-
-        // Assert
-        assertThat(result, is(true));
-    }
-
-    @Test
-    public void testCheckEqualVoiceServer_nullA_returnsFalse() {
-        // Arrange
-        VoiceServer mockVoiceServer = mock(VoiceServer.class);
-
-        DataFileFilter filter = createDefaultConfigFilter();
-
-        // Act
-        boolean result = filter.checkEqualVoiceServer(null, mockVoiceServer);
-
-        // Assert
-        assertThat(result, is(false));
-    }
-
-    @Test
-    public void testCheckEqualVoiceServer_nullB_returnsFalse() {
-        // Arrange
-        VoiceServer mockVoiceServer = mock(VoiceServer.class);
-
-        DataFileFilter filter = createDefaultConfigFilter();
-
-        // Act
-        boolean result = filter.checkEqualVoiceServer(mockVoiceServer, null);
-
-        // Assert
-        assertThat(result, is(false));
-    }
-
-    @Test
     @DataProvider({
         "MYID, some.server.net, Somewhere, Name, true",
         "serverA, 123.4.56.7, Anywhere, Server A, false",
@@ -402,46 +362,6 @@ public class DataFileFilterTest {
 
         // Act
         boolean result = filter.checkEqualFSDServer(mockA, mockB);
-
-        // Assert
-        assertThat(result, is(false));
-    }
-
-    @Test
-    public void testCheckEqualFSDServer_nullBoth_returnsTrue() {
-        // Arrange
-        DataFileFilter filter = createDefaultConfigFilter();
-
-        // Act
-        boolean result = filter.checkEqualFSDServer(null, null);
-
-        // Assert
-        assertThat(result, is(true));
-    }
-
-    @Test
-    public void testCheckEqualFSDServer_nullA_returnsFalse() {
-        // Arrange
-        FSDServer mockFSDServer = mock(FSDServer.class);
-
-        DataFileFilter filter = createDefaultConfigFilter();
-
-        // Act
-        boolean result = filter.checkEqualFSDServer(null, mockFSDServer);
-
-        // Assert
-        assertThat(result, is(false));
-    }
-
-    @Test
-    public void testCheckEqualFSDServer_nullB_returnsFalse() {
-        // Arrange
-        FSDServer mockFSDServer = mock(FSDServer.class);
-
-        DataFileFilter filter = createDefaultConfigFilter();
-
-        // Act
-        boolean result = filter.checkEqualFSDServer(mockFSDServer, null);
 
         // Assert
         assertThat(result, is(false));
