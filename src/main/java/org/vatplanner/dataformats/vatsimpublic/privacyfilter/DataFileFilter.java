@@ -164,8 +164,6 @@ public class DataFileFilter {
     boolean checkEqualMetadata(DataFileMetaData a, DataFileMetaData b) {
         if (a == null) {
             return (b == null);
-        } else if (b == null) {
-            return false;
         }
 
         return a.equals(b);
