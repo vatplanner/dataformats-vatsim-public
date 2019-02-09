@@ -202,7 +202,7 @@ public class DataFileFilter {
         boolean isAddressEqual = equalsNullSafe(a, b, VoiceServer::getAddress);
         boolean isLocationEqual = equalsNullSafe(a, b, VoiceServer::getLocation);
         boolean isNameEqual = equalsNullSafe(a, b, VoiceServer::getName);
-        boolean isClientConnectionAllowedEqual = equalsNullSafe(a, b, VoiceServer::isClientConnectionAllowed);
+        boolean isClientConnectionAllowedEqual = (a.isClientConnectionAllowed() == b.isClientConnectionAllowed());
         boolean isRawServerTypeEqual = equalsNullSafe(a, b, VoiceServer::getRawServerType);
 
         boolean isEqual = isAddressEqual && isLocationEqual && isNameEqual && isClientConnectionAllowedEqual && isRawServerTypeEqual;
@@ -229,7 +229,7 @@ public class DataFileFilter {
         boolean isAddressEqual = equalsNullSafe(a, b, FSDServer::getAddress);
         boolean isLocationEqual = equalsNullSafe(a, b, FSDServer::getLocation);
         boolean isNameEqual = equalsNullSafe(a, b, FSDServer::getName);
-        boolean isClientConnectionAllowedEqual = equalsNullSafe(a, b, FSDServer::isClientConnectionAllowed);
+        boolean isClientConnectionAllowedEqual = (a.isClientConnectionAllowed() == b.isClientConnectionAllowed());
 
         boolean isEqual = isIdEqual && isAddressEqual && isLocationEqual && isNameEqual && isClientConnectionAllowedEqual;
 
