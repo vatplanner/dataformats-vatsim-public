@@ -1,10 +1,10 @@
 package org.vatplanner.dataformats.vatsimpublic.privacyfilter;
 
-import java.util.function.Function;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
 import org.vatplanner.dataformats.vatsimpublic.parser.FSDServer;
 import org.vatplanner.dataformats.vatsimpublic.parser.VoiceServer;
+import static org.vatplanner.dataformats.vatsimpublic.utils.Comparisons.equalsNullSafe;
 
 /**
  * A simple first-tool-in-line filter attempting to provide a limited degree of
@@ -222,31 +222,5 @@ public class DataFileFilter {
         boolean isEqual = isIdEqual && isAddressEqual && isLocationEqual && isNameEqual && isClientConnectionAllowedEqual;
 
         return isEqual;
-    }
-
-    /**
-     * Checks if the results returned by both objects' accessor is either equal
-     * or null. If only one accessor result is null, the evaluation result will
-     * always be false.
-     *
-     * @param <T> type of objects
-     * @param a first object, must not be null
-     * @param b second object, must not be null
-     * @param accessor accessor to retrieve value to be compared; you will
-     * likely want to provide a method reference to a getter
-     * @return true if both accessor results are either null or equal
-     * (determined by {@link Object#equals(Object)})
-     */
-    private <T> boolean equalsNullSafe(T a, T b, Function<T, Object> accessor) {
-        Object objA = accessor.apply(a);
-        Object objB = accessor.apply(b);
-
-        if (objA == null) {
-            return (objB == null);
-        } else if (objB == null) {
-            return false;
-        }
-
-        return objA.equals(objB);
     }
 }
