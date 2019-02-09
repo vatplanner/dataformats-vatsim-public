@@ -1,5 +1,7 @@
 package org.vatplanner.dataformats.vatsimpublic.parser;
 
+import static org.vatplanner.dataformats.vatsimpublic.utils.Comparisons.equalsNullSafe;
+
 /**
  * Information about VATSIM FSD servers as available from data.txt status file.
  * FSD is the protocol used to connect actual clients with the network. VATSIM
@@ -25,8 +27,9 @@ public class FSDServer {
         return id;
     }
 
-    void setId(String id) {
+    FSDServer setId(String id) {
         this.id = id;
+        return this;
     }
 
     /**
@@ -40,8 +43,9 @@ public class FSDServer {
         return address;
     }
 
-    void setAddress(String address) {
+    FSDServer setAddress(String address) {
         this.address = address;
+        return this;
     }
 
     /**
@@ -53,8 +57,9 @@ public class FSDServer {
         return location;
     }
 
-    void setLocation(String location) {
+    FSDServer setLocation(String location) {
         this.location = location;
+        return this;
     }
 
     /**
@@ -67,8 +72,9 @@ public class FSDServer {
         return name;
     }
 
-    void setName(String name) {
+    FSDServer setName(String name) {
         this.name = name;
+        return this;
     }
 
     /**
@@ -81,8 +87,26 @@ public class FSDServer {
         return clientConnectionAllowed;
     }
 
-    void setClientConnectionAllowed(boolean clientConnectionAllowed) {
+    FSDServer setClientConnectionAllowed(boolean clientConnectionAllowed) {
         this.clientConnectionAllowed = clientConnectionAllowed;
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if ((o == null) || !(o instanceof FSDServer)) {
+            return false;
+        }
+
+        FSDServer other = (FSDServer) o;
+
+        boolean isIdEqual = equalsNullSafe(this, other, FSDServer::getId);
+        boolean isAddressEqual = equalsNullSafe(this, other, FSDServer::getAddress);
+        boolean isLocationEqual = equalsNullSafe(this, other, FSDServer::getLocation);
+        boolean isNameEqual = equalsNullSafe(this, other, FSDServer::getName);
+        boolean isClientConnectionAllowedEqual = (this.isClientConnectionAllowed() == other.isClientConnectionAllowed());
+
+        return isIdEqual && isAddressEqual && isLocationEqual && isNameEqual && isClientConnectionAllowedEqual;
     }
 
 }

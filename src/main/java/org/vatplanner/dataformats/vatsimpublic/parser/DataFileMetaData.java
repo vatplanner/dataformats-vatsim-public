@@ -2,6 +2,7 @@ package org.vatplanner.dataformats.vatsimpublic.parser;
 
 import java.time.Duration;
 import java.time.Instant;
+import static org.vatplanner.dataformats.vatsimpublic.utils.Comparisons.equalsNullSafe;
 
 /**
  * Meta data found in the <code>GENERAL</code> section of VATSIM's data.txt
@@ -25,8 +26,9 @@ public class DataFileMetaData {
         return versionFormat;
     }
 
-    void setVersionFormat(int versionFormat) {
+    DataFileMetaData setVersionFormat(int versionFormat) {
         this.versionFormat = versionFormat;
+        return this;
     }
 
     /**
@@ -39,8 +41,9 @@ public class DataFileMetaData {
         return timestamp;
     }
 
-    void setTimestamp(Instant timestamp) {
+    DataFileMetaData setTimestamp(Instant timestamp) {
         this.timestamp = timestamp;
+        return this;
     }
 
     /**
@@ -54,8 +57,9 @@ public class DataFileMetaData {
         return numberOfConnectedClients;
     }
 
-    void setNumberOfConnectedClients(int numberOfConnectedClients) {
+    DataFileMetaData setNumberOfConnectedClients(int numberOfConnectedClients) {
         this.numberOfConnectedClients = numberOfConnectedClients;
+        return this;
     }
 
     /**
@@ -84,8 +88,9 @@ public class DataFileMetaData {
         return minimumDataFileRetrievalInterval;
     }
 
-    void setMinimumDataFileRetrievalInterval(Duration minimumDataFileRetrievalInterval) {
+    DataFileMetaData setMinimumDataFileRetrievalInterval(Duration minimumDataFileRetrievalInterval) {
         this.minimumDataFileRetrievalInterval = minimumDataFileRetrievalInterval;
+        return this;
     }
 
     /**
@@ -114,7 +119,28 @@ public class DataFileMetaData {
         return minimumAtisRetrievalInterval;
     }
 
-    void setMinimumAtisRetrievalInterval(Duration minimumAtisRetrievalInterval) {
+    DataFileMetaData setMinimumAtisRetrievalInterval(Duration minimumAtisRetrievalInterval) {
         this.minimumAtisRetrievalInterval = minimumAtisRetrievalInterval;
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if ((o == null) || !(o instanceof DataFileMetaData)) {
+            return false;
+        }
+
+        DataFileMetaData other = (DataFileMetaData) o;
+
+        boolean isVersionFormatEqual = (this.getVersionFormat() == other.getVersionFormat());
+        boolean isTimestampEqual = equalsNullSafe(this, other, DataFileMetaData::getTimestamp);
+        boolean isNumberOfConnectedClientsEqual = (this.getNumberOfConnectedClients() == other.getNumberOfConnectedClients());
+        boolean isMinimumDataFileRetrievalIntervalEqual = equalsNullSafe(this, other, DataFileMetaData::getMinimumDataFileRetrievalInterval);
+        boolean isMinimumAtisFileRetrievalIntervalEqual = equalsNullSafe(this, other, DataFileMetaData::getMinimumAtisRetrievalInterval);
+
+        boolean isEqual = isVersionFormatEqual && isTimestampEqual && isNumberOfConnectedClientsEqual //
+                && isMinimumDataFileRetrievalIntervalEqual && isMinimumAtisFileRetrievalIntervalEqual;
+
+        return isEqual;
     }
 }

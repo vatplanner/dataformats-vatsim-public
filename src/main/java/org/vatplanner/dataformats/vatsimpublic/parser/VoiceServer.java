@@ -1,5 +1,7 @@
 package org.vatplanner.dataformats.vatsimpublic.parser;
 
+import static org.vatplanner.dataformats.vatsimpublic.utils.Comparisons.equalsNullSafe;
+
 /**
  * Holds information about VATSIM voice servers as available from data.txt
  * status file.
@@ -31,8 +33,9 @@ public class VoiceServer {
         return address;
     }
 
-    void setAddress(String address) {
+    VoiceServer setAddress(String address) {
         this.address = address;
+        return this;
     }
 
     /**
@@ -44,8 +47,9 @@ public class VoiceServer {
         return location;
     }
 
-    void setLocation(String location) {
+    VoiceServer setLocation(String location) {
         this.location = location;
+        return this;
     }
 
     /**
@@ -58,8 +62,9 @@ public class VoiceServer {
         return name;
     }
 
-    void setName(String name) {
+    VoiceServer setName(String name) {
         this.name = name;
+        return this;
     }
 
     /**
@@ -72,8 +77,9 @@ public class VoiceServer {
         return clientConnectionAllowed;
     }
 
-    void setClientConnectionAllowed(boolean clientConnectionAllowed) {
+    VoiceServer setClientConnectionAllowed(boolean clientConnectionAllowed) {
         this.clientConnectionAllowed = clientConnectionAllowed;
+        return this;
     }
 
     /**
@@ -90,7 +96,25 @@ public class VoiceServer {
         return rawServerType;
     }
 
-    void setRawServerType(String rawServerType) {
+    VoiceServer setRawServerType(String rawServerType) {
         this.rawServerType = rawServerType;
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if ((o == null) || !(o instanceof VoiceServer)) {
+            return false;
+        }
+
+        VoiceServer other = (VoiceServer) o;
+
+        boolean isAddressEqual = equalsNullSafe(this, other, VoiceServer::getAddress);
+        boolean isLocationEqual = equalsNullSafe(this, other, VoiceServer::getLocation);
+        boolean isNameEqual = equalsNullSafe(this, other, VoiceServer::getName);
+        boolean isClientConnectionAllowedEqual = (this.isClientConnectionAllowed() == other.isClientConnectionAllowed());
+        boolean isRawServerTypeEqual = equalsNullSafe(this, other, VoiceServer::getRawServerType);
+
+        return isAddressEqual && isLocationEqual && isNameEqual && isClientConnectionAllowedEqual && isRawServerTypeEqual;
     }
 }

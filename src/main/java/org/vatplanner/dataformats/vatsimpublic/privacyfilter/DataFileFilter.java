@@ -2,9 +2,6 @@ package org.vatplanner.dataformats.vatsimpublic.privacyfilter;
 
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
-import org.vatplanner.dataformats.vatsimpublic.parser.FSDServer;
-import org.vatplanner.dataformats.vatsimpublic.parser.VoiceServer;
-import static org.vatplanner.dataformats.vatsimpublic.utils.Comparisons.equalsNullSafe;
 
 /**
  * A simple first-tool-in-line filter attempting to provide a limited degree of
@@ -171,56 +168,6 @@ public class DataFileFilter {
             return false;
         }
 
-        // QUESTION: move to .equals in DataFileMetaData?
-        boolean isVersionFormatEqual = (a.getVersionFormat() == b.getVersionFormat());
-        boolean isTimestampEqual = equalsNullSafe(a, b, DataFileMetaData::getTimestamp);
-        boolean isNumberOfConnectedClientsEqual = (a.getNumberOfConnectedClients() == b.getNumberOfConnectedClients());
-        boolean isMinimumDataFileRetrievalIntervalEqual = equalsNullSafe(a, b, DataFileMetaData::getMinimumDataFileRetrievalInterval);
-        boolean isMinimumAtisFileRetrievalIntervalEqual = equalsNullSafe(a, b, DataFileMetaData::getMinimumAtisRetrievalInterval);
-
-        boolean isEqual = isVersionFormatEqual && isTimestampEqual && isNumberOfConnectedClientsEqual //
-                && isMinimumDataFileRetrievalIntervalEqual && isMinimumAtisFileRetrievalIntervalEqual;
-
-        return isEqual;
-    }
-
-    /**
-     * Checks if both voice server objects hold the same information.
-     *
-     * @param a first voice server object; must not be null
-     * @param b second voice server object; must not be null
-     * @return Are both voice server objects equal?
-     */
-    boolean checkEqualVoiceServer(VoiceServer a, VoiceServer b) {
-        // QUESTION: move to .equals in VoiceServer?
-        boolean isAddressEqual = equalsNullSafe(a, b, VoiceServer::getAddress);
-        boolean isLocationEqual = equalsNullSafe(a, b, VoiceServer::getLocation);
-        boolean isNameEqual = equalsNullSafe(a, b, VoiceServer::getName);
-        boolean isClientConnectionAllowedEqual = (a.isClientConnectionAllowed() == b.isClientConnectionAllowed());
-        boolean isRawServerTypeEqual = equalsNullSafe(a, b, VoiceServer::getRawServerType);
-
-        boolean isEqual = isAddressEqual && isLocationEqual && isNameEqual && isClientConnectionAllowedEqual && isRawServerTypeEqual;
-
-        return isEqual;
-    }
-
-    /**
-     * Checks if both FSD server objects hold the same information.
-     *
-     * @param a first FSD server object; must not be null
-     * @param b second FSD server object; must not be null
-     * @return Are both FSD server objects equal?
-     */
-    boolean checkEqualFSDServer(FSDServer a, FSDServer b) {
-        // QUESTION: move to .equals in FSDServer?
-        boolean isIdEqual = equalsNullSafe(a, b, FSDServer::getId);
-        boolean isAddressEqual = equalsNullSafe(a, b, FSDServer::getAddress);
-        boolean isLocationEqual = equalsNullSafe(a, b, FSDServer::getLocation);
-        boolean isNameEqual = equalsNullSafe(a, b, FSDServer::getName);
-        boolean isClientConnectionAllowedEqual = (a.isClientConnectionAllowed() == b.isClientConnectionAllowed());
-
-        boolean isEqual = isIdEqual && isAddressEqual && isLocationEqual && isNameEqual && isClientConnectionAllowedEqual;
-
-        return isEqual;
+        return a.equals(b);
     }
 }
