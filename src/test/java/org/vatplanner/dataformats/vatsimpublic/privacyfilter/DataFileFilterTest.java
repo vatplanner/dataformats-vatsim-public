@@ -14,6 +14,7 @@ import org.junit.runner.RunWith;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
+import org.vatplanner.dataformats.vatsimpublic.parser.FSDServer;
 import org.vatplanner.dataformats.vatsimpublic.parser.VoiceServer;
 
 @RunWith(DataProviderRunner.class)
@@ -317,8 +318,7 @@ public class DataFileFilterTest {
     @Test
     public void testCheckEqualVoiceServer_nullA_returnsFalse() {
         // Arrange
-        VoiceServer mockVoiceServer = mock(VoiceServer.class
-        );
+        VoiceServer mockVoiceServer = mock(VoiceServer.class);
 
         DataFileFilter filter = createDefaultConfigFilter();
 
@@ -332,13 +332,116 @@ public class DataFileFilterTest {
     @Test
     public void testCheckEqualVoiceServer_nullB_returnsFalse() {
         // Arrange
-        VoiceServer mockVoiceServer = mock(VoiceServer.class
-        );
+        VoiceServer mockVoiceServer = mock(VoiceServer.class);
 
         DataFileFilter filter = createDefaultConfigFilter();
 
         // Act
         boolean result = filter.checkEqualVoiceServer(mockVoiceServer, null);
+
+        // Assert
+        assertThat(result, is(false));
+    }
+
+    @Test
+    @DataProvider({
+        "MYID, some.server.net, Somewhere, Name, true",
+        "serverA, 123.4.56.7, Anywhere, Server A, false",
+        "null, 123.4.56.7, Anywhere, Server A, false",
+        "serverA, null, Anywhere, Server A, false",
+        "serverA, 123.4.56.7, null, Server A, false",
+        "serverA, 123.4.56.7, Anywhere, null, false"
+    })
+    public void testCheckEqualFSDServer_equal_returnsTrue(String id, String address, String location, String name, boolean clientConnectionAllowed) {
+        // Arrange
+        FSDServer mockA = mockFSDServer(id, address, location, name, clientConnectionAllowed);
+        FSDServer mockB = mockFSDServer(id, address, location, name, clientConnectionAllowed);
+
+        DataFileFilter filter = createDefaultConfigFilter();
+
+        // Act
+        boolean result = filter.checkEqualFSDServer(mockA, mockB);
+
+        // Assert
+        assertThat(result, is(true));
+    }
+
+    @Test
+    @DataProvider({
+        //              object A                              ||                    object B
+        // ID
+        "MYID,    some.server.net, Somewhere, Name,     true,   myid,     some.server.net, Somewhere, Name,     true ", // 0
+        "serverA, 123.4.56.7,      Anywhere,  Server A, false,  server A, 123.4.56.7,      Anywhere,  Server A, false", // 1
+        "serverA, 123.4.56.7,      Anywhere,  Server A, false,  null,     123.4.56.7,      Anywhere,  Server A, false", // 2
+        "null,    123.4.56.7,      Anywhere,  Server A, false,  serverA,  123.4.56.7,      Anywhere,  Server A, false", // 3
+        // address
+        "MYID,    some.server.net, Somewhere, Name,     true,   MYID,     someserver.net,  Somewhere, Name,     true ", // 4
+        "serverA, 123.4.56.7,      Anywhere,  Server A, false,  serverA,  123.45.6.7,      Anywhere,  Server A, false", // 5
+        "serverA, 123.4.56.7,      Anywhere,  Server A, false,  serverA,  null,            Anywhere,  Server A, false", // 6
+        "serverA, null,            Anywhere,  Server A, false,  serverA,  123.4.56.7,      Anywhere,  Server A, false", // 7
+        // location
+        "MYID,    some.server.net, Somewhere, Name,     true,   MYID,     some.server.net, SomeWhere, Name,     true ", // 8
+        "serverA, 123.4.56.7,      Anywhere,  Server A, false,  serverA,  123.4.56.7,      Any where, Server A, false", // 9
+        "serverA, 123.4.56.7,      Anywhere,  Server A, false,  serverA,  123.4.56.7,      null,      Server A, false", // 10
+        "serverA, 123.4.56.7,      null,      Server A, false,  serverA,  123.4.56.7,      Anywhere,  Server A, false", // 11
+        // name
+        "MYID,    some.server.net, Somewhere, Name,     true,   MYID,     some.server.net, Somewhere, NAME,     true ", // 12
+        "serverA, 123.4.56.7,      Anywhere,  Server A, false,  serverA,  123.4.56.7,      Anywhere,  ServerA,  false", // 13
+        "serverA, 123.4.56.7,      Anywhere,  Server A, false,  serverA,  123.4.56.7,      Anywhere,  null,     false", // 14
+        "serverA, 123.4.56.7,      Anywhere,  null,     false,  serverA,  123.4.56.7,      Anywhere,  Server A, false", // 15
+        // client connection allowed
+        "MYID,    some.server.net, Somewhere, Name,     true,   MYID,     some.server.net, Somewhere, Name,     false", // 16
+        "serverA, 123.4.56.7,      Anywhere,  Server A, false,  serverA,  123.4.56.7,      Anywhere,  Server A, true ", // 17
+    })
+    public void testCheckEqualFSDServer_nonEqual_returnsFalse(String idA, String addressA, String locationA, String nameA, boolean clientConnectionAllowedA, String idB, String addressB, String locationB, String nameB, boolean clientConnectionAllowedB) {
+        // Arrange
+        FSDServer mockA = mockFSDServer(idA, addressA, locationA, nameA, clientConnectionAllowedA);
+        FSDServer mockB = mockFSDServer(idB, addressB, locationB, nameB, clientConnectionAllowedB);
+
+        DataFileFilter filter = createDefaultConfigFilter();
+
+        // Act
+        boolean result = filter.checkEqualFSDServer(mockA, mockB);
+
+        // Assert
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void testCheckEqualFSDServer_nullBoth_returnsTrue() {
+        // Arrange
+        DataFileFilter filter = createDefaultConfigFilter();
+
+        // Act
+        boolean result = filter.checkEqualFSDServer(null, null);
+
+        // Assert
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void testCheckEqualFSDServer_nullA_returnsFalse() {
+        // Arrange
+        FSDServer mockFSDServer = mock(FSDServer.class);
+
+        DataFileFilter filter = createDefaultConfigFilter();
+
+        // Act
+        boolean result = filter.checkEqualFSDServer(null, mockFSDServer);
+
+        // Assert
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void testCheckEqualFSDServer_nullB_returnsFalse() {
+        // Arrange
+        FSDServer mockFSDServer = mock(FSDServer.class);
+
+        DataFileFilter filter = createDefaultConfigFilter();
+
+        // Act
+        boolean result = filter.checkEqualFSDServer(mockFSDServer, null);
 
         // Assert
         assertThat(result, is(false));
@@ -365,14 +468,25 @@ public class DataFileFilterTest {
     }
 
     private VoiceServer mockVoiceServer(String address, String location, String name, boolean clientConnectionAllowed, String rawServerType) {
-        VoiceServer mock = mock(VoiceServer.class
-        );
+        VoiceServer mock = mock(VoiceServer.class);
 
         doReturn(address).when(mock).getAddress();
         doReturn(location).when(mock).getLocation();
         doReturn(name).when(mock).getName();
         doReturn(clientConnectionAllowed).when(mock).isClientConnectionAllowed();
         doReturn(rawServerType).when(mock).getRawServerType();
+
+        return mock;
+    }
+
+    private FSDServer mockFSDServer(String id, String address, String location, String name, boolean clientConnectionAllowed) {
+        FSDServer mock = mock(FSDServer.class);
+
+        doReturn(id).when(mock).getId();
+        doReturn(address).when(mock).getAddress();
+        doReturn(location).when(mock).getLocation();
+        doReturn(name).when(mock).getName();
+        doReturn(clientConnectionAllowed).when(mock).isClientConnectionAllowed();
 
         return mock;
     }

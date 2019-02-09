@@ -3,6 +3,7 @@ package org.vatplanner.dataformats.vatsimpublic.privacyfilter;
 import java.util.function.Function;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
+import org.vatplanner.dataformats.vatsimpublic.parser.FSDServer;
 import org.vatplanner.dataformats.vatsimpublic.parser.VoiceServer;
 
 /**
@@ -197,6 +198,7 @@ public class DataFileFilter {
             return false;
         }
 
+        // QUESTION: move to .equals in VoiceServer?
         boolean isAddressEqual = equalsNullSafe(a, b, VoiceServer::getAddress);
         boolean isLocationEqual = equalsNullSafe(a, b, VoiceServer::getLocation);
         boolean isNameEqual = equalsNullSafe(a, b, VoiceServer::getName);
@@ -204,6 +206,32 @@ public class DataFileFilter {
         boolean isRawServerTypeEqual = equalsNullSafe(a, b, VoiceServer::getRawServerType);
 
         boolean isEqual = isAddressEqual && isLocationEqual && isNameEqual && isClientConnectionAllowedEqual && isRawServerTypeEqual;
+
+        return isEqual;
+    }
+
+    /**
+     * Checks if both FSD server objects hold the same information.
+     *
+     * @param a first FSD server object
+     * @param b second FSD server object
+     * @return Are both FSD server objects equal?
+     */
+    boolean checkEqualFSDServer(FSDServer a, FSDServer b) {
+        if (a == null) {
+            return (b == null);
+        } else if (b == null) {
+            return false;
+        }
+
+        // QUESTION: move to .equals in FSDServer?
+        boolean isIdEqual = equalsNullSafe(a, b, FSDServer::getId);
+        boolean isAddressEqual = equalsNullSafe(a, b, FSDServer::getAddress);
+        boolean isLocationEqual = equalsNullSafe(a, b, FSDServer::getLocation);
+        boolean isNameEqual = equalsNullSafe(a, b, FSDServer::getName);
+        boolean isClientConnectionAllowedEqual = equalsNullSafe(a, b, FSDServer::isClientConnectionAllowed);
+
+        boolean isEqual = isIdEqual && isAddressEqual && isLocationEqual && isNameEqual && isClientConnectionAllowedEqual;
 
         return isEqual;
     }
