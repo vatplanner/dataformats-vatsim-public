@@ -7,6 +7,10 @@ import java.util.function.Function;
  */
 public class Comparisons {
 
+    private Comparisons() {
+        // hide utility class constructor
+    }
+
     /**
      * Checks if the results returned by both objects' accessor is either equal
      * or null. If only one accessor result is null, the evaluation result will
