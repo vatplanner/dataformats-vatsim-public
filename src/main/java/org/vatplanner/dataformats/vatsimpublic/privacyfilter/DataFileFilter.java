@@ -3,6 +3,7 @@ package org.vatplanner.dataformats.vatsimpublic.privacyfilter;
 import java.util.function.Function;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
+import org.vatplanner.dataformats.vatsimpublic.parser.VoiceServer;
 
 /**
  * A simple first-tool-in-line filter attempting to provide a limited degree of
@@ -178,6 +179,31 @@ public class DataFileFilter {
 
         boolean isEqual = isVersionFormatEqual && isTimestampEqual && isNumberOfConnectedClientsEqual //
                 && isMinimumDataFileRetrievalIntervalEqual && isMinimumAtisFileRetrievalIntervalEqual;
+
+        return isEqual;
+    }
+
+    /**
+     * Checks if both voice server objects hold the same information.
+     *
+     * @param a first voice server object
+     * @param b second voice server object
+     * @return Are both voice server objects equal?
+     */
+    boolean checkEqualVoiceServer(VoiceServer a, VoiceServer b) {
+        if (a == null) {
+            return (b == null);
+        } else if (b == null) {
+            return false;
+        }
+
+        boolean isAddressEqual = equalsNullSafe(a, b, VoiceServer::getAddress);
+        boolean isLocationEqual = equalsNullSafe(a, b, VoiceServer::getLocation);
+        boolean isNameEqual = equalsNullSafe(a, b, VoiceServer::getName);
+        boolean isClientConnectionAllowedEqual = equalsNullSafe(a, b, VoiceServer::isClientConnectionAllowed);
+        boolean isRawServerTypeEqual = equalsNullSafe(a, b, VoiceServer::getRawServerType);
+
+        boolean isEqual = isAddressEqual && isLocationEqual && isNameEqual && isClientConnectionAllowedEqual && isRawServerTypeEqual;
 
         return isEqual;
     }
