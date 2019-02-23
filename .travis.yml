@@ -1,3 +1,6 @@
+addons:
+  sonarcloud:
+    organization: "vatplanner"
 language: java
 jdk:
  - oraclejdk8
