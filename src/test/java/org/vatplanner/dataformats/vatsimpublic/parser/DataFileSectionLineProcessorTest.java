@@ -3,7 +3,7 @@ package org.vatplanner.dataformats.vatsimpublic.parser;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import org.junit.Rule;
@@ -30,8 +30,8 @@ public class DataFileSectionLineProcessorTest {
 
     @DataProvider
     public static Object[][] dataProviderApplicationToSection() {
-        Function<String, String> function1 = s -> "prefix " + s + " postfix";
-        Function<String, String> function2 = String::toLowerCase;
+        UnaryOperator<String> function1 = s -> "prefix " + s + " postfix";
+        UnaryOperator<String> function2 = String::toLowerCase;
 
         return new Object[][]{ //
             new Object[]{"", "SECTION", function1, ""}, //
@@ -63,7 +63,7 @@ public class DataFileSectionLineProcessorTest {
 
     @Test
     @UseDataProvider("dataProviderApplicationToSection")
-    public void testGetResultAsString_applied_returnsAlteredOutput(String input, String sectionName, Function function, String expectedResult) {
+    public void testGetResultAsString_applied_returnsAlteredOutput(String input, String sectionName, UnaryOperator<String> function, String expectedResult) {
         // Arrange
         DataFileSectionLineProcessor processor = new DataFileSectionLineProcessor(input);
         processor.apply(sectionName, function);
@@ -110,7 +110,7 @@ public class DataFileSectionLineProcessorTest {
         thrown.expect(IllegalArgumentException.class);
 
         // Act
-        processor.apply(null, Function.identity());
+        processor.apply(null, UnaryOperator.identity());
 
         // Assert (nothing to do)
     }
@@ -123,7 +123,7 @@ public class DataFileSectionLineProcessorTest {
         thrown.expect(IllegalArgumentException.class);
 
         // Act
-        processor.apply("", Function.identity());
+        processor.apply("", UnaryOperator.identity());
 
         // Assert (nothing to do)
     }
@@ -134,7 +134,7 @@ public class DataFileSectionLineProcessorTest {
         DataFileSectionLineProcessor processor = new DataFileSectionLineProcessor("");
 
         // Act
-        DataFileSectionLineProcessor returned = processor.apply("a", Function.identity());
+        DataFileSectionLineProcessor returned = processor.apply("a", UnaryOperator.identity());
 
         // Assert
         assertThat(returned, is(sameInstance(processor)));

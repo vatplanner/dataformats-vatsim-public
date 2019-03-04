@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,7 +33,7 @@ public class DataFileSectionLineProcessor {
         private String content;
         private String separator;
 
-        private void applyToContent(Function<String, String> function) {
+        private void applyToContent(UnaryOperator<String> function) {
             if (!content.isEmpty()) {
                 content = function.apply(content);
             }
@@ -107,7 +107,7 @@ public class DataFileSectionLineProcessor {
      * @return this processor instance for method-chaining
      * @throws IllegalArgumentException if requirements are not fulfilled
      */
-    public DataFileSectionLineProcessor apply(String sectionName, Function<String, String> function) {
+    public DataFileSectionLineProcessor apply(String sectionName, UnaryOperator<String> function) {
         if (sectionName == null) {
             throw new IllegalArgumentException("section name must not be null");
         }
