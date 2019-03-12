@@ -19,7 +19,7 @@ public class SubstituteObserverPrefixFilter implements VerifiableClientFilter<St
     private static final String OBSERVER_SUFFIX = "_OBS";
     private static final String OBSERVER_REPLACEMENT = "XX_OBS";
 
-    private static final Pattern PATTERN = Pattern.compile("^[^:]*" + Pattern.quote(OBSERVER_SUFFIX) + "(:.*)$"); // FIXME: end with :
+    private static final Pattern PATTERN = Pattern.compile("^[^:]*" + Pattern.quote(OBSERVER_SUFFIX) + "(:.*)$");
     private static final String PATTERN_REPLACEMENT = OBSERVER_REPLACEMENT + "$1";
 
     @Override
