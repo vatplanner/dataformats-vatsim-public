@@ -24,7 +24,7 @@ public class DataProviderHelpers {
      * @param oneDimensionalArray one-dimensional array
      * @return two-dimensional array with every item wrapped in its own array
      */
-    public static Object[][] asTwoDimensionalArray(Object[] oneDimensionalArray) {
+    public static Object[][] asTwoDimensionalArray(Object... oneDimensionalArray) {
         Object[][] twoDimensionalArray = new Object[oneDimensionalArray.length][1];
 
         for (int i = 0; i < oneDimensionalArray.length; i++) {

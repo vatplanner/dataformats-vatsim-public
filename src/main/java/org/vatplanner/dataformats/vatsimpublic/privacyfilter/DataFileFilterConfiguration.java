@@ -175,7 +175,13 @@ public class DataFileFilterConfiguration {
      * plan remarks are cleared without replacement. Strings are matched across
      * complete remarks, so they don't need to be full words but can also be
      * word parts. The mandatory communication type flag (text only/receive
-     * only/full voice) is kept.
+     * only/full voice) is kept as well as pre-filing system indication (e.g.
+     * <code>+VFPS+</code>).
+     * </p>
+     * <p>
+     * The given {@link Collection} of trigger strings must not contain any
+     * items which are null or empty (including strings consisting of just
+     * white-spaces).
      * </p>
      * <p>
      * This works independent from the general
