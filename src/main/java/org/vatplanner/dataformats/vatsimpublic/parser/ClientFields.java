@@ -13,11 +13,15 @@ import java.util.function.Function;
 public class ClientFields {
     // FIXME: write script to auto-generate https://area-51.blog/2009/11/07/using-groovy-to-generate-java-sources-in-maven/
 
+    private ClientFields() {
+        // utility class; hide constructor
+    }
+
     /**
      * All {@link Client} object fields resulting in {@link String} return
      * values.
      */
-    public static enum StringFields implements FieldAccess<String> {
+    public enum StringFields implements FieldAccess<String> {
         CALLSIGN(Client::getCallsign), //
         REAL_NAME(Client::getRealName), //
         AIRCRAFT_TYPE(Client::getAircraftType), //
