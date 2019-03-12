@@ -87,12 +87,9 @@ public class DataFileSectionLineProcessor {
             }
 
             // link line with section for later processing
-            List<ContentLine> sectionLines = linesBySectionName.get(sectionName);
-            if (sectionLines == null) {
-                sectionLines = new ArrayList<>();
-                linesBySectionName.put(sectionName, sectionLines);
-            }
-            sectionLines.add(contentLine);
+            linesBySectionName
+                    .computeIfAbsent(sectionName, k -> new ArrayList<>())
+                    .add(contentLine);
         }
     }
 
