@@ -27,6 +27,15 @@ public class FlightPlanRemarksRemoveAllFilter implements VerifiableClientFilter<
     private static final String COMMUNICATION_FLAG_RECEIVE_ONLY = "/R/";
     private static final String COMMUNICATION_FLAG_TEXT = "/T/";
 
+    private static final Pattern PATTERN_APPLICATION = Pattern.compile("^([^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:)([^:]*)(:.*|)$", Pattern.CASE_INSENSITIVE);
+    private static final int PATTERN_APPLICATION_FIELDS_BEFORE = 1;
+    private static final int PATTERN_APPLICATION_FIELD_CONTENT = 2;
+    private static final int PATTERN_APPLICATION_FIELDS_AFTER = 3;
+
+    private static final Pattern PATTERN_VERIFICATION_FILTERED = Pattern.compile("^(\\+VFPS\\+|)(/[VRT]/|)$", Pattern.CASE_INSENSITIVE);
+    private static final int PATTERN_VERIFICATION_FILTERED_VFPS = 1;
+    private static final int PATTERN_VERIFICATION_FILTERED_COMMUNICATION_FLAG = 2;
+
     /**
      * Creates a new filter to remove free-text from flight plan remarks.
      * Communication type flag as well as pre-filing system indication (e.g.
@@ -84,12 +93,6 @@ public class FlightPlanRemarksRemoveAllFilter implements VerifiableClientFilter<
         return matcher.matches();
     }
 
-    private String extractFieldContent(String rawLine) {
-        // FIXME: implement
-        // field 30
-        return "";
-    }
-
     @Override
     public Set<ClientFields.FieldAccess<String>> getAffectedFields() {
         return AFFECTED_FIELDS;
@@ -105,14 +108,21 @@ public class FlightPlanRemarksRemoveAllFilter implements VerifiableClientFilter<
                 return filtered.equals(original);
             }
 
-            // VFPS prefix must be maintained, if set
-            boolean isFiledByVFPS = original.startsWith(VFPS_PREFIX);
-            if (isFiledByVFPS && !filtered.startsWith(VFPS_PREFIX)) {
+            Matcher matcher = PATTERN_VERIFICATION_FILTERED.matcher(filtered);
+            if (!matcher.matches()) {
                 return false;
             }
-            String expectedPrefix = isFiledByVFPS ? VFPS_PREFIX : "";
 
-            // find communication flags
+            String filteredVFPSFlag = matcher.group(PATTERN_VERIFICATION_FILTERED_VFPS);
+            String filteredCommunicationFlag = matcher.group(PATTERN_VERIFICATION_FILTERED_COMMUNICATION_FLAG);
+
+            // VFPS prefix must be maintained, if set
+            boolean isFiledByVFPS = original.startsWith(VFPS_PREFIX);
+            if (isFiledByVFPS && !VFPS_PREFIX.equals(filteredVFPSFlag)) {
+                return false;
+            }
+
+            // find original communication flags
             String originalUpperCase = original.toUpperCase();
             boolean hadCommunicationFlagVoice = originalUpperCase.contains(COMMUNICATION_FLAG_VOICE);
             boolean hadCommunicationFlagReceiveOnly = originalUpperCase.contains(COMMUNICATION_FLAG_RECEIVE_ONLY);
@@ -128,9 +138,7 @@ public class FlightPlanRemarksRemoveAllFilter implements VerifiableClientFilter<
                 expectedCommunicationFlag = COMMUNICATION_FLAG_TEXT;
             }
 
-            String expectedOutput = expectedPrefix + expectedCommunicationFlag;
-
-            return filtered.equals(expectedOutput);
+            return filteredCommunicationFlag.equalsIgnoreCase(expectedCommunicationFlag);
         }
 
         throw new IllegalArgumentException("attempted to verify an unhandled field");
@@ -138,8 +146,41 @@ public class FlightPlanRemarksRemoveAllFilter implements VerifiableClientFilter<
 
     @Override
     public String apply(String t) {
-        // FIXME: implement, use extractFieldContent
-        return "";
+        Matcher matcher = PATTERN_APPLICATION.matcher(t);
+        if (!matcher.matches()) {
+            return t;
+        }
+
+        String fieldContent = matcher.group(PATTERN_APPLICATION_FIELD_CONTENT);
+        if (!isConditionMet(fieldContent)) {
+            return t;
+        }
+
+        String fieldsBefore = matcher.group(PATTERN_APPLICATION_FIELDS_BEFORE);
+        String fieldsAfter = matcher.group(PATTERN_APPLICATION_FIELDS_AFTER);
+
+        boolean isFiledByVFPS = fieldContent.startsWith(VFPS_PREFIX);
+        String expectedPrefix = isFiledByVFPS ? VFPS_PREFIX : "";
+
+        // find communication flags
+        String originalUpperCase = fieldContent.toUpperCase();
+        boolean hadCommunicationFlagVoice = originalUpperCase.contains(COMMUNICATION_FLAG_VOICE);
+        boolean hadCommunicationFlagReceiveOnly = originalUpperCase.contains(COMMUNICATION_FLAG_RECEIVE_ONLY);
+        boolean hadCommunicationFlagText = originalUpperCase.contains(COMMUNICATION_FLAG_TEXT);
+
+        // precedence: voice over receive-only over text
+        String expectedCommunicationFlag = "";
+        if (hadCommunicationFlagVoice) {
+            expectedCommunicationFlag = COMMUNICATION_FLAG_VOICE;
+        } else if (hadCommunicationFlagReceiveOnly) {
+            expectedCommunicationFlag = COMMUNICATION_FLAG_RECEIVE_ONLY;
+        } else if (hadCommunicationFlagText) {
+            expectedCommunicationFlag = COMMUNICATION_FLAG_TEXT;
+        }
+
+        String filteredFieldContent = expectedPrefix + expectedCommunicationFlag;
+
+        return fieldsBefore + filteredFieldContent + fieldsAfter;
     }
 
 }

@@ -25,11 +25,13 @@ import org.vatplanner.dataformats.vatsimpublic.parser.ClientFields;
  * </p>
  *
  * <p>
- * Application as well as verification must be independent from each other, the
- * same filter instance may be reused concurrently for every line in multiple
- * files which have nothing to do with each other. Only filter configuration
- * (final after construction) is allowed to be kept as a state, everything else
- * must be done stateless.
+ * Application as well as verification must work independent from each other,
+ * the same filter instance may be reused concurrently for every line in
+ * multiple files which have nothing to do with each other. Only filter
+ * configuration (final after construction) is allowed to be kept as a state,
+ * everything else must be done stateless. Ideally, verification should use a
+ * different approach to implementation than application, sharing or duplicating
+ * code between verification and application should be avoided, if possible.
  * </p>
  *
  * @param <T> type as used for fields in {@link ClientFields}
