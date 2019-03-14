@@ -116,32 +116,55 @@ public class FlightPlanRemarksRemoveAllFilter implements VerifiableClientFilter<
             String filteredVFPSFlag = matcher.group(PATTERN_VERIFICATION_FILTERED_VFPS);
             String filteredCommunicationFlag = matcher.group(PATTERN_VERIFICATION_FILTERED_COMMUNICATION_FLAG);
 
-            // VFPS prefix must be maintained, if set
+            // VFPS prefix must be maintained (case-sensitive), if set
             boolean isFiledByVFPS = original.startsWith(VFPS_PREFIX);
             if (isFiledByVFPS && !VFPS_PREFIX.equals(filteredVFPSFlag)) {
                 return false;
             }
 
-            // find original communication flags
-            String originalUpperCase = original.toUpperCase();
-            boolean hadCommunicationFlagVoice = originalUpperCase.contains(COMMUNICATION_FLAG_VOICE);
-            boolean hadCommunicationFlagReceiveOnly = originalUpperCase.contains(COMMUNICATION_FLAG_RECEIVE_ONLY);
-            boolean hadCommunicationFlagText = originalUpperCase.contains(COMMUNICATION_FLAG_TEXT);
-
-            // precedence: voice over receive-only over text
-            String expectedCommunicationFlag = "";
-            if (hadCommunicationFlagVoice) {
-                expectedCommunicationFlag = COMMUNICATION_FLAG_VOICE;
-            } else if (hadCommunicationFlagReceiveOnly) {
-                expectedCommunicationFlag = COMMUNICATION_FLAG_RECEIVE_ONLY;
-            } else if (hadCommunicationFlagText) {
-                expectedCommunicationFlag = COMMUNICATION_FLAG_TEXT;
-            }
+            String expectedCommunicationFlag = findExpectedCommunicationFlag(original);
 
             return filteredCommunicationFlag.equalsIgnoreCase(expectedCommunicationFlag);
         }
 
         throw new IllegalArgumentException("attempted to verify an unhandled field");
+    }
+
+    /**
+     * Finds all communication flags indicated by given string and returns only
+     * a single flag. The flag to be returned is determined by applying an order
+     * of precedence:
+     *
+     * <ol>
+     * <li>voice takes precedence over</li>
+     * <li>receive-only takes precedence over</li>
+     * <li>text</li>
+     * </ol>
+     *
+     * If no flag was set, an empty string will be returned.
+     *
+     * @param s string to evaluate for communication flags
+     * @return communication flag according to order of precedence; empty if not
+     * set
+     */
+    private String findExpectedCommunicationFlag(String s) {
+        // find communication flags
+        String originalUpperCase = s.toUpperCase();
+        boolean hadCommunicationFlagVoice = originalUpperCase.contains(COMMUNICATION_FLAG_VOICE);
+        boolean hadCommunicationFlagReceiveOnly = originalUpperCase.contains(COMMUNICATION_FLAG_RECEIVE_ONLY);
+        boolean hadCommunicationFlagText = originalUpperCase.contains(COMMUNICATION_FLAG_TEXT);
+
+        // precedence: voice over receive-only over text
+        String expectedCommunicationFlag = "";
+        if (hadCommunicationFlagVoice) {
+            expectedCommunicationFlag = COMMUNICATION_FLAG_VOICE;
+        } else if (hadCommunicationFlagReceiveOnly) {
+            expectedCommunicationFlag = COMMUNICATION_FLAG_RECEIVE_ONLY;
+        } else if (hadCommunicationFlagText) {
+            expectedCommunicationFlag = COMMUNICATION_FLAG_TEXT;
+        }
+
+        return expectedCommunicationFlag;
     }
 
     @Override
@@ -162,21 +185,7 @@ public class FlightPlanRemarksRemoveAllFilter implements VerifiableClientFilter<
         boolean isFiledByVFPS = fieldContent.startsWith(VFPS_PREFIX);
         String expectedPrefix = isFiledByVFPS ? VFPS_PREFIX : "";
 
-        // find communication flags
-        String originalUpperCase = fieldContent.toUpperCase();
-        boolean hadCommunicationFlagVoice = originalUpperCase.contains(COMMUNICATION_FLAG_VOICE);
-        boolean hadCommunicationFlagReceiveOnly = originalUpperCase.contains(COMMUNICATION_FLAG_RECEIVE_ONLY);
-        boolean hadCommunicationFlagText = originalUpperCase.contains(COMMUNICATION_FLAG_TEXT);
-
-        // precedence: voice over receive-only over text
-        String expectedCommunicationFlag = "";
-        if (hadCommunicationFlagVoice) {
-            expectedCommunicationFlag = COMMUNICATION_FLAG_VOICE;
-        } else if (hadCommunicationFlagReceiveOnly) {
-            expectedCommunicationFlag = COMMUNICATION_FLAG_RECEIVE_ONLY;
-        } else if (hadCommunicationFlagText) {
-            expectedCommunicationFlag = COMMUNICATION_FLAG_TEXT;
-        }
+        String expectedCommunicationFlag = findExpectedCommunicationFlag(fieldContent);
 
         String filteredFieldContent = expectedPrefix + expectedCommunicationFlag;
 
