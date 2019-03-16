@@ -102,9 +102,9 @@ public class DataFileFilterConfiguration {
      * <strong>high rate of false positives</strong> and remove other
      * information as well.
      * <p>
-     * When set to true, URLs to services such as Twitch or YouTube trigger
-     * removal of the next word (which usually should be the channel or user
-     * name).
+     * When set to true, a few different common patterns of announcing account
+     * data in remarks will be tried to identify and remove a word that
+     * <em>could</em> be a channel/user/page name.
      * </p>
      *
      * @param removeStreamingChannels Attempt to remove streaming service
@@ -112,6 +112,7 @@ public class DataFileFilterConfiguration {
      * @return this instance for method-chaining
      */
     public DataFileFilterConfiguration setRemoveStreamingChannels(boolean removeStreamingChannels) {
+        // TODO: rename option to better fit current implementation
         this.removeStreamingChannels = removeStreamingChannels;
         return this;
     }
