@@ -7,6 +7,8 @@ import static org.junit.Assert.*;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.vatplanner.dataformats.vatsimpublic.privacyfilter.errorhandling.ErrorHandlingStrategy;
+import org.vatplanner.dataformats.vatsimpublic.privacyfilter.errorhandling.ThrowExceptionStrategy;
 
 public class DataFileFilterConfigurationTest {
 
@@ -54,5 +56,41 @@ public class DataFileFilterConfigurationTest {
         configuration.setFlightPlanRemarksRemoveAllIfContaining(emptyList);
 
         // Assert (nothing to do)
+    }
+
+    @Test
+    public void testGetUnwantedModificationErrorHandlingStrategy_unconfigured_returnsThrowExceptionStrategy() {
+        // Arrange
+        DataFileFilterConfiguration configuration = new DataFileFilterConfiguration();
+
+        // Act
+        ErrorHandlingStrategy strategy = configuration.getUnwantedModificationErrorHandlingStrategy();
+
+        // Assert
+        assertThat(strategy, is(instanceOf(ThrowExceptionStrategy.class)));
+    }
+
+    @Test
+    public void testGetIncompleteFilteringErrorHandlingStrategy_unconfigured_returnsThrowExceptionStrategy() {
+        // Arrange
+        DataFileFilterConfiguration configuration = new DataFileFilterConfiguration();
+
+        // Act
+        ErrorHandlingStrategy strategy = configuration.getIncompleteFilteringErrorHandlingStrategy();
+
+        // Assert
+        assertThat(strategy, is(instanceOf(ThrowExceptionStrategy.class)));
+    }
+
+    @Test
+    public void testGetUnstableResultErrorHandlingStrategy_unconfigured_returnsThrowExceptionStrategy() {
+        // Arrange
+        DataFileFilterConfiguration configuration = new DataFileFilterConfiguration();
+
+        // Act
+        ErrorHandlingStrategy strategy = configuration.getUnstableResultErrorHandlingStrategy();
+
+        // Assert
+        assertThat(strategy, is(instanceOf(ThrowExceptionStrategy.class)));
     }
 }

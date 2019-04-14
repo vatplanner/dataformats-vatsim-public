@@ -2,6 +2,8 @@ package org.vatplanner.dataformats.vatsimpublic.privacyfilter;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import static org.vatplanner.dataformats.vatsimpublic.privacyfilter.errorhandling.DefaultErrorHandlingStrategies.THROW_EXCEPTION;
+import org.vatplanner.dataformats.vatsimpublic.privacyfilter.errorhandling.ErrorHandlingStrategy;
 
 /**
  * Configures the actions to be performed by {@link DataFileFilter}. See
@@ -40,6 +42,10 @@ public class DataFileFilterConfiguration {
     private boolean removeStreamingChannels = false;
     private boolean flightPlanRemarksRemoveAll = false;
     private Collection<String> flightPlanRemarksRemoveAllIfContaining = new ArrayList<>();
+
+    private ErrorHandlingStrategy unwantedModificationErrorHandlingStrategy = THROW_EXCEPTION;
+    private ErrorHandlingStrategy incompleteFilteringErrorHandlingStrategy = THROW_EXCEPTION;
+    private ErrorHandlingStrategy unstableResultErrorHandlingStrategy = THROW_EXCEPTION;
 
     public boolean isRemoveRealNameAndHomebase() {
         return removeRealNameAndHomebase;
@@ -185,10 +191,11 @@ public class DataFileFilterConfiguration {
      * white-spaces).
      * </p>
      * <p>
-     * This works independent from the general
-     * {@link #setFlightPlanRemarksRemoveAll(boolean)} option, allowing you to
-     * only clear remarks field when content was identified as potentially
-     * troublesome.
+     * Conditional filtering allows you to only clear remarks field when content
+     * was identified as potentially troublesome. To apply such conditional
+     * filtering, {@link #setFlightPlanRemarksRemoveAll(boolean)} option must be
+     * set to false, otherwise unconditional filtering will still be applied
+     * regardless of this option.
      * </p>
      *
      * @param flightPlanRemarksRemoveAllIfContaining case-insensitive strings
@@ -204,6 +211,52 @@ public class DataFileFilterConfiguration {
         this.flightPlanRemarksRemoveAllIfContaining = flightPlanRemarksRemoveAllIfContaining;
 
         return this;
+    }
+
+    public ErrorHandlingStrategy getUnwantedModificationErrorHandlingStrategy() {
+        return unwantedModificationErrorHandlingStrategy;
+    }
+
+    /**
+     * Provides a strategy to be called when filtering modified unexpected
+     * fields.
+     *
+     * @param unwantedModificationErrorHandlingStrategy called on modification
+     * to unexpected fields
+     */
+    public void setUnwantedModificationErrorHandlingStrategy(ErrorHandlingStrategy unwantedModificationErrorHandlingStrategy) {
+        this.unwantedModificationErrorHandlingStrategy = unwantedModificationErrorHandlingStrategy;
+    }
+
+    public ErrorHandlingStrategy getIncompleteFilteringErrorHandlingStrategy() {
+        return incompleteFilteringErrorHandlingStrategy;
+    }
+
+    /**
+     * Provides a strategy to be called when filter was unsuccessful and
+     * verification of affected fields still indicates that unwanted data
+     * remained.
+     *
+     * @param incompleteFilteringErrorHandlingStrategy called when unwanted data
+     * remains after filtering
+     */
+    public void setIncompleteFilteringErrorHandlingStrategy(ErrorHandlingStrategy incompleteFilteringErrorHandlingStrategy) {
+        this.incompleteFilteringErrorHandlingStrategy = incompleteFilteringErrorHandlingStrategy;
+    }
+
+    public ErrorHandlingStrategy getUnstableResultErrorHandlingStrategy() {
+        return unstableResultErrorHandlingStrategy;
+    }
+
+    /**
+     * Provides a strategy to be called when applying the same filter again on
+     * its result yields a different, thus unstable output.
+     *
+     * @param unstableResultErrorHandlingStrategy called when filter produces
+     * unstable results
+     */
+    public void setUnstableResultErrorHandlingStrategy(ErrorHandlingStrategy unstableResultErrorHandlingStrategy) {
+        this.unstableResultErrorHandlingStrategy = unstableResultErrorHandlingStrategy;
     }
 
 }
