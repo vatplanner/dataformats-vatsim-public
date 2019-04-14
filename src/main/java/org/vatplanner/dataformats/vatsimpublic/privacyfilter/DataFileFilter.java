@@ -1,5 +1,6 @@
 package org.vatplanner.dataformats.vatsimpublic.privacyfilter;
 
+import java.util.List;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
 
@@ -56,6 +57,7 @@ import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
 public class DataFileFilter {
 
     private final DataFileFilterConfiguration configuration;
+    private final List<VerifiableClientFilter<?>> filterChain;
 
     private static final int SUPPORTED_FORMAT_VERSION = 8;
 
@@ -72,17 +74,14 @@ public class DataFileFilter {
             throw new IllegalArgumentException("configuration must not be null");
         }
 
-        // FIXME: finish implementation, then stop throwing this exception :)
-        boolean isUnimplementedFeatureRequested = configuration.isFlightPlanRemarksRemoveAll()
-                || !configuration.getFlightPlanRemarksRemoveAllIfContaining().isEmpty()
-                || configuration.isRemoveRealNameAndHomebase()
-                || configuration.isRemoveStreamingChannels()
-                || configuration.isSubstituteObserverPrefix();
-        if (isUnimplementedFeatureRequested) {
-            throw new UnsupportedOperationException("a requested filter feature is still under development and cannot be used yet");
-        }
+        filterChain = getVerifiableClientFilterFactory()
+                .buildFromConfiguration(configuration);
 
         this.configuration = configuration;
+    }
+
+    VerifiableClientFilterFactory getVerifiableClientFilterFactory() {
+        return new VerifiableClientFilterFactory();
     }
 
     /**
@@ -104,8 +103,8 @@ public class DataFileFilter {
      * Filters the given raw data file as configured and returns the result.
      * Filtering may result in some form of data corruption, so you may want to
      * parse & verify the result using
-     * {@link #verifyNoAdditionalLogMessages(DataFile, DataFile)} and
-     * {@link #verifyOnlyWantedModifications(DataFile, DataFile)} afterwards.
+     * {@link #verifyNoAdditionalLogMessages(DataFile, DataFile)} afterwards.
+     * Error handling will be performed as configured through strategies.
      * <p>
      * <b>Disclaimer (again):</b> The filter may fail to apply properly and not
      * only corrupt data but also fail to implement all configured filtering
@@ -119,7 +118,9 @@ public class DataFileFilter {
      * @return filtered data file (may be erroneous or incompletely filtered!)
      */
     public String filter(int formatVersion, String original) {
+        // QUESTION: return an object with a filter error log instead of just the datafile string?
         // FIXME: implement
+        // FIXME: use checkEqualMetadata
         return null;
     }
 
@@ -133,10 +134,12 @@ public class DataFileFilter {
      * @return Is all non-filtered data still present 1:1 on filtered DataFile?
      * (true = all data OK; false = filtered file lost data which should not
      * have been removed)
+     * @deprecated always verified; configurable by
+     * {@link DataFileFilterConfiguration#setUnwantedModificationErrorHandlingStrategy(ErrorHandlingStrategy)}
      */
+    @Deprecated
     public boolean verifyOnlyWantedModifications(DataFile original, DataFile filtered) {
-        // FIXME: use checkEqualMetadata
-        // FIXME: implement
+        // FIXME: remove
         return false;
     }
 

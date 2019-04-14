@@ -2,7 +2,6 @@ package org.vatplanner.dataformats.vatsimpublic.privacyfilter;
 
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import java.util.Arrays;
 import javax.xml.ws.Holder;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -31,54 +30,6 @@ public class DataFileFilterTest {
     }
 
     @Test
-    public void testConstructor_enabledFlightPlanRemarksRemoveAll_throwsUnsupportedOperationException() {
-        // FIXME: temporarily, remove when feature is implemented
-
-        // Arrange
-        DataFileFilterConfiguration configuration = new DataFileFilterConfiguration()
-                .setFlightPlanRemarksRemoveAll(true);
-
-        thrown.expect(UnsupportedOperationException.class);
-
-        // Act
-        new DataFileFilter(configuration);
-
-        // Assert (nothing to do)
-    }
-
-    @Test
-    public void testConstructor_nonEmptyListOfFlightPlanRemarksRemoveAll_throwsUnsupportedOperationException() {
-        // FIXME: temporarily, remove when feature is implemented
-
-        // Arrange
-        DataFileFilterConfiguration configuration = new DataFileFilterConfiguration()
-                .setFlightPlanRemarksRemoveAllIfContaining(Arrays.asList(""));
-
-        thrown.expect(UnsupportedOperationException.class);
-
-        // Act
-        new DataFileFilter(configuration);
-
-        // Assert (nothing to do)
-    }
-
-    @Test
-    public void testConstructor_enabledRemoveRealNameAndHomebase_throwsUnsupportedOperationException() {
-        // FIXME: temporarily, remove when feature is implemented
-
-        // Arrange
-        DataFileFilterConfiguration configuration = new DataFileFilterConfiguration()
-                .setRemoveRealNameAndHomebase(true);
-
-        thrown.expect(UnsupportedOperationException.class);
-
-        // Act
-        new DataFileFilter(configuration);
-
-        // Assert (nothing to do)
-    }
-
-    @Test
     public void testConstructor_enabledRemoveStreamingChannels_throwsUnsupportedOperationException() {
         // FIXME: temporarily, remove when feature is implemented
 
@@ -95,26 +46,10 @@ public class DataFileFilterTest {
     }
 
     @Test
-    public void testConstructor_enabledSubstituteObserverPrefix_throwsUnsupportedOperationException() {
-        // FIXME: temporarily, remove when feature is implemented
-
-        // Arrange
-        DataFileFilterConfiguration configuration = new DataFileFilterConfiguration()
-                .setSubstituteObserverPrefix(true);
-
-        thrown.expect(UnsupportedOperationException.class);
-
-        // Act
-        new DataFileFilter(configuration);
-
-        // Assert (nothing to do)
-    }
-
-    @Test
     @DataProvider({"-1", "0", "1", "7", "9", "10"})
     public void testIsFormatVersionSupported_unsupported_returnsFalse(int formatVersion) {
         // Arrange
-        DataFileFilter filter = createDefaultConfigFilter();
+        DataFileFilter filter = createAnyFilterForIndependentMethods();
 
         // Act
         boolean result = filter.isFormatVersionSupported(formatVersion);
@@ -126,7 +61,7 @@ public class DataFileFilterTest {
     @Test
     public void testIsFormatVersionSupported_supported_returnsTrue() {
         // Arrange
-        DataFileFilter filter = createDefaultConfigFilter();
+        DataFileFilter filter = createAnyFilterForIndependentMethods();
 
         // Act
         boolean result = filter.isFormatVersionSupported(8);
@@ -138,7 +73,7 @@ public class DataFileFilterTest {
     @Test
     public void testCheckEqualMetadata_nullBoth_returnsTrue() {
         // Arrange
-        DataFileFilter filter = createDefaultConfigFilter();
+        DataFileFilter filter = createAnyFilterForIndependentMethods();
 
         // Act
         boolean result = filter.checkEqualMetadata(null, null);
@@ -152,7 +87,7 @@ public class DataFileFilterTest {
         // Arrange
         DataFileMetaData mockMetaData = mock(DataFileMetaData.class);
 
-        DataFileFilter filter = createDefaultConfigFilter();
+        DataFileFilter filter = createAnyFilterForIndependentMethods();
 
         // Act
         boolean result = filter.checkEqualMetadata(null, mockMetaData);
@@ -166,7 +101,7 @@ public class DataFileFilterTest {
         // Arrange
         DataFileMetaData mockMetaData = mock(DataFileMetaData.class);
 
-        DataFileFilter filter = createDefaultConfigFilter();
+        DataFileFilter filter = createAnyFilterForIndependentMethods();
 
         // Act
         boolean result = filter.checkEqualMetadata(mockMetaData, null);
@@ -201,7 +136,7 @@ public class DataFileFilterTest {
         holderA.value = a;
         holderB.value = b;
 
-        DataFileFilter filter = createDefaultConfigFilter();
+        DataFileFilter filter = createAnyFilterForIndependentMethods();
 
         // Act
         boolean result = filter.checkEqualMetadata(a, b);
@@ -210,8 +145,9 @@ public class DataFileFilterTest {
         assertThat(result, is(expectedResult));
     }
 
-    private DataFileFilter createDefaultConfigFilter() {
-        DataFileFilterConfiguration configuration = new DataFileFilterConfiguration();
+    private DataFileFilter createAnyFilterForIndependentMethods() {
+        DataFileFilterConfiguration configuration = new DataFileFilterConfiguration() //
+                .setRemoveRealNameAndHomebase(true);
         return new DataFileFilter(configuration);
     }
 
