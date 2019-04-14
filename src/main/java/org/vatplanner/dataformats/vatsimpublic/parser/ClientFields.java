@@ -55,6 +55,13 @@ public class ClientFields {
     public static interface FieldAccess<T> {
 
         /**
+         * Returns the name identifying this accessor.
+         *
+         * @return name identifying this accessor
+         */
+        String name();
+
+        /**
          * Returns a method reference to the getter for the described field.
          *
          * @return getter method reference
@@ -71,6 +78,7 @@ public class ClientFields {
         default T getFrom(Client client) {
             return getter().apply(client);
         }
+
     }
 
     /**
