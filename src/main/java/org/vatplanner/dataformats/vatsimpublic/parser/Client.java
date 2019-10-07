@@ -82,7 +82,8 @@ import java.time.Instant;
  * controllerMessage for ATIS stations, otherwise general flightPlanRemarks
  * about ATC stations such as contact information, controller's estimated online
  * times or station's spatial coverage. May contain a URL to the voice room on
- * first line if prefixed with "$ ". Update timestamps are provided by
+ * first line if prefixed with "$ ". Voice rooms are superseded by "Audio for
+ * VATSIM" starting 14 October 2019. Update timestamps are provided by
  * {@link #controllerMessageLastUpdated}.</li>
  * <li>{@link #realName}: By convention, pilots should add a 4-letter ICAO code
  * for their "home base". Pilots often choose the closest airport to their
@@ -975,9 +976,11 @@ public class Client {
     /**
      * Returns the message set by a controller. Empty if unavailable.
      * <p>
-     * The message usually consists of a voice server URL prefixed with "$ " on
-     * first line. Remainder is generally known as "info lines" or "controller
-     * info".
+     * Until October 2019, the message usually consists of a voice server URL
+     * prefixed with "$ " on first line. Remainder is generally known as "info
+     * lines" or "controller info". Voice rooms are superseded by "Audio for
+     * VATSIM" on 14 October 2019, URLs after that date may be dummies or
+     * missing.
      * </p>
      * <p>
      * Multiple lines are separated by LF (\n).
