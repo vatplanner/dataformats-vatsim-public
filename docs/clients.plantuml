@@ -1,29 +1,37 @@
 @startuml
 
-Connection "1" -- Flight
+Connection "*" -- Flight
 Connection "1" -- Facility
+Connection "*" -- "1" Member
 
 Member "1" -- "*" Flight
-Member "1" -- "*" Facility
 
-Flight "1" -- "*" Flightplan
+Flight "1" -- "*" FlightPlan
 Flight "1" -- "*" TrackPoint
 
 Facility "1" -- "*" Message
 
 GeoCoordinates "1" -- TrackPoint
-GeoCoordinates "1" -- Facility
+
+Report -- "*" Facility
+Report -- "*" Flight
+Report "1" -- FlightPlan
+Report "1" -- TrackPoint
+Report "1" -- Message
+Report "1" -- Connection
+Report "1" -- Connection
 
 class Member {
       vatsimID : int
       
-      flights : Collection<Flight>
-      facilities : Collection<Facility>
+      flights : List<Flight>
+      facilities : List<Facility>
 }
 
 class Connection {
       member : Member
-      lastSeen : Instant
+      firstReport : Report
+      lastReport : Report
 
       .. from data file ..
       logonTime : Instant
@@ -36,39 +44,53 @@ class Connection {
       protocolVersion : int
 }
 
+note as Note_connections
+     ATC service always terminates with end of connection but
+     flights continue independent of actual connections and
+     flights may be prefiled by unconnected members
+end note
+
+Connection .. Note_connections
+
 note as Note_atis_message
      decode "atis_message":
      first line prefixed "$ " => voice URL
      rest of lines => message
      multi-line formatting with "^" and special character as CR LF?
+     
+     voice URL should become irrelevant as of October 2019 due to removal of voice rooms
 end note
 
 Facility .. Note_atis_message
 Message .. Note_atis_message
 
 class Facility {
-      member : Member
       connection : Connection
-      callsign : String
+      name : String
       facilityType : int
       frequencyKilohertz : int
       messagesByUpdateTime : NavigableMap<Instant, Message>
-      visualRange : int
-
-      .. connection info ..
-      voiceUrl : String
 }
+
+note as Note_facility
+     Geo coordinates and visibility ranges from
+     data files do not make much sense.
+     If such information is needed, retrieve it
+     from quality sources instead.
+end note
+
+Facility .. Note_facility
 
 class Message {
       facility : Facility
-      time : Instant
+      reportFirstSeen : Report
       message : String
 }
 
 class Flight {
       member : Member
-      connection : Connection
-      flightplanByRevision : NavigableMap<Integer, Flightplan>
+      connections : Collection<Connection>
+      flightPlanByRevision : NavigableMap<Integer, FlightPlan>
       callsign : String
       departureTimeActual : Instant
 
@@ -82,7 +104,7 @@ class GeoCoordinates {
 }
 
 class TrackPoint {
-      reportTime : Instant
+      report : Report
       flight : Flight
       
       .. tracking ..
@@ -96,21 +118,23 @@ class TrackPoint {
       qnhHectopascal : double
 }
 
-class Flightplan {
+class FlightPlan {
       flight : Flight
-      revisionFirstSeen : Instant
+      reportFirstSeen : Report
 
       .. basic information ..
       revision : int
       flightPlanType : String
-      departureTimePlanned : Instant
+      departureTimePlanned : LocalTime
 
       .. tracking ..
       route : String
       remarks : String
       
       .. aircraft and performance ..
+      wakeCategory : char
       aircraftType : String
+      equipmentCode : char
       trueAirSpeed : int
       altitude : int
       estimatedTimeEnroute : Duration
@@ -120,10 +144,32 @@ class Flightplan {
       departureAirportCode : String
       destinationAirportCode : String
       alternateAirportCode : String
-      departureAirportLatitude : double
-      departureAirportLongitude : double
-      destinationAirportLatitude : double
-      destinationAirportLongitude : double
+}
+
+note as Note_flightplan
+     fields for departure and destination airport coordinates
+     exist in data files but seem unused and thus have been excluded,
+     look up ICAO codes instead if needed
+end note
+
+FlightPlan .. Note_flightplan
+
+class Report {
+      facilities : Collection<Facility>
+      flights : Collection<Flight>
+
+      .. meta information (data file) ..
+      recordTime : Instant
+      connectedClients : int
+
+      .. meta information (fetching) ..
+      fetchTime : Instant
+      fetchUrl : String
+      fetchNode : String
+
+      .. meta information (processing) ..
+      parseTime : Instant
+      parserRejectedLines : int
 }
 
 /'
