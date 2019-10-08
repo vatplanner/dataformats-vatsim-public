@@ -1,5 +1,7 @@
 package org.vatplanner.dataformats.vatsimpublic.parser;
 
+import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating;
 import java.time.Duration;
 import java.time.Instant;
 

@@ -1,4 +1,4 @@
-package org.vatplanner.dataformats.vatsimpublic.parser;
+package org.vatplanner.dataformats.vatsimpublic.entities.status;
 
 import java.util.Map;
 import java.util.TreeMap;

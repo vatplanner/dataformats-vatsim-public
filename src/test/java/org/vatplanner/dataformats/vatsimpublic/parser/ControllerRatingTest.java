@@ -1,10 +1,10 @@
 package org.vatplanner.dataformats.vatsimpublic.parser;
 
-import org.vatplanner.dataformats.vatsimpublic.parser.ControllerRating;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
-import static org.vatplanner.dataformats.vatsimpublic.parser.ControllerRating.*;
+import static org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import org.junit.Rule;

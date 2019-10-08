@@ -37,7 +37,7 @@ class Connection {
       logonTime : Instant
       realName : String
       homeBase : String
-      rating : int
+      rating : ControllerRating
 
       .. technical details ..
       serverId : String
@@ -67,7 +67,7 @@ Message .. Note_atis_message
 class Facility {
       connection : Connection
       name : String
-      facilityType : int
+      type : FacilityType
       frequencyKilohertz : int
       messagesByUpdateTime : NavigableMap<Instant, Message>
 }
@@ -100,7 +100,8 @@ class Flight {
 class GeoCoordinates {
       latitude : double
       longitude : double
-      altitude : int          
+      altitude : int
+      isAltitudeUnitFeet : boolean
 }
 
 class TrackPoint {
@@ -112,10 +113,7 @@ class TrackPoint {
       heading : int
       groundSpeed : int
       transponderCode : int
-
-      .. QNH ..
-      qnhInchMercury : double
-      qnhHectopascal : double
+      qnh : BarometricPressure
 }
 
 class FlightPlan {
