@@ -1,10 +1,5 @@
 package org.vatplanner.dataformats.vatsimpublic.parser;
 
-import org.vatplanner.dataformats.vatsimpublic.parser.ClientType;
-import org.vatplanner.dataformats.vatsimpublic.parser.ClientParser;
-import org.vatplanner.dataformats.vatsimpublic.parser.Client;
-import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
-import org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
@@ -21,6 +16,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRatingTest;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityTypeTest;
 
 @RunWith(DataProviderRunner.class)
 public class ClientParserTest {

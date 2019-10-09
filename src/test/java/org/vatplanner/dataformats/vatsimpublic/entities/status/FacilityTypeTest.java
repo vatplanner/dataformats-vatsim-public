@@ -1,16 +1,15 @@
-package org.vatplanner.dataformats.vatsimpublic.parser;
+package org.vatplanner.dataformats.vatsimpublic.entities.status;
 
-import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
-import static org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import static org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType.*;
 
 @RunWith(DataProviderRunner.class)
 public class FacilityTypeTest {
