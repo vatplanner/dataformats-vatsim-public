@@ -7,7 +7,8 @@ import java.time.Instant;
  */
 public class Connection {
 
-    private Member member;
+    private final Member member;
+
     private Report firstReport;
     private Report lastReport;
 
@@ -20,17 +21,21 @@ public class Connection {
     private int protocolVersion;
 
     /**
+     * Creates a new connection record.
+     *
+     * @param member member holding this connection
+     */
+    public Connection(Member member) {
+        this.member = member;
+    }
+
+    /**
      * Returns the member holding this connection.
      *
      * @return member holding this connection
      */
     public Member getMember() {
         return member;
-    }
-
-    public Connection setMember(Member member) {
-        this.member = member;
-        return this;
     }
 
     /**
@@ -60,7 +65,16 @@ public class Connection {
      * @return this instance for method-chaining
      */
     public Connection seenInReport(Report report) {
-        // TODO: implement remember first/last
+        Instant recordTime = report.getRecordTime();
+
+        if ((firstReport == null) || recordTime.isBefore(firstReport.getRecordTime())) {
+            firstReport = report;
+        }
+
+        if ((lastReport == null) || recordTime.isAfter(lastReport.getRecordTime())) {
+            lastReport = report;
+        }
+
         return this;
     }
 
@@ -97,7 +111,6 @@ public class Connection {
         return this;
     }
 
-    // TODO: unit tests
     /**
      * Returns the "home base" the user has entered for this connection. In
      * theory this should be a 4-letter ICAO code for an airport. While most

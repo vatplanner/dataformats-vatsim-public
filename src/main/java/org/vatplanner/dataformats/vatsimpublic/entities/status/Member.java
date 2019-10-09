@@ -10,9 +10,19 @@ import java.util.Set;
  */
 public class Member {
 
-    private int vatsimId;
+    private final int vatsimId;
     private Set<Flight> flights;
     private Set<Facility> facilities;
+
+    /**
+     * Creates a new member. Members are uniquely identified by their VATSIM ID
+     * which is mandatory to be entered.
+     *
+     * @param vatsimId VATSIM ID of member
+     */
+    public Member(int vatsimId) {
+        this.vatsimId = vatsimId;
+    }
 
     /**
      * Returns the member's VATSIM ID.

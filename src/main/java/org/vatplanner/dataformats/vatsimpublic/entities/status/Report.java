@@ -1,9 +1,13 @@
 package org.vatplanner.dataformats.vatsimpublic.entities.status;
 
 import java.time.Instant;
-import static java.util.Collections.unmodifiableSet;
+import java.util.Collection;
+import static java.util.Collections.unmodifiableCollection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
 import org.vatplanner.dataformats.vatsimpublic.parser.NetworkInformation;
 
@@ -33,8 +37,8 @@ import org.vatplanner.dataformats.vatsimpublic.parser.NetworkInformation;
  */
 public class Report {
 
-    private final Set<Facility> facilities = new HashSet<>();
-    private final Set<Flight> flights = new HashSet<>();
+    private final Map<String, Facility> facilitiesByName = new HashMap<>();
+    private final Map<String, Set<Flight>> flightsByCallsign = new HashMap<>();
 
     private final Instant recordTime;
     private int numberOfConnectedClients;
@@ -67,8 +71,20 @@ public class Report {
      *
      * @return facilities visible on this report
      */
-    public Set<Facility> getFacilities() {
-        return unmodifiableSet(facilities);
+    public Collection<Facility> getFacilities() {
+        return unmodifiableCollection(facilitiesByName.values());
+    }
+
+    /**
+     * Returns the facility identified by given name on this report if recorded.
+     * Null will be returned if no such facility has been recorded.
+     *
+     * @param name facility name to look up
+     * @return facility recorded under given name on this report; null if not
+     * recorded
+     */
+    public Facility getFacilityByName(String name) {
+        return facilitiesByName.get(name);
     }
 
     /**
@@ -79,7 +95,9 @@ public class Report {
      * @return this instance for method-chaining
      */
     public Report addFacility(Facility facility) {
-        facilities.add(facility);
+        // TODO: reject if another facility has already been added by this name
+
+        facilitiesByName.put(facility.getName(), facility);
 
         // TODO: set/check report on facility's connection?
         return this;
@@ -92,8 +110,11 @@ public class Report {
      *
      * @return flights visible on this report
      */
-    public Set<Flight> getFlights() {
-        return unmodifiableSet(flights);
+    public Collection<Flight> getFlights() {
+        return flightsByCallsign.values() //
+                .stream() //
+                .flatMap(Set::stream) //
+                .collect(Collectors.toList());
     }
 
     /**
@@ -104,12 +125,14 @@ public class Report {
      * @return this instance for method-chaining
      */
     public Report addFlight(Flight flight) {
-        flights.add(flight);
+        Set<Flight> flightsForCallsign = flightsByCallsign.computeIfAbsent(flight.getCallsign(), x -> new HashSet<>());
+        flightsForCallsign.add(flight);
 
         // TODO: is there any reference that should be set/check on flights?
         return this;
     }
 
+    // TODO: add getter to lookup flights for callsign
     /**
      * Returns the time a record has been created. This is equal to the time a
      * processed data file has originally been created (see

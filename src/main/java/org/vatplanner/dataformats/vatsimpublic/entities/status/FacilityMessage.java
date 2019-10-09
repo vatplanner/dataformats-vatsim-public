@@ -2,13 +2,26 @@ package org.vatplanner.dataformats.vatsimpublic.entities.status;
 
 /**
  * Holds a message published for a facility. Facility messages are free text and
- * usually contain either controller information or ATIS messages.
+ * usually contain either controller information or ATIS messages. Data files
+ * may or may not provide a "last updated" timestamp which is not tracked as
+ * it's availability is not guaranteed and report recording time should
+ * generally be sufficient time information.
  */
 public class FacilityMessage {
 
-    private Facility facility;
+    private final Facility facility;
+
     private Report reportFirstSeen;
     private String message;
+
+    /**
+     * Creates a new message posted for a facility.
+     *
+     * @param facility facility who published the message
+     */
+    public FacilityMessage(Facility facility) {
+        this.facility = facility;
+    }
 
     /**
      * Returns the facility who published the message.
@@ -17,12 +30,6 @@ public class FacilityMessage {
      */
     public Facility getFacility() {
         return facility;
-    }
-
-    public FacilityMessage setFacility(Facility facility) {
-        this.facility = facility;
-        // TODO: add message to facility
-        return this;
     }
 
     /**
@@ -41,10 +48,18 @@ public class FacilityMessage {
      * @return this instance for method-chaining
      */
     public FacilityMessage seenInReport(Report report) {
-        // TODO: implement remember first report
+        if ((reportFirstSeen == null) || report.getRecordTime().isBefore(reportFirstSeen.getRecordTime())) {
+            reportFirstSeen = report;
+        }
+
         return this;
     }
 
+    /**
+     * Returns the message content.
+     *
+     * @return message content
+     */
     public String getMessage() {
         return message;
     }

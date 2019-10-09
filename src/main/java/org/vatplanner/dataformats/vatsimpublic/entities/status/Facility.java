@@ -1,8 +1,10 @@
 package org.vatplanner.dataformats.vatsimpublic.entities.status;
 
-import java.util.ArrayList;
-import static java.util.Collections.unmodifiableList;
-import java.util.List;
+import java.time.Instant;
+import static java.util.Collections.unmodifiableSortedSet;
+import java.util.Comparator;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * A facility is a stationary client usually providing services to pilots. If
@@ -16,10 +18,31 @@ import java.util.List;
 public class Facility {
 
     private Connection connection;
-    private String name;
+    private final String name;
     private FacilityType type;
     private int frequencyKilohertz; // NOTE: information may be discontinued or multiplied with "Audio for VATSIM" (frequency coupling)
-    private List<FacilityMessage> messages;
+    private SortedSet<FacilityMessage> messagesSortedByRecordTime = new TreeSet<>(COMPARATOR_MESSAGE_REPORT_RECORD_TIME);
+
+    private static final int LOWEST_VALID_FREQUENCY_KILOHERTZ = 118000;
+    private static final int HIGHEST_VALID_FREQUENCY_KILOHERTZ = 136975;
+
+    private static final Comparator<FacilityMessage> COMPARATOR_MESSAGE_REPORT_RECORD_TIME = (a, b) -> {
+        return a.getReportFirstSeen().getRecordTime().compareTo(b.getReportFirstSeen().getRecordTime());
+    };
+
+    /**
+     * Creates a new facility. If ATC service is provided, the name is
+     * well-defined by VACCs and can be resolved to air spaces. Names are
+     * mandatory and facilities are, at each time of record, uniquely identified
+     * by their name.
+     *
+     * @param name raw facility name
+     */
+    public Facility(String name) {
+        // TODO: reject empty/null names
+        // TODO: normalize name? (trim, upper case)
+        this.name = name;
+    }
 
     /**
      * Returns the associated client connection.
@@ -46,11 +69,6 @@ public class Facility {
      */
     public String getName() {
         return name;
-    }
-
-    public Facility setName(String name) {
-        this.name = name;
-        return this;
     }
 
     /**
@@ -99,33 +117,80 @@ public class Facility {
     }
 
     /**
-     * Returns all messages recorded for this facility. Messages are returned in
-     * order of insertion.
+     * Remembers the given frequency if no valid frequency has been set yet.
      *
-     * @return all messages recorded for this facility, never null
+     * @param frequencyKilohertz frequency to set if previously set frequency
+     * was invalid
+     * @return this instance for method-chaining
      */
-    public List<FacilityMessage> getMessages() {
-        if (messages == null) {
-            return unmodifiableList(new ArrayList<>());
+    public Facility seenOnFrequencyKilohertz(int frequencyKilohertz) {
+        // QUESTION: frequency can change during session, record all?
+
+        if (!isValidFrequency(this.frequencyKilohertz)) {
+            setFrequencyKilohertz(frequencyKilohertz);
         }
 
-        return unmodifiableList(messages);
+        return this;
+    }
+
+    private boolean isValidFrequency(int frequencyKilohertz) {
+        return (LOWEST_VALID_FREQUENCY_KILOHERTZ <= frequencyKilohertz) && (frequencyKilohertz <= HIGHEST_VALID_FREQUENCY_KILOHERTZ);
     }
 
     /**
-     * Adds a message to this facility.
+     * Returns all messages recorded for this facility, sorted by report record
+     * time.
+     *
+     * @return all messages recorded for this facility, never null
+     */
+    public SortedSet<FacilityMessage> getMessages() {
+        return unmodifiableSortedSet(messagesSortedByRecordTime);
+    }
+
+    /**
+     * Adds a message to this facility. See
+     * {@link #seenMessage(Report, String, Instant)} for easier handling of
+     * updates.
      *
      * @param message message to be added
      * @return this instance for method-chaining
+     * @see #seenMessage(Report, String, Instant)
      */
     public Facility addMessage(FacilityMessage message) {
-        if (messages == null) {
-            messages = new ArrayList<>();
+        // TODO: ensure message not already added
+        messagesSortedByRecordTime.add(message);
+        // TODO: set facility on message; must not loop back; document
+
+        // QUESTION: remove in favor of seenMessage?
+        return this;
+    }
+
+    /**
+     * Checks if the message is already known and updates it, otherwise adds it
+     * to the facility.
+     *
+     * @param report report the message appears in
+     * @param content message content
+     * @return this instance for method-chaining
+     */
+    public Facility seenMessage(Report report, String content) {
+        FacilityMessage lastMessage = null;
+        if (!messagesSortedByRecordTime.isEmpty()) {
+            lastMessage = messagesSortedByRecordTime.last();
         }
 
-        // TODO: ensure message not already added
-        messages.add(message);
-        // TODO: set facility on message; must not loop back; document
+        boolean isLastMessage = (lastMessage != null)
+                && content.equals(lastMessage.getMessage());
+
+        if (isLastMessage) {
+            lastMessage.seenInReport(report);
+        } else {
+            messagesSortedByRecordTime.add(
+                    new FacilityMessage(this)
+                            .setMessage(content)
+                            .seenInReport(report)
+            );
+        }
 
         return this;
     }

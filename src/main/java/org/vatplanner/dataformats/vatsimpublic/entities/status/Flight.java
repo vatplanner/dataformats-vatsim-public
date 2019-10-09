@@ -14,13 +14,30 @@ import java.util.TreeSet;
  * any track points before the user logs in. Because flight simulators continue
  * to run offline, flights may span multiple connections in case of a connection
  * loss.
+ *
+ * <p>
+ * Flights can only be identified uniquely at time of each report by a tuple of
+ * both member/VATSIM ID and callsign. Just using one criteria is not
+ * sufficient:
+ * <ul>
+ * <li>Members are technically able (but in most cases just not permitted) to
+ * connect multiple times, so the VATSIM ID alone does not uniquely identify a
+ * flight.</li>
+ * <li>Different members can pre-file flight plans for the same callsign and yet
+ * another user can then connect. VATSIM does not copy flight plans across
+ * different members, information may be totally different. Neither will
+ * pre-filed flight plans be revoked upon connection of another member using
+ * that same callsign.</li>
+ * </ul>
+ * </p>
  */
 public class Flight {
 
-    private Member member;
+    private final Member member;
+    private final String callsign;
+
     private Set<Connection> connections;
     private SortedSet<FlightPlan> flightPlans;
-    private String callsign;
     private SortedSet<TrackPoint> track;
 
     private static final Comparator<FlightPlan> FLIGHT_PLANS_COMPARATOR = (FlightPlan x, FlightPlan y) -> {
@@ -34,19 +51,29 @@ public class Flight {
     };
 
     /**
+     * Creates a new flight. Flights can only be identified uniquely at time of
+     * each report by a tuple of both member/VATSIM ID and callsign. See class
+     * JavaDoc for further information.
+     *
+     * @param member member performing or filing this flight
+     * @param callsign actual (connected) or intended (pre-filed) callsign to be
+     * used on this flight
+     */
+    public Flight(Member member, String callsign) {
+        this.member = member;
+        this.callsign = callsign;
+
+        // TODO: normalize callsign? (trim, upper case)
+        // TODO: add flight to member; must not loop back; document
+    }
+
+    /**
      * Returns the member performing this flight.
      *
      * @return member performing this flight
      */
     public Member getMember() {
         return member;
-    }
-
-    public Flight setMember(Member member) {
-        this.member = member;
-
-        // TODO: add flight to member; must not loop back; document
-        return this;
     }
 
     /**
@@ -114,17 +141,12 @@ public class Flight {
     }
 
     /**
-     * Sets the callsign used for this flight.
+     * Returns the callsign used for this flight.
      *
-     * @return this instance for method-chaining
+     * @return callsign used for this flight
      */
     public String getCallsign() {
         return callsign;
-    }
-
-    public Flight setCallsign(String callsign) {
-        this.callsign = callsign;
-        return this;
     }
 
     /**
