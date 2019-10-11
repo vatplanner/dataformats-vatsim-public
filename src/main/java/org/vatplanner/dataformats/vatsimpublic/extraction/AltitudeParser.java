@@ -59,7 +59,6 @@ public class AltitudeParser {
         // continue processing only the first numeric value found in string
         Matcher matcherFirstNumbers = PATTERN_FIRST_NUMBERS.matcher(s);
         if (!matcherFirstNumbers.matches()) {
-            System.out.println("not matched");
             value = -1;
             feet = -1;
             return;
