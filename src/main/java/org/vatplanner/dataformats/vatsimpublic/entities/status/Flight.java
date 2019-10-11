@@ -165,7 +165,7 @@ public class Flight {
      */
     public SortedSet<TrackPoint> getTrack() {
         if (track == null) {
-            track = unmodifiableSortedSet(new TreeSet<>());
+            return unmodifiableSortedSet(new TreeSet<>());
         }
 
         return unmodifiableSortedSet(track);

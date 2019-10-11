@@ -49,7 +49,7 @@ public class Report {
     private String fetchNode;
 
     private Instant parseTime;
-    private int parserRejectedLines = -1;
+    private int parserRejectedLines = -1; // TODO: instead of lines count rejected clients; also count clients which were parsed but could not be imported
 
     /**
      * Creates a new report for the given timestamp.

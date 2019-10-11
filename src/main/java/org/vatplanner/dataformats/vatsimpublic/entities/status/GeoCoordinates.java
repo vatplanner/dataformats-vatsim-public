@@ -1,5 +1,8 @@
 package org.vatplanner.dataformats.vatsimpublic.entities.status;
 
+import static org.vatplanner.dataformats.vatsimpublic.utils.UnitConversion.feetToMeters;
+import static org.vatplanner.dataformats.vatsimpublic.utils.UnitConversion.metersToFeet;
+
 /**
  * Holds a 3-dimensional tuple of geographic coordinates.
  *
@@ -72,8 +75,11 @@ public class GeoCoordinates {
      * @return altitude in feet
      */
     public int getAltitudeFeet() {
-        // TODO: implement automated conversion
-        return -1;
+        if (isAltitudeUnitFeet == UNIT_FEET) {
+            return altitude;
+        } else {
+            return (int) Math.round(metersToFeet(altitude));
+        }
     }
 
     /**
@@ -83,8 +89,11 @@ public class GeoCoordinates {
      * @return altitude in meters
      */
     public int getAltitudeMeters() {
-        // TODO: implement automated conversion
-        return -1;
+        if (isAltitudeUnitFeet == UNIT_METERS) {
+            return altitude;
+        } else {
+            return (int) Math.round(feetToMeters(altitude));
+        }
     }
 
     /**
@@ -98,8 +107,8 @@ public class GeoCoordinates {
      * @see TrackPoint#getFlightLevel()
      */
     public int toFlightLevel(BarometricPressure qnh) {
-        // TODO: implement, difference in hPa * 27ft
-        return -1;
+        // FIXME: check if really correct
+        return (int) Math.round((getAltitudeFeet() + (1013 - qnh.getHectopascals()) * 27.0d) / 100.0);
     }
 
     // TODO: unit tests

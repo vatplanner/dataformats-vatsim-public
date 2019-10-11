@@ -135,10 +135,14 @@ public class TrackPoint {
      * easier access to
      * {@link GeoCoordinates#toFlightLevel(BarometricPressure)}.
      *
-     * @return flight level at standard QNH
+     * @return flight level at standard QNH; negative if unavailable
      * @see GeoCoordinates#toFlightLevel(BarometricPressure)
      */
     public int getFlightLevel() {
+        if (geoCoordinates == null) {
+            return -1;
+        }
+
         return geoCoordinates.toFlightLevel(qnh);
     }
 
