@@ -14,11 +14,11 @@ public enum WakeTurbulenceCategory {
 
     private final char flightPlanCode;
 
-    private static final Map<Character, WakeTurbulenceCategory> byFlightPlanCode = new HashMap<>();
+    private static final Map<Character, WakeTurbulenceCategory> INDEXED_BY_CODE = new HashMap<>();
 
     static {
         for (WakeTurbulenceCategory category : values()) {
-            byFlightPlanCode.put(category.flightPlanCode, category);
+            INDEXED_BY_CODE.put(category.flightPlanCode, category);
         }
     }
 
@@ -53,7 +53,7 @@ public enum WakeTurbulenceCategory {
             throw new IllegalArgumentException("flight plan wake category codes must only have one letter");
         }
 
-        return byFlightPlanCode.get(flightPlanCode.toUpperCase().charAt(0));
+        return INDEXED_BY_CODE.get(flightPlanCode.toUpperCase().charAt(0));
     }
 
     // TODO: unit tests

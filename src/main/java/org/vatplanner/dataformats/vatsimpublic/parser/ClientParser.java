@@ -1,7 +1,5 @@
 package org.vatplanner.dataformats.vatsimpublic.parser;
 
-import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
-import org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.time.Instant;
@@ -12,6 +10,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
 
 /**
  * Parses {@link Client} information as given by VATSIM's data.txt status files

@@ -21,7 +21,7 @@ public class Facility {
     private final String name;
     private FacilityType type;
     private int frequencyKilohertz; // NOTE: information may be discontinued or multiplied with "Audio for VATSIM" (frequency coupling)
-    private SortedSet<FacilityMessage> messagesSortedByRecordTime = new TreeSet<>(COMPARATOR_MESSAGE_REPORT_RECORD_TIME);
+    private final SortedSet<FacilityMessage> messagesSortedByRecordTime = new TreeSet<>(COMPARATOR_MESSAGE_REPORT_RECORD_TIME);
 
     private static final int LOWEST_VALID_FREQUENCY_KILOHERTZ = 118000;
     private static final int HIGHEST_VALID_FREQUENCY_KILOHERTZ = 136975;
@@ -40,7 +40,7 @@ public class Facility {
      */
     public Facility(String name) {
         // TODO: reject empty/null names
-        // TODO: normalize name? (trim, upper case)
+        // TODO: normalize name (trim, upper case)
         this.name = name;
     }
 

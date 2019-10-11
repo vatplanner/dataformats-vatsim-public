@@ -1,5 +1,6 @@
 package org.vatplanner.dataformats.vatsimpublic.entities.status;
 
+import java.time.Instant;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Collections.unmodifiableSortedSet;
 import java.util.Comparator;
@@ -7,6 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.vatplanner.dataformats.vatsimpublic.entities.TimeSpan;
 
 /**
  * Data container for all information related to a single flight. Flights can be
@@ -41,8 +43,8 @@ public class Flight {
     private SortedSet<TrackPoint> track;
 
     private static final Comparator<FlightPlan> FLIGHT_PLANS_COMPARATOR = (FlightPlan x, FlightPlan y) -> {
-        // TODO: implement, ascending order of revisions
-        return 0;
+        // ascending order of revisions
+        return Integer.compare(x.getRevision(), y.getRevision());
     };
 
     private static final Comparator<TrackPoint> TRACK_POINT_COMPARATOR = (TrackPoint x, TrackPoint y) -> {
@@ -63,7 +65,7 @@ public class Flight {
         this.member = member;
         this.callsign = callsign;
 
-        // TODO: normalize callsign? (trim, upper case)
+        // TODO: normalize callsign (trim, upper case)
         // TODO: add flight to member; must not loop back; document
     }
 
@@ -123,13 +125,19 @@ public class Flight {
     }
 
     /**
-     * Adds a flight plan to this flight if it has not yet been recorded.
-     * Attempting to add an existing flight plan again has no effect.
+     * Adds a new flight plan to this flight. Flight plans are uniquely
+     * identified by their revision per flight. If another flight plan is
+     * requested to be added having the same revision number, the operation will
+     * fail.
      *
      * @param flightPlan flight plan to be added
      * @return this instance for method-chaining
+     * @throws UnsupportedOperationException if a different flight plan of that
+     * revision has already been added
      */
     public Flight addFlightPlan(FlightPlan flightPlan) {
+        // TODO: check if flight plan already exists and fail if other instance
+
         if (flightPlans == null) {
             flightPlans = new TreeSet<>(FLIGHT_PLANS_COMPARATOR);
         }
@@ -183,5 +191,67 @@ public class Flight {
         return this;
     }
 
+    /**
+     * Computes the earliest time at which the flight appeared in records.
+     *
+     * @return earliest time flight appeared in records
+     */
+    public Instant getEarliestVisibleTime() {
+        Instant earliest = null;
+
+        if (connections != null) {
+            for (Connection connection : connections) {
+                Instant logOnTime = connection.getLogonTime();
+                if ((earliest == null) || logOnTime.isBefore(earliest)) {
+                    earliest = logOnTime;
+                }
+
+                Instant recordTime = connection.getFirstReport().getRecordTime();
+                if ((earliest == null) || recordTime.isBefore(earliest)) {
+                    earliest = recordTime;
+                }
+            }
+        }
+
+        if (flightPlans != null) {
+            for (FlightPlan flightPlan : flightPlans) {
+                Instant recordTime = flightPlan.getReportFirstSeen().getRecordTime();
+                if ((earliest == null) || recordTime.isBefore(earliest)) {
+                    earliest = recordTime;
+                }
+            }
+        }
+
+        return earliest;
+    }
+
+    /**
+     * Computes the time span from first connection or first record of pre-filed
+     * flight plan to last seen record of connection.
+     *
+     * @return time span between first connection or pre-filing to last seen
+     * connection record
+     */
+    public TimeSpan getVisibleTimeSpan() {
+        TimeSpan timeSpan = new TimeSpan();
+
+        if (connections != null) {
+            for (Connection connection : connections) {
+                timeSpan.expandTo(connection.getLogonTime());
+                timeSpan.expandTo(connection.getFirstReport().getRecordTime());
+                timeSpan.expandTo(connection.getLastReport().getRecordTime());
+            }
+        }
+
+        if (flightPlans != null) {
+            for (FlightPlan flightPlan : flightPlans) {
+                timeSpan.expandTo(flightPlan.getReportFirstSeen().getRecordTime());
+            }
+        }
+
+        return timeSpan;
+    }
+
     // TODO: unit tests
+    // FIXME: add connected aircraft type because it may be different from prefiling
 }

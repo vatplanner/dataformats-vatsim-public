@@ -1,11 +1,22 @@
 package org.vatplanner.dataformats.vatsimpublic.graph;
 
 import java.time.Instant;
+import java.util.SortedSet;
+import java.util.function.Predicate;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.CommunicationMode;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Connection;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Facility;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.Flight;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.FlightPlan;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.FlightPlanType;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Member;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Report;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.SimpleEquipmentSpecification;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.WakeTurbulenceCategory;
+import org.vatplanner.dataformats.vatsimpublic.extraction.AircraftTypeExtractor;
+import org.vatplanner.dataformats.vatsimpublic.extraction.AltitudeParser;
 import org.vatplanner.dataformats.vatsimpublic.extraction.RealNameHomeBaseExtractor;
+import org.vatplanner.dataformats.vatsimpublic.extraction.RemarksExtractor;
 import org.vatplanner.dataformats.vatsimpublic.parser.Client;
 import org.vatplanner.dataformats.vatsimpublic.parser.ClientType;
 import static org.vatplanner.dataformats.vatsimpublic.parser.ClientType.ATC_CONNECTED;
@@ -13,6 +24,7 @@ import static org.vatplanner.dataformats.vatsimpublic.parser.ClientType.PILOT_CO
 import static org.vatplanner.dataformats.vatsimpublic.parser.ClientType.PILOT_PREFILED;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
+import static org.vatplanner.dataformats.vatsimpublic.utils.TimeHelpers.findClosestPlausibleTimestampForFlightPlanField;
 
 /**
  * Imports parsed {@link DataFile}s to a graph of de-duplicated and indexed
@@ -72,6 +84,7 @@ public class GraphImport {
         Report previousReport = index.getLatestReportBefore(report);
         if (previousReport != null) {
             facility = previousReport.getFacilityByName(name);
+            // FIXME: check for same member, do not reuse if member changed
         }
 
         // create new facility if unavailable
@@ -91,7 +104,7 @@ public class GraphImport {
         facility.seenMessage(report, client.getControllerMessage());
     }
 
-    private Connection createConnection(final Client client) {
+    private Member getMember(final Client client) {
         int vatsimId = client.getVatsimID();
 
         Member member = index.getMemberByVatsimId(vatsimId);
@@ -100,6 +113,11 @@ public class GraphImport {
             index.add(member);
         }
 
+        return member;
+    }
+
+    private Connection createConnection(final Client client) {
+        Member member = getMember(client);
         RealNameHomeBaseExtractor nameExtractor = new RealNameHomeBaseExtractor(client.getRealName());
 
         return new Connection(member)
@@ -116,7 +134,93 @@ public class GraphImport {
     }
 
     private void importFlightPrefiled(final Report report, final Client client) {
-        // TODO: implement
+        // a prefiled flight should also have been listed in the previous report
+        // TODO: check if assumption is always true or if search needs to include some older reports as well
+        Flight flight = null;
+
+        Report previousReport = index.getLatestReportBefore(report);
+        if (previousReport != null) {
+            flight = findMatchingFlightByAirports(previousReport, client);
+            if (flight != null && !flight.getTrack().isEmpty()) {
+                // pre-filed flights should not have track points yet,
+                // otherwise they would be "connected" flights
+                flight = null;
+            }
+        }
+
+        if (flight == null) {
+            Member member = getMember(client);
+            flight = new Flight(member, client.getCallsign());
+            member.addFlight(flight);
+        }
+
+        report.addFlight(flight);
+
+        getFlightPlan(flight, report, client)
+                .seenInReport(report);
+    }
+
+    private FlightPlan getFlightPlan(final Flight flight, final Report report, final Client client) {
+        int flightPlanRevision = client.getFlightPlanRevision();
+        FlightPlan flightPlan = flight.getFlightPlans() // TODO: move to Flight
+                .stream()
+                .filter(x -> x.getRevision() == flightPlanRevision)
+                .findFirst()
+                .orElse(null);
+
+        if (flightPlan == null) {
+            int altitudeFeet = new AltitudeParser(client.getRawFiledAltitude()).getFeet();
+            CommunicationMode communicationMode = new RemarksExtractor(client.getFlightPlanRemarks()).getCommunicationMode();
+            FlightPlanType flightPlanType = FlightPlanType.resolveFlightPlanCode(client.getRawFlightPlanType());
+
+            AircraftTypeExtractor aircraftTypeExtractor = new AircraftTypeExtractor(client.getAircraftType());
+            WakeTurbulenceCategory wakeTurbulenceCategory = WakeTurbulenceCategory.resolveFlightPlanCode(aircraftTypeExtractor.getWakeCategory());
+            SimpleEquipmentSpecification simpleEquipmentSpecification = SimpleEquipmentSpecification.resolveFlightPlanCode(aircraftTypeExtractor.getEquipmentCode());
+
+            flightPlan = new FlightPlan(flight, flightPlanRevision)
+                    .setAircraftType(aircraftTypeExtractor.getAircraftType())
+                    .setAlternateAirportCode(client.getFiledAlternateAirportCode())
+                    .setAltitudeFeet(altitudeFeet)
+                    .setCommunicationMode(communicationMode)
+                    .setDepartureAirportCode(client.getFiledDepartureAirportCode())
+                    .setDestinationAirportCode(client.getFiledDestinationAirportCode())
+                    .setEstimatedTimeEnroute(client.getFiledTimeEnroute())
+                    .setEstimatedTimeFuel(client.getFiledTimeFuel())
+                    .setFlightPlanType(flightPlanType)
+                    .setRemarks(client.getFlightPlanRemarks())
+                    .setRoute(client.getFiledRoute())
+                    .setSimpleEquipmentSpecification(simpleEquipmentSpecification)
+                    .setTrueAirSpeed(client.getFiledTrueAirSpeed())
+                    .setWakeTurbulenceCategory(wakeTurbulenceCategory)
+                    .seenInReport(report); // needs to be set for timestamps to be guessed
+
+            flight.addFlightPlan(flightPlan);
+
+            Instant departureTimeActual = findClosestPlausibleTimestampForFlightPlanField(flight, client.getRawDepartureTimeActual());
+            Instant departureTimePlanned = findClosestPlausibleTimestampForFlightPlanField(flight, client.getRawDepartureTimePlanned());
+            flightPlan.setDepartureTimeActual(departureTimeActual);
+            flightPlan.setDepartureTimePlanned(departureTimePlanned);
+        }
+
+        return flightPlan;
+    }
+
+    private Flight findMatchingFlightByAirports(final Report report, final Client client) {
+        return report.getFlights()
+                .stream()
+                .filter(x -> x.getMember().getVatsimId() == client.getVatsimID() && x.getCallsign().equals(client.getCallsign()))
+                .map(Flight::getFlightPlans)
+                .filter(not(SortedSet::isEmpty))
+                .map(SortedSet::last)
+                .filter(x -> x.getDepartureAirportCode().equals(client.getFiledDepartureAirportCode())
+                /*     */ && x.getDestinationAirportCode().equals(client.getFiledDestinationAirportCode()))
+                .map(FlightPlan::getFlight)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private static <T> Predicate<T> not(Predicate<T> predicate) {
+        return predicate.negate();
     }
 
     public GraphIndex getIndex() {

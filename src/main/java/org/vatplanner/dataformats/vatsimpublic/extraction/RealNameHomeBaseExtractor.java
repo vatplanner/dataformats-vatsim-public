@@ -2,6 +2,8 @@ package org.vatplanner.dataformats.vatsimpublic.extraction;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import static org.vatplanner.dataformats.vatsimpublic.utils.StringUtils.nullIfEmpty;
+import static org.vatplanner.dataformats.vatsimpublic.utils.StringUtils.nullIfNumeric;
 
 /**
  * Attempts to split the raw name field used in data files into actual name and
@@ -14,8 +16,6 @@ public class RealNameHomeBaseExtractor {
     private static final Pattern PATTERN_SPLIT = Pattern.compile("^\\s*(.*?\\S)(\\s+[A-Z]{4}|)\\s*$");
     private static final int PATTERN_SPLIT_REAL_NAME = 1;
     private static final int PATTERN_SPLIT_HOME_BASE = 2;
-
-    private static final Pattern PATTERN_NUMERIC = Pattern.compile("^[0-9]+$");
 
     private final String realName;
     private final String homeBase;
@@ -54,18 +54,6 @@ public class RealNameHomeBaseExtractor {
      */
     public String getHomeBase() {
         return homeBase;
-    }
-
-    private String nullIfEmpty(String s) {
-        return s.isEmpty() ? null : s;
-    }
-
-    private String nullIfNumeric(String s) {
-        if (PATTERN_NUMERIC.matcher(s).matches()) {
-            return null;
-        }
-
-        return s;
     }
 
 }

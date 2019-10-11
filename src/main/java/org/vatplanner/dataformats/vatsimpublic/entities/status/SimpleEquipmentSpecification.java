@@ -182,5 +182,30 @@ public enum SimpleEquipmentSpecification {
         return (transponderCapability >= Transponder.MINIMUM_LEVEL_MODE_C);
     }
 
+    /**
+     * Resolves the given flight plan code to a simple equipment specification.
+     * Returns null if no such specification has been defined or input is empty
+     * or null.
+     *
+     * @param flightPlanCode flight plan code to resolve
+     * @return specification matching the code; null if not found or no code was
+     * entered
+     * @throws IllegalArgumentException if code exceeds one letter
+     */
+    public static SimpleEquipmentSpecification resolveFlightPlanCode(String flightPlanCode) {
+        if ((flightPlanCode == null) || flightPlanCode.isEmpty()) {
+            return null;
+        }
+
+        if (flightPlanCode.length() != 1) {
+            throw new IllegalArgumentException("flight plan equipment code must only have one letter; was: \"" + flightPlanCode + "\"");
+        }
+
+        try {
+            return valueOf(flightPlanCode.toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
+    }
     // TODO: add unit tests
 }

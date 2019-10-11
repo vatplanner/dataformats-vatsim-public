@@ -1,6 +1,8 @@
 package org.vatplanner.dataformats.vatsimpublic.graph;
 
 import java.time.Instant;
+import java.util.Collection;
+import static java.util.Collections.unmodifiableCollection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -62,6 +64,24 @@ public class GraphIndex {
 
     private <T> T getValue(Map.Entry<?, T> entry) {
         return (entry == null) ? null : entry.getValue();
+    }
+
+    /**
+     * Returns all indexed reports.
+     *
+     * @return all indexed reports
+     */
+    public Collection<Report> getAllReports() {
+        return unmodifiableCollection(reportsByRecordTime.values());
+    }
+
+    /**
+     * Returns all indexed members.
+     *
+     * @return all indexed members
+     */
+    public Collection<Member> getAllMembers() {
+        return unmodifiableCollection(membersByVatsimId.values());
     }
 
     // TODO: unit tests

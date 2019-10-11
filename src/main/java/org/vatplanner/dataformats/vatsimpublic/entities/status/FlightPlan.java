@@ -10,10 +10,11 @@ import java.time.Instant;
  */
 public class FlightPlan {
 
-    private Flight flight;
+    private final Flight flight;
+    private final int revision;
+
     private Report reportFirstSeen;
 
-    private final int revision;
     private FlightPlanType flightPlanType;
     private Instant departureTimePlanned;
     private Instant departureTimeActual;
@@ -36,11 +37,14 @@ public class FlightPlan {
 
     /**
      * Creates a new flight plan. Flight plans always require a revision number
-     * for indexing.
+     * for indexing and a flight as reference.
      *
+     * @param flight the flight described by this flight plan
      * @param revision revision number to index flight plans by
      */
-    public FlightPlan(int revision) {
+    public FlightPlan(Flight flight, int revision) {
+        // TODO: add flightplan to flight; must not loop back; document
+        this.flight = flight;
         this.revision = revision;
     }
 
@@ -51,13 +55,6 @@ public class FlightPlan {
      */
     public Flight getFlight() {
         return flight;
-    }
-
-    public FlightPlan setFlight(Flight flight) {
-        this.flight = flight;
-
-        // TODO: add flightplan to flight; must not loop back; document
-        return this;
     }
 
     /**
@@ -76,7 +73,10 @@ public class FlightPlan {
      * @return this instance for method-chaining
      */
     public FlightPlan seenInReport(Report report) {
-        // TODO: implement remember first
+        if ((reportFirstSeen == null) || report.getRecordTime().isBefore(reportFirstSeen.getRecordTime())) {
+            reportFirstSeen = report;
+        }
+
         return this;
     }
 
@@ -306,6 +306,7 @@ public class FlightPlan {
     }
 
     public FlightPlan setDepartureAirportCode(String departureAirportCode) {
+        // TODO: normalize (trim, upper case)
         this.departureAirportCode = departureAirportCode;
         return this;
     }
@@ -321,6 +322,7 @@ public class FlightPlan {
     }
 
     public FlightPlan setDestinationAirportCode(String destinationAirportCode) {
+        // TODO: normalize (trim, upper case)
         this.destinationAirportCode = destinationAirportCode;
         return this;
     }
@@ -337,9 +339,11 @@ public class FlightPlan {
     }
 
     public FlightPlan setAlternateAirportCode(String alternateAirportCode) {
+        // TODO: normalize (trim, upper case)
         this.alternateAirportCode = alternateAirportCode;
         return this;
     }
 
+    // TODO: could also have real name and home base (no connection if only prefiled)
     // TODO: unit tests
 }
