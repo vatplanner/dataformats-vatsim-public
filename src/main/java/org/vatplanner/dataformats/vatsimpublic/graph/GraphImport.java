@@ -1,17 +1,24 @@
 package org.vatplanner.dataformats.vatsimpublic.graph;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.SortedSet;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.BarometricPressure;
+import static org.vatplanner.dataformats.vatsimpublic.entities.status.BarometricPressure.UNIT_HECTOPASCALS;
+import static org.vatplanner.dataformats.vatsimpublic.entities.status.BarometricPressure.UNIT_INCHES_OF_MERCURY;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.CommunicationMode;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Connection;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Facility;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Flight;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FlightPlan;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FlightPlanType;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.GeoCoordinates;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Member;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Report;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.SimpleEquipmentSpecification;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.TrackPoint;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.WakeTurbulenceCategory;
 import org.vatplanner.dataformats.vatsimpublic.extraction.AircraftTypeExtractor;
 import org.vatplanner.dataformats.vatsimpublic.extraction.AltitudeParser;
@@ -25,6 +32,8 @@ import static org.vatplanner.dataformats.vatsimpublic.parser.ClientType.PILOT_PR
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
 import static org.vatplanner.dataformats.vatsimpublic.utils.TimeHelpers.findClosestPlausibleTimestampForFlightPlanField;
+import static org.vatplanner.dataformats.vatsimpublic.utils.TimeHelpers.isLessOrEqualThan;
+import static org.vatplanner.dataformats.vatsimpublic.utils.ValueHelpers.inRange;
 
 /**
  * Imports parsed {@link DataFile}s to a graph of de-duplicated and indexed
@@ -33,6 +42,16 @@ import static org.vatplanner.dataformats.vatsimpublic.utils.TimeHelpers.findClos
 public class GraphImport {
 
     private final GraphIndex index = new GraphIndex();
+
+    private static final Duration MAXIMUM_AGE_FOR_CONTINUED_FLIGHT = Duration.ofMinutes(30); // TODO: fine-tune and/or make configurable; compensate for missed data files as well as client connection loss
+    private static final int MAXIMUM_REPORTS_FOR_CONTINUED_FLIGHT_CONNECTED = 15; // TODO: fine-tune and/or make configurable; compensate for client connection loss
+
+    private static final double MINIMUM_LATITUDE = -90.0;
+    private static final double MAXIMUM_LATITUDE = 90.0;
+    private static final double MINIMUM_LONGITUDE = -180.0;
+    private static final double MAXIMUM_LONGITUDE = 180.0;
+
+    private static final Pattern PATTERN_VALID_TRANSPONDER_CODE = Pattern.compile("^[0-7]{0,4}$");
 
     /**
      * Imports the given {@link DataFile} to the graph. All files must be
@@ -130,22 +149,125 @@ public class GraphImport {
     }
 
     private void importFlightConnected(final Report report, final Client client) {
-        // TODO: implement
+        Instant logonTime = client.getLogonTime();
+        if (logonTime == null) {
+            throw new UnsupportedOperationException("log on time is mandatory to import connected flights; report recorded " + report.getRecordTime());
+        }
+
+        // FIXME: implement proper search and create new flights where needed
+        // DEBUG: use existing search method for quick testing
+        Flight flight = findContinuedFlightByFlightPlanAirports(report, client, MAXIMUM_REPORTS_FOR_CONTINUED_FLIGHT_CONNECTED);
+        if (flight == null) {
+            return;
+        }
+
+        TrackPoint trackPoint = createTrackPoint(report, client);
+        trackPoint.setFlight(flight);
+        flight.addTrackPoint(trackPoint);
+
+        // TODO: check distance between last and current position for plausibility and start new flight if aircraft "jumped" to a new location
+        // TODO: start new connection if aircraft type changes
+        // TODO: start new flight if aircraft type changes? may not be feasible as ATC ammended flight plans could trigger flight restart
+    }
+
+    private TrackPoint createTrackPoint(final Report report, final Client client) {
+        TrackPoint trackPoint = new TrackPoint(report);
+
+        // set coordinates if valid
+        double latitude = client.getLatitude();
+        double longitude = client.getLongitude();
+        if (inRange(latitude, MINIMUM_LATITUDE, MAXIMUM_LATITUDE) && inRange(longitude, MINIMUM_LONGITUDE, MAXIMUM_LONGITUDE)) {
+            // TODO: try to correct lat/lon if out of range instead of ignoring it
+            // TODO: check altitude for plausibility?
+            trackPoint.setGeoCoordinates(new GeoCoordinates(latitude, longitude, client.getAltitudeFeet(), true));
+        }
+
+        // prefer QNH measured in inHg as it provides higher precision in data files (at least 2 decimal places)
+        BarometricPressure localQnh = null;
+        double qnhInchMercury = client.getQnhInchMercury();
+        if (!Double.isNaN(qnhInchMercury)) {
+            localQnh = BarometricPressure.forPlausibleQnh(qnhInchMercury, UNIT_INCHES_OF_MERCURY);
+        }
+
+        // fall back to QNH measured in hPa if inHg was unavailable or made no sense
+        if (localQnh == null) {
+            int qnhHectopascal = client.getQnhHectopascal();
+            if (qnhHectopascal >= 0) {
+                localQnh = BarometricPressure.forPlausibleQnh(qnhHectopascal, UNIT_HECTOPASCALS);
+            }
+        }
+
+        // set QNH if available and plausible
+        if (localQnh != null) {
+            trackPoint.setQnh(localQnh);
+        }
+
+        // set GS if available
+        int groundSpeed = client.getGroundSpeed();
+        if (groundSpeed >= 0) {
+            trackPoint.setGroundSpeed(groundSpeed);
+        }
+
+        // set heading if available
+        int heading = client.getHeading();
+        if (heading >= 0) {
+            trackPoint.setHeading(heading % 360);
+        }
+
+        // set transponder code if valid
+        int transponder = client.getTransponderCodeDecimal();
+        if (isValidTransponderCode(transponder)) {
+            trackPoint.setTransponderCode(transponder);
+        }
+
+        return trackPoint;
+    }
+
+    private boolean isValidTransponderCode(int code) {
+        return PATTERN_VALID_TRANSPONDER_CODE.matcher(Integer.toString(code)).matches();
+    }
+
+    /**
+     * Searches for a continued flight by checking airports filed on flight
+     * plan. Also, VATSIM ID and callsign has to match as that pair of
+     * information uniquely identifies flights. At most the given number of
+     * maximum reports recorded before the given new report are searched if
+     * their age, compared to the new report, does not exceed
+     * {@link #MAXIMUM_AGE_FOR_CONTINUED_FLIGHT}.
+     *
+     * @param newReport new report to lookup a flight for
+     * @param client client to lookup a flight for
+     * @param maxReports maximum number of reports to search
+     * @return flight matching all criteria, null if not found
+     * @see #findMatchingFlightByFlightPlanAirports(Report, Client)
+     */
+    private Flight findContinuedFlightByFlightPlanAirports(final Report newReport, final Client client, final int maxReports) {
+        Report report = newReport;
+        int checkedReports = 0;
+        while ((checkedReports++ < maxReports) && (report = index.getLatestReportBefore(report)) != null) {
+            Duration reportAge = Duration.between(report.getRecordTime(), newReport.getRecordTime());
+            boolean isReportCurrentEnough = isLessOrEqualThan(reportAge, MAXIMUM_AGE_FOR_CONTINUED_FLIGHT);
+            if (!isReportCurrentEnough) {
+                return null;
+            }
+
+            Flight flight = findMatchingFlightByFlightPlanAirports(report, client);
+            if (flight != null) {
+                return flight;
+            }
+        }
+
+        return null;
     }
 
     private void importFlightPrefiled(final Report report, final Client client) {
         // a prefiled flight should also have been listed in the previous report
         // TODO: check if assumption is always true or if search needs to include some older reports as well
-        Flight flight = null;
-
-        Report previousReport = index.getLatestReportBefore(report);
-        if (previousReport != null) {
-            flight = findMatchingFlightByAirports(previousReport, client);
-            if (flight != null && !flight.getTrack().isEmpty()) {
-                // pre-filed flights should not have track points yet,
-                // otherwise they would be "connected" flights
-                flight = null;
-            }
+        Flight flight = findContinuedFlightByFlightPlanAirports(report, client, 1);
+        if (flight != null && !flight.getTrack().isEmpty()) {
+            // pre-filed flights should not have track points yet,
+            // otherwise they would be "connected" flights
+            flight = null;
         }
 
         if (flight == null) {
@@ -205,7 +327,7 @@ public class GraphImport {
         return flightPlan;
     }
 
-    private Flight findMatchingFlightByAirports(final Report report, final Client client) {
+    private Flight findMatchingFlightByFlightPlanAirports(final Report report, final Client client) {
         return report.getFlights()
                 .stream()
                 .filter(x -> x.getMember().getVatsimId() == client.getVatsimID() && x.getCallsign().equals(client.getCallsign()))
