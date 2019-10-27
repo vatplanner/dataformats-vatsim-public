@@ -76,6 +76,27 @@ public class GraphIndex {
     }
 
     /**
+     * Checks if a report with given record time has already been indexed.
+     *
+     * @param recordTime record time to check
+     * @return true if already indexed, false if not
+     */
+    public boolean hasReportWithRecordTime(Instant recordTime) {
+        return reportsByRecordTime.containsKey(recordTime);
+    }
+
+    /**
+     * Checks if a report with a later record time than given has already been
+     * indexed.
+     *
+     * @param recordTime record time to check
+     * @return true if a later report has already been indexed, false if not
+     */
+    public boolean hasReportAfterRecordTime(Instant recordTime) {
+        return reportsByRecordTime.higherKey(recordTime) != null;
+    }
+
+    /**
      * Returns all indexed members.
      *
      * @return all indexed members

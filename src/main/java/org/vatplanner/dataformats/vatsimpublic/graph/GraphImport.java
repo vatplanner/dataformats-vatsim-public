@@ -69,10 +69,20 @@ public class GraphImport {
      * strictly
      */
     public void importDataFile(final DataFile dataFile) {
-        // TODO: log warning if recording time is not strictly advanced (same or earlier than last import)
-
         DataFileMetaData metaData = dataFile.getMetaData();
         Instant recordTime = metaData.getTimestamp();
+
+        if (index.hasReportWithRecordTime(recordTime)) {
+            // TODO: log properly
+            System.err.println(recordTime + " report has already been imported, not processing again");
+            return;
+        }
+
+        if (index.hasReportAfterRecordTime(recordTime)) {
+            // TODO: log properly
+            System.err.println(recordTime + " report has been recorded earlier than an already imported one but import must be performed in increasing order of record time; not importing");
+            return;
+        }
 
         Report report = new Report(recordTime);
         index.add(report);
