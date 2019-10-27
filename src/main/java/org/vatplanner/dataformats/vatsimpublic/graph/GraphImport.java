@@ -241,7 +241,7 @@ public class GraphImport {
 
             // reset flight if last connection exceeds retention time
             if (connection != null) {
-                Duration timeSinceLastSeen = Duration.between(report.getRecordTime(), connection.getLastReport().getRecordTime());
+                Duration timeSinceLastSeen = Duration.between(connection.getLastReport().getRecordTime(), report.getRecordTime());
                 if (!isLessOrEqualThan(timeSinceLastSeen, MAXIMUM_AGE_FOR_CONTINUED_FLIGHT)) {
                     // TODO: check if we actually got at least 1 or 2 reports since then, otherwise we may have had a network outage
                     flight = null;
