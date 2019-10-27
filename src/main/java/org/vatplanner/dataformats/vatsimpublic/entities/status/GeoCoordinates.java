@@ -103,10 +103,14 @@ public class GeoCoordinates {
      * available from the associated {@link TrackPoint}.
      *
      * @param qnh local QNH specific to client's simulation environment
-     * @return flight level
+     * @return flight level; negative if unavailable
      * @see TrackPoint#getFlightLevel()
      */
     public int toFlightLevel(BarometricPressure qnh) {
+        if (qnh == null) {
+            return -1;
+        }
+
         // FIXME: check if really correct
         return (int) Math.round((getAltitudeFeet() + (1013 - qnh.getHectopascals()) * 27.0d) / 100.0);
     }
