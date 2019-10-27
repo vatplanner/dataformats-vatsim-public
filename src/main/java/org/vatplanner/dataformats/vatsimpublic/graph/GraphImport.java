@@ -2,9 +2,11 @@ package org.vatplanner.dataformats.vatsimpublic.graph;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.BarometricPressure;
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.BarometricPressure.UNIT_HECTOPASCALS;
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.BarometricPressure.UNIT_INCHES_OF_MERCURY;
@@ -44,8 +46,10 @@ public class GraphImport {
     private final GraphIndex index = new GraphIndex();
 
     private static final Duration MAXIMUM_AGE_FOR_CONTINUED_FLIGHT = Duration.ofMinutes(30); // TODO: fine-tune and/or make configurable; compensate for missed data files as well as client connection loss
+    private static final Duration MAXIMUM_AGE_FOR_CONTINUED_FLIGHT_ON_RECONSTRUCTION = Duration.ofMinutes(10); // TODO: fine-tune and/or make configurable
 
     private static final int MINIMUM_FLIGHT_PLAN_REVISION = 0;
+    private static final int MINIMUM_VATSIM_ID = 0;
 
     private static final double MINIMUM_LATITUDE = -90.0;
     private static final double MAXIMUM_LATITUDE = 90.0;
@@ -110,6 +114,11 @@ public class GraphImport {
         // create new facility if unavailable
         if (facility == null) {
             Connection connection = createConnection(client);
+            if (connection == null) {
+                // TODO: log properly
+                System.err.println(report.getRecordTime() + " unable to record connection for connected ATC " + name);
+                return;
+            }
 
             facility = new Facility(name)
                     .setConnection(connection)
@@ -126,6 +135,9 @@ public class GraphImport {
 
     private Member getMember(final Client client) {
         int vatsimId = client.getVatsimID();
+        if (vatsimId < MINIMUM_VATSIM_ID) {
+            return null;
+        }
 
         Member member = index.getMemberByVatsimId(vatsimId);
         if (member == null) {
@@ -138,6 +150,10 @@ public class GraphImport {
 
     private Connection createConnection(final Client client) {
         Member member = getMember(client);
+        if (member == null) {
+            return null;
+        }
+
         RealNameHomeBaseExtractor nameExtractor = new RealNameHomeBaseExtractor(client.getRealName());
 
         return new Connection(member, client.getLogonTime())
@@ -157,6 +173,38 @@ public class GraphImport {
         Member member = getMember(client);
         String callsign = client.getCallsign();
         boolean clientHasFlightPlan = (client.getFlightPlanRevision() >= MINIMUM_FLIGHT_PLAN_REVISION);
+
+        // Strange network errors exist where essential data is missing.
+        // (e.g. during CTP East 2019 in reports created 0951z-1147z)
+        // Try to identify the member by continuation of callsign and connection
+        // matching previous report if VATSIM ID went away...
+        boolean needsFuzzyReconstruction = (member == null);
+        if (needsFuzzyReconstruction && (callsign != null) && !callsign.isEmpty()) {
+            Report previousReport = index.getLatestReportBefore(report);
+            if (previousReport != null) {
+                List<Flight> matchingFlights = previousReport.getFlights()
+                        .stream()
+                        .filter(x -> callsign.equals(x.getCallsign()))
+                        .filter(x -> x.getLatestConnection() != null)
+                        .filter(
+                                x -> isLessOrEqualThan(
+                                        Duration.between(x.getLatestConnection().getLogonTime(), logonTime),
+                                        MAXIMUM_AGE_FOR_CONTINUED_FLIGHT_ON_RECONSTRUCTION
+                                )
+                        )
+                        .collect(Collectors.toList());
+
+                if (matchingFlights.size() == 1) {
+                    member = matchingFlights.get(0).getMember();
+                }
+            }
+        }
+
+        if (member == null) {
+            // TODO: log properly
+            System.err.println(report.getRecordTime() + " unable to identify member for connected pilot " + callsign);
+            return;
+        }
 
         // find last flight of member under same callsign
         Flight flight = member.getFlights()
@@ -195,31 +243,48 @@ public class GraphImport {
             }
 
             // do not continue last connection if it's another session (logon time mismatch)
-            if ((connection != null) && !logonTime.equals(connection.getLogonTime())) {
+            if (!needsFuzzyReconstruction && (connection != null) && !logonTime.equals(connection.getLogonTime())) {
                 connection = null;
             }
         }
 
         // reset flight plan if data has changed
-        if (!isSameFlightPlan(flightPlan, client)) {
+        if (!needsFuzzyReconstruction && !isSameFlightPlan(flightPlan, client)) {
             flightPlan = null;
         }
 
         // create new flight if unavailable
         if (flight == null) {
             flight = new Flight(member, callsign);
-            report.addFlight(flight);
             member.addFlight(flight);
+        }
+
+        // record flight on report
+        report.addFlight(flight);
+
+        // record reconstruction so we don't delete data if we see a pre-filing
+        // pop up separate from this connection
+        if (needsFuzzyReconstruction) {
+            flight.markAsReconstructed(report);
         }
 
         // create new connection if unavailable
         if (connection == null) {
             connection = createConnection(client);
-            flight.addConnection(connection);
+
+            // NOTE: creation may fail if VATSIM ID is missing
+            if (connection != null) {
+                flight.addConnection(connection);
+            }
         }
 
         // record connection seen
-        connection.seenInReport(report);
+        if (connection != null) {
+            connection.seenInReport(report);
+        } else {
+            // TODO: log properly
+            System.err.println(report.getRecordTime() + " unable to record connection for connected pilot " + callsign);
+        }
 
         // add track point
         addTrackPointToFlight(report, client, flight);
@@ -384,7 +449,7 @@ public class GraphImport {
         // TODO: check if assumption is always true or if search needs to include some older reports as well
         // TODO: check if flight plan has same revision but content has changed - in that case flight has been canceled & refiled
         Flight flight = findContinuedFlightByFlightPlanAirports(report, client, 1);
-        if (flight != null && !flight.getTrack().isEmpty()) {
+        if (flight != null && !flight.getTrack().isEmpty() && !flight.isReconstructed(report)) {
             // pre-filed flights should not have track points yet,
             // otherwise they would be "connected" flights
             flight = null;
@@ -392,6 +457,12 @@ public class GraphImport {
 
         if (flight == null) {
             Member member = getMember(client);
+            if (member == null) {
+                // TODO: log properly
+                System.err.println(report.getRecordTime() + " unable to record prefiling for " + client.getCallsign());
+                return;
+            }
+
             flight = new Flight(member, client.getCallsign());
             member.addFlight(flight);
         }

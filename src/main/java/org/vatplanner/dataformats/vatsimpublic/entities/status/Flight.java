@@ -1,8 +1,11 @@
 package org.vatplanner.dataformats.vatsimpublic.entities.status;
 
 import java.time.Instant;
+import static java.util.Collections.unmodifiableSet;
 import static java.util.Collections.unmodifiableSortedSet;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.vatplanner.dataformats.vatsimpublic.entities.TimeSpan;
@@ -38,6 +41,7 @@ public class Flight {
     private SortedSet<Connection> connections;
     private SortedSet<FlightPlan> flightPlans;
     private SortedSet<TrackPoint> track;
+    private Set<Report> reconstructedReports;
 
     private static final Comparator<Connection> CONNECTIONS_COMPARATOR = (Connection x, Connection y) -> {
         // ascending order of logon time
@@ -300,6 +304,47 @@ public class Flight {
         }
 
         return timeSpan;
+    }
+
+    /**
+     * Checks if the flight needed to be reconstructed for given report.
+     *
+     * @param report report to check for reconstruction
+     * @return true if flight data needed reconstruction for given report, false
+     * if not
+     */
+    public boolean isReconstructed(Report report) {
+        if (reconstructedReports == null) {
+            return false;
+        }
+
+        return reconstructedReports.contains(report);
+    }
+
+    /**
+     * Records for the given report that flight data needs to be reconstructed.
+     *
+     * @param report report flight data needs to be reconstructed for
+     */
+    public void markAsReconstructed(Report report) {
+        if (reconstructedReports == null) {
+            reconstructedReports = new HashSet<>();
+        }
+
+        reconstructedReports.add(report);
+    }
+
+    /**
+     * Returns all reports which flight data needed to be reconstructed for.
+     *
+     * @return reports which required reconstruction; random order, never null
+     */
+    public Set<Report> getReconstructedReports() {
+        if (reconstructedReports == null) {
+            return unmodifiableSet(new HashSet<>());
+        }
+
+        return unmodifiableSet(reconstructedReports);
     }
 
     // TODO: unit tests
