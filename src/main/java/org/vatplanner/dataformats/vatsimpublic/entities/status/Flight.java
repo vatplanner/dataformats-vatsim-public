@@ -1,11 +1,8 @@
 package org.vatplanner.dataformats.vatsimpublic.entities.status;
 
 import java.time.Instant;
-import static java.util.Collections.unmodifiableSet;
 import static java.util.Collections.unmodifiableSortedSet;
 import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.vatplanner.dataformats.vatsimpublic.entities.TimeSpan;
@@ -38,9 +35,14 @@ public class Flight {
     private final Member member;
     private final String callsign;
 
-    private Set<Connection> connections;
+    private SortedSet<Connection> connections;
     private SortedSet<FlightPlan> flightPlans;
     private SortedSet<TrackPoint> track;
+
+    private static final Comparator<Connection> CONNECTIONS_COMPARATOR = (Connection x, Connection y) -> {
+        // ascending order of logon time
+        return x.getLogonTime().compareTo(y.getLogonTime());
+    };
 
     private static final Comparator<FlightPlan> FLIGHT_PLANS_COMPARATOR = (FlightPlan x, FlightPlan y) -> {
         // ascending order of revisions
@@ -48,8 +50,8 @@ public class Flight {
     };
 
     private static final Comparator<TrackPoint> TRACK_POINT_COMPARATOR = (TrackPoint x, TrackPoint y) -> {
-        // TODO: implement, ascending order of recording time
-        return 0;
+        // ascending order of record time
+        return x.getReport().getRecordTime().compareTo(y.getReport().getRecordTime());
     };
 
     /**
@@ -79,18 +81,32 @@ public class Flight {
     }
 
     /**
-     * Returns all connections related to this flight. Note that all connections
-     * are unordered, remember to sort them if needed.
+     * Returns all connections related to this flight. Connections are returned
+     * sorted by their log on time in ascending order.
      *
-     * @return all connections related to this flight in random order; never
-     * null
+     * @return all connections related to this flight ordered by log on time;
+     * never null
      */
-    public Set<Connection> getConnections() {
+    public SortedSet<Connection> getConnections() {
         if (connections == null) {
-            return unmodifiableSet(new HashSet<>());
+            return unmodifiableSortedSet(new TreeSet<>());
         }
 
-        return unmodifiableSet(connections);
+        return unmodifiableSortedSet(connections);
+    }
+
+    /**
+     * Returns the latest connection determined by log on time.
+     *
+     * @return latest connection by log on time; null if no connection has been
+     * recorded
+     */
+    public Connection getLatestConnection() {
+        if (connections == null) {
+            return null;
+        }
+
+        return connections.last();
     }
 
     /**
@@ -102,7 +118,7 @@ public class Flight {
      */
     public Flight addConnection(Connection connection) {
         if (connections == null) {
-            connections = new HashSet<>();
+            connections = new TreeSet<>(CONNECTIONS_COMPARATOR);
         }
 
         connections.add(connection);
@@ -226,6 +242,40 @@ public class Flight {
     }
 
     /**
+     * Computes the latest time at which the flight appeared in records.
+     *
+     * @return latest time flight appeared in records
+     */
+    public Instant getLatestVisibleTime() {
+        Instant latest = null;
+
+        if (connections != null) {
+            for (Connection connection : connections) {
+                Instant logOnTime = connection.getLogonTime();
+                if ((latest == null) || logOnTime.isAfter(latest)) {
+                    latest = logOnTime;
+                }
+
+                Instant recordTime = connection.getFirstReport().getRecordTime();
+                if ((latest == null) || recordTime.isAfter(latest)) {
+                    latest = recordTime;
+                }
+            }
+        }
+
+        if (flightPlans != null) {
+            for (FlightPlan flightPlan : flightPlans) {
+                Instant recordTime = flightPlan.getReportFirstSeen().getRecordTime();
+                if ((latest == null) || recordTime.isAfter(latest)) {
+                    latest = recordTime;
+                }
+            }
+        }
+
+        return latest;
+    }
+
+    /**
      * Computes the time span from first connection or first record of pre-filed
      * flight plan to last seen record of connection.
      *
@@ -253,5 +303,5 @@ public class Flight {
     }
 
     // TODO: unit tests
-    // FIXME: add connected aircraft type because it may be different from prefiling
+    // TODO: add connected aircraft type because it may be different from prefiling? (is this actually still needed?)
 }

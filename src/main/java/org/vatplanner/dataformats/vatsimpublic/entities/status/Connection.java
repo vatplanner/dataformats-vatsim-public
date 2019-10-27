@@ -8,11 +8,11 @@ import java.time.Instant;
 public class Connection {
 
     private final Member member;
+    private final Instant logonTime;
 
     private Report firstReport;
     private Report lastReport;
 
-    private Instant logonTime;
     private String realName;
     private String homeBase;
     private ControllerRating rating;
@@ -25,8 +25,9 @@ public class Connection {
      *
      * @param member member holding this connection
      */
-    public Connection(Member member) {
+    public Connection(Member member, Instant logonTime) {
         this.member = member;
+        this.logonTime = logonTime;
     }
 
     /**
@@ -85,11 +86,6 @@ public class Connection {
      */
     public Instant getLogonTime() {
         return logonTime;
-    }
-
-    public Connection setLogonTime(Instant logonTime) {
-        this.logonTime = logonTime;
-        return this;
     }
 
     /**

@@ -44,7 +44,8 @@ public class GraphImport {
     private final GraphIndex index = new GraphIndex();
 
     private static final Duration MAXIMUM_AGE_FOR_CONTINUED_FLIGHT = Duration.ofMinutes(30); // TODO: fine-tune and/or make configurable; compensate for missed data files as well as client connection loss
-    private static final int MAXIMUM_REPORTS_FOR_CONTINUED_FLIGHT_CONNECTED = 15; // TODO: fine-tune and/or make configurable; compensate for client connection loss
+
+    private static final int MINIMUM_FLIGHT_PLAN_REVISION = 0;
 
     private static final double MINIMUM_LATITUDE = -90.0;
     private static final double MAXIMUM_LATITUDE = 90.0;
@@ -139,8 +140,7 @@ public class GraphImport {
         Member member = getMember(client);
         RealNameHomeBaseExtractor nameExtractor = new RealNameHomeBaseExtractor(client.getRealName());
 
-        return new Connection(member)
-                .setLogonTime(client.getLogonTime())
+        return new Connection(member, client.getLogonTime())
                 .setProtocolVersion(client.getProtocolVersion())
                 .setRating(client.getControllerRating())
                 .setServerId(client.getServerId())
@@ -154,20 +154,134 @@ public class GraphImport {
             throw new UnsupportedOperationException("log on time is mandatory to import connected flights; report recorded " + report.getRecordTime());
         }
 
-        // FIXME: implement proper search and create new flights where needed
-        // DEBUG: use existing search method for quick testing
-        Flight flight = findContinuedFlightByFlightPlanAirports(report, client, MAXIMUM_REPORTS_FOR_CONTINUED_FLIGHT_CONNECTED);
+        Member member = getMember(client);
+        String callsign = client.getCallsign();
+        boolean clientHasFlightPlan = (client.getFlightPlanRevision() >= MINIMUM_FLIGHT_PLAN_REVISION);
+
+        // find last flight of member under same callsign
+        Flight flight = member.getFlights()
+                .stream()
+                .filter(x -> x.getCallsign().equals(callsign))
+                .max((x, y) -> x.getLatestVisibleTime().compareTo(y.getLatestVisibleTime()))
+                .orElse(null);
+
+        // reset flight if it no longer matches flight plan
+        FlightPlan flightPlan = null;
+        if (flight != null) {
+            SortedSet<FlightPlan> flightPlans = flight.getFlightPlans();
+            if (!flightPlans.isEmpty()) {
+                flightPlan = flightPlans.last();
+            }
+
+            if (clientHasFlightPlan && (flightPlan != null) && !isSameFlight(flightPlan, client)) {
+                flightPlan = null;
+                flight = null;
+            }
+        }
+
+        // check connection for continuation of flight
+        Connection connection = null;
+        if (flight != null) {
+            connection = flight.getLatestConnection();
+
+            // reset flight if last connection exceeds retention time
+            if (connection != null) {
+                Duration timeSinceLastSeen = Duration.between(report.getRecordTime(), connection.getLastReport().getRecordTime());
+                if (!isLessOrEqualThan(timeSinceLastSeen, MAXIMUM_AGE_FOR_CONTINUED_FLIGHT)) {
+                    // TODO: check if we actually got at least 1 or 2 reports since then, otherwise we may have had a network outage
+                    flight = null;
+                    flightPlan = null;
+                }
+            }
+
+            // do not continue last connection if it's another session (logon time mismatch)
+            if ((connection != null) && !logonTime.equals(connection.getLogonTime())) {
+                connection = null;
+            }
+        }
+
+        // reset flight plan if data has changed
+        if (!isSameFlightPlan(flightPlan, client)) {
+            flightPlan = null;
+        }
+
+        // create new flight if unavailable
         if (flight == null) {
+            flight = new Flight(member, callsign);
+            report.addFlight(flight);
+            member.addFlight(flight);
+        }
+
+        // create new connection if unavailable
+        if (connection == null) {
+            connection = createConnection(client);
+            flight.addConnection(connection);
+        }
+
+        // record connection seen
+        connection.seenInReport(report);
+
+        // add track point
+        addTrackPointToFlight(report, client, flight);
+
+        // create new flight plan if available but not continued
+        if ((flightPlan == null) && clientHasFlightPlan) {
+            getFlightPlan(flight, report, client)
+                    .seenInReport(report);
+        }
+
+        // TODO: check distance between last and current position for plausibility and start new flight if aircraft "jumped" to a new location?
+        // TODO: track flight phases and mark flight completed after landing, trigger new flight when aircraft moves/departs again?
+    }
+
+    private boolean isSameFlight(final FlightPlan flightPlan, final Client client) {
+        if (flightPlan == null) {
+            return false;
+        }
+
+        if (flightPlan.getRevision() > client.getFlightPlanRevision()) {
+            // flight plan revision is strictly ascending; if it moves backward, flight plan has been deleted and refiled
+            return false;
+        }
+
+        // TODO: perform all checks case insensitive/normalized?
+        AircraftTypeExtractor extractor = new AircraftTypeExtractor(client.getAircraftType());
+        String previousType = flightPlan.getAircraftType();
+        if ((previousType != null) && !previousType.equals(extractor.getAircraftType())) {
+            return false;
+        }
+
+        if (!flightPlan.getDepartureAirportCode().equals(client.getFiledDepartureAirportCode())) {
+            return false;
+        }
+
+        if (!flightPlan.getDestinationAirportCode().equals(client.getFiledDestinationAirportCode())) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean isSameFlightPlan(final FlightPlan flightPlan, final Client client) {
+        if (flightPlan == null) {
+            return false;
+        }
+
+        if (flightPlan.getRevision() != client.getFlightPlanRevision()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void addTrackPointToFlight(final Report report, final Client client, final Flight flight) {
+        TrackPoint trackPoint = createTrackPoint(report, client);
+        if (trackPoint == null) {
             return;
         }
 
-        TrackPoint trackPoint = createTrackPoint(report, client);
         trackPoint.setFlight(flight);
         flight.addTrackPoint(trackPoint);
-
-        // TODO: check distance between last and current position for plausibility and start new flight if aircraft "jumped" to a new location
-        // TODO: start new connection if aircraft type changes
-        // TODO: start new flight if aircraft type changes? may not be feasible as ATC ammended flight plans could trigger flight restart
     }
 
     private TrackPoint createTrackPoint(final Report report, final Client client) {
@@ -180,6 +294,11 @@ public class GraphImport {
             // TODO: try to correct lat/lon if out of range instead of ignoring it
             // TODO: check altitude for plausibility?
             trackPoint.setGeoCoordinates(new GeoCoordinates(latitude, longitude, client.getAltitudeFeet(), true));
+        }
+
+        // don't allow track points without coordinates
+        if (trackPoint.getGeoCoordinates() == null) {
+            return null;
         }
 
         // prefer QNH measured in inHg as it provides higher precision in data files (at least 2 decimal places)
@@ -263,6 +382,7 @@ public class GraphImport {
     private void importFlightPrefiled(final Report report, final Client client) {
         // a prefiled flight should also have been listed in the previous report
         // TODO: check if assumption is always true or if search needs to include some older reports as well
+        // TODO: check if flight plan has same revision but content has changed - in that case flight has been canceled & refiled
         Flight flight = findContinuedFlightByFlightPlanAirports(report, client, 1);
         if (flight != null && !flight.getTrack().isEmpty()) {
             // pre-filed flights should not have track points yet,
@@ -334,7 +454,7 @@ public class GraphImport {
                 .map(Flight::getFlightPlans)
                 .filter(not(SortedSet::isEmpty))
                 .map(SortedSet::last)
-                .filter(x -> x.getDepartureAirportCode().equals(client.getFiledDepartureAirportCode())
+                .filter(x -> x.getDepartureAirportCode().equals(client.getFiledDepartureAirportCode()) // TODO: ignore case or normalize?
                 /*     */ && x.getDestinationAirportCode().equals(client.getFiledDestinationAirportCode()))
                 .map(FlightPlan::getFlight)
                 .findFirst()
