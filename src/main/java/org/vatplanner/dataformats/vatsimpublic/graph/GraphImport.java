@@ -51,8 +51,6 @@ public class GraphImport {
     private static final int MINIMUM_FLIGHT_PLAN_REVISION = 0;
     private static final int MINIMUM_VATSIM_ID = 0;
 
-    private static final String FACILITY_NAME_AFVDATA = "AFVDATA";
-
     private static final double MINIMUM_LATITUDE = -90.0;
     private static final double MAXIMUM_LATITUDE = 90.0;
     private static final double MINIMUM_LONGITUDE = -180.0;
@@ -87,6 +85,11 @@ public class GraphImport {
     }
 
     private void importClient(final Report report, final Client client) {
+        // ignore system services
+        if (isSystemService(client)) {
+            return;
+        }
+
         ClientType clientType = client.getEffectiveClientType();
 
         if (clientType == PILOT_CONNECTED) {
@@ -102,13 +105,24 @@ public class GraphImport {
         }
     }
 
+    private boolean isSystemService(final Client client) {
+        if (client.getVatsimID() >= MINIMUM_VATSIM_ID) {
+            return false;
+        }
+
+        String callsign = client.getCallsign();
+
+        if (client.getRawClientType() == ATC_CONNECTED) {
+            if ("AFVDATA".equals(callsign) || "AFV-SLURPER".equals(callsign)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private void importFacility(final Report report, final Client client) {
         String name = client.getCallsign();
-
-        // ignore system services
-        if (FACILITY_NAME_AFVDATA.equals(name)) {
-            return;
-        }
 
         // continue facility from previous report if available
         Facility facility = null;
