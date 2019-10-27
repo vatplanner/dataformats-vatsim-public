@@ -51,6 +51,8 @@ public class GraphImport {
     private static final int MINIMUM_FLIGHT_PLAN_REVISION = 0;
     private static final int MINIMUM_VATSIM_ID = 0;
 
+    private static final String FACILITY_NAME_AFVDATA = "AFVDATA";
+
     private static final double MINIMUM_LATITUDE = -90.0;
     private static final double MAXIMUM_LATITUDE = 90.0;
     private static final double MINIMUM_LONGITUDE = -180.0;
@@ -102,6 +104,11 @@ public class GraphImport {
 
     private void importFacility(final Report report, final Client client) {
         String name = client.getCallsign();
+
+        // ignore system services
+        if (FACILITY_NAME_AFVDATA.equals(name)) {
+            return;
+        }
 
         // continue facility from previous report if available
         Facility facility = null;
