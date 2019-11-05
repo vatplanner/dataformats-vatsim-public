@@ -8,19 +8,36 @@ This library's goal is to provide parsers and entities for data formats used by 
 
 The scope of this project is rather small but an essential part of a bigger project I'm working on (VATPlanner). It still seemed like a good idea to split the data parsers & entities apart to be easily reusable if needed in other projects.
 
-## Supported Data Formats
+## Features
 
-Currently supported are:
+Implemented:
 
- * Network status:
-   * the initial `status.txt` file (providing URLs to fetch further information from)
-   * the publicly accessible `vatsim-data.txt` file (in particular containing all stations & pilots currently online as well as pre-filed flight plans)
+- parsers to work with raw data:
+  - `NetworkInformationParser` parses the initial `status.txt` file (providing URLs to fetch further information from)
+  - `DataFileParser` parses publicly accessible `vatsim-data.txt` file (containing all stations & pilots currently online as well as pre-filed flight plans)
+- `GraphImport`: import of parsed `DataFile`s to a deduplicated graph structure
+  - splits connections spanning multiple flights
+  - continues flights on client connection losses
+  - attempts to continue previous flight if data file splits information
+  - ignores service clients (AFVDATA etc.)
+
+Under construction:
+
+- privacy filter to help removing personal information from data files before they are parsed or archived (*should not be used yet*)
+
+Planned:
+
+- parsing of EuroScope sector files (defining VATSIM air spaces and airport ground layouts)
 
 ## Current API State
 
 API is currently not stable and may change without notice.
 
 **Privacy filter is under construction and should not be attempted to be used yet.**
+
+## Examples and Development Tools
+
+See [dataformats-vatsim-public-examples](https://github.com/vatplanner/dataformats-vatsim-public-examples) for a collection of development tools which may also be useful to look into as "example code" on how to use this library.
 
 ## License
 
