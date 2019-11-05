@@ -123,7 +123,7 @@ public class GraphImport {
         String callsign = client.getCallsign();
 
         if (client.getRawClientType() == ATC_CONNECTED) {
-            if ("AFVDATA".equals(callsign) || "AFV-SLURPER".equals(callsign)) {
+            if ("AFVDATA".equals(callsign) || "AFV-SLURPER".equals(callsign) || "DATASVR".equals(callsign)) {
                 return true;
             }
         }
