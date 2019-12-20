@@ -83,19 +83,20 @@ public class GraphImport {
      *
      * @param dataFile file to import to graph; recording time must advance
      * strictly
+     * @return imported {@link Report}, null if not imported
      */
-    public void importDataFile(final DataFile dataFile) {
+    public Report importDataFile(final DataFile dataFile) {
         DataFileMetaData metaData = dataFile.getMetaData();
         Instant recordTime = metaData.getTimestamp();
 
         if (index.hasReportWithRecordTime(recordTime)) {
             LOGGER.info("report recorded at {} has already been imported, not processing again", recordTime);
-            return;
+            return null;
         }
 
         if (index.hasReportAfterRecordTime(recordTime)) {
             LOGGER.warn("report recorded at {} is older than an already imported one but import must be performed in increasing order of record time; not importing", recordTime);
-            return;
+            return null;
         }
 
         Report report = entityFactory.createReport(recordTime);
@@ -106,6 +107,8 @@ public class GraphImport {
         for (Client client : dataFile.getClients()) {
             importClient(report, client);
         }
+
+        return report;
     }
 
     private void importClient(final Report report, final Client client) {
