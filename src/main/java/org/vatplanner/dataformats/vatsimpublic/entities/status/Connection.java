@@ -24,6 +24,7 @@ public class Connection {
      * Creates a new connection record.
      *
      * @param member member holding this connection
+     * @param logonTime timestamp of this connection's login
      */
     public Connection(Member member, Instant logonTime) {
         this.member = member;
