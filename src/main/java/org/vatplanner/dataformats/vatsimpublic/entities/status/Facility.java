@@ -171,9 +171,10 @@ public class Facility {
      *
      * @param report report the message appears in
      * @param content message content
+     * @param factory to instantiate new message if needed
      * @return this instance for method-chaining
      */
-    public Facility seenMessage(Report report, String content) {
+    public Facility seenMessage(Report report, String content, StatusEntityFactory factory) {
         FacilityMessage lastMessage = null;
         if (!messagesSortedByRecordTime.isEmpty()) {
             lastMessage = messagesSortedByRecordTime.last();
@@ -186,7 +187,7 @@ public class Facility {
             lastMessage.seenInReport(report);
         } else {
             messagesSortedByRecordTime.add(
-                    new FacilityMessage(this)
+                    factory.createFacilityMessage(this)
                             .setMessage(content)
                             .seenInReport(report)
             );

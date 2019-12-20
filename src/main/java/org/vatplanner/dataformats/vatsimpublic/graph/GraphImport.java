@@ -173,7 +173,7 @@ public class GraphImport {
         report.addFacility(facility);
         facility.getConnection().seenInReport(report);
         facility.seenOnFrequencyKilohertz(client.getServedFrequencyKilohertz());
-        facility.seenMessage(report, client.getControllerMessage());
+        facility.seenMessage(report, client.getControllerMessage(), entityFactory);
     }
 
     private Member getMember(final Client client) {
