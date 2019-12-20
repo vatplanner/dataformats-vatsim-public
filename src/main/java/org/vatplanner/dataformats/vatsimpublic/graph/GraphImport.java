@@ -20,6 +20,7 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.GeoCoordinates;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Member;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Report;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.SimpleEquipmentSpecification;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.StatusEntityFactory;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.TrackPoint;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.WakeTurbulenceCategory;
 import org.vatplanner.dataformats.vatsimpublic.extraction.AircraftTypeExtractor;
@@ -43,6 +44,7 @@ import static org.vatplanner.dataformats.vatsimpublic.utils.ValueHelpers.inRange
  */
 public class GraphImport {
 
+    private final StatusEntityFactory entityFactory;
     private final GraphIndex index = new GraphIndex();
 
     private static final Duration MAXIMUM_AGE_FOR_CONTINUED_FLIGHT = Duration.ofMinutes(30); // TODO: fine-tune and/or make configurable; compensate for missed data files as well as client connection loss
@@ -57,6 +59,16 @@ public class GraphImport {
     private static final double MAXIMUM_LONGITUDE = 180.0;
 
     private static final Pattern PATTERN_VALID_TRANSPONDER_CODE = Pattern.compile("^[0-7]{0,4}$");
+
+    /**
+     * Creates a new graph import using the given factory to instantiate
+     * entities.
+     *
+     * @param entityFactory factory to instantiate entities
+     */
+    public GraphImport(StatusEntityFactory entityFactory) {
+        this.entityFactory = entityFactory;
+    }
 
     /**
      * Imports the given {@link DataFile} to the graph. All files must be
@@ -84,7 +96,7 @@ public class GraphImport {
             return;
         }
 
-        Report report = new Report(recordTime);
+        Report report = entityFactory.createReport(recordTime);
         index.add(report);
 
         report.setNumberOfConnectedClients(metaData.getNumberOfConnectedClients());
@@ -151,7 +163,7 @@ public class GraphImport {
                 return;
             }
 
-            facility = new Facility(name)
+            facility = entityFactory.createFacility(name)
                     .setConnection(connection)
                     .setType(client.getFacilityType());
 
@@ -172,7 +184,7 @@ public class GraphImport {
 
         Member member = index.getMemberByVatsimId(vatsimId);
         if (member == null) {
-            member = new Member(vatsimId);
+            member = entityFactory.createMember(vatsimId);
             index.add(member);
         }
 
@@ -187,7 +199,7 @@ public class GraphImport {
 
         RealNameHomeBaseExtractor nameExtractor = new RealNameHomeBaseExtractor(client.getRealName());
 
-        return new Connection(member, client.getLogonTime())
+        return entityFactory.createConnection(member, client.getLogonTime())
                 .setProtocolVersion(client.getProtocolVersion())
                 .setRating(client.getControllerRating())
                 .setServerId(client.getServerId())
@@ -286,7 +298,7 @@ public class GraphImport {
 
         // create new flight if unavailable
         if (flight == null) {
-            flight = new Flight(member, callsign);
+            flight = entityFactory.createFlight(member, callsign);
             member.addFlight(flight);
         }
 
@@ -381,7 +393,7 @@ public class GraphImport {
     }
 
     private TrackPoint createTrackPoint(final Report report, final Client client) {
-        TrackPoint trackPoint = new TrackPoint(report);
+        TrackPoint trackPoint = entityFactory.createTrackPoint(report);
 
         // set coordinates if valid
         double latitude = client.getLatitude();
@@ -494,7 +506,7 @@ public class GraphImport {
                 return;
             }
 
-            flight = new Flight(member, client.getCallsign());
+            flight = entityFactory.createFlight(member, client.getCallsign());
             member.addFlight(flight);
         }
 
@@ -521,7 +533,7 @@ public class GraphImport {
             WakeTurbulenceCategory wakeTurbulenceCategory = WakeTurbulenceCategory.resolveFlightPlanCode(aircraftTypeExtractor.getWakeCategory());
             SimpleEquipmentSpecification simpleEquipmentSpecification = SimpleEquipmentSpecification.resolveFlightPlanCode(aircraftTypeExtractor.getEquipmentCode());
 
-            flightPlan = new FlightPlan(flight, flightPlanRevision)
+            flightPlan = entityFactory.createFlightPlan(flight, flightPlanRevision)
                     .setAircraftType(aircraftTypeExtractor.getAircraftType())
                     .setAlternateAirportCode(client.getFiledAlternateAirportCode())
                     .setAltitudeFeet(altitudeFeet)
