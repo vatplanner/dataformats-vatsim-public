@@ -7,6 +7,8 @@ import java.util.SortedSet;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.BarometricPressure;
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.BarometricPressure.UNIT_HECTOPASCALS;
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.BarometricPressure.UNIT_INCHES_OF_MERCURY;
@@ -43,6 +45,8 @@ import static org.vatplanner.dataformats.vatsimpublic.utils.ValueHelpers.inRange
  * entities.
  */
 public class GraphImport {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GraphImport.class);
 
     private final StatusEntityFactory entityFactory;
     private final GraphIndex index = new GraphIndex();
@@ -85,14 +89,12 @@ public class GraphImport {
         Instant recordTime = metaData.getTimestamp();
 
         if (index.hasReportWithRecordTime(recordTime)) {
-            // TODO: log properly
-            System.err.println(recordTime + " report has already been imported, not processing again");
+            LOGGER.info("report recorded at {} has already been imported, not processing again", recordTime);
             return;
         }
 
         if (index.hasReportAfterRecordTime(recordTime)) {
-            // TODO: log properly
-            System.err.println(recordTime + " report has been recorded earlier than an already imported one but import must be performed in increasing order of record time; not importing");
+            LOGGER.warn("report recorded at {} is older than an already imported one but import must be performed in increasing order of record time; not importing", recordTime);
             return;
         }
 
@@ -158,8 +160,7 @@ public class GraphImport {
         if (facility == null) {
             Connection connection = createConnection(client);
             if (connection == null) {
-                // TODO: log properly
-                System.err.println(report.getRecordTime() + " unable to record connection for connected ATC " + name);
+                LOGGER.warn("report recorded at {}: unable to record connection for connected ATC {} (internal connection record could not be found nor created)", report.getRecordTime(), name);
                 return;
             }
 
@@ -244,8 +245,7 @@ public class GraphImport {
         }
 
         if (member == null) {
-            // TODO: log properly
-            System.err.println(report.getRecordTime() + " unable to identify member for connected pilot " + callsign);
+            LOGGER.warn("report recorded at {}: unable to identify member for connected pilot {} (may occur on broken datafiles if fuzzy reconstruction fails)", report.getRecordTime(), callsign);
             return;
         }
 
@@ -325,8 +325,7 @@ public class GraphImport {
         if (connection != null) {
             connection.seenInReport(report);
         } else {
-            // TODO: log properly
-            System.err.println(report.getRecordTime() + " unable to record connection for connected pilot " + callsign);
+            LOGGER.warn("report recorded at {}: unable to record connection for connected pilot {} (internal connection record could not be found nor created)", report.getRecordTime(), callsign);
         }
 
         // add track point
@@ -501,8 +500,7 @@ public class GraphImport {
         if (flight == null) {
             Member member = getMember(client);
             if (member == null) {
-                // TODO: log properly
-                System.err.println(report.getRecordTime() + " unable to record prefiling for " + client.getCallsign());
+                LOGGER.warn("report recorded at {}: unable to record prefiling for {} (unknown member)", report.getRecordTime(), client.getCallsign());
                 return;
             }
 
