@@ -307,7 +307,7 @@ public class FlightPlan {
     }
 
     public FlightPlan setDepartureAirportCode(String departureAirportCode) {
-        this.departureAirportCode = departureAirportCode.trim().toUpperCase();
+        this.departureAirportCode = normalizeAirportCode(departureAirportCode);
         return this;
     }
 
@@ -323,7 +323,7 @@ public class FlightPlan {
     }
 
     public FlightPlan setDestinationAirportCode(String destinationAirportCode) {
-        this.destinationAirportCode = destinationAirportCode.trim().toUpperCase();
+        this.destinationAirportCode = normalizeAirportCode(destinationAirportCode);
         return this;
     }
 
@@ -340,8 +340,19 @@ public class FlightPlan {
     }
 
     public FlightPlan setAlternateAirportCode(String alternateAirportCode) {
-        this.alternateAirportCode = alternateAirportCode.trim().toUpperCase();
+        this.alternateAirportCode = normalizeAirportCode(alternateAirportCode);
         return this;
+    }
+
+    /**
+     * Normalizes an airport code. Normalization is performed by trimming the
+     * input and converting it to upper case.
+     *
+     * @param airportCode code to normalize
+     * @return normalized airport code
+     */
+    public static String normalizeAirportCode(String airportCode) {
+        return airportCode.trim().toUpperCase();
     }
 
     // TODO: could also have real name and home base (no connection if only prefiled)

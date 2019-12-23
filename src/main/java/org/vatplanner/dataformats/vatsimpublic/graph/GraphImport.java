@@ -17,6 +17,7 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.Connection;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Facility;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Flight;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FlightPlan;
+import static org.vatplanner.dataformats.vatsimpublic.entities.status.FlightPlan.normalizeAirportCode;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FlightPlanType;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.GeoCoordinates;
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.GeoCoordinates.UNIT_FEET;
@@ -377,11 +378,11 @@ public class GraphImport {
             return false;
         }
 
-        if (!flightPlan.getDepartureAirportCode().equals(client.getFiledDepartureAirportCode())) {
+        if (!flightPlan.getDepartureAirportCode().equals(normalizeAirportCode(client.getFiledDepartureAirportCode()))) {
             return false;
         }
 
-        if (!flightPlan.getDestinationAirportCode().equals(client.getFiledDestinationAirportCode())) {
+        if (!flightPlan.getDestinationAirportCode().equals(normalizeAirportCode(client.getFiledDestinationAirportCode()))) {
             return false;
         }
 
