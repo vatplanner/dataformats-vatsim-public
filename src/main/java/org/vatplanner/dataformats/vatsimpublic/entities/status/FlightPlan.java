@@ -299,15 +299,15 @@ public class FlightPlan {
      * Returns the departure airport code. This should usually be an ICAO code
      * (generally 4 letters), not IATA (3 letter).
      *
-     * @return departure airport code (usually ICAO)
+     * @return departure airport code (usually ICAO), normalized (trimmed
+     * upper-case)
      */
     public String getDepartureAirportCode() {
         return departureAirportCode;
     }
 
     public FlightPlan setDepartureAirportCode(String departureAirportCode) {
-        // TODO: normalize (trim, upper case)
-        this.departureAirportCode = departureAirportCode;
+        this.departureAirportCode = departureAirportCode.trim().toUpperCase();
         return this;
     }
 
@@ -315,15 +315,15 @@ public class FlightPlan {
      * Returns the destination airport code. This should usually be an ICAO code
      * (generally 4 letters), not IATA (3 letter).
      *
-     * @return destination airport code (usually ICAO)
+     * @return destination airport code (usually ICAO), normalized (trimmed
+     * upper-case)
      */
     public String getDestinationAirportCode() {
         return destinationAirportCode;
     }
 
     public FlightPlan setDestinationAirportCode(String destinationAirportCode) {
-        // TODO: normalize (trim, upper case)
-        this.destinationAirportCode = destinationAirportCode;
+        this.destinationAirportCode = destinationAirportCode.trim().toUpperCase();
         return this;
     }
 
@@ -332,15 +332,15 @@ public class FlightPlan {
      * should usually be an ICAO code (generally 4 letters), not IATA (3
      * letter).
      *
-     * @return alternate airport code (usually ICAO)
+     * @return alternate airport code (usually ICAO), normalized (trimmed
+     * upper-case)
      */
     public String getAlternateAirportCode() {
         return alternateAirportCode;
     }
 
     public FlightPlan setAlternateAirportCode(String alternateAirportCode) {
-        // TODO: normalize (trim, upper case)
-        this.alternateAirportCode = alternateAirportCode;
+        this.alternateAirportCode = alternateAirportCode.trim().toUpperCase();
         return this;
     }
 
