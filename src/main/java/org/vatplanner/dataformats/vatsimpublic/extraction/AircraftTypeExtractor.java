@@ -38,6 +38,7 @@ import static org.vatplanner.dataformats.vatsimpublic.utils.StringUtils.nullIfEm
  */
 public class AircraftTypeExtractor {
 
+    // FIXME: type should be trimmed
     private static final Pattern PATTERN_SPLIT = Pattern.compile("^\\s*([A-Z]/|)(.*?)(/[A-Z]|)\\s*$", Pattern.CASE_INSENSITIVE);
     private static final int PATTERN_SPLIT_WAKE_CATEGORY = 1;
     private static final int PATTERN_SPLIT_AIRCRAFT_TYPE = 2;

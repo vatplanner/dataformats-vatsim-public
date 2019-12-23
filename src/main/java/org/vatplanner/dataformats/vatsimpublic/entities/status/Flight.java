@@ -260,6 +260,7 @@ public class Flight {
                     latest = logOnTime;
                 }
 
+                // TODO: looks odd, I suppose we should check latest, not first report?
                 Instant recordTime = connection.getFirstReport().getRecordTime();
                 if ((latest == null) || recordTime.isAfter(latest)) {
                     latest = recordTime;
