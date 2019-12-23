@@ -142,5 +142,10 @@ public class BarometricPressure {
         return null;
     }
 
+    @Override
+    public String toString() {
+        return String.format("BarometricPressure(%.2f %s)", value, isUnitInchesOfMercury ? "inHg" : "hPa");
+    }
+
     // TODO: unit tests
 }

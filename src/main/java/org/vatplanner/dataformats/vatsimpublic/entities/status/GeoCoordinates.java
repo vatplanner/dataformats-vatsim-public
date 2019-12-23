@@ -115,5 +115,10 @@ public class GeoCoordinates {
         return (int) Math.round((getAltitudeFeet() + (1013 - qnh.getHectopascals()) * 27.0d) / 100.0);
     }
 
+    @Override
+    public String toString() {
+        return String.format("GeoCoordinates(%.5f, %.5f, %d%s)", latitude, longitude, altitude, isAltitudeUnitFeet ? "ft" : "m");
+    }
+
     // TODO: unit tests
 }
