@@ -84,5 +84,18 @@ public class TimeHelpers {
         return a.compareTo(b) <= 0;
     }
 
+    /**
+     * Checks if {@link Duration} <code>a</code> is less than {@link Duration}
+     * <code>b</code>.
+     *
+     * @param a left operand
+     * @param b right operand
+     * @return true if <code>a</code>&lt;<code>b</code>, false if
+     * <code>a</code>&ge;<code>b</code>
+     */
+    public static boolean isLessThan(Duration a, Duration b) {
+        return a.compareTo(b) < 0;
+    }
+
     // TODO: unit tests
 }
