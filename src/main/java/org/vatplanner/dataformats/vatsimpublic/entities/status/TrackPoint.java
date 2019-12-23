@@ -10,9 +10,9 @@ public class TrackPoint {
     private Flight flight;
 
     private GeoCoordinates geoCoordinates;
-    private int heading;
-    private int groundSpeed;
-    private int transponderCode;
+    private int heading = -1;
+    private int groundSpeed = -1;
+    private int transponderCode = -1;
     private BarometricPressure qnh;
 
     /**
@@ -66,10 +66,11 @@ public class TrackPoint {
     }
 
     /**
-     * Returns the heading the aircraft was pointing to. Headings are limited to
-     * 0..359 degrees.
+     * Returns the heading the aircraft was pointing to. Valid headings are
+     * limited to 0..359 degrees.
      *
-     * @return heading the aircraft was pointing to (0..359 degrees)
+     * @return heading the aircraft was pointing to (0..359 degrees), negative
+     * if unavailable
      */
     public int getHeading() {
         return heading;
@@ -84,7 +85,7 @@ public class TrackPoint {
     /**
      * Returns the ground speed (in knots) the aircraft was moving at.
      *
-     * @return ground speed (knots)
+     * @return ground speed (knots), negative if unavailable
      */
     public int getGroundSpeed() {
         return groundSpeed;
@@ -103,7 +104,7 @@ public class TrackPoint {
      * (code 7777 = int 7777), not octal.
      *
      * @return transponder code as decimal integer (code 7777 = int 7777); may
-     * exceed 4-octal limits
+     * exceed 4-octal limits, negative if unavailable
      */
     public int getTransponderCode() {
         return transponderCode;
@@ -119,7 +120,7 @@ public class TrackPoint {
      * provided by pilot clients and depends on the aircraft's location and the
      * client's weather simulation.
      *
-     * @return local QNH at the aircraft's position
+     * @return local QNH at the aircraft's position, null if unavailable
      */
     public BarometricPressure getQnh() {
         return qnh;
