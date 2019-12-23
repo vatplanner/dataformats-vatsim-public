@@ -19,6 +19,7 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.Flight;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FlightPlan;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FlightPlanType;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.GeoCoordinates;
+import static org.vatplanner.dataformats.vatsimpublic.entities.status.GeoCoordinates.UNIT_FEET;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Member;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Report;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.SimpleEquipmentSpecification;
@@ -61,6 +62,21 @@ public class GraphImport {
     private static final double MAXIMUM_LATITUDE = 90.0;
     private static final double MINIMUM_LONGITUDE = -180.0;
     private static final double MAXIMUM_LONGITUDE = 180.0;
+
+    private static final double FACTOR_KPH_TO_NM = 0.539957;
+
+    /**
+     * According to Wikipedia the fastest airplane so far flew with ~3500kph
+     * "air speed" (IAS? TAS?). We add a bit of extra for ground speed and allow
+     * some extra margin for simmers to determine the maximum plausible ground
+     * speed to be encountered online. Everything else can be seen as erroneous
+     * indication (fast-forward playback or whatever).
+     *
+     * <p>
+     * Source: https://en.wikipedia.org/wiki/Flight_airspeed_record
+     * </p>
+     */
+    private static final int MAXIMUM_PLAUSIBLE_GROUND_SPEED = (int) Math.round(4000 * FACTOR_KPH_TO_NM);
 
     private static final Pattern PATTERN_VALID_TRANSPONDER_CODE = Pattern.compile("^[0-7]{0,4}$");
 
@@ -395,21 +411,22 @@ public class GraphImport {
     }
 
     private TrackPoint createTrackPoint(final Report report, final Client client) {
-        TrackPoint trackPoint = entityFactory.createTrackPoint(report);
-
-        // set coordinates if valid
+        // check coordinates for validity
         double latitude = client.getLatitude();
         double longitude = client.getLongitude();
-        if (inRange(latitude, MINIMUM_LATITUDE, MAXIMUM_LATITUDE) && inRange(longitude, MINIMUM_LONGITUDE, MAXIMUM_LONGITUDE)) {
+        boolean inRange = inRange(latitude, MINIMUM_LATITUDE, MAXIMUM_LATITUDE) && inRange(longitude, MINIMUM_LONGITUDE, MAXIMUM_LONGITUDE);
+        if (!inRange) {
+            // don't allow track points without coordinates
             // TODO: try to correct lat/lon if out of range instead of ignoring it
             // TODO: check altitude for plausibility?
-            trackPoint.setGeoCoordinates(new GeoCoordinates(latitude, longitude, client.getAltitudeFeet(), true));
-        }
-
-        // don't allow track points without coordinates
-        if (trackPoint.getGeoCoordinates() == null) {
             return null;
         }
+
+        // create track point
+        TrackPoint trackPoint = entityFactory.createTrackPoint(report);
+
+        // set coordinates
+        trackPoint.setGeoCoordinates(new GeoCoordinates(latitude, longitude, client.getAltitudeFeet(), UNIT_FEET));
 
         // prefer QNH measured in inHg as it provides higher precision in data files (at least 2 decimal places)
         BarometricPressure localQnh = null;
@@ -431,9 +448,9 @@ public class GraphImport {
             trackPoint.setQnh(localQnh);
         }
 
-        // set GS if available
+        // set GS if available and plausible
         int groundSpeed = client.getGroundSpeed();
-        if (groundSpeed >= 0) {
+        if (groundSpeed >= 0 && groundSpeed <= MAXIMUM_PLAUSIBLE_GROUND_SPEED) {
             trackPoint.setGroundSpeed(groundSpeed);
         }
 
