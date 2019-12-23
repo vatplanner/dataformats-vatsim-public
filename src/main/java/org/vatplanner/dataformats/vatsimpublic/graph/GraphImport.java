@@ -558,8 +558,8 @@ public class GraphImport {
                     .setCommunicationMode(communicationMode)
                     .setDepartureAirportCode(client.getFiledDepartureAirportCode())
                     .setDestinationAirportCode(client.getFiledDestinationAirportCode())
-                    .setEstimatedTimeEnroute(client.getFiledTimeEnroute())
-                    .setEstimatedTimeFuel(client.getFiledTimeFuel())
+                    .setEstimatedTimeEnroute(nullDurationIfNegative(client.getFiledTimeEnroute()))
+                    .setEstimatedTimeFuel(nullDurationIfNegative(client.getFiledTimeFuel()))
                     .setFlightPlanType(flightPlanType)
                     .setRemarks(client.getFlightPlanRemarks())
                     .setRoute(client.getFiledRoute())
@@ -599,6 +599,14 @@ public class GraphImport {
 
     public GraphIndex getIndex() {
         return index;
+    }
+
+    private Duration nullDurationIfNegative(Duration duration) {
+        if (duration.isNegative()) {
+            return null;
+        }
+
+        return duration;
     }
 
     // TODO: "unit tests"... integration tests make more sense, i.e. create a series of data files, import them and check for expected outcome
