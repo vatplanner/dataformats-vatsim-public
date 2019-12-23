@@ -38,6 +38,7 @@ import static org.vatplanner.dataformats.vatsimpublic.parser.ClientType.PILOT_CO
 import static org.vatplanner.dataformats.vatsimpublic.parser.ClientType.PILOT_PREFILED;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
+import org.vatplanner.dataformats.vatsimpublic.utils.TimeHelpers;
 import static org.vatplanner.dataformats.vatsimpublic.utils.TimeHelpers.findClosestPlausibleTimestampForFlightPlanField;
 import static org.vatplanner.dataformats.vatsimpublic.utils.TimeHelpers.isLessOrEqualThan;
 import static org.vatplanner.dataformats.vatsimpublic.utils.ValueHelpers.inRange;
@@ -78,6 +79,9 @@ public class GraphImport {
      * </p>
      */
     private static final int MAXIMUM_PLAUSIBLE_GROUND_SPEED = (int) Math.round(4000 * FACTOR_KPH_TO_NM);
+
+    private static final Duration MINIMUM_FLIGHT_DURATION = Duration.ofMinutes(5);
+    private static final Duration MAXIMUM_FLIGHT_DURATION = Duration.ofHours(48); // ... let's allow some in-air refueling because we are simming
 
     private static final Pattern PATTERN_VALID_TRANSPONDER_CODE = Pattern.compile("^[0-7]{0,4}$");
 
@@ -559,8 +563,8 @@ public class GraphImport {
                     .setCommunicationMode(communicationMode)
                     .setDepartureAirportCode(client.getFiledDepartureAirportCode())
                     .setDestinationAirportCode(client.getFiledDestinationAirportCode())
-                    .setEstimatedTimeEnroute(nullDurationIfNegative(client.getFiledTimeEnroute()))
-                    .setEstimatedTimeFuel(nullDurationIfNegative(client.getFiledTimeFuel()))
+                    .setEstimatedTimeEnroute(nullDurationIfOutOfRange(client.getFiledTimeEnroute(), MINIMUM_FLIGHT_DURATION, MAXIMUM_FLIGHT_DURATION))
+                    .setEstimatedTimeFuel(nullDurationIfOutOfRange(client.getFiledTimeFuel(), MINIMUM_FLIGHT_DURATION, MAXIMUM_FLIGHT_DURATION))
                     .setFlightPlanType(flightPlanType)
                     .setRemarks(client.getFlightPlanRemarks())
                     .setRoute(client.getFiledRoute())
@@ -602,12 +606,12 @@ public class GraphImport {
         return index;
     }
 
-    private Duration nullDurationIfNegative(Duration duration) {
-        if (duration.isNegative()) {
-            return null;
+    private Duration nullDurationIfOutOfRange(Duration duration, Duration minimum, Duration maximum) {
+        if (!TimeHelpers.isLessThan(duration, minimum) && TimeHelpers.isLessOrEqualThan(duration, maximum)) {
+            return duration;
         }
 
-        return duration;
+        return null;
     }
 
     // TODO: "unit tests"... integration tests make more sense, i.e. create a series of data files, import them and check for expected outcome
