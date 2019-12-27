@@ -345,13 +345,55 @@ public class FlightPlan {
     }
 
     /**
-     * Normalizes an airport code. Normalization is performed by trimming the
-     * input and converting it to upper case.
+     * Checks if the given airport code matches this flight plan's departure
+     * airport. Input is normalized before check as airport codes are always
+     * stored in normalized form. Null values are evaluated as true only if both
+     * input and flight plan airport code are null.
+     *
+     * @param departureAirportCode code of departure airport, will be normalized
+     * @return true if this flight plan matches the given departure airport,
+     * false if not; true if input and flight plan airport code are null
+     */
+    public boolean equalsDepartureAirportCode(String departureAirportCode) {
+        if (this.departureAirportCode == null) {
+            return (departureAirportCode == null);
+        }
+
+        return this.departureAirportCode.equals(normalizeAirportCode(departureAirportCode));
+    }
+
+    /**
+     * Checks if the given airport code matches this flight plan's destination
+     * airport. Input is normalized before check as airport codes are always
+     * stored in normalized form. Null values are evaluated as true only if both
+     * input and flight plan airport code are null.
+     *
+     * @param destinationAirportCode code of destination airport, will be
+     * normalized
+     * @return true if this flight plan matches the given destination airport,
+     * false if not; true if input and flight plan airport code are null
+     */
+    public boolean equalsDestinationAirportCode(String destinationAirportCode) {
+        if (this.destinationAirportCode == null) {
+            return (destinationAirportCode == null);
+        }
+
+        return this.destinationAirportCode.equals(normalizeAirportCode(destinationAirportCode));
+    }
+
+    /**
+     * Normalizes an airport code. By default, normalization is performed by
+     * trimming the input and converting it to upper case but exact behavior can
+     * be overridden by inheriting class. Null input will be preserved.
      *
      * @param airportCode code to normalize
      * @return normalized airport code
      */
-    public static String normalizeAirportCode(String airportCode) {
+    public String normalizeAirportCode(String airportCode) {
+        if (airportCode == null) {
+            return null;
+        }
+
         return airportCode.trim().toUpperCase();
     }
 
