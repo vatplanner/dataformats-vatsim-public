@@ -5,6 +5,8 @@ import static java.util.Collections.unmodifiableSortedSet;
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A facility is a stationary client usually providing services to pilots. If
@@ -16,6 +18,8 @@ import java.util.TreeSet;
  * them to air space definitions and frequencies.
  */
 public class Facility {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Facility.class);
 
     private Connection connection;
     private final String name;
@@ -128,6 +132,8 @@ public class Facility {
 
         if (!isValidFrequency(this.frequencyKilohertz)) {
             setFrequencyKilohertz(frequencyKilohertz);
+        } else {
+            LOGGER.warn("facility {} already recorded with frequency {}, ignoring change to {}", name, this.frequencyKilohertz, frequencyKilohertz);
         }
 
         return this;
