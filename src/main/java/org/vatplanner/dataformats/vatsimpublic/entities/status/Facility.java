@@ -114,16 +114,27 @@ public class Facility {
     }
 
     /**
-     * Returns the frequency in kilohertz (kHz) as indicated by status report.
+     * Returns the first seen frequency in kilohertz (kHz) as indicated by
+     * status report. Invalid frequencies may be omitted on import. Only the
+     * first valid frequency is retained, later frequency changes are ignored.
      *
-     * @return frequency in kilohertz (kHz); may be zero or negative if
-     * information has been removed
+     * <p>
+     * Also note that since Audio for VATSIM deployment the single reported
+     * primary controller frequency in data files has become rather inaccurate
+     * as controllers may use features such as frequency coupling which are (as
+     * of December 2019) not represented in data files. Complete information may
+     * be added at a later time by AFV development team but actual
+     * representation is unclear (multiplication as "pseudo stations" etc.).
+     * </p>
+     *
+     * @return first seen frequency in kilohertz (kHz); may be zero or negative
+     * if information has been removed
      */
     public int getFrequencyKilohertz() {
         return frequencyKilohertz;
     }
 
-    public Facility setFrequencyKilohertz(int frequencyKilohertz) {
+    protected Facility setFrequencyKilohertz(int frequencyKilohertz) {
         this.frequencyKilohertz = frequencyKilohertz;
         return this;
     }
@@ -140,8 +151,8 @@ public class Facility {
 
         if (!isValidFrequency(this.frequencyKilohertz)) {
             setFrequencyKilohertz(frequencyKilohertz);
-        } else {
-            LOGGER.warn("facility {} already recorded with frequency {}, ignoring change to {}", name, this.frequencyKilohertz, frequencyKilohertz);
+        } else if (frequencyKilohertz != this.frequencyKilohertz) {
+            LOGGER.trace("facility {} already recorded with frequency {}, ignoring change to {}", name, this.frequencyKilohertz, frequencyKilohertz);
         }
 
         return this;
