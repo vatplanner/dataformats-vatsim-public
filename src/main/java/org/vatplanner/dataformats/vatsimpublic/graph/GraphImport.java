@@ -177,7 +177,16 @@ public class GraphImport {
         Report previousReport = index.getLatestReportBefore(report);
         if (previousReport != null) {
             facility = previousReport.getFacilityByName(name);
-            // FIXME: check for same member, do not reuse if member changed
+
+            // do not continue if member changed
+            if ((facility != null) && (client.getVatsimID() != facility.getConnection().getMember().getVatsimId())) {
+                facility = null;
+            }
+
+            // do not continue if reconnected
+            if ((facility != null) && (client.getLogonTime() != null) && !client.getLogonTime().equals(facility.getConnection().getLogonTime())) {
+                facility = null;
+            }
         }
 
         // create new facility if unavailable
