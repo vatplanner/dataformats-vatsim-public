@@ -24,7 +24,7 @@ public class Facility {
     private Connection connection;
     private final String name;
     private FacilityType type;
-    private int frequencyKilohertz; // NOTE: information may be discontinued or multiplied with "Audio for VATSIM" (frequency coupling)
+    private int frequencyKilohertz = -1; // NOTE: information may change or be multiplied with future "Audio for VATSIM" developments (frequency coupling etc.)
     private final SortedSet<FacilityMessage> messagesSortedByRecordTime = new TreeSet<>(COMPARATOR_MESSAGE_REPORT_RECORD_TIME);
 
     private static final int LOWEST_VALID_FREQUENCY_KILOHERTZ = 118000;
@@ -41,11 +41,18 @@ public class Facility {
      * by their name.
      *
      * @param name raw facility name
+     * @throws IllegalArgumentException if facility name is null or empty
      */
     public Facility(String name) {
-        // TODO: reject empty/null names
-        // TODO: normalize name (trim, upper case)
-        this.name = name;
+        if (name == null) {
+            throw new IllegalArgumentException("facility names must not be null");
+        }
+
+        this.name = normalizeFacilityName(name);
+
+        if (this.name.isEmpty()) {
+            throw new IllegalArgumentException("facility names must not be empty");
+        }
     }
 
     /**
@@ -87,8 +94,9 @@ public class Facility {
      * @return true if facility provides ATC service; false if not
      */
     public boolean providesATCService() {
-        // TODO: not OBSERVER and (if set) valid frequency
-        return false;
+        // NOTE: handling of frequencies may change in future AFV developments
+        return ((type == null) || (type != FacilityType.OBSERVER))
+                && ((frequencyKilohertz <= 0) || isValidFrequency(frequencyKilohertz));
     }
 
     /**
@@ -200,6 +208,17 @@ public class Facility {
         }
 
         return this;
+    }
+
+    /**
+     * Normalizes a facility name. Normalization is performed by trimming the
+     * input and converting it to upper case.
+     *
+     * @param name facility name to normalize
+     * @return normalized facility name
+     */
+    public static String normalizeFacilityName(String name) {
+        return name.trim().toUpperCase();
     }
 
     // TODO: unit tests

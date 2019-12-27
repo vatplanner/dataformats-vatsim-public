@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import static org.vatplanner.dataformats.vatsimpublic.entities.status.Facility.normalizeFacilityName;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
 
 /**
@@ -51,12 +52,12 @@ public class Report {
      * Returns the facility identified by given name on this report if recorded.
      * Null will be returned if no such facility has been recorded.
      *
-     * @param name facility name to look up
+     * @param name facility name to look up, will be normalized
      * @return facility recorded under given name on this report; null if not
      * recorded
      */
     public Facility getFacilityByName(String name) {
-        return facilitiesByName.get(name);
+        return facilitiesByName.get(normalizeFacilityName(name));
     }
 
     /**
