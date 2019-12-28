@@ -76,6 +76,15 @@ public class GraphIndex {
     }
 
     /**
+     * Checks if any reports are currently held in index.
+     *
+     * @return true if index holds reports, false if report index is empty
+     */
+    public boolean hasReports() {
+        return !reportsByRecordTime.isEmpty();
+    }
+
+    /**
      * Checks if a report with given record time has already been indexed.
      *
      * @param recordTime record time to check
