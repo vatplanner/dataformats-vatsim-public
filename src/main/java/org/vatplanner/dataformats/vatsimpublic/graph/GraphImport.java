@@ -332,6 +332,13 @@ public class GraphImport {
         if (flight == null) {
             flight = entityFactory.createFlight(member, callsign);
             member.addFlight(flight);
+
+            // connection may be continued from earlier flight but flight might
+            // have been recognized as discontinued above; since all connected
+            // flights require a connection associate with previously found one
+            if (connection != null) {
+                flight.addConnection(connection);
+            }
         }
 
         // record flight on report
