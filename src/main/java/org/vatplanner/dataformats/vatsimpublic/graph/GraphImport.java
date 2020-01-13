@@ -16,6 +16,7 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.CommunicationMode
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Connection;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Facility;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Flight;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.FlightEvent;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FlightPlan;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FlightPlanType;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.GeoCoordinates;
@@ -37,6 +38,7 @@ import static org.vatplanner.dataformats.vatsimpublic.parser.ClientType.PILOT_CO
 import static org.vatplanner.dataformats.vatsimpublic.parser.ClientType.PILOT_PREFILED;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
+import static org.vatplanner.dataformats.vatsimpublic.utils.CollectionHelpers.findPrevious;
 import org.vatplanner.dataformats.vatsimpublic.utils.TimeHelpers;
 import static org.vatplanner.dataformats.vatsimpublic.utils.TimeHelpers.findClosestPlausibleTimestampForFlightPlanField;
 import static org.vatplanner.dataformats.vatsimpublic.utils.TimeHelpers.isLessOrEqualThan;
@@ -65,6 +67,15 @@ public class GraphImport {
     private static final double MAXIMUM_LONGITUDE = 180.0;
 
     private static final double FACTOR_KPH_TO_NM = 0.539957;
+
+    /**
+     * Lowest ground speed in knots to consider an airplane to be airborne
+     * (obviously does not apply to rotary-wing aircraft such as helicopters).
+     * While minimum airborne IAS for airplanes is usually around 70kt, we only
+     * have ground speed and need to take typical wind speeds into account which
+     * are subtracted from IAS.
+     */
+    private static final int MINIMUM_GROUND_SPEED_AIRBORNE = 50;
 
     /**
      * According to Wikipedia the fastest airplane so far flew with ~3500kph
@@ -428,6 +439,26 @@ public class GraphImport {
 
         trackPoint.setFlight(flight);
         flight.addTrackPoint(trackPoint);
+
+        // check for events and mark
+        // TODO: analyze much earlier in import and use information about flight phase to split flights on (i.e. only one takeoff and landing per flight)
+        // TODO: mark only if multiple track points have confirmed stable condition
+        // TODO: take difference in height from start position into account to determine airborne state (would allow state for rotary-wing aircraft to be detected more reliably)
+        boolean wasAirborne = flight.isAirborne();
+        boolean hasLanded = flight.hasLanded();
+        boolean hasSpeedToBeAirborne = (trackPoint.getGroundSpeed() >= MINIMUM_GROUND_SPEED_AIRBORNE);
+        if (!hasLanded) {
+            if (!wasAirborne && hasSpeedToBeAirborne) {
+                flight.markEvent(trackPoint, FlightEvent.AIRBORNE);
+
+                TrackPoint previousTrackPoint = findPrevious(flight.getTrack(), trackPoint).orElse(null);
+                if (previousTrackPoint != null) {
+                    flight.markEvent(previousTrackPoint, FlightEvent.BEFORE_AIRBORNE);
+                }
+            } else if (wasAirborne && !hasSpeedToBeAirborne) {
+                flight.markEvent(trackPoint, FlightEvent.LANDED);
+            }
+        }
     }
 
     private TrackPoint createTrackPoint(final Report report, final Client client) {

@@ -1,10 +1,13 @@
 package org.vatplanner.dataformats.vatsimpublic.entities.status;
 
 import java.time.Instant;
+import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Collections.unmodifiableSortedSet;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -42,6 +45,7 @@ public class Flight {
     private SortedSet<FlightPlan> flightPlans;
     private SortedSet<TrackPoint> track;
     private Set<Report> reconstructedReports;
+    private Map<TrackPoint, FlightEvent> events;
 
     private static final Comparator<Connection> CONNECTIONS_COMPARATOR = (Connection x, Connection y) -> {
         // ascending order of logon time
@@ -346,6 +350,81 @@ public class Flight {
         }
 
         return unmodifiableSet(reconstructedReports);
+    }
+
+    /**
+     * Records given event to have occurred at track point. Track point must
+     * have been registered to track before. Every track point must only have at
+     * most one event assigned.
+     *
+     * @param trackPoint track point to record event for
+     * @param event event to be recorded
+     * @throws IllegalArgumentException if any argument is null, point is not on
+     * track or point already has an event assigned
+     */
+    public void markEvent(TrackPoint trackPoint, FlightEvent event) {
+        if (event == null) {
+            throw new IllegalArgumentException("event must not be null");
+        }
+
+        if (trackPoint == null) {
+            throw new IllegalArgumentException("track point must not be null");
+        }
+
+        if (!track.contains(trackPoint)) {
+            throw new IllegalArgumentException("point must be recorded on track");
+        }
+
+        if (events == null) {
+            events = new HashMap<>();
+        }
+
+        if (events.containsKey(trackPoint)) {
+            throw new IllegalArgumentException("track point is already marked with another event (old " + events.get(trackPoint) + ", new " + event + ")");
+        }
+
+        events.put(trackPoint, event);
+    }
+
+    /**
+     * Returns all events recorded by track point.
+     *
+     * @return all events recorded by track point, never null
+     */
+    public Map<TrackPoint, FlightEvent> getEvents() {
+        if (events == null) {
+            return unmodifiableMap(new HashMap<>());
+        }
+
+        return unmodifiableMap(events);
+    }
+
+    /**
+     * Checks if the flight is airborne as of last recorded track point and
+     * event.
+     *
+     * @return true if airborne, false if not taken off yet or already landed
+     */
+    public boolean isAirborne() {
+        if (events == null) {
+            return false;
+        }
+
+        return events.containsValue(FlightEvent.AIRBORNE) && !events.containsValue(FlightEvent.LANDED);
+    }
+
+    /**
+     * Checks if the flight has landed as of last recorded track point and
+     * event.
+     *
+     * @return true if landed, false if still airborne or not taken off yet
+     */
+    public boolean hasLanded() {
+        if (events == null) {
+            return false;
+        }
+
+        return events.containsValue(FlightEvent.LANDED);
     }
 
     // TODO: unit tests
