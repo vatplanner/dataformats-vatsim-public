@@ -104,6 +104,16 @@ public class AltitudeParserTest {
             new Object[]{"A70001"}, //
             new Object[]{"A0199"}, //
             new Object[]{"21337m"}, //
+
+            // general non-sense
+            new Object[]{"2147483648"}, // exceeding unsigned Java integer
+            new Object[]{"9223372036854775809"}, // exceeding unsigned Java long
+            new Object[]{""}, //
+            new Object[]{"nonsense"}, //
+            new Object[]{"F"}, //
+            new Object[]{"A"}, //
+            new Object[]{"M"}, //
+            new Object[]{"S"}, //
         };
     }
 

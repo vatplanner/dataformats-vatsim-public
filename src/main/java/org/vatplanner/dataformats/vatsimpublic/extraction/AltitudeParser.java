@@ -38,6 +38,8 @@ public class AltitudeParser {
     private static final Pattern PATTERN_FIRST_NUMBERS = Pattern.compile("^[A-Z]*([0-9]+).*");
     private static final int PATTERN_FIRST_NUMBERS_NUMBERS = 1;
 
+    private static final int INVALID = -1;
+
     /**
      * Parses the given string to extract altitude information.
      *
@@ -59,15 +61,22 @@ public class AltitudeParser {
         // continue processing only the first numeric value found in string
         Matcher matcherFirstNumbers = PATTERN_FIRST_NUMBERS.matcher(s);
         if (!matcherFirstNumbers.matches()) {
-            value = -1;
-            feet = -1;
+            value = INVALID;
+            feet = INVALID;
             return;
         }
 
         s = matcherFirstNumbers.group(PATTERN_FIRST_NUMBERS_NUMBERS);
 
-        // determine factor to apply to value
+        // excessively long numbers will fail parsing, don't try at all
         int numDigits = s.length();
+        if (numDigits > 9) {
+            value = INVALID;
+            feet = INVALID;
+            return;
+        }
+
+        // determine factor to apply to value
         int factor = 1;
         if (isUnitFeet && numDigits <= 3 && !isExactValue) {
             factor = 100;
@@ -80,8 +89,8 @@ public class AltitudeParser {
         int tempFeet = isUnitFeet ? tempValue : (int) Math.round(metersToFeet(tempValue));
 
         if ((tempFeet < MINIMUM_THRESHOLD_FEET) || (tempFeet > MAXIMUM_THRESHOLD_FEET)) {
-            value = -1;
-            feet = -1;
+            value = INVALID;
+            feet = INVALID;
         } else {
             value = tempValue;
             feet = tempFeet;
