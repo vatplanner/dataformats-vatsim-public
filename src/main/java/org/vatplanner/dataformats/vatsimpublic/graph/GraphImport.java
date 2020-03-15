@@ -653,7 +653,7 @@ public class GraphImport {
     }
 
     private Duration nullDurationIfOutOfRange(Duration duration, Duration minimum, Duration maximum) {
-        if (!TimeHelpers.isLessThan(duration, minimum) && TimeHelpers.isLessOrEqualThan(duration, maximum)) {
+        if ((duration != null) && !TimeHelpers.isLessThan(duration, minimum) && TimeHelpers.isLessOrEqualThan(duration, maximum)) {
             return duration;
         }
 
