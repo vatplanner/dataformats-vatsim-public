@@ -99,6 +99,8 @@ public class ClientParser {
     private static final String CONTROLLER_MESSAGE_LINEBREAK = new String(new byte[]{(byte) 0x5E, (byte) 0xA7}, Charset.forName("ISO-8859-1"));
     private static final String LINEBREAK = "\n";
 
+    private static final String DUMMY_TIMESTAMP = "00010101000000";
+
     private boolean isParsingPrefileSection = false;
 
     /**
@@ -835,7 +837,7 @@ public class ClientParser {
      * @throws IllegalArgumentException if not allowed but set or parsing error
      */
     private Instant parseFullTimestamp(String s, boolean isAllowed) throws IllegalArgumentException {
-        if (s.isEmpty()) {
+        if (isEmptyOrDummyTimestamp(s)) {
             return null;
         }
 
@@ -844,6 +846,10 @@ public class ClientParser {
         }
 
         return LocalDateTime.parse(s, LOCAL_DATE_TIME_FORMATTER).toInstant(ZoneOffset.UTC);
+    }
+
+    private boolean isEmptyOrDummyTimestamp(String s) {
+        return s.isEmpty() || DUMMY_TIMESTAMP.equals(s);
     }
 
     /**
