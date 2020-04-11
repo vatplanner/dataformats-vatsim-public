@@ -2043,8 +2043,8 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="visual range">
     @Test
-    @DataProvider({"0", "5", "50", "200", "1000"})
-    public void testParse_connectedPilotWithValidVisualRange_throwsIllegalArgumentException(int visualRange) {
+    @DataProvider({"1", "5", "50", "200", "1000"})
+    public void testParse_connectedPilotWithValidNonZeroVisualRange_throwsIllegalArgumentException(int visualRange) {
         // Arrange
         String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234::%d:1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", visualRange);
         parser.setIsParsingPrefileSection(false);
@@ -2073,6 +2073,19 @@ public class ClientParserTest {
     }
 
     @Test
+    public void testParse_connectedPilotWithZeroVisualRange_returnsObjectWithNegativeVisualRange() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234::0:1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getVisualRange(), is(lessThan(0)));
+    }
+
+    @Test
     public void testParse_connectedPilotWithoutVisualRange_returnsObjectWithNegativeVisualRange() {
         // Arrange
         String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
@@ -2086,8 +2099,8 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "5", "50", "200", "1000"})
-    public void testParse_prefiledPilotWithValidVisualRange_throwsIllegalArgumentException(int visualRange) {
+    @DataProvider({"1", "5", "50", "200", "1000"})
+    public void testParse_prefiledPilotWithValidNonZeroVisualRange_throwsIllegalArgumentException(int visualRange) {
         // Arrange
         String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM::::::%d:1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", visualRange);
         parser.setIsParsingPrefileSection(true);
@@ -2113,6 +2126,19 @@ public class ClientParserTest {
         parser.parse(line);
 
         // Assert (nothing to do)
+    }
+
+    @Test
+    public void testParse_prefiledPilotWithZeroVisualRange_returnsObjectWithNegativeVisualRange() {
+        // Arrange
+        String line = "ABC123:123456::::::::B738:420:EDDT:30000:EHAM::::::0:1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getVisualRange(), is(lessThan(0)));
     }
 
     @Test

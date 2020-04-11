@@ -673,12 +673,10 @@ public class ClientParser {
     private int parseVisualRange(String s, ClientType rawClientType) throws IllegalArgumentException {
         boolean isATC = (rawClientType == ClientType.ATC_CONNECTED);
 
-        if (s.isEmpty()) {
-            return -1;
-        }
-
         if (isATC) {
-            return Integer.parseInt(s);
+            return s.isEmpty() ? -1 : Integer.parseInt(s);
+        } else if (isZeroOrEmpty(s)) {
+            return -1;
         } else {
             throw new IllegalArgumentException("Only ATC stations are allowed to indicate a visual range; found: \"" + s + "\"");
         }
