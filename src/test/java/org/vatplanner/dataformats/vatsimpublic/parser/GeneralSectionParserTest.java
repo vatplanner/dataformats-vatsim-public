@@ -1,13 +1,7 @@
 package org.vatplanner.dataformats.vatsimpublic.parser;
 
-import org.vatplanner.dataformats.vatsimpublic.parser.GeneralSectionParser;
-import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
-import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
-import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
-import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntryCollector;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import static org.vatplanner.dataformats.vatsimpublic.testutils.ParserLogEntryMatcher.matchesParserLogEntry;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -18,6 +12,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import static org.vatplanner.dataformats.vatsimpublic.testutils.ParserLogEntryMatcher.matchesParserLogEntry;
 
 @RunWith(DataProviderRunner.class)
 public class GeneralSectionParserTest {
@@ -121,7 +116,7 @@ public class GeneralSectionParserTest {
 
     @Test
     @DataProvider({"2", "100"})
-    public void testParse_withReload_returnsDataFileMetaDataWithExpectedMinimumDataFileRetrievalInterval(int minimumIntervalMinutes) {
+    public void testParse_withReloadIntegerNumber_returnsDataFileMetaDataWithExpectedMinimumDataFileRetrievalInterval(int minimumIntervalMinutes) {
         // Arrange
         Collection<String> lines = Arrays.asList(
                 String.format("RELOAD = %d", minimumIntervalMinutes)
@@ -132,6 +127,21 @@ public class GeneralSectionParserTest {
 
         // Assert
         assertThat(result.getMinimumDataFileRetrievalInterval(), is(equalTo(Duration.ofMinutes(minimumIntervalMinutes))));
+    }
+
+    @Test
+    @DataProvider({"0.25, 15", "1.33, 80"})
+    public void testParse_withReloadFloatingNumber_returnsDataFileMetaDataWithExpectedMinimumDataFileRetrievalInterval(String input, int expectedSeconds) {
+        // Arrange
+        Collection<String> lines = Arrays.asList(
+                String.format("RELOAD = %s", input)
+        );
+
+        // Act
+        DataFileMetaData result = parser.parse(lines, logEntryCollector, null);
+
+        // Assert
+        assertThat(result.getMinimumDataFileRetrievalInterval(), is(equalTo(Duration.ofSeconds(expectedSeconds))));
     }
 
     @Test

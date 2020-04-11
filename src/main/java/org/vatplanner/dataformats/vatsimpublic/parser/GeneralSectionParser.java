@@ -60,7 +60,7 @@ public class GeneralSectionParser {
                         break;
 
                     case KEY_RELOAD:
-                        metaData.setMinimumDataFileRetrievalInterval(Duration.ofMinutes(Integer.parseInt(value)));
+                        metaData.setMinimumDataFileRetrievalInterval(Duration.ofSeconds(Math.round(Double.parseDouble(value) * 60.0)));
                         break;
 
                     case KEY_ATIS_ALLOW_MIN:
