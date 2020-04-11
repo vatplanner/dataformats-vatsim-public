@@ -1778,8 +1778,8 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "1", "123", "2143", "7000", "9999", "12345"})
-    public void testParse_prefiledPilotWithValidTransponderCode_throwsIllegalArgumentException(int transponderCodeNumeric) {
+    @DataProvider({"1", "123", "2143", "7000", "9999", "12345"})
+    public void testParse_prefiledPilotWithValidNonZeroTransponderCode_throwsIllegalArgumentException(int transponderCodeNumeric) {
         // Arrange
         String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM::::%d:::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", transponderCodeNumeric);
         parser.setIsParsingPrefileSection(true);
@@ -1821,8 +1821,8 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "1", "123", "2143", "7000", "9999", "12345"})
-    public void testParse_atcWithValidTransponderCode_throwsIllegalArgumentException(int transponderCodeNumeric) {
+    @DataProvider({"1", "123", "2143", "7000", "9999", "12345"})
+    public void testParse_atcWithValidNonZeroTransponderCode_throwsIllegalArgumentException(int transponderCodeNumeric) {
         // Arrange
         String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::::::SERVER1:100:3:%d:4:50::::::::::::::::atis message:20180101160000:20180101150000::::", transponderCodeNumeric);
         parser.setIsParsingPrefileSection(false);
@@ -3987,8 +3987,8 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "123", "359"})
-    public void testParse_prefiledPilotWithValidHeading_throwsIllegalArgumentException(int heading) {
+    @DataProvider({"1", "123", "359"})
+    public void testParse_prefiledPilotWithValidNonZeroHeading_throwsIllegalArgumentException(int heading) {
         // Arrange
         String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::::%d:::", heading);
         parser.setIsParsingPrefileSection(true);
@@ -4030,8 +4030,8 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "123", "359"})
-    public void testParse_atcWithValidHeading_throwsIllegalArgumentException(int heading) {
+    @DataProvider({"1", "123", "359"})
+    public void testParse_atcWithValidNonZeroHeading_throwsIllegalArgumentException(int heading) {
         // Arrange
         String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000:%d:::", heading);
         parser.setIsParsingPrefileSection(false);
@@ -4438,5 +4438,36 @@ public class ClientParserTest {
         assertThat(result.getQnhHectopascal(), is(equalTo(1013)));
     }
 
+    @Test
+    public void testParse_atcWithZeroHeadingQNHGroundSpeedAndTransponderInOnlineSectionOnNonPlaceholderFrequency_returnsObjectAsEffectiveATCWithExpectedData() {
+        // Default in data format version 9:
+        // ATC appears like a pilot with heading, QNH and transponder fields set to zero
+
+        // Arrange
+        String line = "SOME_ATC:987654321:some name:ATC:124.525:12.34567:-12.34567:123:0::0::::SOMESERVER:100:10:0:0:40::::::::::::::::::20171006123456:0:0:0:";
+        parser.setIsParsingPrefileSection(false);
+
+        Instant expectedLogonTime = LocalDateTime.of(2017, Month.OCTOBER, 6, 12, 34, 56).toInstant(ZoneOffset.UTC);
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getRawClientType(), is(equalTo(ClientType.ATC_CONNECTED)));
+        assertThat(result.getEffectiveClientType(), is(equalTo(ClientType.ATC_CONNECTED)));
+        assertThat(result.getCallsign(), is(equalTo("SOME_ATC")));
+        assertThat(result.getLatitude(), is(closeTo(12.34567, ALLOWED_DOUBLE_ERROR)));
+        assertThat(result.getLongitude(), is(closeTo(-12.34567, ALLOWED_DOUBLE_ERROR)));
+        assertThat(result.getAltitudeFeet(), is(equalTo(123)));
+        assertThat(result.getGroundSpeed(), is(equalTo(-1)));
+        assertThat(result.getServerId(), is(equalTo("SOMESERVER")));
+        assertThat(result.getControllerRating(), is(equalTo(ControllerRating.I3)));
+        assertThat(result.getTransponderCodeDecimal(), is(equalTo(0)));
+        assertThat(result.getLogonTime(), is(equalTo(expectedLogonTime)));
+        assertThat(result.getHeading(), is(equalTo(0)));
+        assertThat(result.getQnhInchMercury(), is(closeTo(0, ALLOWED_DOUBLE_ERROR)));
+        assertThat(result.getQnhHectopascal(), is(equalTo(0)));
+        assertThat(result.getServedFrequencyKilohertz(), is(equalTo(124525)));
+    }
     // </editor-fold>
 }

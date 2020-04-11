@@ -187,8 +187,8 @@ public class ClientParser {
             client.setControllerMessageLastUpdated(parseFullTimestamp(matcher.group(PATTERN_LINE_TIME_LAST_ATIS_RECEIVED), isATC));
             client.setLogonTime(requireNonNullIf("logon time", isEffectiveClientTypeOnline, parseFullTimestamp(matcher.group(PATTERN_LINE_TIME_LOGON), isEffectiveClientTypeOnline)));
             client.setHeading(parseHeading(matcher.group(PATTERN_LINE_HEADING), effectiveClientType));
-            client.setQnhInchMercury(requireNaNIf("QNH Inch Mercury", !isConnectedPilot, parseDouble(matcher.group(PATTERN_LINE_QNH_IHG))));
-            client.setQnhHectopascal(requireNegativeIf("QNH Hectopascal", !isConnectedPilot, parseIntWithDefault(matcher.group(PATTERN_LINE_QNH_MB), -1)));
+            client.setQnhInchMercury(requireNaNIf("QNH Inch Mercury", !(isConnectedPilot || isZeroOrEmpty(matcher.group(PATTERN_LINE_QNH_IHG))), parseDouble(matcher.group(PATTERN_LINE_QNH_IHG))));
+            client.setQnhHectopascal(requireNegativeIf("QNH Hectopascal", !(isConnectedPilot || isZeroOrEmpty(matcher.group(PATTERN_LINE_QNH_MB))), parseIntWithDefault(matcher.group(PATTERN_LINE_QNH_MB), -1)));
         } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException(
                     "unparseable line in "
@@ -278,9 +278,15 @@ public class ClientParser {
         // TODO: only online pilots have GS >0 (implement only if necessary)
 
         if (!isParsingPrefileSection) {
-            // only online pilots have a heading
-            boolean hasHeading = !matcher.group(PATTERN_LINE_HEADING).isEmpty();
-            if (hasHeading) {
+            boolean hasAtLeastOneFilledPilotField = !( //
+                    isZeroOrEmpty(matcher.group(PATTERN_LINE_HEADING))
+                    && isZeroOrEmpty(matcher.group(PATTERN_LINE_GROUNDSPEED))
+                    && isZeroOrEmpty(matcher.group(PATTERN_LINE_QNH_IHG))
+                    && isZeroOrEmpty(matcher.group(PATTERN_LINE_QNH_MB))
+                    && isZeroOrEmpty(matcher.group(PATTERN_LINE_TRANSPONDER)) //
+                    );
+
+            if (hasAtLeastOneFilledPilotField) {
                 return ClientType.PILOT_CONNECTED;
             }
         }
@@ -290,6 +296,10 @@ public class ClientParser {
         }
 
         return null;
+    }
+
+    private boolean isZeroOrEmpty(String s) {
+        return s.isEmpty() || "0".equals(s);
     }
 
     /**
@@ -605,11 +615,11 @@ public class ClientParser {
             return -1;
         }
 
-        if (clientType == ClientType.PILOT_CONNECTED) {
-            return Integer.parseInt(s);
-        } else {
+        if ((clientType != ClientType.PILOT_CONNECTED) && !"0".equals(s)) {
             throw new IllegalArgumentException("Only connected pilots are allowed to list a transponder code but code was: \"" + s + "\"");
         }
+
+        return Integer.parseInt(s);
     }
 
     /**
@@ -875,7 +885,7 @@ public class ClientParser {
             return -1;
         }
 
-        boolean isAllowed = (clientType == ClientType.PILOT_CONNECTED);
+        boolean isAllowed = (clientType == ClientType.PILOT_CONNECTED) || "0".equals(s);
         if (!isAllowed) {
             throw new IllegalArgumentException("heading is only allowed to be set by connected pilots");
         }
