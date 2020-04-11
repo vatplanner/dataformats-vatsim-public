@@ -9,6 +9,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.ZoneOffset;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -1865,9 +1867,22 @@ public class ClientParserTest {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="facility type">
+    @DataProvider
+    public static Object[][] dataProviderNonZeroFacilityTypeIds() {
+        return Arrays.stream(FacilityTypeTest.dataProviderIdAndEnum())
+                .map(arguments -> (Integer) arguments[0])
+                .filter(id -> id != 0)
+                .distinct()
+                .map(id -> new Object[]{id})
+                .collect(Collectors.toList())
+                .toArray(new Object[0][0]);
+    }
+
     @Test
-    @UseDataProvider(value = "dataProviderIdAndEnum", location = FacilityTypeTest.class)
-    public void testParse_connectedPilotWithValidFacilityType_throwsIllegalArgumentException(int id, FacilityType _facilityType) {
+    @UseDataProvider("dataProviderNonZeroFacilityTypeIds")
+    public void testParse_connectedPilotWithValidNonZeroFacilityType_throwsIllegalArgumentException(int id) {
+        // 0 is the default value for all pilots since data format version 9
+
         // Arrange
         String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:%d::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", id);
         parser.setIsParsingPrefileSection(false);
@@ -1896,6 +1911,21 @@ public class ClientParserTest {
     }
 
     @Test
+    public void testParse_connectedPilotWithZeroFacilityType_returnsObjectWithNullForFacilityType() {
+        // 0 is the default value for all pilots since data format version 9
+
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:0::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getFacilityType(), is(nullValue()));
+    }
+
+    @Test
     public void testParse_connectedPilotWithoutFacilityType_returnsObjectWithNullForFacilityType() {
         // Arrange
         String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
@@ -1909,8 +1939,10 @@ public class ClientParserTest {
     }
 
     @Test
-    @UseDataProvider(value = "dataProviderIdAndEnum", location = FacilityTypeTest.class)
-    public void testParse_prefiledPilotWithValidFacilityType_throwsIllegalArgumentException(int id, FacilityType _facilityType) {
+    @UseDataProvider("dataProviderNonZeroFacilityTypeIds")
+    public void testParse_prefiledPilotWithValidNonZeroFacilityType_throwsIllegalArgumentException(int id) {
+        // 0 is the default value for all pilots since data format version 9
+
         // Arrange
         String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::%d::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", id);
         parser.setIsParsingPrefileSection(true);
@@ -1936,6 +1968,21 @@ public class ClientParserTest {
         parser.parse(line);
 
         // Assert (nothing to do)
+    }
+
+    @Test
+    public void testParse_prefiledPilotWithZeroFacilityType_returnsObjectWithNullForFacilityType() {
+        // 0 is the default value for all pilots since data format version 9
+
+        // Arrange
+        String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::0::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getFacilityType(), is(nullValue()));
     }
 
     @Test

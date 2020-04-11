@@ -643,12 +643,10 @@ public class ClientParser {
     private FacilityType parseFacilityType(String s, ClientType rawClientType) throws IllegalArgumentException {
         boolean isATC = (rawClientType == ClientType.ATC_CONNECTED);
 
-        if (s.isEmpty()) {
-            return null;
-        }
-
         if (isATC) {
-            return FacilityType.resolveStatusFileId(Integer.parseInt(s));
+            return s.isEmpty() ? null : FacilityType.resolveStatusFileId(Integer.parseInt(s));
+        } else if (isZeroOrEmpty(s)) {
+            return null;
         } else {
             throw new IllegalArgumentException("Only ATC stations are allowed to list a facility type but type was: \"" + s + "\"");
         }
