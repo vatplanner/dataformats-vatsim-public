@@ -81,7 +81,7 @@ public class GeneralSectionParser {
                                         sectionName,
                                         line,
                                         true,
-                                        "key " + key + "is unknown and could not be parsed",
+                                        "key " + key + " is unknown and could not be parsed",
                                         null
                                 )
                         );
