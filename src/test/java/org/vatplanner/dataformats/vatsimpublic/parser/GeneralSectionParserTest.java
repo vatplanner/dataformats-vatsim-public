@@ -39,6 +39,7 @@ public class GeneralSectionParserTest {
         assertThat(result.getMinimumAtisRetrievalInterval(), is(equalTo(defaultMetaData.getMinimumAtisRetrievalInterval())));
         assertThat(result.getMinimumDataFileRetrievalInterval(), is(equalTo(defaultMetaData.getMinimumDataFileRetrievalInterval())));
         assertThat(result.getNumberOfConnectedClients(), is(equalTo(defaultMetaData.getNumberOfConnectedClients())));
+        assertThat(result.getNumberOfUniqueConnectedUsers(), is(equalTo(defaultMetaData.getNumberOfUniqueConnectedUsers())));
         assertThat(result.getTimestamp(), is(equalTo(defaultMetaData.getTimestamp())));
         assertThat(result.getVersionFormat(), is(equalTo(defaultMetaData.getVersionFormat())));
     }
@@ -214,6 +215,35 @@ public class GeneralSectionParserTest {
 
         // Assert
         assertThat(result.getNumberOfConnectedClients(), is(lessThan(0)));
+    }
+
+    @Test
+    @DataProvider({"5", "100"})
+    public void testParse_withUniqueUsers_returnsDataFileMetaDataWithExpectedNumberOfConnectedUniqueUsers(int uniqueUsers) {
+        // Arrange
+        Collection<String> lines = Arrays.asList(
+                String.format("UNIQUE USERS = %d", uniqueUsers)
+        );
+
+        // Act
+        DataFileMetaData result = parser.parse(lines, logEntryCollector, null);
+
+        // Assert
+        assertThat(result.getNumberOfUniqueConnectedUsers(), is(equalTo(uniqueUsers)));
+    }
+
+    @Test
+    public void testParse_withoutUniqueUsers_returnsDataFileMetaDataWithNegativeValueForNumberOfConnectedUniqueUsers() {
+        // Arrange
+        Collection<String> lines = Arrays.asList(
+                "VERSION = 123"
+        );
+
+        // Act
+        DataFileMetaData result = parser.parse(lines, logEntryCollector, null);
+
+        // Assert
+        assertThat(result.getNumberOfUniqueConnectedUsers(), is(lessThan(0)));
     }
 
     @Test

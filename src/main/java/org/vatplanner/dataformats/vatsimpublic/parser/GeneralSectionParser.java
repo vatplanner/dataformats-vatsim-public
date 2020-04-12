@@ -25,6 +25,7 @@ public class GeneralSectionParser {
     private static final String KEY_RELOAD = "RELOAD";
     private static final String KEY_ATIS_ALLOW_MIN = "ATIS ALLOW MIN";
     private static final String KEY_CONNECTED_CLIENTS = "CONNECTED CLIENTS";
+    private static final String KEY_UNIQUE_USERS = "UNIQUE USERS";
     private static final String KEY_UPDATE = "UPDATE";
 
     /**
@@ -69,6 +70,10 @@ public class GeneralSectionParser {
 
                     case KEY_CONNECTED_CLIENTS:
                         metaData.setNumberOfConnectedClients(Integer.parseInt(value));
+                        break;
+
+                    case KEY_UNIQUE_USERS:
+                        metaData.setNumberOfUniqueConnectedUsers(Integer.parseInt(value));
                         break;
 
                     case KEY_UPDATE:

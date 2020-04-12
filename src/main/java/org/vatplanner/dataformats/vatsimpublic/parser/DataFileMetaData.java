@@ -13,6 +13,7 @@ public class DataFileMetaData {
     private int versionFormat = -1;
     private Instant timestamp = null;
     private int numberOfConnectedClients = -1;
+    private int numberOfUniqueConnectedUsers = -1;
     private Duration minimumDataFileRetrievalInterval = null;
     private Duration minimumAtisRetrievalInterval = null;
 
@@ -49,9 +50,18 @@ public class DataFileMetaData {
     /**
      * Returns the number of connected clients at time of update. Will be
      * negative if not set.
+     * <p>
+     * This information includes duplicate connections (most coming from ATIS
+     * stations) and is <b>not</b> the number that is being used to count
+     * connection records on VATSIM - see
+     * {@link #getNumberOfUniqueConnectedUsers()} instead if you want to count
+     * users.
+     * </p>
      *
-     * @return number of connected clients at time of update; negative if not
-     * set
+     * @return number of connected clients at time of update (includes duplicate
+     * connections); negative if not set
+     * @see #getNumberOfUniqueConnectedUsers() for de-duplicated number of
+     * connected users instead of clients
      */
     public int getNumberOfConnectedClients() {
         return numberOfConnectedClients;
@@ -59,6 +69,29 @@ public class DataFileMetaData {
 
     DataFileMetaData setNumberOfConnectedClients(int numberOfConnectedClients) {
         this.numberOfConnectedClients = numberOfConnectedClients;
+        return this;
+    }
+
+    /**
+     * Returns the number of unique connected users at time of update. Will be
+     * negative if not set.
+     * <p>
+     * This information has only been added in format version 9. On older format
+     * data, connected clients need to be de-duplicated and counted to get an
+     * equivalent number.
+     * </p>
+     *
+     * @return number of unique connected users at time of update; negative if
+     * not set
+     * @see #getNumberOfConnectedClients() for total number of connected clients
+     * (not users)
+     */
+    public int getNumberOfUniqueConnectedUsers() {
+        return numberOfUniqueConnectedUsers;
+    }
+
+    public DataFileMetaData setNumberOfUniqueConnectedUsers(int numberOfUniqueConnectedUsers) {
+        this.numberOfUniqueConnectedUsers = numberOfUniqueConnectedUsers;
         return this;
     }
 
@@ -135,10 +168,12 @@ public class DataFileMetaData {
         boolean isVersionFormatEqual = (this.getVersionFormat() == other.getVersionFormat());
         boolean isTimestampEqual = equalsNullSafe(this, other, DataFileMetaData::getTimestamp);
         boolean isNumberOfConnectedClientsEqual = (this.getNumberOfConnectedClients() == other.getNumberOfConnectedClients());
+        boolean isNumberOfConnectedUniqueUsersEqual = (this.getNumberOfUniqueConnectedUsers() == other.getNumberOfUniqueConnectedUsers());
         boolean isMinimumDataFileRetrievalIntervalEqual = equalsNullSafe(this, other, DataFileMetaData::getMinimumDataFileRetrievalInterval);
         boolean isMinimumAtisFileRetrievalIntervalEqual = equalsNullSafe(this, other, DataFileMetaData::getMinimumAtisRetrievalInterval);
 
-        boolean isEqual = isVersionFormatEqual && isTimestampEqual && isNumberOfConnectedClientsEqual //
+        boolean isEqual = isVersionFormatEqual && isTimestampEqual //
+                && isNumberOfConnectedClientsEqual && isNumberOfConnectedUniqueUsersEqual //
                 && isMinimumDataFileRetrievalIntervalEqual && isMinimumAtisFileRetrievalIntervalEqual;
 
         return isEqual;
