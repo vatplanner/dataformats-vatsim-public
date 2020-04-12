@@ -4107,7 +4107,7 @@ public class ClientParserTest {
     // <editor-fold defaultstate="collapsed" desc="heading">
     @Test
     @DataProvider({"0", "123", "359"})
-    public void testParse_connectedPilotWithValidHeading_returnsObjectWithExpectedHeading(int expectedHeading) {
+    public void testParse_connectedPilotWithValidRegularHeading_returnsObjectWithExpectedHeading(int expectedHeading) {
         // Arrange
         String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:%d:29.92:1013:", expectedHeading);
         parser.setIsParsingPrefileSection(false);
@@ -4120,7 +4120,20 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1", "360", "1080"})
+    public void testParse_connectedPilotWithValid360Heading_returnsObjectWithZeroHeading() {
+        // Arrange
+        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:360:29.92:1013:");
+        parser.setIsParsingPrefileSection(false);
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getHeading(), is(equalTo(0)));
+    }
+
+    @Test
+    @DataProvider({"-1", "abc", "1a", "a1", "361", "1080"})
     public void testParse_connectedPilotWithInvalidHeading_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:%s:29.92:1013:", input);
@@ -4148,7 +4161,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"1", "123", "359"})
+    @DataProvider({"1", "123", "359", "360"})
     public void testParse_prefiledPilotWithValidNonZeroHeading_throwsIllegalArgumentException(int heading) {
         // Arrange
         String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::::%d:::", heading);
@@ -4163,7 +4176,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1", "360", "1080"})
+    @DataProvider({"-1", "abc", "1a", "a1", "361", "1080"})
     public void testParse_prefiledPilotWithInvalidHeading_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::::%s:::", input);
@@ -4191,7 +4204,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"1", "123", "359"})
+    @DataProvider({"1", "123", "359", "360"})
     public void testParse_atcWithValidNonZeroHeading_throwsIllegalArgumentException(int heading) {
         // Arrange
         String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000:%d:::", heading);
@@ -4206,7 +4219,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1", "360", "1080"})
+    @DataProvider({"-1", "abc", "1a", "a1", "361", "1080"})
     public void testParse_atcWithInvalidHeading_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000:%s:::", input);

@@ -894,7 +894,9 @@ public class ClientParser {
 
         int heading = Integer.parseInt(s);
 
-        if (heading > 359) {
+        if (heading == 360) {
+            heading = 0;
+        } else if (heading > 359) {
             throw new IllegalArgumentException("heading is out of range: \"" + s + "\"");
         }
 
