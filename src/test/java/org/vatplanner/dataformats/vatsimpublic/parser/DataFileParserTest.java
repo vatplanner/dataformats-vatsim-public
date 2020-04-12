@@ -1,20 +1,8 @@
 package org.vatplanner.dataformats.vatsimpublic.parser;
 
-import org.vatplanner.dataformats.vatsimpublic.parser.FSDServerParser;
-import org.vatplanner.dataformats.vatsimpublic.parser.GeneralSectionParser;
-import org.vatplanner.dataformats.vatsimpublic.parser.ClientParser;
-import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
-import org.vatplanner.dataformats.vatsimpublic.parser.FSDServer;
-import org.vatplanner.dataformats.vatsimpublic.parser.VoiceServerParser;
-import org.vatplanner.dataformats.vatsimpublic.parser.Client;
-import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
-import org.vatplanner.dataformats.vatsimpublic.parser.VoiceServer;
-import org.vatplanner.dataformats.vatsimpublic.parser.DataFileParser;
-import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntryCollector;
-import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import static org.vatplanner.dataformats.vatsimpublic.testutils.ParserLogEntryMatcher.matchesParserLogEntry;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Arrays;
@@ -37,6 +25,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.vatplanner.dataformats.vatsimpublic.testutils.ParserLogEntryMatcher.matchesParserLogEntry;
 import uk.org.lidalia.slf4jtest.LoggingEvent;
 import uk.org.lidalia.slf4jtest.TestLogger;
 import uk.org.lidalia.slf4jtest.TestLoggerFactory;
@@ -53,7 +42,7 @@ public class DataFileParserTest {
 
     private final TestLogger testLogger = TestLoggerFactory.getTestLogger(DataFileParser.class);
 
-    private static final int SUPPORTED_FORMAT_VERSION = 8;
+    private static final int HIGHEST_SUPPORTED_FORMAT_VERSION = 9;
 
     @Before
     public void setUp() {
@@ -294,9 +283,9 @@ public class DataFileParserTest {
 
     @Test
     @DataProvider({
-        "-1, metadata reports unsupported format version -1 (supported: 8)",
-        "7, metadata reports unsupported format version 7 (supported: 8)",
-        "9, metadata reports unsupported format version 9 (supported: 8)"
+        "-1, metadata reports unsupported format version -1 (supported: 8..9)",
+        "7, metadata reports unsupported format version 7 (supported: 8..9)",
+        "10, metadata reports unsupported format version 10 (supported: 8..9)"
     })
     public void testParse_generalSectionListsUnsupportedFormatVersion_logsWarningToSLF4J(int unsupportedFormatVersion, String expectedMessage) {
         // Arrange
@@ -316,9 +305,9 @@ public class DataFileParserTest {
 
     @Test
     @DataProvider({
-        "-1, metadata reports unsupported format version -1 (supported: 8)",
-        "7, metadata reports unsupported format version 7 (supported: 8)",
-        "9, metadata reports unsupported format version 9 (supported: 8)"
+        "-1, metadata reports unsupported format version -1 (supported: 8..9)",
+        "7, metadata reports unsupported format version 7 (supported: 8..9)",
+        "10, metadata reports unsupported format version 10 (supported: 8..9)"
     })
     public void testParse_generalSectionListsUnsupportedFormatVersion_logsToDataFile(int unsupportedFormatVersion, String expectedMessage) {
         // Arrange
@@ -343,12 +332,18 @@ public class DataFileParserTest {
         ));
     }
 
+    @DataProvider
+    public static Object[][] dataProviderSupportedFormatVersions() {
+        return new Object[][]{{8}, {9}};
+    }
+
     @Test
-    public void testParse_generalSectionListsSupportedFormatVersion_doesNotLogsWarningToSLF4J() {
+    @UseDataProvider("dataProviderSupportedFormatVersions")
+    public void testParse_generalSectionListsSupportedFormatVersion_doesNotLogsWarningToSLF4J(int supportedFormatVersion) {
         // Arrange
         String lines = buildDataFileForSection("GENERAL");
 
-        DataFileMetaData mockMetaData = mockMetaDataWithFormatVersion(SUPPORTED_FORMAT_VERSION);
+        DataFileMetaData mockMetaData = mockMetaDataWithFormatVersion(supportedFormatVersion);
         doReturn(mockMetaData).when(mockGeneralSectionParser).parse(any(Collection.class), any(ParserLogEntryCollector.class), anyString());
 
         // Act
@@ -360,11 +355,12 @@ public class DataFileParserTest {
     }
 
     @Test
-    public void testParse_generalSectionListsSupportedFormatVersion_doesNotLogToDataFile() {
+    @UseDataProvider("dataProviderSupportedFormatVersions")
+    public void testParse_generalSectionListsSupportedFormatVersion_doesNotLogToDataFile(int supportedFormatVersion) {
         // Arrange
         String lines = buildDataFileForSection("GENERAL");
 
-        DataFileMetaData mockMetaData = mockMetaDataWithFormatVersion(SUPPORTED_FORMAT_VERSION);
+        DataFileMetaData mockMetaData = mockMetaDataWithFormatVersion(supportedFormatVersion);
         doReturn(mockMetaData).when(mockGeneralSectionParser).parse(any(Collection.class), any(ParserLogEntryCollector.class), anyString());
 
         // Act
@@ -427,7 +423,7 @@ public class DataFileParserTest {
         String triggerLine2 = "trigger error 2";
         String lines = buildDataFileForSection(section, ":expected line:1:", triggerLine1, ":expected line:2:", triggerLine2);
 
-        doReturn(mockMetaDataWithFormatVersion(SUPPORTED_FORMAT_VERSION)).when(mockGeneralSectionParser).parse(Mockito.any(), Mockito.any(), Mockito.anyString());
+        doReturn(mockMetaDataWithFormatVersion(HIGHEST_SUPPORTED_FORMAT_VERSION)).when(mockGeneralSectionParser).parse(Mockito.any(), Mockito.any(), Mockito.anyString());
         doReturn(mock(Client.class)).when(mockOnlineClientParser).parse(Mockito.anyString());
 
         IllegalArgumentException exception1 = new IllegalArgumentException("some error");
@@ -487,7 +483,7 @@ public class DataFileParserTest {
         String triggerLine2 = "trigger error 2";
         String lines = buildDataFileForSection(section, ":expected line:1:", triggerLine1, ":expected line:2:", triggerLine2);
 
-        doReturn(mockMetaDataWithFormatVersion(SUPPORTED_FORMAT_VERSION)).when(mockGeneralSectionParser).parse(Mockito.any(), Mockito.any(), Mockito.anyString());
+        doReturn(mockMetaDataWithFormatVersion(HIGHEST_SUPPORTED_FORMAT_VERSION)).when(mockGeneralSectionParser).parse(Mockito.any(), Mockito.any(), Mockito.anyString());
         doReturn(mock(Client.class)).when(mockPrefileClientParser).parse(Mockito.anyString());
 
         IllegalArgumentException exception1 = new IllegalArgumentException("some error");
@@ -547,7 +543,7 @@ public class DataFileParserTest {
         String triggerLine2 = "trigger error 2";
         String lines = buildDataFileForSection("SERVERS", ":expected line:1:", triggerLine1, ":expected line:2:", triggerLine2);
 
-        doReturn(mockMetaDataWithFormatVersion(SUPPORTED_FORMAT_VERSION)).when(mockGeneralSectionParser).parse(Mockito.any(), Mockito.any(), Mockito.anyString());
+        doReturn(mockMetaDataWithFormatVersion(HIGHEST_SUPPORTED_FORMAT_VERSION)).when(mockGeneralSectionParser).parse(Mockito.any(), Mockito.any(), Mockito.anyString());
         doReturn(mock(FSDServer.class)).when(mockFSDServerParser).parse(Mockito.anyString());
 
         IllegalArgumentException exception1 = new IllegalArgumentException("some error");
@@ -607,7 +603,7 @@ public class DataFileParserTest {
         String triggerLine2 = "trigger error 2";
         String lines = buildDataFileForSection("VOICE SERVERS", ":expected line:1:", "trigger error 1", ":expected line:2:", "trigger error 2");
 
-        doReturn(mockMetaDataWithFormatVersion(SUPPORTED_FORMAT_VERSION)).when(mockGeneralSectionParser).parse(Mockito.any(), Mockito.any(), Mockito.anyString());
+        doReturn(mockMetaDataWithFormatVersion(HIGHEST_SUPPORTED_FORMAT_VERSION)).when(mockGeneralSectionParser).parse(Mockito.any(), Mockito.any(), Mockito.anyString());
         doReturn(mock(VoiceServer.class)).when(mockVoiceServerParser).parse(Mockito.anyString());
 
         IllegalArgumentException exception1 = new IllegalArgumentException("some error");

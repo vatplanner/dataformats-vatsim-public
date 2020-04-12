@@ -37,7 +37,9 @@ public class DataFileParser {
     private static final String SECTION_NAME_SERVERS = "SERVERS";
     private static final String SECTION_NAME_VOICE_SERVERS = "VOICE SERVERS";
 
-    private static final int SUPPORTED_FORMAT_VERSION = 8;
+    private static final int LOWEST_SUPPORTED_FORMAT_VERSION = 8;
+    private static final int HIGHEST_SUPPORTED_FORMAT_VERSION = 9;
+    private static final String SUPPORTED_FORMAT_VERSIONS_STRING = String.format("%d..%d", LOWEST_SUPPORTED_FORMAT_VERSION, HIGHEST_SUPPORTED_FORMAT_VERSION);
 
     GeneralSectionParser getGeneralSectionParser() {
         return new GeneralSectionParser();
@@ -224,8 +226,8 @@ public class DataFileParser {
         } else {
             int actualVersion = metaData.getVersionFormat();
 
-            if (actualVersion != SUPPORTED_FORMAT_VERSION) {
-                msg = "metadata reports unsupported format version " + actualVersion + " (supported: " + SUPPORTED_FORMAT_VERSION + ")";
+            if (actualVersion < LOWEST_SUPPORTED_FORMAT_VERSION || actualVersion > HIGHEST_SUPPORTED_FORMAT_VERSION) {
+                msg = "metadata reports unsupported format version " + actualVersion + " (supported: " + SUPPORTED_FORMAT_VERSIONS_STRING + ")";
             }
         }
 
