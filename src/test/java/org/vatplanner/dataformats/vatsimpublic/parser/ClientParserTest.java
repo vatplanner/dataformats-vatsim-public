@@ -1700,6 +1700,19 @@ public class ClientParserTest {
     }
 
     @Test
+    public void testParse_prefiledPilotWithZeroRating_returnsObjectWithNullForControllerRating() {
+        // Arrange
+        String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::0::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getControllerRating(), is(nullValue()));
+    }
+
+    @Test
     @UseDataProvider(value = "dataProviderIdAndEnum", location = ControllerRatingTest.class)
     public void testParse_prefiledPilotWithValidRating_throwsIllegalArgumentException(int controllerRatingId, ControllerRating _controllerRating) {
         // Arrange
@@ -1715,8 +1728,8 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1", "0", "99"})
-    public void testParse_prefiledPilotWithInvalidRating_throwsIllegalArgumentException(String input) {
+    @DataProvider({"-1", "abc", "1a", "a1", "99"})
+    public void testParse_prefiledPilotWithInvalidNonZeroRating_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::%s::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
         parser.setIsParsingPrefileSection(true);

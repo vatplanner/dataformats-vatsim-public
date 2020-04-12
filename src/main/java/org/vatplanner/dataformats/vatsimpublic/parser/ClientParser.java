@@ -576,7 +576,7 @@ public class ClientParser {
      */
     private ControllerRating parseControllerRating(String s, ClientType clientType) throws IllegalArgumentException {
         if (clientType == ClientType.PILOT_PREFILED) {
-            if (!s.isEmpty()) {
+            if (!isZeroOrEmpty(s)) {
                 throw new IllegalArgumentException("prefiled flight plans are not expected to indicate any controller rating but rating is \"" + s + "\"");
             }
 
