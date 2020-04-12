@@ -540,16 +540,16 @@ public class ClientParser {
      * or error occurs while parsing the value
      */
     private int parseOnlineProtocolVersion(String s, boolean isOnline) throws IllegalArgumentException {
-        boolean hasNoProtocolVersion = s.isEmpty();
+        boolean hasEmptyOrZeroProtocolVersion = isZeroOrEmpty(s);
 
-        boolean availabilityMatchesOnlineState = isOnline || hasNoProtocolVersion;
+        boolean availabilityMatchesOnlineState = isOnline || hasEmptyOrZeroProtocolVersion;
         if (!availabilityMatchesOnlineState) {
             throw new IllegalArgumentException(
                     "client is "
                     + (isOnline ? "" : "not ")
                     + "online but indicates "
-                    + (hasNoProtocolVersion ? "no" : "a")
-                    + " protocol revision: \""
+                    + (hasEmptyOrZeroProtocolVersion ? "no" : "a")
+                    + " non-zero protocol revision: \""
                     + s
                     + "\"");
         }

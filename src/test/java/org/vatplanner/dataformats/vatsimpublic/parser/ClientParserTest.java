@@ -1546,8 +1546,8 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "10", "100"})
-    public void testParse_prefiledPilotWithValidProtocolRevision_throwsIllegalArgumentException(int protocolVersion) {
+    @DataProvider({"1", "10", "100"})
+    public void testParse_prefiledPilotWithValidNonZeroProtocolRevision_throwsIllegalArgumentException(int protocolVersion) {
         // Arrange
         String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM::%d:::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", protocolVersion);
         parser.setIsParsingPrefileSection(true);
@@ -1558,6 +1558,19 @@ public class ClientParserTest {
         parser.parse(line);
 
         // Assert (nothing to do)
+    }
+
+    @Test
+    public void testParse_prefiledPilotWithZeroProtocolRevision_returnsObjectWithNegativeProtocolVersion() {
+        // Arrange
+        String line = "ABC123:123456::::::::B738:420:EDDT:30000:EHAM::0:::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getProtocolVersion(), is(lessThan(0)));
     }
 
     @Test
