@@ -352,10 +352,10 @@ public class ClientParser {
      * provides a geo coordinate
      */
     private double parseOnlineGeoCoordinate(String s, boolean isOnline) throws IllegalArgumentException {
-        if (s.isEmpty()) {
+        if (isOnline) {
+            return s.isEmpty() ? Double.NaN : Double.parseDouble(s);
+        } else if (isZeroOrEmpty(s)) {
             return Double.NaN;
-        } else if (isOnline) {
-            return Double.parseDouble(s);
         } else {
             throw new IllegalArgumentException("client is not online but still provides a geo coordinate (latitude/longitude)");
         }

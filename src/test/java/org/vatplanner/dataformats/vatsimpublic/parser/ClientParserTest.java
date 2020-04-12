@@ -618,8 +618,8 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
-    public void testParse_prefiledPilotWithLatitude_throwsIllegalArgumentException(String input) {
+    @DataProvider({"12.34567", "-80.23456", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_prefiledPilotWithNonZeroLatitude_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:::%s::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
         parser.setIsParsingPrefileSection(true);
@@ -633,8 +633,20 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
-    public void testParse_prefiledPilotWithoutLatitude_returnsObjectWithNaNAsLatitude(String input) {
+    public void testParse_prefiledPilotWithZeroLatitude_returnsObjectWithNaNAsLatitude() {
+        // Arrange
+        String line = "ABC123:123456:realname:::0::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getLatitude(), is(equalTo(Double.NaN)));
+    }
+
+    @Test
+    public void testParse_prefiledPilotWithoutLatitude_returnsObjectWithNaNAsLatitude() {
         // Arrange
         String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
         parser.setIsParsingPrefileSection(true);
@@ -707,8 +719,8 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
-    public void testParse_prefiledPilotWithLongitude_throwsIllegalArgumentException(String input) {
+    @DataProvider({"12.34567", "-80.23456", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    public void testParse_prefiledPilotWithNonZeroLongitude_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname::::%s:::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
         parser.setIsParsingPrefileSection(true);
@@ -722,8 +734,20 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
-    public void testParse_prefiledPilotWithoutLongitude_returnsObjectWithNaNAsLongitude(String input) {
+    public void testParse_prefiledPilotWithZeroLongitude_returnsObjectWithNaNAsLongitude() {
+        // Arrange
+        String line = "ABC123:123456:realname::::0:::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getLongitude(), is(equalTo(Double.NaN)));
+    }
+
+    @Test
+    public void testParse_prefiledPilotWithoutLongitude_returnsObjectWithNaNAsLongitude() {
         // Arrange
         String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
         parser.setIsParsingPrefileSection(true);
