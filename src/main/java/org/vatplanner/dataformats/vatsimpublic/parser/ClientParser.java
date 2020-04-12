@@ -24,7 +24,7 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
 public class ClientParser {
 
     private static final String SUBPATTERN_TIMESTAMP = "\\d{14}";
-    private static final String SUBPATTERN_FLOAT_UNSIGNED = "\\d+(?:\\.\\d+|)(?:e\\-?\\d+|)"; // integers are valid as well
+    private static final String SUBPATTERN_FLOAT_UNSIGNED = "\\d+(?:\\.\\d+|)(?:[eE][\\-+]?\\d+|)"; // integers are valid as well
     private static final String SUBPATTERN_GEOCOORDINATES = "\\-?" + SUBPATTERN_FLOAT_UNSIGNED;
 
     // TODO: test for floating numbers like 7.62939e-08 as some pilot client submits such numbers...

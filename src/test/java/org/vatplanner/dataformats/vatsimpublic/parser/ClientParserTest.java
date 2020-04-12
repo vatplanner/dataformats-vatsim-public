@@ -589,7 +589,7 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="latitude">
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_connectedPilotWithLatitude_returnsObjectWithExpectedLatitude(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:PILOT::%s:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
@@ -618,7 +618,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_prefiledPilotWithNonZeroLatitude_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:::%s::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
@@ -659,7 +659,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_atcWithLatitude_returnsObjectWithExpectedLatitude(String input) {
         // Arrange
         String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:%s:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
@@ -690,7 +690,7 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="longitude">
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_connectedPilotWithLongitude_returnsObjectWithExpectedLongitude(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:PILOT::12.34567:%s:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
@@ -719,7 +719,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_prefiledPilotWithNonZeroLongitude_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname::::%s:::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
@@ -760,7 +760,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_atcWithLongitude_returnsObjectWithExpectedLongitude(String input) {
         // Arrange
         String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:%s:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
@@ -3367,7 +3367,7 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="departure airport latitude">
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_connectedPilotWithDepartureAirportLatitude_returnsObjectWithExpectedDepartureAirportLatitude(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:%s:0:0:0:::20180101094500:270:29.92:1013:", input);
@@ -3396,7 +3396,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_prefiledPilotWithDepartureAirportLatitude_returnsObjectWithExpectedDepartureAirportLatitude(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:%s:0:0:0:::::::", input);
@@ -3412,7 +3412,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_prefiledPilotWithoutDepartureAirportLatitude_returnsObjectWithNaNAsDepartureAirportLatitude(String input) {
         // Arrange
         String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT::0:0:0:::::::";
@@ -3426,7 +3426,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_atcWithDepartureAirportLatitude_returnsObjectWithExpectedDepartureAirportLatitude(String input) {
         // Arrange
         String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::%s::::atis message:20180101160000:20180101150000::::", input);
@@ -3457,7 +3457,7 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="departure airport longitude">
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_connectedPilotWithDepartureAirportLongitude_returnsObjectWithExpectedDepartureAirportLongitude(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:%s:0:0:::20180101094500:270:29.92:1013:", input);
@@ -3486,7 +3486,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_prefiledPilotWithDepartureAirportLongitude_returnsObjectWithExpectedDepartureAirportLongitude(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:%s:0:0:::::::", input);
@@ -3502,7 +3502,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_prefiledPilotWithoutDepartureAirportLongitude_returnsObjectWithNaNAsDepartureAirportLongitude(String input) {
         // Arrange
         String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0::0:0:::::::";
@@ -3516,7 +3516,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_atcWithDepartureAirportLongitude_returnsObjectWithExpectedDepartureAirportLongitude(String input) {
         // Arrange
         String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::::::::%s:::atis message:20180101160000:20180101150000::::", input);
@@ -3547,7 +3547,7 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="destination airport latitude">
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_connectedPilotWithDestinationAirportLatitude_returnsObjectWithExpectedDestinationAirportLatitude(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:%s:0:::20180101094500:270:29.92:1013:", input);
@@ -3576,7 +3576,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_prefiledPilotWithDestinationAirportLatitude_returnsObjectWithExpectedDestinationAirportLatitude(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:%s:0:::::::", input);
@@ -3592,7 +3592,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_prefiledPilotWithoutDestinationAirportLatitude_returnsObjectWithNaNAsDestinationAirportLatitude(String input) {
         // Arrange
         String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0::0:::::::";
@@ -3606,7 +3606,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_atcWithDestinationAirportLatitude_returnsObjectWithExpectedDestinationAirportLatitude(String input) {
         // Arrange
         String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::%s::atis message:20180101160000:20180101150000::::", input);
@@ -3637,7 +3637,7 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="destination airport longitude">
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_connectedPilotWithDestinationAirportLongitude_returnsObjectWithExpectedDestinationAirportLongitude(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:%s:::20180101094500:270:29.92:1013:", input);
@@ -3666,7 +3666,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_prefiledPilotWithDestinationAirportLongitude_returnsObjectWithExpectedDestinationAirportLongitude(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:%s:::::::", input);
@@ -3682,7 +3682,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_prefiledPilotWithoutDestinationAirportLongitude_returnsObjectWithNaNAsDestinationAirportLongitude(String input) {
         // Arrange
         String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0::::::::";
@@ -3696,7 +3696,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "9999", "-9999"})
+    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
     public void testParse_atcWithDestinationAirportLongitude_returnsObjectWithExpectedDestinationAirportLongitude(String input) {
         // Arrange
         String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::::::::::%s:atis message:20180101160000:20180101150000::::", input);
@@ -4250,7 +4250,7 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="QNH Inch Mercury">
     @Test
-    @DataProvider({"29.92", "2.992e02", "30", "27.9", "-1", "-29.92", "-2.992e02"})
+    @DataProvider({"29.92", "2.992e02", "30", "27.9", "-1", "-29.92", "-2.992e02", "-2.992E5", "-2.992E05", "-2.992E-1", "-2.992E+1", "-2.992E+01"})
     public void testParse_connectedPilotWithValidQnhIHg_returnsObjectWithExpectedQnhInchMercury(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:%s:1013:", input);
@@ -4294,7 +4294,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"29.92", "2.992e02", "30", "27.9", "-1", "-29.92", "-2.992e02"})
+    @DataProvider({"29.92", "2.992e02", "30", "27.9", "-1", "-29.92", "-2.992e02", "-2.992E5", "-2.992E05", "-2.992E-1", "-2.992E+1", "-2.992E+01"})
     public void testParse_prefiledPilotWithValidQnhIhg_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::%s::", input);
@@ -4337,7 +4337,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"29.92", "2.992e02", "30", "27.9", "-1", "-29.92", "-2.992e02"})
+    @DataProvider({"29.92", "2.992e02", "30", "27.9", "-1", "-29.92", "-2.992e02", "-2.992E5", "-2.992E05", "-2.992E-1", "-2.992E+1", "-2.992E+01"})
     public void testParse_atcWithValidQnhIHg_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::%s::", input);
