@@ -186,7 +186,13 @@ public class ClientParser {
             client.setDestinationAirportLatitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT_LAT)));
             client.setDestinationAirportLongitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT_LON)));
             client.setControllerMessage(decodeControllerMessage(matcher.group(PATTERN_LINE_ATIS_MESSAGE), isATC));
-            client.setControllerMessageLastUpdated(parseFullTimestamp(matcher.group(PATTERN_LINE_TIME_LAST_ATIS_RECEIVED), isATC));
+
+            Instant lastAtisReceived = parseFullTimestamp(matcher.group(PATTERN_LINE_TIME_LAST_ATIS_RECEIVED), !isPrefiling);
+            if (!isATC) {
+                lastAtisReceived = null;
+            }
+            client.setControllerMessageLastUpdated(lastAtisReceived);
+
             client.setLogonTime(requireNonNullIf("logon time", isEffectiveClientTypeOnline, parseFullTimestamp(matcher.group(PATTERN_LINE_TIME_LOGON), isEffectiveClientTypeOnline)));
             client.setHeading(parseHeading(matcher.group(PATTERN_LINE_HEADING), effectiveClientType));
             client.setQnhInchMercury(requireNaNIf("QNH Inch Mercury", !(isConnectedPilot || isZeroOrEmpty(matcher.group(PATTERN_LINE_QNH_IHG))), parseDouble(matcher.group(PATTERN_LINE_QNH_IHG))));

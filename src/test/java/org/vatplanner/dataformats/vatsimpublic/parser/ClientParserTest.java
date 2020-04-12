@@ -3810,17 +3810,18 @@ public class ClientParserTest {
     // <editor-fold defaultstate="collapsed" desc="controller message last updated">
     @Test
     @UseDataProvider("dataProviderFullTimestampStringAndObject")
-    public void testParse_connectedPilotWithValidLastAtisReceived_throwsIllegalArgumentException(String input, Instant _instant) {
+    public void testParse_connectedPilotWithValidLastAtisReceived_returnsObjectWithNullForControllerMessageLastUpdated(String input, Instant _instant) {
+        // server appears to randomly assign some ATIS timestamp to pilots in format 9...
+
         // Arrange
         String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0::%s:20180101094500:270:29.92:1013:", input);
         parser.setIsParsingPrefileSection(false);
 
-        thrown.expect(IllegalArgumentException.class);
-
         // Act
-        parser.parse(line);
+        Client result = parser.parse(line);
 
         // Assert (nothing to do)
+        assertThat(result.getControllerMessageLastUpdated(), is(nullValue()));
     }
 
     @Test
