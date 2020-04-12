@@ -43,7 +43,7 @@ public class ClientParser {
             + //36     37                              38                            39
             "(.*):(" + SUBPATTERN_TIMESTAMP + "|):(" + SUBPATTERN_TIMESTAMP + "|):(\\d+|):"
             + //      40                                41
-            "(\\-?" + SUBPATTERN_FLOAT_UNSIGNED + "|):(\\d+|):");
+            "(\\-?" + SUBPATTERN_FLOAT_UNSIGNED + "|):(\\-?\\d+|):");
 
     // TODO: allowed ATIS message to contain ":" in text as seen in the wild... may cause issues, keep an eye on it
     private static final int PATTERN_LINE_CALLSIGN = 1;
@@ -196,7 +196,12 @@ public class ClientParser {
             client.setLogonTime(requireNonNullIf("logon time", isEffectiveClientTypeOnline, parseFullTimestamp(matcher.group(PATTERN_LINE_TIME_LOGON), isEffectiveClientTypeOnline)));
             client.setHeading(parseHeading(matcher.group(PATTERN_LINE_HEADING), effectiveClientType));
             client.setQnhInchMercury(requireNaNIf("QNH Inch Mercury", !(isConnectedPilot || isZeroOrEmpty(matcher.group(PATTERN_LINE_QNH_IHG))), parseDouble(matcher.group(PATTERN_LINE_QNH_IHG))));
-            client.setQnhHectopascal(requireNegativeIf("QNH Hectopascal", !(isConnectedPilot || isZeroOrEmpty(matcher.group(PATTERN_LINE_QNH_MB))), parseIntWithDefault(matcher.group(PATTERN_LINE_QNH_MB), -1)));
+
+            int qnhHectopascals = parseIntWithDefault(matcher.group(PATTERN_LINE_QNH_MB), -1);
+            if (!isConnectedPilot) {
+                qnhHectopascals = -1;
+            }
+            client.setQnhHectopascal(qnhHectopascals);
         } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException(
                     "unparseable line in "

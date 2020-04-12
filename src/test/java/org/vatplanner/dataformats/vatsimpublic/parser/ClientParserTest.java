@@ -4382,7 +4382,7 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="QNH Hectopascal">
     @Test
-    @DataProvider({"997", "1013", "1030"})
+    @DataProvider({"-12345", "0", "997", "1013", "1030"})
     public void testParse_connectedPilotWithValidQnhMB_returnsObjectWithExpectedQnhHectopascal(int expectedQnh) {
         // Arrange
         String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:%d:", expectedQnh);
@@ -4396,7 +4396,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "29.92", "1e03", "abc", "1a", "a1"})
+    @DataProvider({"-1.0", "29.92", "1e03", "abc", "1a", "a1"})
     public void testParse_connectedPilotWithInvalidQnhMB_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:%s:", input);
@@ -4424,22 +4424,21 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"997", "1013", "1030"})
-    public void testParse_prefiledPilotWithValidQnhMB_throwsIllegalArgumentException(String input) {
+    @DataProvider({"-12345", "0", "997", "1013", "1030"})
+    public void testParse_prefiledPilotWithValidQnhMB_returnsObjectWithNegativeQnhHectopascal(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::::::%s:", input);
         parser.setIsParsingPrefileSection(true);
 
-        thrown.expect(IllegalArgumentException.class);
-
         // Act
-        parser.parse(line);
+        Client result = parser.parse(line);
 
-        // Assert (nothing to do)
+        // Assert
+        assertThat(result.getQnhHectopascal(), is(lessThan(0)));
     }
 
     @Test
-    @DataProvider({"-1", "29.92", "1e03", "abc", "1a", "a1"})
+    @DataProvider({"-1.0", "29.92", "1e03", "abc", "1a", "a1"})
     public void testParse_prefiledPilotWithInvalidQnhMB_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::::::%s:", input);
@@ -4467,8 +4466,8 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"997", "1013", "1030"})
-    public void testParse_atcWithValidQnhMB_throwsIllegalArgumentException(String input) {
+    @DataProvider({"-12345", "-1", "997", "1013", "1030"})
+    public void testParse_atcWithValidNonZeroQnhMB_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000:::%s:", input);
         parser.setIsParsingPrefileSection(false);
@@ -4482,7 +4481,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "29.92", "1e03", "abc", "1a", "a1"})
+    @DataProvider({"-1.0", "29.92", "1e03", "abc", "1a", "a1"})
     public void testParse_atcWithInvalidQnhMB_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000:::%s:", input);
@@ -4494,6 +4493,19 @@ public class ClientParserTest {
         parser.parse(line);
 
         // Assert (nothing to do)
+    }
+
+    @Test
+    public void testParse_atcWithZeroQnhMB_returnsObjectWithNegativeQnhHectopascal() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000:::0:";
+        parser.setIsParsingPrefileSection(false);
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getQnhHectopascal(), is(lessThan(0)));
     }
 
     @Test
@@ -4641,7 +4653,7 @@ public class ClientParserTest {
         assertThat(result.getLogonTime(), is(equalTo(expectedLogonTime)));
         assertThat(result.getHeading(), is(equalTo(0)));
         assertThat(result.getQnhInchMercury(), is(closeTo(0, ALLOWED_DOUBLE_ERROR)));
-        assertThat(result.getQnhHectopascal(), is(equalTo(0)));
+        assertThat(result.getQnhHectopascal(), is(equalTo(-1)));
         assertThat(result.getServedFrequencyKilohertz(), is(equalTo(124525)));
     }
     // </editor-fold>

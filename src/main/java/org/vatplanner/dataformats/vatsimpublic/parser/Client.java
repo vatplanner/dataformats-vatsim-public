@@ -1,9 +1,10 @@
 package org.vatplanner.dataformats.vatsimpublic.parser;
 
-import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
-import org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating;
 import java.time.Duration;
 import java.time.Instant;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.BarometricPressure;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
 
 /**
  * Combines information about VATSIM online pilots, prefiled flight plans and
@@ -1058,8 +1059,14 @@ public class Client {
      * <p>
      * Returns {@link Double#NaN} if unavailable.
      * </p>
+     * <p>
+     * Pilot-submitted QNH may make no sense, so you are advised to use
+     * {@link BarometricPressure} to check a QNH for plausibility before
+     * actually using it.
+     * </p>
      *
      * @return local QNH in inches of mercury; {@link Double#NaN} if unavailable
+     * @see BarometricPressure
      */
     public double getQnhInchMercury() {
         return qnhInchMercury;
@@ -1079,10 +1086,15 @@ public class Client {
      * time).
      * </p>
      * <p>
-     * Returns negative value if unavailable.
+     * Returns negative value if unavailable. Note that negative values may also
+     * have been specified as input, so a negative value may also indicate an
+     * available erroneous input. In general, you are advised to use
+     * {@link BarometricPressure} to check a pilot-submitted QNH for
+     * plausibility before actually using it.
      * </p>
      *
      * @return local QNH in hectopascal; negative if unavailable
+     * @see BarometricPressure
      */
     public int getQnhHectopascal() {
         return qnhHectopascal;
