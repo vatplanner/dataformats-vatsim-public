@@ -120,6 +120,11 @@ public class GraphImport {
         DataFileMetaData metaData = dataFile.getMetaData();
         Instant recordTime = metaData.getTimestamp();
 
+        if (recordTime == null) {
+            LOGGER.warn("report has no record time, so it cannot be imported");
+            return null;
+        }
+
         if (index.hasReportWithRecordTime(recordTime)) {
             LOGGER.info("report recorded at {} has already been imported, not processing again", recordTime);
             return null;
