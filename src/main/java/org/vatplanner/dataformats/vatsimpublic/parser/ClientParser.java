@@ -670,11 +670,12 @@ public class ClientParser {
      * <p>
      * Visual range field is only available to clients logged in as ATC (given
      * by raw client type). The field is not mandatory.
-     * {@link IllegalArgumentException} will be thrown if invalid or a non-ATC
-     * client (pilot/flight plan) attempts to define a visual range.
+     * {@link IllegalArgumentException} will be thrown if invalid or a prefiled
+     * flight plan attempts to define a visual range.
      * </p>
      * <p>
-     * Returns negative value if undefined.
+     * Returns negative value if undefined. Visual ranges defined for connected
+     * pilots are ignored and a negative value is returned instead.
      * </p>
      *
      * @param s string to parse
@@ -685,13 +686,14 @@ public class ClientParser {
      */
     private int parseVisualRange(String s, ClientType rawClientType) throws IllegalArgumentException {
         boolean isATC = (rawClientType == ClientType.ATC_CONNECTED);
+        boolean isConnectedPilot = (rawClientType == ClientType.PILOT_CONNECTED);
 
         if (isATC) {
             return s.isEmpty() ? -1 : Integer.parseInt(s);
-        } else if (isZeroOrEmpty(s)) {
+        } else if (isConnectedPilot || isZeroOrEmpty(s)) {
             return -1;
         } else {
-            throw new IllegalArgumentException("Only ATC stations are allowed to indicate a visual range; found: \"" + s + "\"");
+            throw new IllegalArgumentException("Prefilings are not allowed to indicate a visual range; found: \"" + s + "\"");
         }
     }
 
