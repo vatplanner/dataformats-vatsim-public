@@ -85,8 +85,13 @@ Although this implementation is provided under an open license, usage of the dat
 
 Some technical policies stressed explicitely on the initial `status.txt` file should be repeated here as otherwise they may go unnoticed when using this library:
 
- * `status.txt` should only be fetched once per application start
+ * `status.txt` ~~should only be fetched once per application start~~
+   * June 2020: new policy is to check _regularly_ for changes which makes much more sense - restrictions are no longer listed
  * `vatsim-data.txt` and `vatsim-servers.txt` (not supported yet) should be loaded from randomly chosen servers in a round-robin fashion, i.e. decide a random server each time you download the files
+   * June 2020: VATSIM now uses server-side load balancing for data feeds, so only one URL is now provided but the feature for cooperative client-side load balancing still exists, so expect to see multiple URLs at some point and continue to choose one randomly even if you currently only see one.
  * obey the minimum `RELOAD` intervals if specified in/parsed from those files
+   * June 2020: Temporarilly, reload intervals have been observed to have been practically removed by using floating point values. The limit has however been reset to 1 minute now (was 2 minutes a year ago). There is no longer any mention of reload intervals other than the now unexplained header field. It still does not make sense to fetch more often as current data seems to be updated at most once per minute.
 
 Further or updated policies may be in effect; please read all available VATSIM-provided documents and regularly check the raw source files you are feeding into these parsers.
+
+If you are debugging this library or are wondering about some missing/erroneous data you may want to have a look at the (incomplete) list of datafile [oddities](docs/oddities.md) which have been observed so far while importing larger amounts of live data.
