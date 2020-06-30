@@ -2,7 +2,10 @@ package org.vatplanner.dataformats.vatsimpublic.graph;
 
 import java.time.Duration;
 import java.time.Instant;
+import static java.util.Arrays.asList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -96,6 +99,17 @@ public class GraphImport {
     private static final Pattern PATTERN_VALID_TRANSPONDER_CODE = Pattern.compile("^[0-7]{0,4}$");
 
     /**
+     * Callsigns used by system services (should be ignored on import).
+     */
+    private static final Set<String> SYSTEM_SERVICE_CALLSIGNS = new HashSet<String>(asList(
+            "AFVDATA",
+            "AFV-SLURPER",
+            "DATA",
+            "DATASVR",
+            "SUP"
+    ));
+
+    /**
      * Creates a new graph import using the given factory to instantiate
      * entities.
      *
@@ -175,10 +189,8 @@ public class GraphImport {
 
         String callsign = client.getCallsign();
 
-        if (client.getRawClientType() == ATC_CONNECTED) {
-            if ("AFVDATA".equals(callsign) || "AFV-SLURPER".equals(callsign) || "DATASVR".equals(callsign)) {
-                return true;
-            }
+        if ((client.getRawClientType() == ATC_CONNECTED) && SYSTEM_SERVICE_CALLSIGNS.contains(callsign)) {
+            return true;
         }
 
         return false;
