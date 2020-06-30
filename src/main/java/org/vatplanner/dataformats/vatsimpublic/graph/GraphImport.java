@@ -304,10 +304,17 @@ public class GraphImport {
                 .max((x, y) -> x.getLatestVisibleTime().compareTo(y.getLatestVisibleTime()))
                 .orElse(null);
 
-        // if previous flight was found, try to reuse the connection
-        // (pilot connections are sessions which can span multiple flights)
-        Connection connection = null;
-        if (flight != null) {
+        // search for an existing pilot connection with same logon time
+        Connection connection = member.getFlights()
+                .stream()
+                .flatMap(x -> x.getConnections().stream())
+                .filter(x -> logonTime.equals(x.getLogonTime()))
+                .findFirst()
+                .orElse(null);
+
+        // only if fuzzy reconstruction is running:
+        // if no existing connection was found, try to reuse the previous flight's connection
+        if (needsFuzzyReconstruction && (connection == null) && (flight != null)) {
             connection = flight.getLatestConnection();
         }
 
@@ -333,11 +340,6 @@ public class GraphImport {
                 flight = null;
                 flightPlan = null;
             }
-        }
-
-        // do not continue last connection if it's another session (logon time mismatch)
-        if (!needsFuzzyReconstruction && (connection != null) && !logonTime.equals(connection.getLogonTime())) {
-            connection = null;
         }
 
         // reset flight plan if data has changed
