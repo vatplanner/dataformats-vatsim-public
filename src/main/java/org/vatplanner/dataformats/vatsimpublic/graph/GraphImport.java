@@ -304,6 +304,13 @@ public class GraphImport {
                 .max((x, y) -> x.getLatestVisibleTime().compareTo(y.getLatestVisibleTime()))
                 .orElse(null);
 
+        // if previous flight was found, try to reuse the connection
+        // (pilot connections are sessions which can span multiple flights)
+        Connection connection = null;
+        if (flight != null) {
+            connection = flight.getLatestConnection();
+        }
+
         // reset flight if it no longer matches flight plan
         FlightPlan flightPlan = null;
         if (flight != null) {
@@ -318,25 +325,19 @@ public class GraphImport {
             }
         }
 
-        // check connection for continuation of flight
-        Connection connection = null;
-        if (flight != null) {
-            connection = flight.getLatestConnection();
-
-            // reset flight if last connection exceeds retention time
-            if (connection != null) {
-                Duration timeSinceLastSeen = Duration.between(connection.getLastReport().getRecordTime(), report.getRecordTime());
-                if (!isLessOrEqualThan(timeSinceLastSeen, MAXIMUM_AGE_FOR_CONTINUED_FLIGHT)) {
-                    // TODO: check if we actually got at least 1 or 2 reports since then, otherwise we may have had a network outage
-                    flight = null;
-                    flightPlan = null;
-                }
+        // reset flight if last connection exceeds retention time
+        if ((flight != null) && (connection != null)) {
+            Duration timeSinceLastSeen = Duration.between(connection.getLastReport().getRecordTime(), report.getRecordTime());
+            if (!isLessOrEqualThan(timeSinceLastSeen, MAXIMUM_AGE_FOR_CONTINUED_FLIGHT)) {
+                // TODO: check if we actually got at least 1 or 2 reports since then, otherwise we may have had a network outage
+                flight = null;
+                flightPlan = null;
             }
+        }
 
-            // do not continue last connection if it's another session (logon time mismatch)
-            if (!needsFuzzyReconstruction && (connection != null) && !logonTime.equals(connection.getLogonTime())) {
-                connection = null;
-            }
+        // do not continue last connection if it's another session (logon time mismatch)
+        if (!needsFuzzyReconstruction && (connection != null) && !logonTime.equals(connection.getLogonTime())) {
+            connection = null;
         }
 
         // reset flight plan if data has changed
