@@ -23,7 +23,10 @@ import static org.vatplanner.dataformats.vatsimpublic.utils.StringUtils.nullIfEm
  * <p>
  * The format resembles what is used for US domestic flights filed on FAA forms.
  * It has been the only format used globally for all flight plans on VATSIM
- * before August 2020 when migration to the ICAO format has been started.
+ * before August 2020 when migration to the ICAO format has been started. Since
+ * the actual contents of the VATSIM flight plan field depend on the application
+ * submitting it, a mix of both formats is to be expected. Use
+ * {@link AircraftTypeExtractor} to support both.
  * </p>
  *
  * <p>
@@ -42,10 +45,10 @@ import static org.vatplanner.dataformats.vatsimpublic.utils.StringUtils.nullIfEm
  * type for plausibility.
  * </p>
  */
-public class FAADomesticTypeFormatExtractor {
+public class FAADomesticTypeFormatExtractor implements ParsedTypeData {
 
     // FIXME: type should be trimmed
-    private static final Pattern PATTERN_SPLIT = Pattern.compile("^\\s*([A-Z]/|)(.*?)(/[A-Z]|)\\s*$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_SPLIT = Pattern.compile("^\\s*([A-Z]/|)([^/]*?)(/[A-Z]|)\\s*$", Pattern.CASE_INSENSITIVE);
     private static final int PATTERN_SPLIT_WAKE_CATEGORY = 1;
     private static final int PATTERN_SPLIT_AIRCRAFT_TYPE = 2;
     private static final int PATTERN_SPLIT_EQUIPMENT_CODE = 3;
@@ -61,6 +64,13 @@ public class FAADomesticTypeFormatExtractor {
      * @param s aircraft type field as provided by data files
      */
     public FAADomesticTypeFormatExtractor(String s) {
+        if (s == null) {
+            wakeCategory = null;
+            aircraftType = null;
+            equipmentCode = null;
+            return;
+        }
+
         Matcher matcher = PATTERN_SPLIT.matcher(s);
         if (!matcher.matches()) {
             wakeCategory = null;
@@ -94,6 +104,7 @@ public class FAADomesticTypeFormatExtractor {
      * @return aircraft type (should but may not be an ICAO code); null if
      * unavailable
      */
+    @Override
     public String getAircraftType() {
         return aircraftType;
     }
@@ -106,6 +117,7 @@ public class FAADomesticTypeFormatExtractor {
      *
      * @return equipment code letter; null if unavailable
      */
+    @Override
     public String getEquipmentCode() {
         return equipmentCode;
     }
@@ -117,9 +129,8 @@ public class FAADomesticTypeFormatExtractor {
      *
      * @return wake category code letter; null if unavailable
      */
+    @Override
     public String getWakeCategory() {
         return wakeCategory;
     }
-
-    // TODO: unit tests
 }

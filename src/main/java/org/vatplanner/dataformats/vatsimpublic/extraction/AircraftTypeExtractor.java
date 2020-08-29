@@ -1,52 +1,54 @@
 package org.vatplanner.dataformats.vatsimpublic.extraction;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.vatplanner.dataformats.vatsimpublic.entities.status.SimpleEquipmentSpecification;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.WakeTurbulenceCategory;
-import static org.vatplanner.dataformats.vatsimpublic.utils.StringUtils.nullIfEmpty;
+import org.vatplanner.dataformats.vatsimpublic.extraction.aircrafttype.FAADomesticTypeFormatExtractor;
+import org.vatplanner.dataformats.vatsimpublic.extraction.aircrafttype.ICAOTypeFormatExtractor;
+import org.vatplanner.dataformats.vatsimpublic.extraction.aircrafttype.ParsedTypeData;
 
 /**
  * Extracts information from a combined aircraft type string as encountered in
  * VATSIM data files.
  *
  * <p>
- * The supported format is <code>[X/]Y[/Z]</code> where
+ * Type fields combine information about actual aircraft type, wake category and
+ * equipment. Two different formats are in use on VATSIM:
  * </p>
  *
  * <ul>
- * <li><code>X</code> is an optional wake turbulence category code letter</li>
- * <li><code>Y</code> is the actual aircraft type</li>
- * <li><code>Z</code> is an optional equipment code letter</li>
+ * <li>a full ICAO format looking like <code>A319/M-SDE3FGHIRWY/LB1</code> or
+ * <code>B737/M-S</code></li>
+ * <li>a FAA-based format looking like <code>H/B744/L</code>,
+ * <code>H/B744</code>, <code>B744/L</code> or just <code>B744</code></li>
  * </ul>
+ *
+ * <p>
+ * The FAA-based format has been used on VATSIM for many years and always caused
+ * confusion about the (simple) equipment codes. With the launch of a new flight
+ * plan filing web form in August 2020, a migration towards the modern
+ * real-world ICAO format has been started. Most notably, a different placement
+ * of the actual aircraft type causes both formats to be incompatible to each
+ * other and requiring their own interpretation.
+ * </p>
  *
  * <p>
  * Note that all parts of extracted user input for this data field are
  * unreliable. The extractor therefore intentionally does not resolve code
- * letters to {@link WakeTurbulenceCategory} or
- * {@link SimpleEquipmentSpecification}. The aircraft type is also unreliable;
- * while it should be a valid ICAO code, some input is based on false
- * assumptions or confusion with IATA codes (like "B77F" for a 777 Freighter),
- * other input is due to missing knowledge (like "Boeing 737-800" instead of
- * "B738"). If reliable wake turbulence information is required, the aircraft
- * type should be mapped to a clean result and information extracted from an
- * aircraft type database. The equipment code is often unreliable due to
- * complexity and a conflict of codes between real-world ICAO and VATSIM flight
- * plan codes. If needed, it should be checked against a clean resolved aircraft
- * type for plausibility.
+ * letters to {@link WakeTurbulenceCategory} or equipment codes. The aircraft
+ * type is also unreliable; while it should be a valid ICAO code, some input is
+ * based on false assumptions or confusion with IATA codes (like "B77F" for a
+ * 777 Freighter), other input is due to missing knowledge (like "Boeing
+ * 737-800" instead of "B738"). If reliable wake turbulence information is
+ * required, the aircraft type should be mapped to a clean result and
+ * information extracted from an aircraft type database. The equipment code is
+ * often unreliable due to complexity and a conflict of codes between (for the
+ * legacy FAA-based format) real-world ICAO and VATSIM flight plan codes. If
+ * needed, it should be checked against a clean resolved aircraft type for
+ * plausibility.
  * </p>
  */
-public class AircraftTypeExtractor {
+public class AircraftTypeExtractor implements ParsedTypeData {
 
-    // FIXME: type should be trimmed
-    private static final Pattern PATTERN_SPLIT = Pattern.compile("^\\s*([A-Z]/|)(.*?)(/[A-Z]|)\\s*$", Pattern.CASE_INSENSITIVE);
-    private static final int PATTERN_SPLIT_WAKE_CATEGORY = 1;
-    private static final int PATTERN_SPLIT_AIRCRAFT_TYPE = 2;
-    private static final int PATTERN_SPLIT_EQUIPMENT_CODE = 3;
-
-    private final String wakeCategory;
-    private final String aircraftType;
-    private final String equipmentCode;
+    private final ParsedTypeData data;
 
     /**
      * Parses the given data file aircraft type string to extract aircraft
@@ -55,28 +57,15 @@ public class AircraftTypeExtractor {
      * @param s aircraft type field as provided by data files
      */
     public AircraftTypeExtractor(String s) {
-        Matcher matcher = PATTERN_SPLIT.matcher(s);
-        if (!matcher.matches()) {
-            wakeCategory = null;
-            aircraftType = nullIfEmpty(s);
-            equipmentCode = null;
-        } else {
-            String rawWakeCategory = matcher.group(PATTERN_SPLIT_WAKE_CATEGORY);
-            if (rawWakeCategory.isEmpty()) {
-                wakeCategory = null;
-            } else {
-                wakeCategory = rawWakeCategory.substring(0, 1);
-            }
-
-            aircraftType = nullIfEmpty(matcher.group(PATTERN_SPLIT_AIRCRAFT_TYPE));
-
-            String rawEquipmentCode = matcher.group(PATTERN_SPLIT_EQUIPMENT_CODE);
-            if (rawEquipmentCode.isEmpty()) {
-                equipmentCode = null;
-            } else {
-                equipmentCode = rawEquipmentCode.substring(1, 2);
-            }
+        ParsedTypeData data;
+        try {
+            data = new ICAOTypeFormatExtractor(s);
+        } catch (IllegalArgumentException ex) {
+            // try FAA format instead
+            data = new FAADomesticTypeFormatExtractor(s);
         }
+
+        this.data = data;
     }
 
     /**
@@ -88,20 +77,25 @@ public class AircraftTypeExtractor {
      * @return aircraft type (should but may not be an ICAO code); null if
      * unavailable
      */
+    @Override
     public String getAircraftType() {
-        return aircraftType;
+        return data.getAircraftType();
     }
 
     /**
-     * Returns the extracted equipment code letter. This may be inaccurate or
-     * wrong due to complexity or conflicts between real-world ICAO and VATSIM
-     * flight plan codes. If really needed, this information should be checked
-     * for plausibility depending on the specified aircraft type.
+     * Returns the extracted equipment code. Simplified codes use just a single
+     * letter while detailed modern ICAO-codes are more extensive descriptions
+     * which require additional parsing. The supplied information may be
+     * inaccurate or wrong due to complexity or (at least for the simple
+     * one-letter codes) conflicts between real-world ICAO and VATSIM flight
+     * plan codes. If really needed, this information should be checked for
+     * plausibility depending on the specified aircraft type.
      *
-     * @return equipment code letter; null if unavailable
+     * @return equipment code; null if unavailable
      */
+    @Override
     public String getEquipmentCode() {
-        return equipmentCode;
+        return data.getEquipmentCode();
     }
 
     /**
@@ -111,8 +105,9 @@ public class AircraftTypeExtractor {
      *
      * @return wake category code letter; null if unavailable
      */
+    @Override
     public String getWakeCategory() {
-        return wakeCategory;
+        return data.getWakeCategory();
     }
 
     // TODO: unit tests
