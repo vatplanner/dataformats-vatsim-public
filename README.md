@@ -47,6 +47,10 @@ The implementation and accompanying files are released under [MIT license](LICEN
 
 **This section is a copy of [DISCLAIMER.md](DISCLAIMER.md).**
 
+### Use of real-world aviation formats
+
+VATSIM uses some data in the same way as in real-world aviation, for example ICAO flight plan equipment codes (field 10a/10b and PBN remarks), so parsers and data representations for such formats have also been added to this library. Although such data is supported by this library such classes should not be blindly used for real-world aviation. Such "unsafe" classes generally hold an additional disclaimer on class JavaDoc but it could also be missing in some cases. Note that there generally is no warranty given for any code in this library but applying classes/data from a library of an unprofessional simulation environment for real-world aviation use in particular would be highly irresponsible to say the least. Also note that parser/data present in this library may have adjusted to the specific needs of VATSIM, so although they look compatible to real-world scenarios they result in invalid data when applied outside the context of VATSIM/flight simulation. You have been warned...
+
 ### Privacy filtering
 
 **Privacy filter is under construction and should not be attempted to be used yet.**
