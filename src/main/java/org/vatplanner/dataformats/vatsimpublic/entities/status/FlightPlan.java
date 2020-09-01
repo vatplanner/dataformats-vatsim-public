@@ -220,12 +220,15 @@ public class FlightPlan {
 
     /**
      * Returns the simple equipment specification, specifying navigational
-     * capability of the aircraft. Pilots encode this information with a single
-     * letter (thus "simple"). Unfortunately, this may sometimes not have been
-     * reliably determined or be misinterpreted by a mismatch between real world
-     * and VATSIM codes. See {@link SimpleEquipmentSpecification} for details.
+     * capability of the aircraft. This information is only provided if pilots
+     * file flight plans in the old FAA-based format. If used, pilots encode the
+     * information with a single letter (thus "simple"). Unfortunately, this may
+     * sometimes not have been reliably determined or be misinterpreted by a
+     * mismatch between real world and VATSIM codes. See
+     * {@link SimpleEquipmentSpecification} for details.
      *
-     * @return equipment specification as determined by single-letter code
+     * @return equipment specification as determined by single-letter code, null
+     * if unavailable or invalid
      * @see SimpleEquipmentSpecification
      */
     public SimpleEquipmentSpecification getSimpleEquipmentSpecification() {

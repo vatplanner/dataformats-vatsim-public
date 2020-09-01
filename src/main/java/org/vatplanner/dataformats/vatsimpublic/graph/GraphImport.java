@@ -620,7 +620,11 @@ public class GraphImport {
 
             AircraftTypeExtractor aircraftTypeExtractor = new AircraftTypeExtractor(client.getAircraftType());
             WakeTurbulenceCategory wakeTurbulenceCategory = WakeTurbulenceCategory.resolveFlightPlanCode(aircraftTypeExtractor.getWakeCategory());
-            SimpleEquipmentSpecification simpleEquipmentSpecification = SimpleEquipmentSpecification.resolveFlightPlanCode(aircraftTypeExtractor.getEquipmentCode());
+
+            String equipmentCode = aircraftTypeExtractor.getEquipmentCode();
+            SimpleEquipmentSpecification simpleEquipmentSpecification = ((equipmentCode != null) && (equipmentCode.length() == 1))
+                    ? SimpleEquipmentSpecification.resolveFlightPlanCode(equipmentCode)
+                    : null;
 
             flightPlan = entityFactory.createFlightPlan(flight, flightPlanRevision)
                     .setAircraftType(aircraftTypeExtractor.getAircraftType())
