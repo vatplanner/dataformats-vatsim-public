@@ -49,6 +49,7 @@ import org.vatplanner.dataformats.vatsimpublic.extraction.aircrafttype.ParsedTyp
 public class AircraftTypeExtractor implements ParsedTypeData {
 
     private final ParsedTypeData data;
+    private final boolean isICAOFormat;
 
     /**
      * Parses the given data file aircraft type string to extract aircraft
@@ -66,6 +67,7 @@ public class AircraftTypeExtractor implements ParsedTypeData {
         }
 
         this.data = data;
+        isICAOFormat = (data instanceof ICAOTypeFormatExtractor);
     }
 
     /**
@@ -108,6 +110,18 @@ public class AircraftTypeExtractor implements ParsedTypeData {
     @Override
     public String getWakeCategory() {
         return data.getWakeCategory();
+    }
+
+    /**
+     * Indicates if the information has been extracted from ICAO format. This is
+     * relevant for correct interpretation of {@link #getEquipmentCode()} as
+     * designators have different meanings depending on the context (if used
+     * correctly).
+     *
+     * @return true if information was extracted from ICAO format, false if not
+     */
+    public boolean isICAOFormat() {
+        return isICAOFormat;
     }
 
     // TODO: unit tests

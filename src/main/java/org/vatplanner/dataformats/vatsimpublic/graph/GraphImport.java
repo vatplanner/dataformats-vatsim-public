@@ -34,6 +34,9 @@ import org.vatplanner.dataformats.vatsimpublic.extraction.AircraftTypeExtractor;
 import org.vatplanner.dataformats.vatsimpublic.extraction.AltitudeParser;
 import org.vatplanner.dataformats.vatsimpublic.extraction.RealNameHomeBaseExtractor;
 import org.vatplanner.dataformats.vatsimpublic.extraction.RemarksExtractor;
+import org.vatplanner.dataformats.vatsimpublic.icao.CommunicationCapability;
+import org.vatplanner.dataformats.vatsimpublic.icao.ICAOField10PBNParser;
+import org.vatplanner.dataformats.vatsimpublic.icao.NavigationApproachCapability;
 import org.vatplanner.dataformats.vatsimpublic.parser.Client;
 import org.vatplanner.dataformats.vatsimpublic.parser.ClientType;
 import static org.vatplanner.dataformats.vatsimpublic.parser.ClientType.ATC_CONNECTED;
@@ -622,9 +625,32 @@ public class GraphImport {
             WakeTurbulenceCategory wakeTurbulenceCategory = WakeTurbulenceCategory.resolveFlightPlanCode(aircraftTypeExtractor.getWakeCategory());
 
             String equipmentCode = aircraftTypeExtractor.getEquipmentCode();
-            SimpleEquipmentSpecification simpleEquipmentSpecification = ((equipmentCode != null) && (equipmentCode.length() == 1))
-                    ? SimpleEquipmentSpecification.resolveFlightPlanCode(equipmentCode)
-                    : null;
+            SimpleEquipmentSpecification simpleEquipmentSpecification = null;
+            if (!aircraftTypeExtractor.isICAOFormat()) {
+                simpleEquipmentSpecification = SimpleEquipmentSpecification.resolveFlightPlanCode(equipmentCode);
+            } else {
+                // TODO: extract PBN using RemarksExtractor and forward to parser
+                // TODO: save information
+
+                ICAOField10PBNParser icaoField10PBNParser = new ICAOField10PBNParser(equipmentCode);
+                Set<CommunicationCapability> communicationCapabilities = icaoField10PBNParser.getCommunicationCapabilities();
+                Set<NavigationApproachCapability> navigationApproachCapabilities = icaoField10PBNParser.getNavigationApproachCapabilities();
+
+                // Plausability check:
+                // Information makes no sense if there was only one designator provided. This does not include the "standard"
+                // designator which will decode to separate capabilities for communication and navigation (total of at least
+                // 2 if left unexpanded).
+                // Assume the user used a simple equipment specification instead of the proper ICAO code if it was just a
+                // single character.
+                // Examples: Just "G" indicates GNSS without any other navigation capability and also no way of communication.
+                //           Just "L" indicates ILS and nothing else...
+                //           Just "Q" means absolutely nothing in terms of ICAO capability.
+                //           => all 3 examples lead to proper SimpleEquipmentSpecification though
+                int totalDesignators = communicationCapabilities.size() + navigationApproachCapabilities.size();
+                if ((totalDesignators == 1) && (equipmentCode.length() == 1)) {
+                    simpleEquipmentSpecification = SimpleEquipmentSpecification.resolveFlightPlanCode(equipmentCode);
+                }
+            }
 
             flightPlan = entityFactory.createFlightPlan(flight, flightPlanRevision)
                     .setAircraftType(aircraftTypeExtractor.getAircraftType())
