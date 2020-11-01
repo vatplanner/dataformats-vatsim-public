@@ -2,7 +2,6 @@ package org.vatplanner.dataformats.vatsimpublic.privacyfilter;
 
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import javax.xml.ws.Holder;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import org.junit.Rule;
@@ -11,6 +10,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import static org.mockito.Mockito.mock;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
+import org.vatplanner.dataformats.vatsimpublic.testutils.Holder;
 
 @RunWith(DataProviderRunner.class)
 public class DataFileFilterTest {
