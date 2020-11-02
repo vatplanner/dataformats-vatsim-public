@@ -5,6 +5,7 @@ import java.time.Instant;
 import static java.util.Arrays.asList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.function.Predicate;
@@ -451,6 +452,7 @@ public class GraphImport {
             return false;
         }
 
+        // TODO: check more data than just revision number? contents may have changed
         return true;
     }
 
@@ -591,6 +593,25 @@ public class GraphImport {
             flight = null;
         }
 
+        // do not continue flight if revision numbers rolled back unless reconstructing
+        // if that happens, we have an entirely new flight plan
+        // TODO: this slightly duplicates isSameFlight, but there is no way to use that method before having a flight plan accessible and getFlightPlan registers a new one instantly :(
+        if ((flight != null) && !flight.isReconstructed(report)) {
+            int highestPreviousFlightPlanRevision = getLast(flight.getFlightPlans())
+                    .map(FlightPlan::getRevision)
+                    .orElse(-1);
+
+            int currentFlightPlanRevision = client.getFlightPlanRevision();
+
+            if (currentFlightPlanRevision < 0) {
+                LOGGER.warn("report recorded at {}: no flight plan revision on prefiling for {}", report.getRecordTime(), client.getCallsign());
+            } else if (currentFlightPlanRevision < highestPreviousFlightPlanRevision) {
+                // TODO: might occur quite often, reduce log level if it looks like a normally expected case (pilots/ATC deleting flight plans before refiling with same airport pair?)
+                LOGGER.warn("report recorded at {}: flight plan revision rolled back from {} to {} on prefiling for {}, resetting flight", report.getRecordTime(), highestPreviousFlightPlanRevision, currentFlightPlanRevision, client.getCallsign());
+                flight = null;
+            }
+        }
+
         if (flight == null) {
             Member member = getMember(client);
             if (member == null) {
@@ -606,6 +627,14 @@ public class GraphImport {
 
         getFlightPlan(flight, report, client)
                 .seenInReport(report);
+    }
+
+    private <T> Optional<T> getLast(SortedSet<T> set) {
+        if (set.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(set.last());
     }
 
     private FlightPlan getFlightPlan(final Flight flight, final Report report, final Client client) {
