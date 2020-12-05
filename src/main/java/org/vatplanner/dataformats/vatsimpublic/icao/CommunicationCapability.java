@@ -2,6 +2,7 @@ package org.vatplanner.dataformats.vatsimpublic.icao;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -42,14 +43,14 @@ import java.util.Set;
 public enum CommunicationCapability {
     NONE('N', -1),
     OTHER('Z', -1),
-    //
+
     ACARS_FMC_WPR('E', 1),
     ACARS_D_FIS('E', 2),
     ACARS_PDC('E', 3),
     HF_RTF('H', -1),
     /**
-     * <code>J</code> without any level is legacy designator (removed in 2012
-     * ICAO update).
+     * <code>J</code> without any level is legacy designator (removed in 2012 ICAO
+     * update).
      */
     CPDLC('J', -1),
     CPDLC_ATN_VDL_MODE_2('J', 1, CPDLC),
@@ -65,8 +66,8 @@ public enum CommunicationCapability {
     /**
      * Required Communication Performance of 400 seconds provided through CPDLC.
      * CPDLC in flight simulation is provided through networks which also have a
-     * latency that cannot be guaranteed by users and is not intentionally
-     * simulated but will generally be less than established real-world RCP.
+     * latency that cannot be guaranteed by users and is not intentionally simulated
+     * but will generally be less than established real-world RCP.
      *
      * @see https://code7700.com/communications_rcp.htm
      */
@@ -74,16 +75,16 @@ public enum CommunicationCapability {
     /**
      * Required Communication Performance of 240 seconds provided through CPDLC.
      * CPDLC in flight simulation is provided through networks which also have a
-     * latency that cannot be guaranteed by users and is not intentionally
-     * simulated but will generally be less than established real-world RCP.
+     * latency that cannot be guaranteed by users and is not intentionally simulated
+     * but will generally be less than established real-world RCP.
      *
      * @see https://code7700.com/communications_rcp.htm
      */
     RCP_240_CPDLC('P', 2),
     /**
-     * Required Communication Performance of 400 seconds provided through
-     * satellite. Does not make any sense to declare in flight simulation as
-     * there is no SATCOM.
+     * Required Communication Performance of 400 seconds provided through satellite.
+     * Does not make any sense to declare in flight simulation as there is no
+     * SATCOM.
      *
      * @see https://code7700.com/communications_rcp.htm
      */
@@ -94,8 +95,8 @@ public enum CommunicationCapability {
     /**
      * Standard capability is only {@link #VHF_RTF} plus
      * {@link NavigationApproachCapability}. It is not sure if
-     * {@link #VHF_RTF_8_33_KHZ} is implicitly included in "standard" for
-     * regions that require it.
+     * {@link #VHF_RTF_8_33_KHZ} is implicitly included in "standard" for regions
+     * that require it.
      */
     STANDARD('S', -1, VHF_RTF);
 
@@ -104,21 +105,28 @@ public enum CommunicationCapability {
 
     private static final Map<String, CommunicationCapability> BY_DESIGNATOR = new HashMap<>();
 
-    public static final Set<CommunicationCapability> STANDARD_EXPANDED = unmodifiableSet(new HashSet<CommunicationCapability>(asList(VHF_RTF)));
+    public static final Set<CommunicationCapability> STANDARD_EXPANDED = unmodifiableSet(
+        new HashSet<CommunicationCapability>( //
+            asList( //
+                VHF_RTF //
+            ) //
+        ) //
+    );
 
     static {
         for (CommunicationCapability capability : values()) {
             CommunicationCapability previous = BY_DESIGNATOR.put(capability.designator, capability);
             if (previous != null) {
-                throw new RuntimeException("ambiguous designator " + capability.designator + " for " + previous + " and " + capability);
+                throw new RuntimeException(
+                    "ambiguous designator " + capability.designator + " for " + previous + " and " + capability);
             }
         }
     }
 
     private CommunicationCapability(char group, int level, CommunicationCapability... expanded) {
         designator = level >= 0
-                ? Character.toString(group) + Integer.toString(level)
-                : Character.toString(group);
+            ? Character.toString(group) + Integer.toString(level)
+            : Character.toString(group);
 
         Set<CommunicationCapability> expandedSet = new HashSet<CommunicationCapability>(asList(expanded));
         expandedSet.add(this);

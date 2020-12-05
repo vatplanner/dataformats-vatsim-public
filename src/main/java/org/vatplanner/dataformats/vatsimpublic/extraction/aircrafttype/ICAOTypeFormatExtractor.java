@@ -2,6 +2,8 @@ package org.vatplanner.dataformats.vatsimpublic.extraction.aircrafttype;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.vatplanner.dataformats.vatsimpublic.entities.status.WakeTurbulenceCategory;
 import org.vatplanner.dataformats.vatsimpublic.extraction.AircraftTypeExtractor;
 
 /**
@@ -46,7 +48,10 @@ import org.vatplanner.dataformats.vatsimpublic.extraction.AircraftTypeExtractor;
  */
 public class ICAOTypeFormatExtractor implements ParsedTypeData {
 
-    private static final Pattern PATTERN_SPLIT = Pattern.compile("^\\s*([^/]+)/([A-Z])\\-([A-Z0-9]+(?:/[A-Z0-9]*|))\\s*$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_SPLIT = Pattern.compile(//
+        "^\\s*([^/]+)/([A-Z])\\-([A-Z0-9]+(?:/[A-Z0-9]*|))\\s*$", //
+        Pattern.CASE_INSENSITIVE //
+    );
 
     private static final int PATTERN_SPLIT_AIRCRAFT_TYPE = 1;
     private static final int PATTERN_SPLIT_WAKE_CATEGORY = 2;
@@ -62,16 +67,16 @@ public class ICAOTypeFormatExtractor implements ParsedTypeData {
      * details.
      *
      * <p>
-     * Note that an {@link IllegalArgumentException} will be thrown if the
-     * format does not match expectation. If this happens, you should consider
-     * falling back to {@link FAADomesticTypeFormatExtractor} which will also
-     * allow completely invalid data to pass as a free-form aircraft type. The
-     * exception can be used to test if the input is in ICAO format.
+     * Note that an {@link IllegalArgumentException} will be thrown if the format
+     * does not match expectation. If this happens, you should consider falling back
+     * to {@link FAADomesticTypeFormatExtractor} which will also allow completely
+     * invalid data to pass as a free-form aircraft type. The exception can be used
+     * to test if the input is in ICAO format.
      * </p>
      *
      * @param s aircraft type field as provided by data files
-     * @throws IllegalArgumentException if input does not match expected
-     * ICAO-style format or input was null
+     * @throws IllegalArgumentException if input does not match expected ICAO-style
+     *         format or input was null
      */
     public ICAOTypeFormatExtractor(String s) throws IllegalArgumentException {
         if (s == null) {
@@ -89,10 +94,10 @@ public class ICAOTypeFormatExtractor implements ParsedTypeData {
     }
 
     /**
-     * Returns the extracted aircraft type. Although users should enter an ICAO
-     * code it may happen that the actual data entered as type is something
-     * else. This will require mapping to correct for input errors if the
-     * information should be interpreted further.
+     * Returns the extracted aircraft type. Although users should enter an ICAO code
+     * it may happen that the actual data entered as type is something else. This
+     * will require mapping to correct for input errors if the information should be
+     * interpreted further.
      *
      * @return aircraft type (should but may not be an ICAO code)
      */
@@ -102,21 +107,21 @@ public class ICAOTypeFormatExtractor implements ParsedTypeData {
     }
 
     /**
-     * Returns the extracted equipment code. This may be inaccurate or wrong due
-     * to complexity or confusion with old simple equipment or FAA codes. If
-     * really needed, this information should be checked for plausibility
-     * depending on the specified aircraft type.
+     * Returns the extracted equipment code. This may be inaccurate or wrong due to
+     * complexity or confusion with old simple equipment or FAA codes. If really
+     * needed, this information should be checked for plausibility depending on the
+     * specified aircraft type.
      *
      * <p>
-     * Note that equipment codes in ICAO-style VATSIM flight plans are usually
-     * very extensive ICAO field 10a + 10b declarations. Field 10b is separated
-     * from 10a by a slash <code>/</code> and comes last.
+     * Note that equipment codes in ICAO-style VATSIM flight plans are usually very
+     * extensive ICAO field 10a + 10b declarations. Field 10b is separated from 10a
+     * by a slash <code>/</code> and comes last.
      * </p>
      *
      * <p>
-     * Returned information should be expected to not only contain field 10
-     * encoded information but also field 18 PBN codes due to complexity of ICAO
-     * flight plan filing and user confusion.
+     * Returned information should be expected to not only contain field 10 encoded
+     * information but also field 18 PBN codes due to complexity of ICAO flight plan
+     * filing and user confusion.
      * </p>
      *
      * @return equipment code
@@ -127,9 +132,9 @@ public class ICAOTypeFormatExtractor implements ParsedTypeData {
     }
 
     /**
-     * Returns the extracted wake category code letter. This may be inaccurate.
-     * If reliable information is needed, look up the aircraft type on an
-     * authoritative database.
+     * Returns the extracted wake category code letter. This may be inaccurate. If
+     * reliable information is needed, look up the aircraft type on an authoritative
+     * database.
      *
      * @return wake category code letter
      */

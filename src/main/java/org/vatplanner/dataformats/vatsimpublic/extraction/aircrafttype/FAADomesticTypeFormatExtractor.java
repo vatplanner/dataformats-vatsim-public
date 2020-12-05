@@ -1,10 +1,13 @@
 package org.vatplanner.dataformats.vatsimpublic.extraction.aircrafttype;
 
+import static org.vatplanner.dataformats.vatsimpublic.utils.StringUtils.nullIfEmpty;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.vatplanner.dataformats.vatsimpublic.entities.status.SimpleEquipmentSpecification;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.WakeTurbulenceCategory;
-import static org.vatplanner.dataformats.vatsimpublic.utils.StringUtils.nullIfEmpty;
+import org.vatplanner.dataformats.vatsimpublic.extraction.AircraftTypeExtractor;
 
 /**
  * Extracts information from a FAA-like combined aircraft type string as
@@ -48,7 +51,10 @@ import static org.vatplanner.dataformats.vatsimpublic.utils.StringUtils.nullIfEm
 public class FAADomesticTypeFormatExtractor implements ParsedTypeData {
 
     // FIXME: type should be trimmed
-    private static final Pattern PATTERN_SPLIT = Pattern.compile("^\\s*([A-Z]/|)([^/]*?)(/[A-Z]|)\\s*$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_SPLIT = Pattern.compile(//
+        "^\\s*([A-Z]/|)([^/]*?)(/[A-Z]|)\\s*$",
+        Pattern.CASE_INSENSITIVE //
+    );
     private static final int PATTERN_SPLIT_WAKE_CATEGORY = 1;
     private static final int PATTERN_SPLIT_AIRCRAFT_TYPE = 2;
     private static final int PATTERN_SPLIT_EQUIPMENT_CODE = 3;
@@ -98,11 +104,11 @@ public class FAADomesticTypeFormatExtractor implements ParsedTypeData {
     /**
      * Returns the extracted aircraft type. Although users should enter an ICAO
      * code, quite often the actual data entered as type is something else. This
-     * will require mapping to correct for input errors if the information
-     * should be interpreted further.
+     * will require mapping to correct for input errors if the information should be
+     * interpreted further.
      *
      * @return aircraft type (should but may not be an ICAO code); null if
-     * unavailable
+     *         unavailable
      */
     @Override
     public String getAircraftType() {
@@ -110,10 +116,10 @@ public class FAADomesticTypeFormatExtractor implements ParsedTypeData {
     }
 
     /**
-     * Returns the extracted equipment code letter. This may be inaccurate or
-     * wrong due to complexity or conflicts between real-world ICAO and VATSIM
-     * flight plan codes. If really needed, this information should be checked
-     * for plausibility depending on the specified aircraft type.
+     * Returns the extracted equipment code letter. This may be inaccurate or wrong
+     * due to complexity or conflicts between real-world ICAO and VATSIM flight plan
+     * codes. If really needed, this information should be checked for plausibility
+     * depending on the specified aircraft type.
      *
      * @return equipment code letter; null if unavailable
      */
@@ -123,9 +129,9 @@ public class FAADomesticTypeFormatExtractor implements ParsedTypeData {
     }
 
     /**
-     * Returns the extracted wake category code letter. This may be inaccurate.
-     * If reliable information is needed, look up the aircraft type on an
-     * authoritative database.
+     * Returns the extracted wake category code letter. This may be inaccurate. If
+     * reliable information is needed, look up the aircraft type on an authoritative
+     * database.
      *
      * @return wake category code letter; null if unavailable
      */

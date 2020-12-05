@@ -1,12 +1,14 @@
 package org.vatplanner.dataformats.vatsimpublic.privacyfilter;
 
+import static org.vatplanner.dataformats.vatsimpublic.utils.CollectionHelpers.asUnmodifiableSet;
+
 import java.util.Collection;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
 import org.vatplanner.dataformats.vatsimpublic.parser.ClientFields;
-import static org.vatplanner.dataformats.vatsimpublic.utils.CollectionHelpers.asUnmodifiableSet;
 
 /**
  * Privacy filter which implements removal of free-text from flight plan
@@ -18,7 +20,9 @@ import static org.vatplanner.dataformats.vatsimpublic.utils.CollectionHelpers.as
 public class FlightPlanRemarksRemoveAllFilter implements VerifiableClientFilter<String> {
     // TODO: check and maintain other prefiling system markers such as SimBrief
 
-    private static final Set<ClientFields.FieldAccess<String>> AFFECTED_FIELDS = asUnmodifiableSet(ClientFields.StringFields.FLIGHT_PLAN_REMARKS);
+    private static final Set<ClientFields.FieldAccess<String>> AFFECTED_FIELDS = asUnmodifiableSet(
+        ClientFields.StringFields.FLIGHT_PLAN_REMARKS //
+    );
 
     private final Pattern patternFieldContentTrigger;
 
@@ -27,12 +31,18 @@ public class FlightPlanRemarksRemoveAllFilter implements VerifiableClientFilter<
     private static final String COMMUNICATION_FLAG_RECEIVE_ONLY = "/R/";
     private static final String COMMUNICATION_FLAG_TEXT = "/T/";
 
-    private static final Pattern PATTERN_APPLICATION = Pattern.compile("^([^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:)([^:]*)(:.*|)$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_APPLICATION = Pattern.compile(
+        "^([^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:)([^:]*)(:.*|)$", //
+        Pattern.CASE_INSENSITIVE //
+    );
     private static final int PATTERN_APPLICATION_FIELDS_BEFORE = 1;
     private static final int PATTERN_APPLICATION_FIELD_CONTENT = 2;
     private static final int PATTERN_APPLICATION_FIELDS_AFTER = 3;
 
-    private static final Pattern PATTERN_VERIFICATION_FILTERED = Pattern.compile("^(\\+VFPS\\+|)(/[VRT]/|)$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_VERIFICATION_FILTERED = Pattern.compile( //
+        "^(\\+VFPS\\+|)(/[VRT]/|)$", //
+        Pattern.CASE_INSENSITIVE //
+    );
     private static final int PATTERN_VERIFICATION_FILTERED_VFPS = 1;
     private static final int PATTERN_VERIFICATION_FILTERED_COMMUNICATION_FLAG = 2;
 
@@ -45,13 +55,13 @@ public class FlightPlanRemarksRemoveAllFilter implements VerifiableClientFilter<
      * If triggers are specified (non-null, non-empty), the filter will only
      * activate if any of the strings given as triggers are found in flight plan
      * remarks. Triggers are finalized and cannot be changed after construction.
-     * While the given {@link Collection} itself is allowed to be null or empty
-     * for unconditional filtering, its items must not be null or empty
-     * (including strings consisting of just white-spaces).
+     * While the given {@link Collection} itself is allowed to be null or empty for
+     * unconditional filtering, its items must not be null or empty (including
+     * strings consisting of just white-spaces).
      * </p>
      *
      * @param triggers search strings to trigger removal; filter will be
-     * unconditional if left null or empty
+     *        unconditional if left null or empty
      */
     public FlightPlanRemarksRemoveAllFilter(Collection<String> triggers) {
         if ((triggers == null) || triggers.isEmpty()) {
@@ -67,9 +77,10 @@ public class FlightPlanRemarksRemoveAllFilter implements VerifiableClientFilter<
         StringBuilder sb = new StringBuilder();
         sb.append(".*(");
         sb.append(
-                triggers.stream()//
-                        .map(Pattern::quote) //
-                        .collect(Collectors.joining("|"))
+            triggers //
+                .stream()//
+                .map(Pattern::quote) //
+                .collect(Collectors.joining("|")) //
         );
         sb.append(").*");
 
@@ -77,8 +88,8 @@ public class FlightPlanRemarksRemoveAllFilter implements VerifiableClientFilter<
     }
 
     /**
-     * Checks if the criteria (configured at construction time) to perform
-     * filtering are met by the given field content.
+     * Checks if the criteria (configured at construction time) to perform filtering
+     * are met by the given field content.
      *
      * @param fieldContent field content to be checked for filtering
      * @return true if given field content should be filtered
@@ -131,9 +142,9 @@ public class FlightPlanRemarksRemoveAllFilter implements VerifiableClientFilter<
     }
 
     /**
-     * Finds all communication flags indicated by given string and returns only
-     * a single flag. The flag to be returned is determined by applying an order
-     * of precedence:
+     * Finds all communication flags indicated by given string and returns only a
+     * single flag. The flag to be returned is determined by applying an order of
+     * precedence:
      *
      * <ol>
      * <li>voice takes precedence over</li>
@@ -144,8 +155,7 @@ public class FlightPlanRemarksRemoveAllFilter implements VerifiableClientFilter<
      * If no flag was set, an empty string will be returned.
      *
      * @param s string to evaluate for communication flags
-     * @return communication flag according to order of precedence; empty if not
-     * set
+     * @return communication flag according to order of precedence; empty if not set
      */
     private String findExpectedCommunicationFlag(String s) {
         // find communication flags

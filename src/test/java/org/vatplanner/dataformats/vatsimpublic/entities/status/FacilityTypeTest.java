@@ -1,15 +1,24 @@
 package org.vatplanner.dataformats.vatsimpublic.entities.status;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType.APPROACH_DEPARTURE;
+import static org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType.CENTER;
+import static org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType.DELIVERY;
+import static org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType.FSS;
+import static org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType.GROUND;
+import static org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType.OBSERVER;
+import static org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType.TOWER;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import static org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType.*;
+
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 
 @RunWith(DataProviderRunner.class)
 public class FacilityTypeTest {
@@ -19,14 +28,14 @@ public class FacilityTypeTest {
 
     @DataProvider
     public static Object[][] dataProviderIdAndEnum() {
-        return new Object[][]{
-            new Object[]{0, OBSERVER},
-            new Object[]{1, FSS},
-            new Object[]{2, DELIVERY},
-            new Object[]{3, GROUND},
-            new Object[]{4, TOWER},
-            new Object[]{5, APPROACH_DEPARTURE},
-            new Object[]{6, CENTER},};
+        return new Object[][] {
+            new Object[] { 0, OBSERVER },
+            new Object[] { 1, FSS },
+            new Object[] { 2, DELIVERY },
+            new Object[] { 3, GROUND },
+            new Object[] { 4, TOWER },
+            new Object[] { 5, APPROACH_DEPARTURE },
+            new Object[] { 6, CENTER }, };
     }
 
     @Test
@@ -42,7 +51,7 @@ public class FacilityTypeTest {
     }
 
     @Test
-    @DataProvider({"-1", "7", "100"})
+    @DataProvider({ "-1", "7", "100" })
     public void testResolveStatusFileId_unknownId_throwsIllegalArgumentException(int unknownId) {
         // Arrange
         thrown.expect(IllegalArgumentException.class);

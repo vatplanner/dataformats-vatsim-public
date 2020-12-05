@@ -1,16 +1,17 @@
 package org.vatplanner.dataformats.vatsimpublic.parser;
 
-import org.vatplanner.dataformats.vatsimpublic.parser.FSDServerParser;
-import org.vatplanner.dataformats.vatsimpublic.parser.FSDServer;
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 
 @RunWith(DataProviderRunner.class)
 public class FSDServerParserTest {
@@ -26,7 +27,7 @@ public class FSDServerParserTest {
     }
 
     @Test
-    @DataProvider({"", "ident:hostname:location:name:1", "ident:hostname:location:name:1:1:"})
+    @DataProvider({ "", "ident:hostname:location:name:1", "ident:hostname:location:name:1:1:" })
     public void testParse_genericFormatViolation_throwsIllegalArgumentException(String erroneousLine) {
         // Arrange
         thrown.expect(IllegalArgumentException.class);
@@ -38,7 +39,7 @@ public class FSDServerParserTest {
     }
 
     @Test
-    @DataProvider({"id1", "another ID"})
+    @DataProvider({ "id1", "another ID" })
     public void testParse_validIdent_returnsObjectWithExpectedId(String expectedId) {
         // Arrange
         String line = String.format("%s:hostname:location:name:1:", expectedId);
@@ -63,7 +64,7 @@ public class FSDServerParserTest {
     }
 
     @Test
-    @DataProvider({"hostname", "some.other.host.name", "123.45.67.89"})
+    @DataProvider({ "hostname", "some.other.host.name", "123.45.67.89" })
     public void testParse_validHostnameOrIp_returnsObjectWithExpectedAddress(String expectedAddress) {
         // Arrange
         String line = String.format("someId:%s:location:name:1:", expectedAddress);
@@ -88,7 +89,7 @@ public class FSDServerParserTest {
     }
 
     @Test
-    @DataProvider({"Location", "My Location", "My Location, Somewhere"})
+    @DataProvider({ "Location", "My Location", "My Location, Somewhere" })
     public void testParse_validLocation_returnsObjectWithExpectedLocation(String expectedLocation) {
         // Arrange
         String line = String.format("someId:hostname:%s:name:1:", expectedLocation);
@@ -113,7 +114,7 @@ public class FSDServerParserTest {
     }
 
     @Test
-    @DataProvider({"Simple Name", "special chars -.,%$!\" and numbers 0123456789 are ok too"})
+    @DataProvider({ "Simple Name", "special chars -.,%$!\" and numbers 0123456789 are ok too" })
     public void testParse_validName_returnsObjectWithExpectedName(String expectedName) {
         // Arrange
         String line = String.format("someId:hostname:location:%s:1:", expectedName);
@@ -138,7 +139,7 @@ public class FSDServerParserTest {
     }
 
     @Test
-    @DataProvider({"0, false", "1, true"})
+    @DataProvider({ "0, false", "1, true" })
     public void testParse_validFlagForClientsConnectionAllowed_returnsObjectWithExpectedConnectionFlag(String inputFlag, boolean expectedOutputFlag) {
         // Arrange
         String line = String.format("someId:hostname:location:name:%s:", inputFlag);
@@ -151,7 +152,7 @@ public class FSDServerParserTest {
     }
 
     @Test
-    @DataProvider({"", "-1", "2", "a", "10", "01"})
+    @DataProvider({ "", "-1", "2", "a", "10", "01" })
     public void testParse_invalidFlagsForClientsConnectionAllowed_throwsIllegalArgumentException(String invalidFlag) {
         // Arrange
         String erroneousLine = String.format("someId:hostname:location:name:%s:", invalidFlag);

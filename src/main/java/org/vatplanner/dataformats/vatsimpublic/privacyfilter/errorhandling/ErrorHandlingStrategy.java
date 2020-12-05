@@ -1,6 +1,7 @@
 package org.vatplanner.dataformats.vatsimpublic.privacyfilter.errorhandling;
 
 import java.util.Collection;
+
 import org.vatplanner.dataformats.vatsimpublic.parser.ClientFields;
 
 /**
@@ -9,9 +10,8 @@ import org.vatplanner.dataformats.vatsimpublic.parser.ClientFields;
 public interface ErrorHandlingStrategy {
 
     /**
-     * An exception to be thrown by
-     * {@link #handleError(String, String, Collection)} in case error handling
-     * wants to abort all filtering.
+     * An exception to be thrown by {@link #handleError(String, String, Collection)}
+     * in case error handling wants to abort all filtering.
      */
     class FailWithException extends RuntimeException {
 
@@ -22,14 +22,13 @@ public interface ErrorHandlingStrategy {
     }
 
     /**
-     * Handles an error that was detected in filteredLine result while
-     * processing the affectedFields on rawLine.
+     * Handles an error that was detected in filteredLine result while processing
+     * the affectedFields on rawLine.
      *
      * @param rawLine content of line before filter was applied; may be an
-     * intermediate result of previous filters
+     *        intermediate result of previous filters
      * @param filteredLine erroneous filter output of line contents
-     * @param affectedFields {@link ClientFields} affected by the erroneous
-     * filter
+     * @param affectedFields {@link ClientFields} affected by the erroneous filter
      * @return content to replace line with; null if line should be removed
      * @throws FailWithException if processing should be aborted by an exception
      */

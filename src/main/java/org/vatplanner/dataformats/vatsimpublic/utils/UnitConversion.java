@@ -11,7 +11,8 @@ public class UnitConversion {
     private static final double FACTOR_METERS_TO_FEET = 1.0 / FACTOR_FEET_TO_METERS;
 
     private static final double FACTOR_HECTOPASCALS_TO_INCHES_OF_MERCURY = 0.029529983071445;
-    private static final double FACTOR_INCHES_OF_MERCURY_TO_HECTOPASCALS = 1.0 / FACTOR_HECTOPASCALS_TO_INCHES_OF_MERCURY;
+    private static final double FACTOR_INCHES_OF_MERCURY_TO_HECTOPASCALS = //
+        1.0 / FACTOR_HECTOPASCALS_TO_INCHES_OF_MERCURY;
 
     private UnitConversion() {
         // utility class; hide constructor
@@ -49,8 +50,8 @@ public class UnitConversion {
     }
 
     /**
-     * Converts the given barometric pressure from hectopascals (hPa) to inches
-     * of mercury (inHg).
+     * Converts the given barometric pressure from hectopascals (hPa) to inches of
+     * mercury (inHg).
      *
      * @param hectopascals value in hectopascals (hPa)
      * @return value in inches of mercury (inHg)

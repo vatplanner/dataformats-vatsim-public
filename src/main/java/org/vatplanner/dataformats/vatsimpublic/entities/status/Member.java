@@ -1,6 +1,7 @@
 package org.vatplanner.dataformats.vatsimpublic.entities.status;
 
 import static java.util.Collections.unmodifiableSet;
+
 import java.util.HashSet;
 import java.util.Set;
 

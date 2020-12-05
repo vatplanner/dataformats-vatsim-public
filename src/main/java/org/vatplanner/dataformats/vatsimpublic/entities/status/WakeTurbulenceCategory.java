@@ -36,12 +36,11 @@ public enum WakeTurbulenceCategory {
     }
 
     /**
-     * Resolves the given flight plan code to a well-defined category. Returns
-     * null if no such category has been defined or input is empty or null.
+     * Resolves the given flight plan code to a well-defined category. Returns null
+     * if no such category has been defined or input is empty or null.
      *
      * @param flightPlanCode flight plan code to resolve
-     * @return category matching the code; null if not found or no code was
-     * entered
+     * @return category matching the code; null if not found or no code was entered
      * @throws IllegalArgumentException if code exceeds one letter
      */
     public static WakeTurbulenceCategory resolveFlightPlanCode(String flightPlanCode) {

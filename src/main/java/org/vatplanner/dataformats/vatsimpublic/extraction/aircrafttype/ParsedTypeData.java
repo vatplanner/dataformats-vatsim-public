@@ -9,7 +9,7 @@ public interface ParsedTypeData {
      * Returns the extracted aircraft type.
      *
      * @return aircraft type (should but may not be an ICAO code); null if
-     * unavailable
+     *         unavailable
      */
     public String getAircraftType();
 

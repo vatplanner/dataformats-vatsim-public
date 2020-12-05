@@ -9,10 +9,12 @@ public enum FlightEvent {
      * airborne for the first time.
      */
     BEFORE_AIRBORNE,
+
     /**
      * Marks the first track point a flight has been observed to be airborne at.
      */
     AIRBORNE,
+
     /**
      * Marks the first track point a flight has been observed to have landed.
      */

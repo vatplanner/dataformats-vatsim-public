@@ -1,6 +1,7 @@
 package org.vatplanner.dataformats.vatsimpublic.privacyfilter.errorhandling;
 
 import java.util.Collection;
+
 import org.vatplanner.dataformats.vatsimpublic.parser.ClientFields;
 
 /**

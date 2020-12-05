@@ -16,8 +16,8 @@ public class TrackPoint {
     private BarometricPressure qnh;
 
     /**
-     * Creates a new track point. A track point needs to be time-referenced to
-     * be useful and thus needs to be linked to the report it appeared in.
+     * Creates a new track point. A track point needs to be time-referenced to be
+     * useful and thus needs to be linked to the report it appeared in.
      *
      * @param report report where this point appeared in
      */
@@ -49,10 +49,8 @@ public class TrackPoint {
         return this;
     }
 
-    // TODO: unit tests
     /**
-     * Returns the geographic coordinates (3-dimensional position) of this
-     * point.
+     * Returns the geographic coordinates (3-dimensional position) of this point.
      *
      * @return geographic coordinates (3-dimensional position)
      */
@@ -66,11 +64,11 @@ public class TrackPoint {
     }
 
     /**
-     * Returns the heading the aircraft was pointing to. Valid headings are
-     * limited to 0..359 degrees.
+     * Returns the heading the aircraft was pointing to. Valid headings are limited
+     * to 0..359 degrees.
      *
-     * @return heading the aircraft was pointing to (0..359 degrees), negative
-     * if unavailable
+     * @return heading the aircraft was pointing to (0..359 degrees), negative if
+     *         unavailable
      */
     public int getHeading() {
         return heading;
@@ -98,13 +96,13 @@ public class TrackPoint {
     }
 
     /**
-     * Returns the aircraft's transponder code. Only 4-octal codes (0000..7777)
-     * are valid as used in real-world but other codes may be indicated as well
-     * by addons. Representation is always in decimal (human-readable) integers
-     * (code 7777 = int 7777), not octal.
+     * Returns the aircraft's transponder code. Only 4-octal codes (0000..7777) are
+     * valid as used in real-world but other codes may be indicated as well by
+     * addons. Representation is always in decimal (human-readable) integers (code
+     * 7777 = int 7777), not octal.
      *
      * @return transponder code as decimal integer (code 7777 = int 7777); may
-     * exceed 4-octal limits, negative if unavailable
+     *         exceed 4-octal limits, negative if unavailable
      */
     public int getTransponderCode() {
         return transponderCode;
@@ -133,8 +131,7 @@ public class TrackPoint {
 
     /**
      * Calculates the flight level at standard QNH. This is a proxy method for
-     * easier access to
-     * {@link GeoCoordinates#toFlightLevel(BarometricPressure)}.
+     * easier access to {@link GeoCoordinates#toFlightLevel(BarometricPressure)}.
      *
      * @return flight level at standard QNH; negative if unavailable
      * @see GeoCoordinates#toFlightLevel(BarometricPressure)

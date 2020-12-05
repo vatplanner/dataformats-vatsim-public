@@ -1,16 +1,20 @@
 package org.vatplanner.dataformats.vatsimpublic.utils;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import java.util.function.Function;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+
+import java.util.function.Function;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 
 @RunWith(DataProviderRunner.class)
 public class ComparisonsTest {
@@ -72,7 +76,7 @@ public class ComparisonsTest {
     }
 
     @Test
-    @DataProvider({"true", "false"})
+    @DataProvider({ "true", "false" })
     public void testEqualsNullSafe_notNull_returnsObjectEquality(boolean expectedResult) {
         // Arrange
         defineGetter(a, attributeA = new Object() {

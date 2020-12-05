@@ -1,22 +1,27 @@
 package org.vatplanner.dataformats.vatsimpublic.privacyfilter;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import static java.util.Arrays.asList;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.vatplanner.dataformats.vatsimpublic.testutils.DataProviderHelpers.allEnumValuesExcept;
+import static org.vatplanner.dataformats.vatsimpublic.testutils.DataProviderHelpers.asTwoDimensionalArray;
+
 import java.util.Collection;
 import java.util.Set;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 import org.vatplanner.dataformats.vatsimpublic.parser.ClientFields;
-import static org.vatplanner.dataformats.vatsimpublic.testutils.DataProviderHelpers.allEnumValuesExcept;
-import static org.vatplanner.dataformats.vatsimpublic.testutils.DataProviderHelpers.asTwoDimensionalArray;
+
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 
 @RunWith(DataProviderRunner.class)
 public class FlightPlanRemarksRemoveAllFilterTest {
@@ -38,16 +43,16 @@ public class FlightPlanRemarksRemoveAllFilterTest {
 
     @DataProvider
     public static Object[][] dataProviderInvalidTriggers() {
-        return new Object[][]{
-            new Object[]{asList((Object) null)},
-            new Object[]{asList("")},
-            new Object[]{asList(" ")},
-            new Object[]{asList("\n")},
-            new Object[]{asList("valid", "", "also valid")},
-            new Object[]{asList("valid", " ", "also valid")},
-            new Object[]{asList("valid", "\n", "also valid")},
-            new Object[]{asList("valid", " \r\n \n \n\r ", "also valid")},
-            new Object[]{asList("valid", null, "also valid")}
+        return new Object[][] {
+            { asList((Object) null) },
+            { asList("") },
+            { asList(" ") },
+            { asList("\n") },
+            { asList("valid", "", "also valid") },
+            { asList("valid", " ", "also valid") },
+            { asList("valid", "\n", "also valid") },
+            { asList("valid", " \r\n \n \n\r ", "also valid") },
+            { asList("valid", null, "also valid") }
         };
     }
 
@@ -65,26 +70,26 @@ public class FlightPlanRemarksRemoveAllFilterTest {
 
     @DataProvider
     public static Object[][] dataProviderIsConditionMet() {
-        return new Object[][]{
+        return new Object[][] {
             // always met if triggers is null or empty
-            new Object[]{null, "does not matter", true}, //
-            new Object[]{asList(), "does not matter", true}, //
+            { null, "does not matter", true }, //
+            { asList(), "does not matter", true }, //
 
             // trigger found in content
-            new Object[]{asList("trigger"), "this one should trigger", true}, //
-            new Object[]{asList("abc", "x y/z"), "when abc goes x y/z it's bad", true}, //
-            new Object[]{asList("abc", "x y/z"), "just abc is bad too", true}, //
-            new Object[]{asList("abc", "x y/z"), "x y/z looks quite mathematical", true}, //
-            new Object[]{asList("abc", "x y/z"), "whenwordscollapseabcshallbebadtoo", true}, //
+            { asList("trigger"), "this one should trigger", true }, //
+            { asList("abc", "x y/z"), "when abc goes x y/z it's bad", true }, //
+            { asList("abc", "x y/z"), "just abc is bad too", true }, //
+            { asList("abc", "x y/z"), "x y/z looks quite mathematical", true }, //
+            { asList("abc", "x y/z"), "whenwordscollapseabcshallbebadtoo", true }, //
 
             // case-insensitive matches
-            new Object[]{asList("TriGgeR"), "This should trigger too.", true}, //
-            new Object[]{asList("trigger"), "This should tRIgGER too.", true}, //
+            { asList("TriGgeR"), "This should trigger too.", true }, //
+            { asList("trigger"), "This should tRIgGER too.", true }, //
 
             // trigger not found in content
-            new Object[]{asList("trigger"), "", false}, //
-            new Object[]{asList("trigger"), "this one is clean", false}, //
-            new Object[]{asList("abc", "x y/z"), "should pass fine", false}, //
+            { asList("trigger"), "", false }, //
+            { asList("trigger"), "this one is clean", false }, //
+            { asList("abc", "x y/z"), "should pass fine", false }, //
         };
     }
 
@@ -104,10 +109,10 @@ public class FlightPlanRemarksRemoveAllFilterTest {
     @DataProvider
     public static Object[][] dataProviderEmptyFieldContent() {
         return asTwoDimensionalArray(
-                null,
-                "",
-                " ",
-                " \n \r\n \n\r "
+            null,
+            "",
+            " ",
+            " \n \r\n \n\r " //
         );
     }
 
@@ -169,7 +174,8 @@ public class FlightPlanRemarksRemoveAllFilterTest {
         "+VFPS+some text/T/ in/VA/ here, +VFPS+/V/, true, false", // matched but misinterpreted meta data => NOK
         "+VFPS+some text/VA/ in/T/ here, +VFPS+/V/, true, false", // matched but misinterpreted meta data => NOK
         "+VFPS+some text/T/ in/VA/ here, +VFPS+/V/, false, false", // not matched but changed => NOK
-        "+VFPS+some text/T/ in/VA/ here, +VFPS+some text/T/ in/VA/ here, false, true", // not matched and unchanged => OK
+        "+VFPS+some text/T/ in/VA/ here, +VFPS+some text/T/ in/VA/ here, false, true", // not matched and unchanged =>
+                                                                                       // OK
 
         // no VFPS flag
         "/V/here goes some content, /V/, true, true", // matched and fully filtered => OK
@@ -212,7 +218,8 @@ public class FlightPlanRemarksRemoveAllFilterTest {
         "here goes /TCAS/ some /V/ content, /V/, true, true", // matched and fully filtered => OK
         "here goes /V/ some /TCAS/ content, /V/, true, true", // matched and fully filtered => OK
         "here goes /RMK/ some /T/ content, /T/, false, false", // not matched but changed => NOK
-        "here goes /RMK/ some /T/ content, here goes /RMK/ some /T/ content, false, true", // not matched and unchanged => OK
+        "here goes /RMK/ some /T/ content, here goes /RMK/ some /T/ content, false, true", // not matched and unchanged
+                                                                                           // => OK
 
         // multiple flags, expecting precedence of V over R over T; case changes OK
         "a/T/b/r//v/c, /V/, true, true", // T, R, V => V
@@ -236,7 +243,11 @@ public class FlightPlanRemarksRemoveAllFilterTest {
         doReturn(isConditionMet).when(spyFilter).isConditionMet(original);
 
         // Act
-        boolean result = spyFilter.verifyAffectedField(ClientFields.StringFields.FLIGHT_PLAN_REMARKS, original, filtered);
+        boolean result = spyFilter.verifyAffectedField(
+            ClientFields.StringFields.FLIGHT_PLAN_REMARKS,
+            original,
+            filtered //
+        );
 
         // Assert
         assertThat(result, is(expectedResult));
@@ -263,62 +274,179 @@ public class FlightPlanRemarksRemoveAllFilterTest {
 
     @DataProvider
     public static Object[][] dataProviderApplicationInputAndExpectedFilteredOutput() {
-        return new Object[][]{
+        return new Object[][] {
             // field content needs to be passed in order to verify that
             // isConditionMet is actually called with correct parameter to
             // evaluate conditions properly (checked in separate test cases to
             // reduce complexity of tests)
 
-            // full online examples, no VFPS, communication flag switching positions and case
-            new Object[]{"UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:SOME COMMENT /v/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", "SOME COMMENT /v/", "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/V/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"}, //
-            new Object[]{"UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:SOME /r/ COMMENT:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", "SOME /r/ COMMENT", "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/R/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"}, //
-            new Object[]{"UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/t/SOME COMMENT:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", "/t/SOME COMMENT", "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/T/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"}, //
-            new Object[]{"UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/V/SOME COMMENT:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", "/V/SOME COMMENT", "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/V/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"}, //
-            new Object[]{"UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:SOME /T/ COMMENT:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", "SOME /T/ COMMENT", "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/T/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"}, //
-            new Object[]{"UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:SOME COMMENT/r/ :THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", "SOME COMMENT/r/ ", "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/R/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"}, //
+            // full online examples, no VFPS, communication flag switching positions and
+            // case
+            {
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:SOME COMMENT /v/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
+                "SOME COMMENT /v/",
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/V/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"
+            }, //
+            {
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:SOME /r/ COMMENT:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
+                "SOME /r/ COMMENT",
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/R/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"
+            }, //
+            {
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/t/SOME COMMENT:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
+                "/t/SOME COMMENT",
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/T/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"
+            }, //
+            {
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/V/SOME COMMENT:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
+                "/V/SOME COMMENT",
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/V/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"
+            }, //
+            {
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:SOME /T/ COMMENT:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
+                "SOME /T/ COMMENT",
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/T/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"
+            }, //
+            {
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:SOME COMMENT/r/ :THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
+                "SOME COMMENT/r/ ",
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/R/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"
+            }, //
 
-            // full online examples, with VFPS, communication flag switching positions and case
-            new Object[]{"UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/r/something else:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", "+VFPS+/r/something else", "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/R/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"}, //
-            new Object[]{"UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+something in between/t/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", "+VFPS+something in between/t/", "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/T/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"}, //
+            // full online examples, with VFPS, communication flag switching positions and
+            // case
+            {
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/r/something else:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
+                "+VFPS+/r/something else",
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/R/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"
+            }, //
+            {
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+something in between/t/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
+                "+VFPS+something in between/t/",
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/T/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"
+            }, //
 
-            // full online examples, no VFPS, input already as filtered (e.g. reapplying filter); upper-case is expected as output
-            new Object[]{"UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/V/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", "/V/", "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/V/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"}, //
-            new Object[]{"UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/R/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", "/R/", "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/R/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"}, //
-            new Object[]{"UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/T/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", "/T/", "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/T/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"}, //
-            new Object[]{"UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/v/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", "/v/", "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/V/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"}, //
-            new Object[]{"UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/r/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", "/r/", "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/R/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"}, //
-            new Object[]{"UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/t/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", "/t/", "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/T/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"}, //
+            // full online examples, no VFPS, input already as filtered (e.g. reapplying
+            // filter); upper-case is expected as output
+            {
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/V/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
+                "/V/",
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/V/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"
+            }, //
+            {
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/R/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
+                "/R/",
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/R/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"
+            }, //
+            {
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/T/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
+                "/T/",
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/T/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"
+            }, //
+            {
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/v/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
+                "/v/",
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/V/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"
+            }, //
+            {
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/r/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
+                "/r/",
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/R/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"
+            }, //
+            {
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/t/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
+                "/t/",
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:/T/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"
+            }, //
 
-            // full online examples, with VFPS, input already as filtered (e.g. reapplying filter); upper-case is expected as output
-            new Object[]{"UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/V/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", "+VFPS+/V/", "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/V/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"}, //
-            new Object[]{"UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/R/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", "+VFPS+/R/", "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/R/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"}, //
-            new Object[]{"UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/T/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", "+VFPS+/T/", "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/T/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"}, //
-            new Object[]{"UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/v/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", "+VFPS+/v/", "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/V/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"}, //
-            new Object[]{"UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/r/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", "+VFPS+/r/", "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/R/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"}, //
-            new Object[]{"UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/t/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", "+VFPS+/t/", "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/T/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"}, //
+            // full online examples, with VFPS, input already as filtered (e.g. reapplying
+            // filter); upper-case is expected as output
+            {
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/V/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
+                "+VFPS+/V/",
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/V/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"
+            }, //
+            {
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/R/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
+                "+VFPS+/R/",
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/R/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"
+            }, //
+            {
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/T/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
+                "+VFPS+/T/",
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/T/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"
+            }, //
+            {
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/v/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
+                "+VFPS+/v/",
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/V/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"
+            }, //
+            {
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/r/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
+                "+VFPS+/r/",
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/R/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"
+            }, //
+            {
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/t/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
+                "+VFPS+/t/",
+                "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:+VFPS+/T/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:"
+            }, //
 
             // variations (prefiling, additional markup)
-            new Object[]{"ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:+VFPS+/V/PBN/A1B1C1D1L1O1 DOF/190311 REG/A12345 RMK/TCAS:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::", "+VFPS+/V/PBN/A1B1C1D1L1O1 DOF/190311 REG/A12345 RMK/TCAS", "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:+VFPS+/V/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::"}, //
-            new Object[]{"ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/RMK/123 /t/ //:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::", "/RMK/123 /t/ //", "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/T/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::"}, //
+            {
+                "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:+VFPS+/V/PBN/A1B1C1D1L1O1 DOF/190311 REG/A12345 RMK/TCAS:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::",
+                "+VFPS+/V/PBN/A1B1C1D1L1O1 DOF/190311 REG/A12345 RMK/TCAS",
+                "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:+VFPS+/V/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::"
+            }, //
+            {
+                "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/RMK/123 /t/ //:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::",
+                "/RMK/123 /t/ //",
+                "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/T/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::"
+            }, //
 
-            // multiple comm flags => precedence according to expected priority V over R over T
-            new Object[]{"ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/t//R//v/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::", "/t//R//v/", "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/V/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::"}, //
-            new Object[]{"ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/T//r//V/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::", "/T//r//V/", "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/V/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::"}, //
-            new Object[]{"ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/t//R//T/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::", "/t//R//T/", "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/R/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::"}, //
-            new Object[]{"ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/t//r//T/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::", "/t//r//T/", "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/R/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::"}, //
-            new Object[]{"ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/t//T/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::", "/t//T/", "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/T/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::"}, //
-            new Object[]{"ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/t//t/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::", "/t//t/", "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/T/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::"}, //
+            // multiple comm flags => precedence according to expected priority V over R
+            // over T
+            {
+                "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/t//R//v/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::",
+                "/t//R//v/",
+                "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/V/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::"
+            }, //
+            {
+                "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/T//r//V/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::",
+                "/T//r//V/",
+                "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/V/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::"
+            }, //
+            {
+                "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/t//R//T/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::",
+                "/t//R//T/",
+                "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/R/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::"
+            }, //
+            {
+                "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/t//r//T/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::",
+                "/t//r//T/",
+                "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/R/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::"
+            }, //
+            {
+                "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/t//T/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::",
+                "/t//T/",
+                "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/T/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::"
+            }, //
+            {
+                "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/t//t/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::",
+                "/t//t/",
+                "ABC987A:54321:Some Name ZYXW:::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:/T/:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::"
+            }, //
 
             // minimal examples
-            new Object[]{":::::::::::::::::::::::::::::", "", ":::::::::::::::::::::::::::::"}, //
-            new Object[]{":::::::::::::::::::::::::::::a", "a", ":::::::::::::::::::::::::::::"}, //
-            new Object[]{":::::::::::::::::::::::::::::a:b", "a", "::::::::::::::::::::::::::::::b"}, //
-            new Object[]{":::::::::::::::::::::::::::::+VFPS+/r/", "+VFPS+/r/", ":::::::::::::::::::::::::::::+VFPS+/R/"}, //
+            { ":::::::::::::::::::::::::::::", "", ":::::::::::::::::::::::::::::" }, //
+            { ":::::::::::::::::::::::::::::a", "a", ":::::::::::::::::::::::::::::" }, //
+            { ":::::::::::::::::::::::::::::a:b", "a", "::::::::::::::::::::::::::::::b" }, //
+            { ":::::::::::::::::::::::::::::+VFPS+/r/", "+VFPS+/r/", ":::::::::::::::::::::::::::::+VFPS+/R/" }, //
 
             // missing expected field
-            new Object[]{"::::::::::::::::::::::::::::", "never to be called", "::::::::::::::::::::::::::::"}, //
-            new Object[]{"", "never to be called", ""}, //
-            new Object[]{"whatever", "never to be called", "whatever"}, //
+            { "::::::::::::::::::::::::::::", "never to be called", "::::::::::::::::::::::::::::" }, //
+            { "", "never to be called", "" }, //
+            { "whatever", "never to be called", "whatever" }, //
         };
     }
 

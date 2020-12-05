@@ -2,6 +2,7 @@ package org.vatplanner.dataformats.vatsimpublic.icao;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -57,10 +58,10 @@ public enum NavigationApproachCapability {
     RNP_4('L', 1),
     /**
      * <code>M</code> has been removed by 2012 ICAO update as OMEGA navigation
-     * system (dated 1971) has been shut down in 1997. <code>M</code> codes
-     * (with a level indication) have been re-purposed to indicate SATCOM
-     * communication by 2012 update. Keeping it in this decoder in case somebody
-     * actually tries to simulate OMEGA...
+     * system (dated 1971) has been shut down in 1997. <code>M</code> codes (with a
+     * level indication) have been re-purposed to indicate SATCOM communication by
+     * 2012 update. Keeping it in this decoder in case somebody actually tries to
+     * simulate OMEGA...
      *
      * @see https://en.wikipedia.org/wiki/Omega_(navigation_system)
      */
@@ -80,8 +81,8 @@ public enum NavigationApproachCapability {
     MNPS_APPROVED('X', -1),
     /**
      * Standard capabilities combine {@link #VOR} and {@link #ILS} plus
-     * {@link CommunicationCapability}. 2012 ICAO update removed {@link #ADF}
-     * from standard capabilities.
+     * {@link CommunicationCapability}. 2012 ICAO update removed {@link #ADF} from
+     * standard capabilities.
      */
     STANDARD('S', -1, VOR, ILS);
 
@@ -94,15 +95,17 @@ public enum NavigationApproachCapability {
         for (NavigationApproachCapability capability : values()) {
             NavigationApproachCapability previous = BY_DESIGNATOR.put(capability.designator, capability);
             if (previous != null) {
-                throw new RuntimeException("ambiguous designator " + capability.designator + " for " + previous + " and " + capability);
+                throw new RuntimeException(
+                    "ambiguous designator " + capability.designator + " for " + previous + " and " + capability //
+                );
             }
         }
     }
 
     private NavigationApproachCapability(char group, int level, NavigationApproachCapability... expanded) {
         designator = level >= 0
-                ? Character.toString(group) + Integer.toString(level)
-                : Character.toString(group);
+            ? Character.toString(group) + Integer.toString(level)
+            : Character.toString(group);
 
         Set<NavigationApproachCapability> expandedSet = new HashSet<NavigationApproachCapability>(asList(expanded));
         expandedSet.add(this);

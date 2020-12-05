@@ -1,10 +1,12 @@
 package org.vatplanner.dataformats.vatsimpublic.entities.status;
 
-import java.time.Instant;
 import static java.util.Collections.unmodifiableSortedSet;
+
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,8 +26,10 @@ public class Facility {
     private Connection connection;
     private final String name;
     private FacilityType type;
-    private int frequencyKilohertz = -1; // NOTE: information may change or be multiplied with future "Audio for VATSIM" developments (frequency coupling etc.)
-    private final SortedSet<FacilityMessage> messagesSortedByRecordTime = new TreeSet<>(COMPARATOR_MESSAGE_REPORT_RECORD_TIME);
+    private int frequencyKilohertz = -1; // NOTE: information may change or be multiplied with future "Audio for VATSIM"
+                                         // developments (frequency coupling etc.)
+    private final SortedSet<FacilityMessage> messagesSortedByRecordTime = new TreeSet<>(
+        COMPARATOR_MESSAGE_REPORT_RECORD_TIME);
 
     private static final int LOWEST_VALID_FREQUENCY_KILOHERTZ = 118000;
     private static final int HIGHEST_VALID_FREQUENCY_KILOHERTZ = 136975;
@@ -35,10 +39,9 @@ public class Facility {
     };
 
     /**
-     * Creates a new facility. If ATC service is provided, the name is
-     * well-defined by VACCs and can be resolved to air spaces. Names are
-     * mandatory and facilities are, at each time of record, uniquely identified
-     * by their name.
+     * Creates a new facility. If ATC service is provided, the name is well-defined
+     * by VACCs and can be resolved to air spaces. Names are mandatory and
+     * facilities are, at each time of record, uniquely identified by their name.
      *
      * @param name raw facility name
      * @throws IllegalArgumentException if facility name is null or empty
@@ -59,7 +62,7 @@ public class Facility {
      * Returns the associated client connection.
      *
      * @return associated client connection; may be null if information has been
-     * removed
+     *         removed
      */
     public Connection getConnection() {
         return connection;
@@ -68,7 +71,10 @@ public class Facility {
     public Facility setConnection(Connection connection) {
         this.connection = connection;
 
-        // TODO: add facility to member if available from connection; must not loop back; document
+        /*
+         * TODO: add facility to member if available from connection; must not loop
+         * back; document
+         */
         return this;
     }
 
@@ -87,8 +93,8 @@ public class Facility {
      * includes ATIS and FSS stations.
      * <p>
      * The check evaluates facility type and frequency. If any information is
-     * missing, it will be skipped. If all information is missing, ATC service
-     * will be assumed.
+     * missing, it will be skipped. If all information is missing, ATC service will
+     * be assumed.
      * </p>
      *
      * @return true if facility provides ATC service; false if not
@@ -96,7 +102,7 @@ public class Facility {
     public boolean providesATCService() {
         // NOTE: handling of frequencies may change in future AFV developments
         return ((type == null) || (type != FacilityType.OBSERVER))
-                && ((frequencyKilohertz <= 0) || isValidFrequency(frequencyKilohertz));
+            && ((frequencyKilohertz <= 0) || isValidFrequency(frequencyKilohertz));
     }
 
     /**
@@ -114,21 +120,21 @@ public class Facility {
     }
 
     /**
-     * Returns the first seen frequency in kilohertz (kHz) as indicated by
-     * status report. Invalid frequencies may be omitted on import. Only the
-     * first valid frequency is retained, later frequency changes are ignored.
+     * Returns the first seen frequency in kilohertz (kHz) as indicated by status
+     * report. Invalid frequencies may be omitted on import. Only the first valid
+     * frequency is retained, later frequency changes are ignored.
      *
      * <p>
-     * Also note that since Audio for VATSIM deployment the single reported
-     * primary controller frequency in data files has become rather inaccurate
-     * as controllers may use features such as frequency coupling which are (as
-     * of December 2019) not represented in data files. Complete information may
-     * be added at a later time by AFV development team but actual
-     * representation is unclear (multiplication as "pseudo stations" etc.).
+     * Also note that since Audio for VATSIM deployment the single reported primary
+     * controller frequency in data files has become rather inaccurate as
+     * controllers may use features such as frequency coupling which are (as of
+     * December 2019) not represented in data files. Complete information may be
+     * added at a later time by AFV development team but actual representation is
+     * unclear (multiplication as "pseudo stations" etc.).
      * </p>
      *
-     * @return first seen frequency in kilohertz (kHz); may be zero or negative
-     * if information has been removed
+     * @return first seen frequency in kilohertz (kHz); may be zero or negative if
+     *         information has been removed
      */
     public int getFrequencyKilohertz() {
         return frequencyKilohertz;
@@ -142,8 +148,8 @@ public class Facility {
     /**
      * Remembers the given frequency if no valid frequency has been set yet.
      *
-     * @param frequencyKilohertz frequency to set if previously set frequency
-     * was invalid
+     * @param frequencyKilohertz frequency to set if previously set frequency was
+     *        invalid
      * @return this instance for method-chaining
      */
     public Facility seenOnFrequencyKilohertz(int frequencyKilohertz) {
@@ -152,14 +158,18 @@ public class Facility {
         if (!isValidFrequency(this.frequencyKilohertz)) {
             setFrequencyKilohertz(frequencyKilohertz);
         } else if (frequencyKilohertz != this.frequencyKilohertz) {
-            LOGGER.trace("facility {} already recorded with frequency {}, ignoring change to {}", name, this.frequencyKilohertz, frequencyKilohertz);
+            LOGGER.trace( //
+                "facility {} already recorded with frequency {}, ignoring change to {}", //
+                name, this.frequencyKilohertz, frequencyKilohertz //
+            );
         }
 
         return this;
     }
 
     private boolean isValidFrequency(int frequencyKilohertz) {
-        return (LOWEST_VALID_FREQUENCY_KILOHERTZ <= frequencyKilohertz) && (frequencyKilohertz <= HIGHEST_VALID_FREQUENCY_KILOHERTZ);
+        return (LOWEST_VALID_FREQUENCY_KILOHERTZ <= frequencyKilohertz)
+            && (frequencyKilohertz <= HIGHEST_VALID_FREQUENCY_KILOHERTZ);
     }
 
     /**
@@ -174,8 +184,7 @@ public class Facility {
 
     /**
      * Adds a message to this facility. See
-     * {@link #seenMessage(Report, String, Instant)} for easier handling of
-     * updates.
+     * {@link #seenMessage(Report, String, Instant)} for easier handling of updates.
      *
      * @param message message to be added
      * @return this instance for method-chaining
@@ -184,6 +193,7 @@ public class Facility {
     public Facility addMessage(FacilityMessage message) {
         // TODO: ensure message not already added
         messagesSortedByRecordTime.add(message);
+
         // TODO: set facility on message; must not loop back; document
 
         // QUESTION: remove in favor of seenMessage?
@@ -191,8 +201,8 @@ public class Facility {
     }
 
     /**
-     * Checks if the message is already known and updates it, otherwise adds it
-     * to the facility.
+     * Checks if the message is already known and updates it, otherwise adds it to
+     * the facility.
      *
      * @param report report the message appears in
      * @param content message content
@@ -206,24 +216,23 @@ public class Facility {
         }
 
         boolean isLastMessage = (lastMessage != null)
-                && content.equals(lastMessage.getMessage());
+            && content.equals(lastMessage.getMessage());
 
         if (isLastMessage) {
             lastMessage.seenInReport(report);
         } else {
             messagesSortedByRecordTime.add(
-                    factory.createFacilityMessage(this)
-                            .setMessage(content)
-                            .seenInReport(report)
-            );
+                factory.createFacilityMessage(this)
+                    .setMessage(content)
+                    .seenInReport(report));
         }
 
         return this;
     }
 
     /**
-     * Normalizes a facility name. Normalization is performed by trimming the
-     * input and converting it to upper case.
+     * Normalizes a facility name. Normalization is performed by trimming the input
+     * and converting it to upper case.
      *
      * @param name facility name to normalize
      * @return normalized facility name

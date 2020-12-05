@@ -1,11 +1,13 @@
 package org.vatplanner.dataformats.vatsimpublic.parser;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 
 @RunWith(DataProviderRunner.class)
 public class FSDServerTest {
@@ -59,27 +61,31 @@ public class FSDServerTest {
 
     @Test
     @DataProvider({
-        //              object A                              ||                    object B
+        // object A || object B
         // ID
         "MYID,    some.server.net, Somewhere, Name,     true,   myid,     some.server.net, Somewhere, Name,     true ", // 0
         "serverA, 123.4.56.7,      Anywhere,  Server A, false,  server A, 123.4.56.7,      Anywhere,  Server A, false", // 1
         "serverA, 123.4.56.7,      Anywhere,  Server A, false,  null,     123.4.56.7,      Anywhere,  Server A, false", // 2
         "null,    123.4.56.7,      Anywhere,  Server A, false,  serverA,  123.4.56.7,      Anywhere,  Server A, false", // 3
+
         // address
         "MYID,    some.server.net, Somewhere, Name,     true,   MYID,     someserver.net,  Somewhere, Name,     true ", // 4
         "serverA, 123.4.56.7,      Anywhere,  Server A, false,  serverA,  123.45.6.7,      Anywhere,  Server A, false", // 5
         "serverA, 123.4.56.7,      Anywhere,  Server A, false,  serverA,  null,            Anywhere,  Server A, false", // 6
         "serverA, null,            Anywhere,  Server A, false,  serverA,  123.4.56.7,      Anywhere,  Server A, false", // 7
+
         // location
         "MYID,    some.server.net, Somewhere, Name,     true,   MYID,     some.server.net, SomeWhere, Name,     true ", // 8
         "serverA, 123.4.56.7,      Anywhere,  Server A, false,  serverA,  123.4.56.7,      Any where, Server A, false", // 9
         "serverA, 123.4.56.7,      Anywhere,  Server A, false,  serverA,  123.4.56.7,      null,      Server A, false", // 10
         "serverA, 123.4.56.7,      null,      Server A, false,  serverA,  123.4.56.7,      Anywhere,  Server A, false", // 11
+
         // name
         "MYID,    some.server.net, Somewhere, Name,     true,   MYID,     some.server.net, Somewhere, NAME,     true ", // 12
         "serverA, 123.4.56.7,      Anywhere,  Server A, false,  serverA,  123.4.56.7,      Anywhere,  ServerA,  false", // 13
         "serverA, 123.4.56.7,      Anywhere,  Server A, false,  serverA,  123.4.56.7,      Anywhere,  null,     false", // 14
         "serverA, 123.4.56.7,      Anywhere,  null,     false,  serverA,  123.4.56.7,      Anywhere,  Server A, false", // 15
+
         // client connection allowed
         "MYID,    some.server.net, Somewhere, Name,     true,   MYID,     some.server.net, Somewhere, Name,     false", // 16
         "serverA, 123.4.56.7,      Anywhere,  Server A, false,  serverA,  123.4.56.7,      Anywhere,  Server A, true ", // 17
@@ -98,10 +104,10 @@ public class FSDServerTest {
 
     private FSDServer createFSDServer(String id, String address, String location, String name, boolean clientConnectionAllowed) {
         return new FSDServer()
-                .setId(id)
-                .setAddress(address)
-                .setLocation(location)
-                .setName(name)
-                .setClientConnectionAllowed(clientConnectionAllowed);
+            .setId(id)
+            .setAddress(address)
+            .setLocation(location)
+            .setName(name)
+            .setClientConnectionAllowed(clientConnectionAllowed);
     }
 }

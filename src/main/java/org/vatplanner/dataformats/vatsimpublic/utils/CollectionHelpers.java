@@ -32,9 +32,9 @@ public class CollectionHelpers {
     }
 
     /**
-     * Searches a {@link Collection} for given needle and returns the element
-     * just before, if any exists. To make any sense, Collection iterator should
-     * return elements in a consistent order (such as for a {@link List} or
+     * Searches a {@link Collection} for given needle and returns the element just
+     * before, if any exists. To make any sense, Collection iterator should return
+     * elements in a consistent order (such as for a {@link List} or
      * {@link SortedSet}).
      *
      * <p>

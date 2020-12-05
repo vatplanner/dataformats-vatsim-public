@@ -1,9 +1,10 @@
 package org.vatplanner.dataformats.vatsimpublic.entities.status;
 
-import java.time.Instant;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Collections.unmodifiableSortedSet;
+
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
 import org.vatplanner.dataformats.vatsimpublic.entities.TimeSpan;
 
 /**
@@ -63,13 +65,13 @@ public class Flight {
     };
 
     /**
-     * Creates a new flight. Flights can only be identified uniquely at time of
-     * each report by a tuple of both member/VATSIM ID and callsign. See class
-     * JavaDoc for further information.
+     * Creates a new flight. Flights can only be identified uniquely at time of each
+     * report by a tuple of both member/VATSIM ID and callsign. See class JavaDoc
+     * for further information.
      *
      * @param member member performing or filing this flight
      * @param callsign actual (connected) or intended (pre-filed) callsign to be
-     * used on this flight
+     *        used on this flight
      */
     public Flight(Member member, String callsign) {
         this.member = member;
@@ -92,8 +94,8 @@ public class Flight {
      * Returns all connections related to this flight. Connections are returned
      * sorted by their log on time in ascending order.
      *
-     * @return all connections related to this flight ordered by log on time;
-     * never null
+     * @return all connections related to this flight ordered by log on time; never
+     *         null
      */
     public SortedSet<Connection> getConnections() {
         if (connections == null) {
@@ -107,7 +109,7 @@ public class Flight {
      * Returns the latest connection determined by log on time.
      *
      * @return latest connection by log on time; null if no connection has been
-     * recorded
+     *         recorded
      */
     public Connection getLatestConnection() {
         if (connections == null) {
@@ -118,8 +120,8 @@ public class Flight {
     }
 
     /**
-     * Adds a connection to this flight if it has not yet been recorded.
-     * Attempting to add an existing connection again has no effect.
+     * Adds a connection to this flight if it has not yet been recorded. Attempting
+     * to add an existing connection again has no effect.
      *
      * @param connection connection to be added
      * @return this instance for method-chaining
@@ -149,15 +151,14 @@ public class Flight {
     }
 
     /**
-     * Adds a new flight plan to this flight. Flight plans are uniquely
-     * identified by their revision per flight. If another flight plan is
-     * requested to be added having the same revision number, the operation will
-     * fail.
+     * Adds a new flight plan to this flight. Flight plans are uniquely identified
+     * by their revision per flight. If another flight plan is requested to be added
+     * having the same revision number, the operation will fail.
      *
      * @param flightPlan flight plan to be added
      * @return this instance for method-chaining
      * @throws UnsupportedOperationException if a different flight plan of that
-     * revision has already been added
+     *         revision has already been added
      */
     public Flight addFlightPlan(FlightPlan flightPlan) {
         // TODO: check if flight plan already exists and fail if other instance
@@ -201,8 +202,8 @@ public class Flight {
      *
      * @param point point to add to this flight's track
      * @return this instance for method-chaining
-     * @throws IllegalArgumentException if given track point does not reference
-     * a timed {@link Report}
+     * @throws IllegalArgumentException if given track point does not reference a
+     *         timed {@link Report}
      */
     public Flight addTrackPoint(TrackPoint point) {
         if (track == null) {
@@ -289,7 +290,7 @@ public class Flight {
      * flight plan to last seen record of connection.
      *
      * @return time span between first connection or pre-filing to last seen
-     * connection record
+     *         connection record
      */
     public TimeSpan getVisibleTimeSpan() {
         TimeSpan timeSpan = new TimeSpan();
@@ -315,8 +316,8 @@ public class Flight {
      * Checks if the flight needed to be reconstructed for given report.
      *
      * @param report report to check for reconstruction
-     * @return true if flight data needed reconstruction for given report, false
-     * if not
+     * @return true if flight data needed reconstruction for given report, false if
+     *         not
      */
     public boolean isReconstructed(Report report) {
         if (reconstructedReports == null) {
@@ -353,14 +354,14 @@ public class Flight {
     }
 
     /**
-     * Records given event to have occurred at track point. Track point must
-     * have been registered to track before. Every track point must only have at
-     * most one event assigned.
+     * Records given event to have occurred at track point. Track point must have
+     * been registered to track before. Every track point must only have at most one
+     * event assigned.
      *
      * @param trackPoint track point to record event for
      * @param event event to be recorded
      * @throws IllegalArgumentException if any argument is null, point is not on
-     * track or point already has an event assigned
+     *         track or point already has an event assigned
      */
     public void markEvent(TrackPoint trackPoint, FlightEvent event) {
         if (event == null) {
@@ -380,7 +381,13 @@ public class Flight {
         }
 
         if (events.containsKey(trackPoint)) {
-            throw new IllegalArgumentException("track point is already marked with another event (old " + events.get(trackPoint) + ", new " + event + ")");
+            throw new IllegalArgumentException(//
+                "track point is already marked with another event (old "
+                    + events.get(trackPoint) //
+                    + ", new " //
+                    + event //
+                    + ")" //
+            );
         }
 
         events.put(trackPoint, event);
@@ -400,8 +407,7 @@ public class Flight {
     }
 
     /**
-     * Checks if the flight is airborne as of last recorded track point and
-     * event.
+     * Checks if the flight is airborne as of last recorded track point and event.
      *
      * @return true if airborne, false if not taken off yet or already landed
      */
@@ -414,8 +420,7 @@ public class Flight {
     }
 
     /**
-     * Checks if the flight has landed as of last recorded track point and
-     * event.
+     * Checks if the flight has landed as of last recorded track point and event.
      *
      * @return true if landed, false if still airborne or not taken off yet
      */
@@ -428,5 +433,8 @@ public class Flight {
     }
 
     // TODO: unit tests
-    // TODO: add connected aircraft type because it may be different from prefiling? (is this actually still needed?)
+    /*
+     * TODO: add connected aircraft type because it may be different from prefiling?
+     * (is this actually still needed?)
+     */
 }

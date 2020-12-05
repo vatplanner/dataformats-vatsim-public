@@ -1,9 +1,9 @@
 package org.vatplanner.dataformats.vatsimpublic.testutils;
 
-import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
 
 /**
  * Provides a Hamcrest {@link TypeSafeMatcher} for testing
@@ -23,17 +23,18 @@ public class ParserLogEntryMatcher extends TypeSafeMatcher<ParserLogEntry> {
      * {@link ParserLogEntry}.
      *
      * @param sectionMatcher matcher to be applied to
-     * {@link ParserLogEntry#getSection()}
+     *        {@link ParserLogEntry#getSection()}
      * @param lineContentMatcher matcher to be applied to
-     * {@link ParserLogEntry#getLineContent()}
+     *        {@link ParserLogEntry#getLineContent()}
      * @param isLineRejectedMatcher matcher to be applied to
-     * {@link ParserLogEntry#isLineRejected()}
+     *        {@link ParserLogEntry#isLineRejected()}
      * @param messageMatcher matcher to be applied to
-     * {@link ParserLogEntry#getMessage()}
+     *        {@link ParserLogEntry#getMessage()}
      * @param throwableMatcher matcher to be applied to
-     * {@link ParserLogEntry#getThrowable()}
+     *        {@link ParserLogEntry#getThrowable()}
      */
-    public ParserLogEntryMatcher(Matcher<String> sectionMatcher, Matcher<String> lineContentMatcher, Matcher<Boolean> isLineRejectedMatcher, Matcher<String> messageMatcher, Matcher<Throwable> throwableMatcher) {
+    public ParserLogEntryMatcher(Matcher<String> sectionMatcher, Matcher<String> lineContentMatcher,
+        Matcher<Boolean> isLineRejectedMatcher, Matcher<String> messageMatcher, Matcher<Throwable> throwableMatcher) {
         this.sectionMatcher = sectionMatcher;
         this.lineContentMatcher = lineContentMatcher;
         this.isLineRejectedMatcher = isLineRejectedMatcher;
@@ -46,28 +47,29 @@ public class ParserLogEntryMatcher extends TypeSafeMatcher<ParserLogEntry> {
      * {@link ParserLogEntry}.
      *
      * @param sectionMatcher matcher to be applied to
-     * {@link ParserLogEntry#getSection()}
+     *        {@link ParserLogEntry#getSection()}
      * @param lineContentMatcher matcher to be applied to
-     * {@link ParserLogEntry#getLineContent()}
+     *        {@link ParserLogEntry#getLineContent()}
      * @param isLineRejectedMatcher matcher to be applied to
-     * {@link ParserLogEntry#isLineRejected()}
+     *        {@link ParserLogEntry#isLineRejected()}
      * @param messageMatcher matcher to be applied to
-     * {@link ParserLogEntry#getMessage()}
+     *        {@link ParserLogEntry#getMessage()}
      * @param throwableMatcher matcher to be applied to
-     * {@link ParserLogEntry#getThrowable()}
+     *        {@link ParserLogEntry#getThrowable()}
      * @return matcher checking all attributes
      */
     public static ParserLogEntryMatcher matchesParserLogEntry(Matcher<String> sectionMatcher, Matcher<String> lineContentMatcher, Matcher<Boolean> isLineRejectedMatcher, Matcher<String> messageMatcher, Matcher<Throwable> throwableMatcher) {
-        return new ParserLogEntryMatcher(sectionMatcher, lineContentMatcher, isLineRejectedMatcher, messageMatcher, throwableMatcher);
+        return new ParserLogEntryMatcher(sectionMatcher, lineContentMatcher, isLineRejectedMatcher, messageMatcher,
+            throwableMatcher);
     }
 
     @Override
     protected boolean matchesSafely(ParserLogEntry actualEntry) {
         return sectionMatcher.matches(actualEntry.getSection())
-                && lineContentMatcher.matches(actualEntry.getLineContent())
-                && isLineRejectedMatcher.matches(actualEntry.isLineRejected())
-                && messageMatcher.matches(actualEntry.getMessage())
-                && throwableMatcher.matches(actualEntry.getThrowable());
+            && lineContentMatcher.matches(actualEntry.getLineContent())
+            && isLineRejectedMatcher.matches(actualEntry.isLineRejected())
+            && messageMatcher.matches(actualEntry.getMessage())
+            && throwableMatcher.matches(actualEntry.getThrowable());
     }
 
     @Override
@@ -111,10 +113,9 @@ public class ParserLogEntryMatcher extends TypeSafeMatcher<ParserLogEntry> {
      * checker's mismatch description.
      *
      * @param <T> type of objects validated by matcher
-     * @param attributeDescription description of attribute matcher belongs to
-     * (will be used as prefix to matcher description)
-     * @param actualValue actual value to be validated against configured
-     * matcher
+     * @param attributeDescription description of attribute matcher belongs to (will
+     *        be used as prefix to matcher description)
+     * @param actualValue actual value to be validated against configured matcher
      * @param matcher matcher configured with an expectation
      * @param mismatchDescription receives detailed description on mismatch
      */

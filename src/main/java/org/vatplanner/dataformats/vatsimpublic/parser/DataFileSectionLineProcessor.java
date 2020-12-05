@@ -88,8 +88,8 @@ public class DataFileSectionLineProcessor {
 
             // link line with section for later processing
             linesBySectionName
-                    .computeIfAbsent(sectionName, k -> new ArrayList<>())
-                    .add(contentLine);
+                .computeIfAbsent(sectionName, k -> new ArrayList<>())
+                .add(contentLine);
         }
     }
 
@@ -98,9 +98,9 @@ public class DataFileSectionLineProcessor {
      * specified section.
      *
      * @param sectionName section to apply function to; must neither be null nor
-     * empty
-     * @param function will be applied to every non-empty, non-comment line;
-     * must not be null
+     *        empty
+     * @param function will be applied to every non-empty, non-comment line; must
+     *        not be null
      * @return this processor instance for method-chaining
      * @throws IllegalArgumentException if requirements are not fulfilled
      */
@@ -126,8 +126,8 @@ public class DataFileSectionLineProcessor {
     }
 
     /**
-     * Returns the result as a string. The result maintains all line-end
-     * characters and comments.
+     * Returns the result as a string. The result maintains all line-end characters
+     * and comments.
      *
      * @return result as string
      */

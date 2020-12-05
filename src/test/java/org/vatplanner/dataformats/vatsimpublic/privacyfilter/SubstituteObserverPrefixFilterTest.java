@@ -1,18 +1,23 @@
 package org.vatplanner.dataformats.vatsimpublic.privacyfilter;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.vatplanner.dataformats.vatsimpublic.testutils.DataProviderHelpers.allEnumValuesExcept;
+
 import java.util.Set;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.vatplanner.dataformats.vatsimpublic.parser.ClientFields;
-import static org.vatplanner.dataformats.vatsimpublic.testutils.DataProviderHelpers.allEnumValuesExcept;
+
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 
 @RunWith(DataProviderRunner.class)
 public class SubstituteObserverPrefixFilterTest {
@@ -94,16 +99,22 @@ public class SubstituteObserverPrefixFilterTest {
     @Test
     @DataProvider({
         // full online examples (pilots)
-        "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:SOME COMMENT /v/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:, UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:SOME COMMENT /v/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", // no suffix => remain unmodified
-        "JD_OBS:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:SOME COMMENT /v/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:, XX_OBS:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:SOME COMMENT /v/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:", // suffix => substitute
+        // - no suffix => remain unmodified
+        "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:SOME COMMENT /v/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:, UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:SOME COMMENT /v/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
+        // - suffix => substitute
+        "JD_OBS:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:SOME COMMENT /v/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:, XX_OBS:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:SOME COMMENT /v/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
 
         // full online examples (ATC)
-        "ABCD_GND:123456:John Doe:ATC:123.450:52.12345:13.54321:0:::0::::MYSERVER:100:2::3:300::::::::::::::::$ SOME.SERVER.NET/WHATEVER:20190311090000:20190311083000::::, ABCD_GND:123456:John Doe:ATC:123.450:52.12345:13.54321:0:::0::::MYSERVER:100:2::3:300::::::::::::::::$ SOME.SERVER.NET/WHATEVER:20190311090000:20190311083000::::", // no suffix => remain unmodified
-        "JD_OBS:123456:John Doe:ATC:123.450:52.12345:13.54321:0:::0::::MYSERVER:100:2::3:300::::::::::::::::$ SOME.SERVER.NET/WHATEVER:20190311090000:20190311083000::::, XX_OBS:123456:John Doe:ATC:123.450:52.12345:13.54321:0:::0::::MYSERVER:100:2::3:300::::::::::::::::$ SOME.SERVER.NET/WHATEVER:20190311090000:20190311083000::::", // suffix => substitute
+        // - no suffix => remain unmodified
+        "ABCD_GND:123456:John Doe:ATC:123.450:52.12345:13.54321:0:::0::::MYSERVER:100:2::3:300::::::::::::::::$ SOME.SERVER.NET/WHATEVER:20190311090000:20190311083000::::, ABCD_GND:123456:John Doe:ATC:123.450:52.12345:13.54321:0:::0::::MYSERVER:100:2::3:300::::::::::::::::$ SOME.SERVER.NET/WHATEVER:20190311090000:20190311083000::::",
+        // - suffix => substitute
+        "JD_OBS:123456:John Doe:ATC:123.450:52.12345:13.54321:0:::0::::MYSERVER:100:2::3:300::::::::::::::::$ SOME.SERVER.NET/WHATEVER:20190311090000:20190311083000::::, XX_OBS:123456:John Doe:ATC:123.450:52.12345:13.54321:0:::0::::MYSERVER:100:2::3:300::::::::::::::::$ SOME.SERVER.NET/WHATEVER:20190311090000:20190311083000::::",
 
         // full prefiled example (pilots)
-        "ABC987A:54321::::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:+VFPS+/V/PBN/A1B1C1D1L1O1 DOF/190311 REG/A12345 RMK/TCAS:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::, ABC987A:54321::::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:+VFPS+/V/PBN/A1B1C1D1L1O1 DOF/190311 REG/A12345 RMK/TCAS:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::", // no suffix => remain unmodified
-        "JD_OBS:54321::::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:+VFPS+/V/PBN/A1B1C1D1L1O1 DOF/190311 REG/A12345 RMK/TCAS:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::, XX_OBS:54321::::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:+VFPS+/V/PBN/A1B1C1D1L1O1 DOF/190311 REG/A12345 RMK/TCAS:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::", // suffix => substitute
+        // - no suffix => remain unmodified
+        "ABC987A:54321::::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:+VFPS+/V/PBN/A1B1C1D1L1O1 DOF/190311 REG/A12345 RMK/TCAS:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::, ABC987A:54321::::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:+VFPS+/V/PBN/A1B1C1D1L1O1 DOF/190311 REG/A12345 RMK/TCAS:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::",
+        // - suffix => substitute
+        "JD_OBS:54321::::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:+VFPS+/V/PBN/A1B1C1D1L1O1 DOF/190311 REG/A12345 RMK/TCAS:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::, XX_OBS:54321::::::::H/B772/L:500:ESSA:34000:LIRF:::::::0:I:1030:1042:3:0:5:20:EDDM:+VFPS+/V/PBN/A1B1C1D1L1O1 DOF/190311 REG/A12345 RMK/TCAS:ANOSA ROUTE FOR TSTNG:0:0:0:0:::::::",
 
         // minimal truncated examples
         ":, :",

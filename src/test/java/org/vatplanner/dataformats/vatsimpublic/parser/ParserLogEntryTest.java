@@ -1,15 +1,16 @@
 package org.vatplanner.dataformats.vatsimpublic.parser;
 
-import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertThat;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 
 /**
  * Unit tests for {@link ParserLogEntry}.
@@ -22,9 +23,9 @@ public class ParserLogEntryTest {
 
     @DataProvider
     public static Object[][] dataProviderThrowablesAndExpectedClassNames() {
-        return new Object[][]{
-            new Object[]{new Throwable(), "java.lang.Throwable"},
-            new Object[]{new IllegalArgumentException(), "java.lang.IllegalArgumentException"}
+        return new Object[][] {
+            { new Throwable(), "java.lang.Throwable" },
+            { new IllegalArgumentException(), "java.lang.IllegalArgumentException" }
         };
     }
 
@@ -40,7 +41,7 @@ public class ParserLogEntryTest {
     }
 
     @Test
-    @DataProvider({"", "abc"})
+    @DataProvider({ "", "abc" })
     public void testConstructor_nonNullMessage_doesNotFail(String message) {
         // Arrange (nothing to do)
 
@@ -51,7 +52,7 @@ public class ParserLogEntryTest {
     }
 
     @Test
-    @DataProvider({"SOME_SECTION", "somethingElse"})
+    @DataProvider({ "SOME_SECTION", "somethingElse" })
     public void testToString_nonNullSection_listsSection(String expectedSection) {
         // Arrange
         ParserLogEntry entry = new ParserLogEntry(expectedSection, "xyz", false, "some message", null);
@@ -76,7 +77,7 @@ public class ParserLogEntryTest {
     }
 
     @Test
-    @DataProvider({"This is some line content.", "1:2:3:4:some:more content"})
+    @DataProvider({ "This is some line content.", "1:2:3:4:some:more content" })
     public void testToString_nonNullLineContent_listsLineContent(String expectedLineContent) {
         // Arrange
         ParserLogEntry entry = new ParserLogEntry("abc", expectedLineContent, false, "some message", null);
@@ -101,7 +102,7 @@ public class ParserLogEntryTest {
     }
 
     @Test
-    @DataProvider({"true,true", "false,false"})
+    @DataProvider({ "true,true", "false,false" })
     public void testToString_anyLineContent_listsLineRejection(boolean isLineRejected, String expectedRejectionOutput) {
         // Arrange
         ParserLogEntry entry = new ParserLogEntry("abc", "xyz", isLineRejected, "some message", null);
@@ -114,7 +115,7 @@ public class ParserLogEntryTest {
     }
 
     @Test
-    @DataProvider({"Expected message #1", "This is another message to be expected."})
+    @DataProvider({ "Expected message #1", "This is another message to be expected." })
     public void testToString_anyMessage_containsMessage(String expectedMessage) {
         // Arrange
         ParserLogEntry entry = new ParserLogEntry("abc", "xyz", false, expectedMessage, null);
@@ -140,10 +141,11 @@ public class ParserLogEntryTest {
     }
 
     @Test
-    @DataProvider({"Message of Throwable", "Another exception detail."})
+    @DataProvider({ "Message of Throwable", "Another exception detail." })
     public void testToString_nonNullThrowable_containsThrowableMessage(String expectedThrowableMessage) {
         // Arrange
-        ParserLogEntry entry = new ParserLogEntry("abc", "xyz", false, "some message", new Throwable(expectedThrowableMessage));
+        ParserLogEntry entry = new ParserLogEntry("abc", "xyz", false, "some message",
+            new Throwable(expectedThrowableMessage));
 
         // Act
         String result = entry.toString();

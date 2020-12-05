@@ -1,17 +1,20 @@
 package org.vatplanner.dataformats.vatsimpublic.utils;
 
+import static java.util.Arrays.asList;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.vatplanner.dataformats.vatsimpublic.testutils.OptionalMatchers.emptyOptional;
+import static org.vatplanner.dataformats.vatsimpublic.testutils.OptionalMatchers.optionalOf;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
-import static java.util.Arrays.asList;
-import java.util.List;
-import java.util.Optional;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import static org.vatplanner.dataformats.vatsimpublic.testutils.OptionalMatchers.emptyOptional;
-import static org.vatplanner.dataformats.vatsimpublic.testutils.OptionalMatchers.optionalOf;
 
 @RunWith(DataProviderRunner.class)
 public class CollectionHelpersTest {
@@ -43,12 +46,12 @@ public class CollectionHelpersTest {
 
     @DataProvider
     public static Object[][] dataProviderFindPrevious() {
-        return new Object[][]{
-            {asList(0, 1), 1, 0},
-            {asList(0, 1, 2), 2, 1},
-            {asList(5, 23, 42, 73), 23, 5},
-            {asList(5, 23, 42, 73), 42, 23},
-            {asList(5, 23, 42, 73), 73, 42}
+        return new Object[][] {
+            { asList(0, 1), 1, 0 },
+            { asList(0, 1, 2), 2, 1 },
+            { asList(5, 23, 42, 73), 23, 5 },
+            { asList(5, 23, 42, 73), 42, 23 },
+            { asList(5, 23, 42, 73), 73, 42 }
         };
     }
 

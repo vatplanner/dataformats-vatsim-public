@@ -11,15 +11,18 @@ import java.util.function.Function;
  * This is mainly (only?) useful to verify filter results.
  */
 public class ClientFields {
-    // FIXME: write script to auto-generate https://area-51.blog/2009/11/07/using-groovy-to-generate-java-sources-in-maven/
+    /*
+     * FIXME: write script to auto-generate
+     * https://area-51.blog/2009/11/07/using-groovy-to-generate-java-sources-in-
+     * maven/
+     */
 
     private ClientFields() {
         // utility class; hide constructor
     }
 
     /**
-     * All {@link Client} object fields resulting in {@link String} return
-     * values.
+     * All {@link Client} object fields resulting in {@link String} return values.
      */
     public enum StringFields implements FieldAccess<String> {
         CALLSIGN(Client::getCallsign), //
@@ -69,8 +72,7 @@ public class ClientFields {
         Function<Client, T> getter();
 
         /**
-         * Uses the getter method to retrieve field content from given
-         * {@link Client}.
+         * Uses the getter method to retrieve field content from given {@link Client}.
          *
          * @param client client instance to retrieve field content from
          * @return field content
@@ -86,7 +88,7 @@ public class ClientFields {
      * regardless of their type.
      *
      * @param <T> abstract type forcing elements to be both {@link Enum} and
-     * {@link FieldAccess}
+     *        {@link FieldAccess}
      * @return all {@link Client} fields
      */
     public static <T extends Enum & FieldAccess<?>> Set<T> getAllFields() {

@@ -2,6 +2,7 @@ package org.vatplanner.dataformats.vatsimpublic.privacyfilter.errorhandling;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
+
 import org.vatplanner.dataformats.vatsimpublic.parser.ClientFields;
 
 /**
@@ -13,11 +14,12 @@ public class ThrowExceptionStrategy implements ErrorHandlingStrategy {
 
     @Override
     public String handleError(String rawLine, String filteredLine, Collection<ClientFields.FieldAccess> affectedFields) {
-        throw new FailWithException("Filtering failed on client fields: "
+        throw new FailWithException( //
+            "Filtering failed on client fields: "
                 + affectedFields //
-                        .stream() //
-                        .map(ClientFields.FieldAccess::name)
-                        .collect(Collectors.joining(", "))
+                    .stream() //
+                    .map(ClientFields.FieldAccess::name)
+                    .collect(Collectors.joining(", ")) //
         );
     }
 

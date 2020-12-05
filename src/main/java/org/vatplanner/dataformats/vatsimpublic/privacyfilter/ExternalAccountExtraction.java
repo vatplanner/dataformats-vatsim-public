@@ -29,21 +29,39 @@ import java.util.regex.Pattern;
  */
 public class ExternalAccountExtraction {
 
-    private static final Pattern PATTERN_1 = Pattern.compile("(?:twitch(?:\\.?tv|\\.com|)|youtu\\.?be(?:\\.com|)|discord(?:\\.gg|\\.me)/|facebook\\.com|hitbox\\.tv|smashcast\\.tv|mixer\\.com)(?:\\s*(?:stream(?:er|)|/?channel|/?user|/?groups|/c/|/watch\\?v=|)\\s*|)[_/ \\[=]*([^/^§$\\] \\?]+)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_1 = Pattern.compile( //
+        "(?:twitch(?:\\.?tv|\\.com|)|youtu\\.?be(?:\\.com|)|discord(?:\\.gg|\\.me)/|facebook\\.com|hitbox\\.tv|smashcast\\.tv|mixer\\.com)(?:\\s*(?:stream(?:er|)|/?channel|/?user|/?groups|/c/|/watch\\?v=|)\\s*|)[_/ \\[=]*([^/^§$\\] \\?]+)", //
+        Pattern.CASE_INSENSITIVE //
+    );
     private static final int PATTERN_1_ACCOUNT = 1;
 
-    private static final Pattern PATTERN_2 = Pattern.compile("([a-z0-9_\\-\\.\"']+) on (?:youtube|twitter|twitch|facebook|discord)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_2 = Pattern.compile( //
+        "([a-z0-9_\\-\\.\"']+) on (?:youtube|twitter|twitch|facebook|discord)", //
+        Pattern.CASE_INSENSITIVE //
+    );
     private static final int PATTERN_2_ACCOUNT = 1;
 
-    private static final Pattern PATTERN_3 = Pattern.compile("(?:youtube|twitter|twitch(?:[\\. /]*tv|)|facebook)(?:[ \\-]*(?:channel|user|page|live|(?:live[- ]*|)stream(?:ing|)|/|)[ \\-]*)[\"'@\\*\\-_= \\|><]+([a-z0-9_\\-\\. ]+)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_3 = Pattern.compile( //
+        "(?:youtube|twitter|twitch(?:[\\. /]*tv|)|facebook)(?:[ \\-]*(?:channel|user|page|live|(?:live[- ]*|)stream(?:ing|)|/|)[ \\-]*)[\"'@\\*\\-_= \\|><]+([a-z0-9_\\-\\. ]+)", //
+        Pattern.CASE_INSENSITIVE //
+    );
     private static final int PATTERN_3_ACCOUNT = 1;
 
-    private static final Pattern PATTERN_4 = Pattern.compile("(?:youtube|twitter|twitch(?:\\s?tv|)|facebook|instagram)[^a-z]*?(?:[@/]|at)([a-z0-9_\\-\\. ]+)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_4 = Pattern.compile( //
+        "(?:youtube|twitter|twitch(?:\\s?tv|)|facebook|instagram)[^a-z]*?(?:[@/]|at)([a-z0-9_\\-\\. ]+)", //
+        Pattern.CASE_INSENSITIVE //
+    );
     private static final int PATTERN_4_ACCOUNT = 1;
 
-    private static final Pattern PATTERN_NOACCOUNT = Pattern.compile("https?|[vtr]|[^a-z0-9]+|stream(|ing|s)|live|live[ \\-]*stream(|ing)|channel|page|vacc|this|call\\s*sign|twitch(\\.tv|\\.com|)|youtube(\\.com|)|.{1,2}|.{30,}", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_NOACCOUNT = Pattern.compile( //
+        "https?|[vtr]|[^a-z0-9]+|stream(|ing|s)|live|live[ \\-]*stream(|ing)|channel|page|vacc|this|call\\s*sign|twitch(\\.tv|\\.com|)|youtube(\\.com|)|.{1,2}|.{30,}", //
+        Pattern.CASE_INSENSITIVE //
+    );
 
-    private static final Pattern PATTERN_EXTRA_CHARS = Pattern.compile("[;@\\s\\.+*\\-_/\"'(=\\[]*(?:watch\\?v=|)(.*?)[\\s\\.+*\\-_/\"')=\\]]*", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_EXTRA_CHARS = Pattern.compile( //
+        "[;@\\s\\.+*\\-_/\"'(=\\[]*(?:watch\\?v=|)(.*?)[\\s\\.+*\\-_/\"')=\\]]*", //
+        Pattern.CASE_INSENSITIVE //
+    );
     private static final int PATTERN_EXTRA_CHARS_KEEP = 1;
 
     private boolean checkPossibleAccount(String s) {

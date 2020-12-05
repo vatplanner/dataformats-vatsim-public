@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,15 +39,16 @@ public class NetworkInformationParser {
 
     private static final Pattern PATTERN_COMMENT_OR_SPACE = Pattern.compile("^(;.*|\\s*)$");
 
-    private static final Map<String, Pattern> expectedDefinitionPatternsByParameterKey = toStringPatternMap(new Object[][]{
-        new Object[]{NetworkInformation.PARAMETER_KEY_MESSAGE_STARTUP, Pattern.compile(".*application startup.*")},
-        new Object[]{NetworkInformation.PARAMETER_KEY_URL_DATA_FILE, Pattern.compile(".*complete data.*")},
-        new Object[]{NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, Pattern.compile(".*servers list.*")},
-        new Object[]{NetworkInformation.PARAMETER_KEY_URL_MOVED, Pattern.compile(".*more updated status.*")},
-        new Object[]{NetworkInformation.PARAMETER_KEY_URL_METAR, Pattern.compile(".*passing a parameter.*\\?id=.*")},
-        new Object[]{NetworkInformation.PARAMETER_KEY_URL_ATIS, Pattern.compile(".*no longer available.*")},
-        new Object[]{NetworkInformation.PARAMETER_KEY_URL_USER_STATISTICS, Pattern.compile(".*statistics.*page.*")}
-    });
+    private static final Map<String, Pattern> expectedDefinitionPatternsByParameterKey = toStringPatternMap(
+        new Object[][] {
+            { NetworkInformation.PARAMETER_KEY_MESSAGE_STARTUP, Pattern.compile(".*application startup.*") },
+            { NetworkInformation.PARAMETER_KEY_URL_DATA_FILE, Pattern.compile(".*complete data.*") },
+            { NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, Pattern.compile(".*servers list.*") },
+            { NetworkInformation.PARAMETER_KEY_URL_MOVED, Pattern.compile(".*more updated status.*") },
+            { NetworkInformation.PARAMETER_KEY_URL_METAR, Pattern.compile(".*passing a parameter.*\\?id=.*") },
+            { NetworkInformation.PARAMETER_KEY_URL_ATIS, Pattern.compile(".*no longer available.*") },
+            { NetworkInformation.PARAMETER_KEY_URL_USER_STATISTICS, Pattern.compile(".*statistics.*page.*") }
+        });
 
     private static Map<String, Pattern> toStringPatternMap(Object[][] pairs) {
         HashMap<String, Pattern> map = new HashMap<>();

@@ -36,8 +36,8 @@ public class FlightPlan {
     private String alternateAirportCode;
 
     /**
-     * Creates a new flight plan. Flight plans always require a revision number
-     * for indexing and a flight as reference.
+     * Creates a new flight plan. Flight plans always require a revision number for
+     * indexing and a flight as reference.
      *
      * @param flight the flight described by this flight plan
      * @param revision revision number to index flight plans by
@@ -119,11 +119,10 @@ public class FlightPlan {
     }
 
     /**
-     * Returns the "actual" departure time as set manually by ATC. This time can
-     * be set by controllers but often remains unchanged. There is no guarantee
-     * if this will really reflect the time of actual departure. Analyze the
-     * recorded track available from {@link Flight#getTrack()} instead, if
-     * actual times are needed.
+     * Returns the "actual" departure time as set manually by ATC. This time can be
+     * set by controllers but often remains unchanged. There is no guarantee if this
+     * will really reflect the time of actual departure. Analyze the recorded track
+     * available from {@link Flight#getTrack()} instead, if actual times are needed.
      *
      * @return "actual" departure time (optional, manual entry to flight plan)
      */
@@ -137,9 +136,9 @@ public class FlightPlan {
     }
 
     /**
-     * Returns the route as entered into flight plan. Note that this is a
-     * free-text field. IFR flights usually hold parseable flight plans but VFR
-     * flight plans may actually hold non-standard verbose comments.
+     * Returns the route as entered into flight plan. Note that this is a free-text
+     * field. IFR flights usually hold parseable flight plans but VFR flight plans
+     * may actually hold non-standard verbose comments.
      *
      * @return route as entered into flight plan
      */
@@ -153,12 +152,12 @@ public class FlightPlan {
     }
 
     /**
-     * Returns the flight plan remarks. Remarks are free text and can hold any
-     * kind of information. This includes parseable tokens such as communication
-     * mode, flight planning/dispatch system and operational flight details
-     * (ICAO field 18 format) but also URLs of social video streams, virtual
-     * airlines or personal information about the pilot's system configuration
-     * or even personal (dis)abilities and handicaps.
+     * Returns the flight plan remarks. Remarks are free text and can hold any kind
+     * of information. This includes parseable tokens such as communication mode,
+     * flight planning/dispatch system and operational flight details (ICAO field 18
+     * format) but also URLs of social video streams, virtual airlines or personal
+     * information about the pilot's system configuration or even personal
+     * (dis)abilities and handicaps.
      *
      * @return flight plan remarks (free text)
      */
@@ -187,11 +186,11 @@ public class FlightPlan {
 
     /**
      * Returns the aircraft's wake turbulence category as entered to the flight
-     * plan. If read from the original user-supplied flight plan, this
-     * information is potentially unreliable.
+     * plan. If read from the original user-supplied flight plan, this information
+     * is potentially unreliable.
      *
-     * @return wake turbulence category of the filed aircraft (information may
-     * be unreliable)
+     * @return wake turbulence category of the filed aircraft (information may be
+     *         unreliable)
      */
     public WakeTurbulenceCategory getWakeTurbulenceCategory() {
         return wakeTurbulenceCategory;
@@ -220,15 +219,15 @@ public class FlightPlan {
 
     /**
      * Returns the simple equipment specification, specifying navigational
-     * capability of the aircraft. This information is only provided if pilots
-     * file flight plans in the old FAA-based format. If used, pilots encode the
+     * capability of the aircraft. This information is only provided if pilots file
+     * flight plans in the old FAA-based format. If used, pilots encode the
      * information with a single letter (thus "simple"). Unfortunately, this may
      * sometimes not have been reliably determined or be misinterpreted by a
      * mismatch between real world and VATSIM codes. See
      * {@link SimpleEquipmentSpecification} for details.
      *
-     * @return equipment specification as determined by single-letter code, null
-     * if unavailable or invalid
+     * @return equipment specification as determined by single-letter code, null if
+     *         unavailable or invalid
      * @see SimpleEquipmentSpecification
      */
     public SimpleEquipmentSpecification getSimpleEquipmentSpecification() {
@@ -255,8 +254,8 @@ public class FlightPlan {
     }
 
     /**
-     * Returns the initially (before performing any step climbs/descends)
-     * requested cruise-level altitude in feet.
+     * Returns the initially (before performing any step climbs/descends) requested
+     * cruise-level altitude in feet.
      *
      * @return initially requested cruise-level altitude in feet
      */
@@ -303,7 +302,7 @@ public class FlightPlan {
      * (generally 4 letters), not IATA (3 letter).
      *
      * @return departure airport code (usually ICAO), normalized (trimmed
-     * upper-case)
+     *         upper-case)
      */
     public String getDepartureAirportCode() {
         return departureAirportCode;
@@ -319,7 +318,7 @@ public class FlightPlan {
      * (generally 4 letters), not IATA (3 letter).
      *
      * @return destination airport code (usually ICAO), normalized (trimmed
-     * upper-case)
+     *         upper-case)
      */
     public String getDestinationAirportCode() {
         return destinationAirportCode;
@@ -332,11 +331,10 @@ public class FlightPlan {
 
     /**
      * Returns the alternate (primary choice for diversions) airport code. This
-     * should usually be an ICAO code (generally 4 letters), not IATA (3
-     * letter).
+     * should usually be an ICAO code (generally 4 letters), not IATA (3 letter).
      *
      * @return alternate airport code (usually ICAO), normalized (trimmed
-     * upper-case)
+     *         upper-case)
      */
     public String getAlternateAirportCode() {
         return alternateAirportCode;
@@ -349,13 +347,13 @@ public class FlightPlan {
 
     /**
      * Checks if the given airport code matches this flight plan's departure
-     * airport. Input is normalized before check as airport codes are always
-     * stored in normalized form. Null values are evaluated as true only if both
-     * input and flight plan airport code are null.
+     * airport. Input is normalized before check as airport codes are always stored
+     * in normalized form. Null values are evaluated as true only if both input and
+     * flight plan airport code are null.
      *
      * @param departureAirportCode code of departure airport, will be normalized
-     * @return true if this flight plan matches the given departure airport,
-     * false if not; true if input and flight plan airport code are null
+     * @return true if this flight plan matches the given departure airport, false
+     *         if not; true if input and flight plan airport code are null
      */
     public boolean equalsDepartureAirportCode(String departureAirportCode) {
         if (this.departureAirportCode == null) {
@@ -367,14 +365,13 @@ public class FlightPlan {
 
     /**
      * Checks if the given airport code matches this flight plan's destination
-     * airport. Input is normalized before check as airport codes are always
-     * stored in normalized form. Null values are evaluated as true only if both
-     * input and flight plan airport code are null.
+     * airport. Input is normalized before check as airport codes are always stored
+     * in normalized form. Null values are evaluated as true only if both input and
+     * flight plan airport code are null.
      *
-     * @param destinationAirportCode code of destination airport, will be
-     * normalized
-     * @return true if this flight plan matches the given destination airport,
-     * false if not; true if input and flight plan airport code are null
+     * @param destinationAirportCode code of destination airport, will be normalized
+     * @return true if this flight plan matches the given destination airport, false
+     *         if not; true if input and flight plan airport code are null
      */
     public boolean equalsDestinationAirportCode(String destinationAirportCode) {
         if (this.destinationAirportCode == null) {
@@ -386,8 +383,8 @@ public class FlightPlan {
 
     /**
      * Normalizes an airport code. By default, normalization is performed by
-     * trimming the input and converting it to upper case but exact behavior can
-     * be overridden by inheriting class. Null input will be preserved.
+     * trimming the input and converting it to upper case but exact behavior can be
+     * overridden by inheriting class. Null input will be preserved.
      *
      * @param airportCode code to normalize
      * @return normalized airport code
@@ -400,6 +397,9 @@ public class FlightPlan {
         return airportCode.trim().toUpperCase();
     }
 
-    // TODO: could also have real name and home base (no connection if only prefiled)
+    /*
+     * TODO: could also have real name and home base (no connection if only
+     * prefiled)
+     */
     // TODO: unit tests
 }

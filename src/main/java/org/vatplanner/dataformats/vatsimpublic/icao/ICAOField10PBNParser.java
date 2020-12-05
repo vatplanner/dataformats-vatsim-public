@@ -39,13 +39,13 @@ public class ICAOField10PBNParser {
     private static final Pattern PATTERN_DESIGNATORS = Pattern.compile("[A-Z][0-9]*");
 
     /**
-     * Parses the given combined field 10 information, also supporting PBN codes
-     * to be used in field 10a.
+     * Parses the given combined field 10 information, also supporting PBN codes to
+     * be used in field 10a.
      *
      * Field 10b will not be fully parsed as it makes no sense on VATSIM.
      *
-     * @param combinedField10 combined field 10 information; a and b are
-     * separated by a slash /
+     * @param combinedField10 combined field 10 information; a and b are separated
+     *        by a slash /
      */
     public ICAOField10PBNParser(String combinedField10) {
         if (combinedField10 == null) {
@@ -65,18 +65,20 @@ public class ICAOField10PBNParser {
         hasTransponder = !NO_TRANSPONDER.equalsIgnoreCase(field10b);
 
         Matcher matcher = PATTERN_DESIGNATORS.matcher(field10a.toUpperCase());
-        //System.out.println(field10a); // DEBUG
+        // System.out.println(field10a); // DEBUG
         while (matcher.find()) {
             String designator = matcher.group();
-            //System.out.print(" => " + designator); // DEBUG
+            // System.out.print(" => " + designator); // DEBUG
 
+            // FIXME: parsed capabilities are never saved/returned
             CommunicationCapability communicationCapability = CommunicationCapability.byDesignator(designator);
-            //System.out.print(" " + communicationCapability); // DEBUG
+            // System.out.print(" " + communicationCapability); // DEBUG
 
-            NavigationApproachCapability navigationApproachCapability = NavigationApproachCapability.byDesignator(designator);
-            //System.out.print(" " + navigationApproachCapability); // DEBUG
+            NavigationApproachCapability navigationApproachCapability = NavigationApproachCapability
+                .byDesignator(designator);
+            // System.out.print(" " + navigationApproachCapability); // DEBUG
 
-            //System.out.println(); // DEBUG
+            // System.out.println(); // DEBUG
         }
     }
 

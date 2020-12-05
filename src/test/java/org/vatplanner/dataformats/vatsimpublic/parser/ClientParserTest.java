@@ -1,8 +1,14 @@
 package org.vatplanner.dataformats.vatsimpublic.parser;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import static org.hamcrest.Matchers.closeTo;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.Assert.assertThat;
+
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.time.Instant;
@@ -11,8 +17,7 @@ import java.time.Month;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.stream.Collectors;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,6 +28,10 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRatingT
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityTypeTest;
 
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
+
 @RunWith(DataProviderRunner.class)
 public class ClientParserTest {
 
@@ -30,7 +39,10 @@ public class ClientParserTest {
 
     private static final double ALLOWED_DOUBLE_ERROR = 0.000001;
 
-    private static final String CONTROLLER_MESSAGE_LINEBREAK = new String(new byte[]{(byte) 0x5E, (byte) 0xA7}, Charset.forName("ISO-8859-1"));
+    private static final String CONTROLLER_MESSAGE_LINEBREAK = new String( //
+        new byte[] { (byte) 0x5E, (byte) 0xA7 },
+        Charset.forName("ISO-8859-1") //
+    );
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -57,42 +69,49 @@ public class ClientParserTest {
 
     @DataProvider
     public static Object[][] dataProviderHoursAndMinutesAndDuration() {
-        return new Object[][]{
-            new Object[]{0, 0, Duration.ofMinutes(0)},
-            new Object[]{0, 1, Duration.ofMinutes(1)},
-            new Object[]{1, 0, Duration.ofHours(1)},
-            new Object[]{2, 59, Duration.ofMinutes(179)},
-            new Object[]{2, 60, Duration.ofMinutes(180)}, // excessive minutes (>59) are valid
-            new Object[]{13, 7, Duration.ofMinutes(787)},
-            new Object[]{0, 787, Duration.ofMinutes(787)}, // excessive minutes (>59) are valid
+        return new Object[][] {
+            new Object[] { 0, 0, Duration.ofMinutes(0) },
+            new Object[] { 0, 1, Duration.ofMinutes(1) },
+            new Object[] { 1, 0, Duration.ofHours(1) },
+            new Object[] { 2, 59, Duration.ofMinutes(179) },
+            new Object[] { 2, 60, Duration.ofMinutes(180) }, // excessive minutes (>59) are valid
+            new Object[] { 13, 7, Duration.ofMinutes(787) },
+            new Object[] { 0, 787, Duration.ofMinutes(787) }, // excessive minutes (>59) are valid
 
             // negative values are (unfortunately) also... valid :/
-            new Object[]{-8, 0, Duration.ofHours(-8)},
-            new Object[]{0, -2, Duration.ofMinutes(-2)},
-            new Object[]{-8, -2, Duration.ofMinutes(-482)}, //
+            new Object[] { -8, 0, Duration.ofHours(-8) },
+            new Object[] { 0, -2, Duration.ofMinutes(-2) },
+            new Object[] { -8, -2, Duration.ofMinutes(-482) }, //
 
             // Since negative values don't make any sense we need to make sure
             // that such input does not mix up when using different signs per
             // hour/minute number. We expect result to remain negative in those
             // cases.
-            new Object[]{1, -60, Duration.ofMinutes(-120)},
-            new Object[]{-1, 60, Duration.ofMinutes(-120)},};
+            new Object[] { 1, -60, Duration.ofMinutes(-120) },
+            new Object[] { -1, 60, Duration.ofMinutes(-120) }, };
     }
 
     @DataProvider
     public static Object[][] dataProviderControllerMessageRawAndDecoded() {
-        return new Object[][]{
-            new Object[]{"simple one-liner with /-.$,#\\ special characters", "simple one-liner with /-.$,#\\ special characters"},
-            new Object[]{":colons : :: are:valid::", ":colons : :: are:valid::"},
-            new Object[]{"first line" + CONTROLLER_MESSAGE_LINEBREAK + "second line" + CONTROLLER_MESSAGE_LINEBREAK, "first line\nsecond line\n"}, // FIXME: charset detection & decoding, Russian controllers send windows-1251 encapsulated in UTF-8
+        /*
+         * FIXME: charset detection & decoding, Russian controllers send windows-1251
+         * encapsulated in UTF-8
+         */
+        return new Object[][] {
+            new Object[] { "simple one-liner with /-.$,#\\ special characters",
+                "simple one-liner with /-.$,#\\ special characters" },
+            new Object[] { ":colons : :: are:valid::", ":colons : :: are:valid::" },
+            new Object[] { //
+                "first line" + CONTROLLER_MESSAGE_LINEBREAK + "second line" + CONTROLLER_MESSAGE_LINEBREAK,
+                "first line\nsecond line\n" },
         };
     }
 
     @DataProvider
     public static Object[][] dataProviderFullTimestampStringAndObject() {
-        return new Object[][]{
-            new Object[]{"20171014170050", LocalDateTime.of(2017, 10, 14, 17, 0, 50).toInstant(ZoneOffset.UTC)},
-            new Object[]{"20180101000000", LocalDateTime.of(2018, 1, 1, 0, 0, 0).toInstant(ZoneOffset.UTC)},};
+        return new Object[][] {
+            new Object[] { "20171014170050", LocalDateTime.of(2017, 10, 14, 17, 0, 50).toInstant(ZoneOffset.UTC) },
+            new Object[] { "20180101000000", LocalDateTime.of(2018, 1, 1, 0, 0, 0).toInstant(ZoneOffset.UTC) }, };
     }
 
     @Before
@@ -101,7 +120,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"true", "false"})
+    @DataProvider({ "true", "false" })
     public void testSetIsParsingPrefileSection_anyFlag_returnsSameParserInstance(boolean flag) {
         // Arrange (nothing to do)
 
@@ -113,7 +132,12 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"", "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW::DCT:::::::201801010945:270:29.92:1013", "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW::DCT:::::::201801010945:270:29.92:1013:1:", "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW::DCT:::::::201801010945:270:29.92:1013:a:"})
+    @DataProvider({
+        "",
+        "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW::DCT:::::::201801010945:270:29.92:1013",
+        "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW::DCT:::::::201801010945:270:29.92:1013:1:",
+        "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW::DCT:::::::201801010945:270:29.92:1013:a:"
+    })
     public void testParse_genericFormatViolation_throwsIllegalArgumentException(String erroneousLine) {
         // Arrange
         thrown.expect(IllegalArgumentException.class);
@@ -126,10 +150,12 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="callsign">
     @Test
-    @DataProvider({"ABC123", "DABCD", "N123A"})
+    @DataProvider({ "ABC123", "DABCD", "N123A" })
     public void testParse_connectedPilotWithCallsign_returnsObjectWithExpectedCallsign(String expectedCallsign) {
         // Arrange
-        String line = String.format("%s:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedCallsign);
+        String line = String.format(
+            "%s:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            expectedCallsign);
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -140,10 +166,12 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"ABC123", "DABCD", "N123A"})
+    @DataProvider({ "ABC123", "DABCD", "N123A" })
     public void testParse_prefiledPilotWithCallsign_returnsObjectWithExpectedCallsign(String expectedCallsign) {
         // Arrange
-        String line = String.format("%s:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", expectedCallsign);
+        String line = String.format(
+            "%s:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            expectedCallsign);
         parser.setIsParsingPrefileSection(true);
 
         // Act
@@ -154,10 +182,12 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"EDDT_TWR", "LOWI_GND"})
+    @DataProvider({ "EDDT_TWR", "LOWI_GND" })
     public void testParse_atcWithCallsign_returnsObjectWithExpectedCallsign(String expectedCallsign) {
         // Arrange
-        String line = String.format("%s:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", expectedCallsign);
+        String line = String.format(
+            "%s:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            expectedCallsign);
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -212,10 +242,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="Vatsim ID">
     @Test
-    @DataProvider({"123456", "987654321"})
+    @DataProvider({ "123456", "987654321" })
     public void testParse_connectedPilotWithCID_returnsObjectWithExpectedVatsimID(int expectedVatsimID) {
         // Arrange
-        String line = String.format("ABC123:%d:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedVatsimID);
+        String line = String.format(
+            "ABC123:%d:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            expectedVatsimID //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -226,10 +259,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"123456", "987654321"})
+    @DataProvider({ "123456", "987654321" })
     public void testParse_prefiledPilotWithCID_returnsObjectWithExpectedVatsimID(int expectedVatsimID) {
         // Arrange
-        String line = String.format("ABC123:%d:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", expectedVatsimID);
+        String line = String.format(
+            "ABC123:%d:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            expectedVatsimID //
+        );
         parser.setIsParsingPrefileSection(true);
 
         // Act
@@ -240,10 +276,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"123456", "987654321"})
+    @DataProvider({ "123456", "987654321" })
     public void testParse_atcWithCID_returnsObjectWithExpectedVatsimID(int expectedVatsimID) {
         // Arrange
-        String line = String.format("EDDT_TWR:%d:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", expectedVatsimID);
+        String line = String.format(
+            "EDDT_TWR:%d:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            expectedVatsimID //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -293,10 +332,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-123", "abc", "1a", "a1"})
+    @DataProvider({ "-123", "abc", "1a", "a1" })
     public void testParse_connectedPilotWithInvalidCID_throwsIllegalArgumentException(String invalidInput) {
         // Arrange
-        String erroneousLine = String.format("ABC123:%s:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", invalidInput);
+        String erroneousLine = String.format(
+            "ABC123:%s:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            invalidInput //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -308,10 +350,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-123", "abc", "1a", "a1"})
+    @DataProvider({ "-123", "abc", "1a", "a1" })
     public void testParse_prefiledPilotWithInvalidCID_throwsIllegalArgumentException(String invalidInput) {
         // Arrange
-        String erroneousLine = String.format("ABC123:%s:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", invalidInput);
+        String erroneousLine = String.format(
+            "ABC123:%s:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            invalidInput //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -323,10 +368,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-123", "abc", "1a", "a1"})
+    @DataProvider({ "-123", "abc", "1a", "a1" })
     public void testParse_atcWithInvalidCID_throwsIllegalArgumentException(String invalidInput) {
         // Arrange
-        String erroneousLine = String.format("ABC123:%s:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", invalidInput);
+        String erroneousLine = String.format(
+            "ABC123:%s:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            invalidInput //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -340,10 +388,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="real name">
     @Test
-    @DataProvider({"", "A Name", "Name", "Name ESSA", "A Full Name ESSA"})
+    @DataProvider({ "", "A Name", "Name", "Name ESSA", "A Full Name ESSA" })
     public void testParse_connectedPilot_returnsObjectWithExpectedRealName(String expectedRealName) {
         // Arrange
-        String line = String.format("ABC123:123456:%s:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedRealName);
+        String line = String.format(
+            "ABC123:123456:%s:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            expectedRealName //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -354,10 +405,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"", "A Name", "Name", "Name ESSA", "A Full Name ESSA"})
+    @DataProvider({ "", "A Name", "Name", "Name ESSA", "A Full Name ESSA" })
     public void testParse_prefiledPilot_returnsObjectWithExpectedRealName(String expectedRealName) {
         // Arrange
-        String line = String.format("ABC123:123456:%s:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", expectedRealName);
+        String line = String.format(
+            "ABC123:123456:%s:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            expectedRealName //
+        );
         parser.setIsParsingPrefileSection(true);
 
         // Act
@@ -368,10 +422,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"", "Some Name", "Name", "Name ESSA", "A Full Name ESSA"})
+    @DataProvider({ "", "Some Name", "Name", "Name ESSA", "A Full Name ESSA" })
     public void testParse_atc_returnsObjectWithExpectedRealName(String expectedRealName) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:%s:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", expectedRealName);
+        String line = String.format(
+            "EDDT_TWR:123456:%s:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            expectedRealName //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -422,42 +479,47 @@ public class ClientParserTest {
         assertThat(result.getRawClientType(), is(equalTo(ClientType.ATC_CONNECTED)));
     }
 
-    // TODO: check for empty client type outside prefile section, should be able to distinguish ATC and PILOT_CONNECTED
     /*
-    @Test
-    public void testParse_missingClientTypeOutsidePrefiledSection_throwsIllegalArgumentException() {
-        // Arrange
-        String erroneousLine = "ABC123:123456:realname:::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
-        parser.setIsParsingPrefileSection(false);
-
-        thrown.expect(IllegalArgumentException.class);
-
-        // Act
-        parser.parse(erroneousLine);
-
-        // Assert (nothing to do)
-    }
-
-    @Test
-    @DataProvider({"ATC", "PILOT"})
-    public void testParse_clientTypeInPrefiledSection_throwsIllegalArgumentException(String inputClientType) {
-        // Arrange
-        String erroneousLine = String.format("ABC123:123456:realname:%s::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", inputClientType);
-        parser.setIsParsingPrefileSection(true);
-
-        thrown.expect(IllegalArgumentException.class);
-
-        // Act
-        parser.parse(erroneousLine);
-
-        // Assert (nothing to do)
-    }
+     * TODO: check for empty client type outside prefile section, should be able to
+     * distinguish ATC and PILOT_CONNECTED
      */
+
+    /*
+     * @Test public void
+     * testParse_missingClientTypeOutsidePrefiledSection_throwsIllegalArgumentException
+     * () { // Arrange String erroneousLine =
+     * "ABC123:123456:realname:::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+     * parser.setIsParsingPrefileSection(false);
+     * 
+     * thrown.expect(IllegalArgumentException.class);
+     * 
+     * // Act parser.parse(erroneousLine);
+     * 
+     * // Assert (nothing to do) }
+     * 
+     * @Test
+     * 
+     * @DataProvider({"ATC", "PILOT"}) public void
+     * testParse_clientTypeInPrefiledSection_throwsIllegalArgumentException(String
+     * inputClientType) { // Arrange String erroneousLine = String.format(
+     * "ABC123:123456:realname:%s::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+     * inputClientType); parser.setIsParsingPrefileSection(true);
+     * 
+     * thrown.expect(IllegalArgumentException.class);
+     * 
+     * // Act parser.parse(erroneousLine);
+     * 
+     * // Assert (nothing to do) }
+     */
+
     @Test
-    @DataProvider({"A, true", "A, false"})
+    @DataProvider({ "A, true", "A, false" })
     public void testParse_invalidClientType_throwsIllegalArgumentException(String inputClientType, boolean isParsingPrefileSection) {
         // Arrange
-        String erroneousLine = String.format("ABC123:123456:realname:%s::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", inputClientType);
+        String erroneousLine = String.format(
+            "ABC123:123456:realname:%s::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            inputClientType //
+        );
         parser.setIsParsingPrefileSection(isParsingPrefileSection);
 
         thrown.expect(IllegalArgumentException.class);
@@ -484,10 +546,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"121.750", "198.999"})
+    @DataProvider({ "121.750", "198.999" })
     public void testParse_connectedPilotWithNonPlaceholderFrequency_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT:%s:12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT:%s:12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -499,7 +564,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"199.000, 199000", "199.998, 199998"})
+    @DataProvider({ "199.000, 199000", "199.998, 199998" })
     public void testParse_connectedPilotWithPlaceholderFrequency_throwsIllegalArgumentException(String input, int expectedFrequencyKilohertz) {
         // This has not actually be seen in the wild but ATC clients may be
         // interpreted as effectively pilots so the test fit in here.
@@ -507,7 +572,10 @@ public class ClientParserTest {
         // frequencies.
 
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT:%s:12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT:%s:12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -545,10 +613,22 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"118.500, 118500", "118.50, 118500", "118.5, 118500", "121.725, 121725", "1.21725e2, 121725", "199.998, 199998", "100.0001, 100000", "99.9999, 100000"})
+    @DataProvider({
+        "118.500, 118500",
+        "118.50, 118500",
+        "118.5, 118500",
+        "121.725, 121725",
+        "1.21725e2, 121725",
+        "199.998, 199998",
+        "100.0001, 100000",
+        "99.9999, 100000"
+    })
     public void testParse_atcWithValidFrequency_returnsObjectWithExpectedServedFrequency(String input, int expectedFrequencyKilohertz) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:%s:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:%s:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -559,10 +639,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "0", "0000", "0.000", "1e-10"})
+    @DataProvider({ "-1", "0", "0000", "0.000", "1e-10" })
     public void testParse_atcWithInvalidFrequency_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:%s:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:%s:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -589,10 +672,27 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="latitude">
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({
+        "12.34567",
+        "-80.23456",
+        "0",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_connectedPilotWithLatitude_returnsObjectWithExpectedLatitude(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::%s:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::%s:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         double expectedOutput = Double.parseDouble(input);
@@ -618,10 +718,26 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({
+        "12.34567",
+        "-80.23456",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_prefiledPilotWithNonZeroLatitude_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::%s::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        String line = String.format(
+            "ABC123:123456:realname:::%s::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -659,10 +775,27 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({
+        "12.34567",
+        "-80.23456",
+        "0",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_atcWithLatitude_returnsObjectWithExpectedLatitude(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:%s:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:%s:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         double expectedOutput = Double.parseDouble(input);
@@ -690,10 +823,27 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="longitude">
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({
+        "12.34567",
+        "-80.23456",
+        "0",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_connectedPilotWithLongitude_returnsObjectWithExpectedLongitude(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:%s:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:%s:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         double expectedOutput = Double.parseDouble(input);
@@ -719,10 +869,26 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({
+        "12.34567",
+        "-80.23456",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_prefiledPilotWithNonZeroLongitude_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname::::%s:::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        String line = String.format(
+            "ABC123:123456:realname::::%s:::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -760,10 +926,27 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({
+        "12.34567",
+        "-80.23456",
+        "0",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_atcWithLongitude_returnsObjectWithExpectedLongitude(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:%s:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:%s:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         double expectedOutput = Double.parseDouble(input);
@@ -791,10 +974,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="altitude">
     @Test
-    @DataProvider({"0", "100000", "-5000"})
+    @DataProvider({ "0", "100000", "-5000" })
     public void testParse_connectedPilotWithValidAltitude_returnsObjectWithExpectedAltitude(int expectedAltitude) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:%d:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedAltitude);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:%d:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            expectedAltitude //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -805,10 +991,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"abc", "1a", "a1"})
+    @DataProvider({ "abc", "1a", "a1" })
     public void testParse_connectedPilotWithInvalidAltitude_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:%s:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:%s:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -833,10 +1022,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"100000", "-5000"})
+    @DataProvider({ "100000", "-5000" })
     public void testParse_prefiledPilotWithNonZeroAltitude_throwsIllegalArgumentException(int altitude) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::%d::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", altitude);
+        String line = String.format(
+            "ABC123:123456:realname:::::%d::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            altitude //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -848,10 +1040,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"abc", "1a", "a1"})
+    @DataProvider({ "abc", "1a", "a1" })
     public void testParse_prefiledPilotWithInvalidAltitude_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::%s::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        String line = String.format(
+            "ABC123:123456:realname:::::%s::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -876,10 +1071,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "100000", "-5000"})
+    @DataProvider({ "0", "100000", "-5000" })
     public void testParse_atcWithValidAltitude_returnsObjectWithExpectedAltitude(int expectedAltitude) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:%d:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", expectedAltitude);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:%d:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            expectedAltitude //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -890,10 +1088,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"abc", "1a", "a1"})
+    @DataProvider({ "abc", "1a", "a1" })
     public void testParse_atcWithInvalidAltitude_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:%s:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:%s:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -920,10 +1121,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="ground speed">
     @Test
-    @DataProvider({"0", "422"})
+    @DataProvider({ "0", "422" })
     public void testParse_connectedPilotWithValidGroundSpeed_returnsObjectWithExpectedGroundSpeed(int expectedGroundSpeed) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:%d:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedGroundSpeed);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:%d:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            expectedGroundSpeed //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -934,10 +1138,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({ "-1", "abc", "1a", "a1" })
     public void testParse_connectedPilotWithInvalidGroundSpeed_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:%s:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:%s:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -975,10 +1182,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"15", "321"})
+    @DataProvider({ "15", "321" })
     public void testParse_prefiledPilotWithNonZeroGroundSpeed_throwsIllegalArgumentException(int groundSpeed) {
         // Arrange
-        String line = String.format("ABC123:123456:realname::::::%d:B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", groundSpeed);
+        String line = String.format(
+            "ABC123:123456:realname::::::%d:B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            groundSpeed //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -990,10 +1200,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({ "-1", "abc", "1a", "a1" })
     public void testParse_prefiledPilotWithInvalidGroundSpeed_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname::::::%s:B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        String line = String.format(
+            "ABC123:123456:realname::::::%s:B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1031,10 +1244,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"15", "321"})
+    @DataProvider({ "15", "321" })
     public void testParse_atcWithNonZeroGroundSpeed_throwsIllegalArgumentException(int groundSpeed) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:%d::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", groundSpeed);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:%d::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            groundSpeed //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1046,10 +1262,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({ "-1", "abc", "1a", "a1" })
     public void testParse_atcWithInvalidGroundSpeed_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:%s::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:%s::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1076,10 +1295,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="aircraft type">
     @Test
-    @DataProvider({"", "B738/M", "H/A332/X", "DH8D"})
+    @DataProvider({ "", "B738/M", "H/A332/X", "DH8D" })
     public void testParse_connectedPilot_returnsObjectWithExpectedAircraftType(String expectedAircraftType) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:%s:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedAircraftType);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:%s:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            expectedAircraftType //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -1090,10 +1312,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"", "B738/M", "H/A332/X", "DH8D"})
+    @DataProvider({ "", "B738/M", "H/A332/X", "DH8D" })
     public void testParse_prefiledPilot_returnsObjectWithExpectedAircraftType(String expectedAircraftType) {
         // Arrange
-        String line = String.format("ABC123:123456::::::::%s:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", expectedAircraftType);
+        String line = String.format(
+            "ABC123:123456::::::::%s:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            expectedAircraftType //
+        );
         parser.setIsParsingPrefileSection(true);
 
         // Act
@@ -1104,7 +1329,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"", "B738/M", "H/A332/X", "DH8D"})
+    @DataProvider({ "", "B738/M", "H/A332/X", "DH8D" })
     public void testParse_atc_returnsObjectWithExpectedAircraftType(String expectedAircraftType) {
         // An ATC with a flight plan doesn't make any sense but can actually be
         // found on data files...
@@ -1113,7 +1338,10 @@ public class ClientParserTest {
         // sense.
 
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0::%s:0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", expectedAircraftType);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0::%s:0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            expectedAircraftType //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -1126,10 +1354,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="planned TAS cruise">
     @Test
-    @DataProvider({"0", "90", "420"})
+    @DataProvider({ "0", "90", "420" })
     public void testParse_connectedPilotWithPlannedTASCruise_returnsObjectWithExpectedFiledTrueAirSpeed(int expectedTAS) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:%d:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedTAS);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:%d:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            expectedTAS //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -1140,10 +1371,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "90", "420"})
+    @DataProvider({ "0", "90", "420" })
     public void testParse_prefiledPilotWithPlannedTASCruise_returnsObjectWithExpectedFiledTrueAirSpeed(int expectedTAS) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:%d:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", expectedTAS);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:%d:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            expectedTAS //
+        );
         parser.setIsParsingPrefileSection(true);
 
         // Act
@@ -1154,10 +1388,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"123456", "987654321"})
+    @DataProvider({ "123456", "987654321" })
     public void testParse_atcWithPlannedTASCruise_returnsObjectWithExpectedFiledTrueAirSpeed(int expectedTAS) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::%d::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", expectedTAS);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::%d::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            expectedTAS //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -1207,10 +1444,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-123", "abc", "1a", "a1"})
+    @DataProvider({ "-123", "abc", "1a", "a1" })
     public void testParse_connectedPilotWithInvalidPlannedTASCruise_throwsIllegalArgumentException(String invalidInput) {
         // Arrange
-        String erroneousLine = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:%s:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", invalidInput);
+        String erroneousLine = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:%s:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            invalidInput //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1222,10 +1462,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-123", "abc", "1a", "a1"})
+    @DataProvider({ "-123", "abc", "1a", "a1" })
     public void testParse_prefiledPilotWithInvalidPlannedTASCruise_throwsIllegalArgumentException(String invalidInput) {
         // Arrange
-        String erroneousLine = String.format("ABC123:123456:realname:::::::B738:%s:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", invalidInput);
+        String erroneousLine = String.format(
+            "ABC123:123456:realname:::::::B738:%s:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            invalidInput //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1237,10 +1480,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-123", "abc", "1a", "a1"})
+    @DataProvider({ "-123", "abc", "1a", "a1" })
     public void testParse_atcWithInvalidPlannedTASCruise_throwsIllegalArgumentException(String invalidInput) {
         // Arrange
-        String erroneousLine = String.format("ABC123:123456:realname:ATC:118.500:12.34567:12.34567:0:::%s::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", invalidInput);
+        String erroneousLine = String.format(
+            "ABC123:123456:realname:ATC:118.500:12.34567:12.34567:0:::%s::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            invalidInput //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1254,10 +1500,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="filed departure airport">
     @Test
-    @DataProvider({"", "EDDT", "05S"})
+    @DataProvider({ "", "EDDT", "05S" })
     public void testParse_connectedPilot_returnsObjectWithExpectedFiledDepartureAirportCode(String expectedAirportCode) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:%s:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedAirportCode);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:%s:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            expectedAirportCode //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -1268,10 +1517,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"", "EDDT", "05S"})
+    @DataProvider({ "", "EDDT", "05S" })
     public void testParse_prefiledPilot_returnsObjectWithExpectedFiledDepartureAirportCode(String expectedAirportCode) {
         // Arrange
-        String line = String.format("ABC123:123456::::::::B738:420:%s:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", expectedAirportCode);
+        String line = String.format(
+            "ABC123:123456::::::::B738:420:%s:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            expectedAirportCode //
+        );
         parser.setIsParsingPrefileSection(true);
 
         // Act
@@ -1282,7 +1534,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"", "EDDT", "05S"})
+    @DataProvider({ "", "EDDT", "05S" })
     public void testParse_atc_returnsObjectWithExpectedFiledDepartureAirportCode(String expectedAirportCode) {
         // An ATC with a flight plan doesn't make any sense but can actually be
         // found on data files...
@@ -1291,7 +1543,10 @@ public class ClientParserTest {
         // sense.
 
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0:%s:::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", expectedAirportCode);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0:%s:::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            expectedAirportCode //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -1304,10 +1559,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="filed altitude">
     @Test
-    @DataProvider({"", "30000", "FL300", "F300", "0", "F", "F 300"})
+    @DataProvider({ "", "30000", "FL300", "F300", "0", "F", "F 300" })
     public void testParse_connectedPilot_returnsObjectWithExpectedRawFiledAltitude(String expectedRawFiledAltitude) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:%s:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedRawFiledAltitude);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:%s:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            expectedRawFiledAltitude //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -1318,10 +1576,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"", "30000", "FL300", "F300", "0", "F", "F 300"})
+    @DataProvider({ "", "30000", "FL300", "F300", "0", "F", "F 300" })
     public void testParse_prefiledPilot_returnsObjectWithExpectedRawFiledAltitude(String expectedRawFiledAltitude) {
         // Arrange
-        String line = String.format("ABC123:123456::::::::B738:420:EDDT:%s:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", expectedRawFiledAltitude);
+        String line = String.format(
+            "ABC123:123456::::::::B738:420:EDDT:%s:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            expectedRawFiledAltitude //
+        );
         parser.setIsParsingPrefileSection(true);
 
         // Act
@@ -1332,7 +1593,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"", "30000", "FL300", "F300", "0", "F", "F 300"})
+    @DataProvider({ "", "30000", "FL300", "F300", "0", "F", "F 300" })
     public void testParse_atc_returnsObjectWithExpectedRawFiledAltitude(String expectedRawFiledAltitude) {
         // An ATC with a flight plan doesn't make any sense but can actually be
         // found on data files...
@@ -1341,7 +1602,10 @@ public class ClientParserTest {
         // sense.
 
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::%s::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", expectedRawFiledAltitude);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::%s::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            expectedRawFiledAltitude //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -1354,10 +1618,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="filed destination airport">
     @Test
-    @DataProvider({"", "EDDT", "05S"})
+    @DataProvider({ "", "EDDT", "05S" })
     public void testParse_connectedPilot_returnsObjectWithExpectedFiledDestinationAirportCode(String expectedAirportCode) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:%s:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedAirportCode);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:%s:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            expectedAirportCode //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -1368,10 +1635,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"", "EDDT", "05S"})
+    @DataProvider({ "", "EDDT", "05S" })
     public void testParse_prefiledPilot_returnsObjectWithExpectedFiledDestinationAirportCode(String expectedAirportCode) {
         // Arrange
-        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:%s:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", expectedAirportCode);
+        String line = String.format(
+            "ABC123:123456::::::::B738:420:EDDT:30000:%s:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            expectedAirportCode //
+        );
         parser.setIsParsingPrefileSection(true);
 
         // Act
@@ -1382,7 +1652,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"", "EDDT", "05S"})
+    @DataProvider({ "", "EDDT", "05S" })
     public void testParse_atc_returnsObjectWithExpectedFiledDestinationAirportCode(String expectedAirportCode) {
         // An ATC with a flight plan doesn't make any sense but can actually be
         // found on data files...
@@ -1391,7 +1661,10 @@ public class ClientParserTest {
         // sense.
 
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0:::%s:SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", expectedAirportCode);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0:::%s:SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            expectedAirportCode //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -1404,10 +1677,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="server ID">
     @Test
-    @DataProvider({"SERVER 1", "some-other-server"})
+    @DataProvider({ "SERVER 1", "some-other-server" })
     public void testParse_connectedPilotWithServerId_returnsObjectWithExpectedServerId(String expectedServerId) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:%s:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedServerId);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:%s:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            expectedServerId //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -1432,10 +1708,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"SERVER 1", "some-other-server"})
+    @DataProvider({ "SERVER 1", "some-other-server" })
     public void testParse_prefiledPilotWithServerId_throwsIllegalArgumentException(String serverId) {
         // Arrange
-        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM:%s::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", serverId);
+        String line = String.format(
+            "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:%s::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            serverId //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1460,10 +1739,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"SERVER 1", "some-other-server"})
+    @DataProvider({ "SERVER 1", "some-other-server" })
     public void testParse_atcWithServerId_returnsObjectWithExpectedServerId(String expectedServerId) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::%s:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", expectedServerId);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::%s:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            expectedServerId //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -1489,10 +1771,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="protocol version">
     @Test
-    @DataProvider({"0", "10", "100"})
+    @DataProvider({ "0", "10", "100" })
     public void testParse_connectedPilotWithValidProtocolRevision_returnsObjectWithExpectedProtocolVersion(int expectedProtocolVersion) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:%d:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedProtocolVersion);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:%d:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            expectedProtocolVersion //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -1503,10 +1788,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-123", "abc", "1a", "a1"})
+    @DataProvider({ "-123", "abc", "1a", "a1" })
     public void testParse_connectedPilotWithInvalidProtocolRevision_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:%s:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:%s:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1531,10 +1819,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-123", "abc", "1a", "a1"})
+    @DataProvider({ "-123", "abc", "1a", "a1" })
     public void testParse_prefiledPilotWithInvalidProtocolRevision_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM::%s:::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        String line = String.format(
+            "ABC123:123456::::::::B738:420:EDDT:30000:EHAM::%s:::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1546,10 +1837,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"1", "10", "100"})
+    @DataProvider({ "1", "10", "100" })
     public void testParse_prefiledPilotWithValidNonZeroProtocolRevision_throwsIllegalArgumentException(int protocolVersion) {
         // Arrange
-        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM::%d:::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", protocolVersion);
+        String line = String.format(
+            "ABC123:123456::::::::B738:420:EDDT:30000:EHAM::%d:::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            protocolVersion //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1587,10 +1881,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "10", "100"})
+    @DataProvider({ "0", "10", "100" })
     public void testParse_atcWithValidProtocolRevision_returnsObjectWithExpectedProtocolVersion(int expectedProtocolVersion) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:%d:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", expectedProtocolVersion);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:%d:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            expectedProtocolVersion //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -1601,10 +1898,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-123", "abc", "1a", "a1"})
+    @DataProvider({ "-123", "abc", "1a", "a1" })
     public void testParse_atcWithInvalidProtocolRevision_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:%s:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:%s:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1646,7 +1946,10 @@ public class ClientParserTest {
     @UseDataProvider("dataProviderControllerRatingIdAndEnumWithoutOBS")
     public void testParse_connectedPilotWithRatingOtherThanOBS_throwsIllegalArgumentException(int controllerRatingId, ControllerRating _controllerRating) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:%d:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", controllerRatingId);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:%d:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            controllerRatingId //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1672,10 +1975,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1", "0", "99"})
+    @DataProvider({ "-1", "abc", "1a", "a1", "0", "99" })
     public void testParse_connectedPilotWithInvalidRating_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:%s:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:%s:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1716,7 +2022,10 @@ public class ClientParserTest {
     @UseDataProvider(value = "dataProviderIdAndEnum", location = ControllerRatingTest.class)
     public void testParse_prefiledPilotWithValidRating_throwsIllegalArgumentException(int controllerRatingId, ControllerRating _controllerRating) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::%d::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", controllerRatingId);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::%d::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            controllerRatingId //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1728,10 +2037,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1", "99"})
+    @DataProvider({ "-1", "abc", "1a", "a1", "99" })
     public void testParse_prefiledPilotWithInvalidNonZeroRating_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::%s::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::%s::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1746,7 +2058,10 @@ public class ClientParserTest {
     @UseDataProvider(value = "dataProviderIdAndEnum", location = ControllerRatingTest.class)
     public void testParse_atcWithValidRating_returnsObjectWithExpectedControllerRating(int controllerRatingId, ControllerRating expectedControllerRating) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:%d::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", controllerRatingId);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:%d::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            controllerRatingId //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -1757,10 +2072,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1", "0", "99"})
+    @DataProvider({ "-1", "abc", "1a", "a1", "0", "99" })
     public void testParse_atcWithInvalidRating_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:%s::4:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:%s::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1788,10 +2106,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="transponder code">
     @Test
-    @DataProvider({"0", "1", "123", "2143", "7000", "9999", "12345"})
+    @DataProvider({ "0", "1", "123", "2143", "7000", "9999", "12345" })
     public void testParse_connectedPilotWithValidTransponderCode_returnsObjectWithExpectedTransponderCodeDecimal(int expectedTransponderCodeDecimal) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:%d:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedTransponderCodeDecimal);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:%d:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            expectedTransponderCodeDecimal //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -1802,10 +2123,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({ "-1", "abc", "1a", "a1" })
     public void testParse_connectedPilotWithInvalidTransponderCode_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:%s:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:%s:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1830,10 +2154,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"1", "123", "2143", "7000", "9999", "12345"})
+    @DataProvider({ "1", "123", "2143", "7000", "9999", "12345" })
     public void testParse_prefiledPilotWithValidNonZeroTransponderCode_throwsIllegalArgumentException(int transponderCodeNumeric) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM::::%d:::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", transponderCodeNumeric);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM::::%d:::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            transponderCodeNumeric //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1845,10 +2172,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({ "-1", "abc", "1a", "a1" })
     public void testParse_prefiledPilotWithInvalidTransponderCode_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM::::%s:::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM::::%s:::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1873,10 +2203,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"1", "123", "2143", "7000", "9999", "12345"})
+    @DataProvider({ "1", "123", "2143", "7000", "9999", "12345" })
     public void testParse_atcWithValidNonZeroTransponderCode_throwsIllegalArgumentException(int transponderCodeNumeric) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::::::SERVER1:100:3:%d:4:50::::::::::::::::atis message:20180101160000:20180101150000::::", transponderCodeNumeric);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::::::SERVER1:100:3:%d:4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            transponderCodeNumeric //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1888,10 +2221,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({ "-1", "abc", "1a", "a1" })
     public void testParse_atcWithInvalidTransponderCode_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::::::SERVER1:100:3:%s:4:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::::::SERVER1:100:3:%s:4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1920,12 +2256,12 @@ public class ClientParserTest {
     @DataProvider
     public static Object[][] dataProviderNonZeroFacilityTypeIds() {
         return Arrays.stream(FacilityTypeTest.dataProviderIdAndEnum())
-                .map(arguments -> (Integer) arguments[0])
-                .filter(id -> id != 0)
-                .distinct()
-                .map(id -> new Object[]{id})
-                .collect(Collectors.toList())
-                .toArray(new Object[0][0]);
+            .map(arguments -> (Integer) arguments[0])
+            .filter(id -> id != 0)
+            .distinct()
+            .map(id -> new Object[] { id })
+            .collect(Collectors.toList())
+            .toArray(new Object[0][0]);
     }
 
     @Test
@@ -1934,7 +2270,10 @@ public class ClientParserTest {
         // 0 is the default value for all pilots since data format version 9
 
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:%d::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", id);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:%d::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            id //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1946,10 +2285,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1", "7", "100"})
+    @DataProvider({ "-1", "abc", "1a", "a1", "7", "100" })
     public void testParse_connectedPilotWithInvalidFacilityType_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:%s::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:%s::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -1994,7 +2336,10 @@ public class ClientParserTest {
         // 0 is the default value for all pilots since data format version 9
 
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::%d::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", id);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::%d::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            id //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2006,10 +2351,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1", "7", "100"})
+    @DataProvider({ "-1", "abc", "1a", "a1", "7", "100" })
     public void testParse_prefiledPilotWithInvalidFacilityType_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::%s::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::%s::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2052,7 +2400,10 @@ public class ClientParserTest {
     @UseDataProvider(value = "dataProviderIdAndEnum", location = FacilityTypeTest.class)
     public void testParse_atcPilotWithValidFacilityType_returnsObjectWithExpectedFacilityType(int id, FacilityType expectedFacilityType) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::%d:50::::::::::::::::atis message:20180101160000:20180101150000::::", id);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::%d:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            id //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -2063,10 +2414,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1", "7", "100"})
+    @DataProvider({ "-1", "abc", "1a", "a1", "7", "100" })
     public void testParse_atcPilotWithInvalidFacilityType_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::%s:50::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::%s:50::::::::::::::::atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2093,10 +2447,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="visual range">
     @Test
-    @DataProvider({"1", "5", "50", "200", "1000"})
+    @DataProvider({ "1", "5", "50", "200", "1000" })
     public void testParse_connectedPilotWithValidNonZeroVisualRange_returnsObjectWithNegativeVisualRange(int visualRange) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234::%d:1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", visualRange);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234::%d:1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            visualRange //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -2107,10 +2464,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-123", "abc", "1a", "a1"})
+    @DataProvider({ "-123", "abc", "1a", "a1" })
     public void testParse_connectedPilotWithInvalidVisualRange_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234::%s:1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234::%s:1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2148,10 +2508,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"1", "5", "50", "200", "1000"})
+    @DataProvider({ "1", "5", "50", "200", "1000" })
     public void testParse_prefiledPilotWithValidNonZeroVisualRange_throwsIllegalArgumentException(int visualRange) {
         // Arrange
-        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM::::::%d:1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", visualRange);
+        String line = String.format(
+            "ABC123:123456::::::::B738:420:EDDT:30000:EHAM::::::%d:1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            visualRange //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2163,10 +2526,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-123", "abc", "1a", "a1"})
+    @DataProvider({ "-123", "abc", "1a", "a1" })
     public void testParse_prefiledPilotWithInvalidVisualRange_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM::::::%s:1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        String line = String.format(
+            "ABC123:123456::::::::B738:420:EDDT:30000:EHAM::::::%s:1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2204,10 +2570,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "5", "50", "200", "1000"})
+    @DataProvider({ "0", "5", "50", "200", "1000" })
     public void testParse_atcWithValidVisualRange_returnsObjectWithExpectedVisualRange(int expectedVisualRange) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:%d::::::::::::::::atis message:20180101160000:20180101150000::::", expectedVisualRange);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:%d::::::::::::::::atis message:20180101160000:20180101150000::::",
+            expectedVisualRange //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -2218,10 +2587,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-123", "abc", "1a", "a1"})
+    @DataProvider({ "-123", "abc", "1a", "a1" })
     public void testParse_atcWithInvalidVisualRange_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:%s::::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:%s::::::::::::::::atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2247,10 +2619,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="flight plan revision">
     @Test
-    @DataProvider({"0", "1", "200"})
+    @DataProvider({ "0", "1", "200" })
     public void testParse_connectedPilotWithValidPlannedRevision_returnsObjectWithExpectedFlightPlanRevision(int expectedRevision) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::%d:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedRevision);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::%d:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            expectedRevision //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -2261,10 +2636,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({ "-1", "abc", "1a", "a1" })
     public void testParse_connectedPilotWithInvalidPlannedRevision_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::%s:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::%s:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2289,10 +2667,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "1", "200"})
+    @DataProvider({ "0", "1", "200" })
     public void testParse_prefiledPilotWithValidPlannedRevision_returnsObjectWithExpectedFlightPlanRevision(int expectedRevision) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::%d:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", expectedRevision);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::%d:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            expectedRevision //
+        );
         parser.setIsParsingPrefileSection(true);
 
         // Act
@@ -2303,10 +2684,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({ "-1", "abc", "1a", "a1" })
     public void testParse_prefiledPilotWithInvalidPlannedRevision_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::%s:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::%s:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2332,7 +2716,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "1", "200"})
+    @DataProvider({ "0", "1", "200" })
     public void testParse_atcWithValidPlannedRevision_returnsObjectWithExpectedFlightPlanRevision(int expectedRevision) {
         // An ATC with a flight plan doesn't make any sense but can actually be
         // found on data files...
@@ -2341,7 +2725,10 @@ public class ClientParserTest {
         // sense.
 
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:%d:::::::::::::::atis message:20180101160000:20180101150000::::", expectedRevision);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:%d:::::::::::::::atis message:20180101160000:20180101150000::::",
+            expectedRevision //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -2352,10 +2739,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({ "-1", "abc", "1a", "a1" })
     public void testParse_atcWithInvalidPlannedRevision_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567::::0::::SERVER1:100:3::4:50:%s:::::::::::::::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567::::0::::SERVER1:100:3::4:50:%s:::::::::::::::atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2382,10 +2772,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="flight plan type">
     @Test
-    @DataProvider({"", "V", "I", "Y", "Z", "something else 123-ABC"})
+    @DataProvider({ "", "V", "I", "Y", "Z", "something else 123-ABC" })
     public void testParse_connectedPilot_returnsObjectWithExpectedRawFlightPlanType(String expectedRawFlightPlanType) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:%s:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedRawFlightPlanType);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:%s:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            expectedRawFlightPlanType //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -2396,10 +2789,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"", "V", "I", "Y", "Z", "something else 123-ABC"})
+    @DataProvider({ "", "V", "I", "Y", "Z", "something else 123-ABC" })
     public void testParse_prefiledPilot_returnsObjectWithExpectedRawFlightPlanType(String expectedRawFlightPlanType) {
         // Arrange
-        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:%s:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", expectedRawFlightPlanType);
+        String line = String.format(
+            "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:%s:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            expectedRawFlightPlanType //
+        );
         parser.setIsParsingPrefileSection(true);
 
         // Act
@@ -2410,7 +2806,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"", "V", "I", "Y", "Z", "something else 123-ABC"})
+    @DataProvider({ "", "V", "I", "Y", "Z", "something else 123-ABC" })
     public void testParse_atc_returnsObjectWithExpectedRawFlightPlanType(String expectedRawFlightPlanType) {
         // An ATC with a flight plan doesn't make any sense but can actually be
         // found on data files...
@@ -2419,7 +2815,10 @@ public class ClientParserTest {
         // sense.
 
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::%s::::::::::::::atis message:20180101160000:20180101150000::::", expectedRawFlightPlanType);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::%s::::::::::::::atis message:20180101160000:20180101150000::::",
+            expectedRawFlightPlanType //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -2432,10 +2831,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="departure time planned">
     @Test
-    @DataProvider({"0", "30", "2359", "123456789"})
+    @DataProvider({ "0", "30", "2359", "123456789" })
     public void testParse_connectedPilotWithValidPlannedDeparture_returnsObjectWithExpectedRawDepartureTimePlanned(int rawValue) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:%d:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", rawValue);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:%d:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            rawValue //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -2446,10 +2848,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({ "-1", "abc", "1a", "a1" })
     public void testParse_connectedPilotWithInvalidPlannedDeparture_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:%s:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:%s:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2474,10 +2879,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "30", "2359", "123456789"})
+    @DataProvider({ "0", "30", "2359", "123456789" })
     public void testParse_prefiledPilotWithValidPlannedDeparture_returnsObjectWithExpectedRawDepartureTimePlanned(int rawValue) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:%d:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", rawValue);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:%d:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            rawValue //
+        );
         parser.setIsParsingPrefileSection(true);
 
         // Act
@@ -2488,10 +2896,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({ "-1", "abc", "1a", "a1" })
     public void testParse_prefiledPilotWithInvalidPlannedDeparture_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:%s:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:%s:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2516,10 +2927,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "30", "2359", "123456789"})
+    @DataProvider({ "0", "30", "2359", "123456789" })
     public void testParse_atcWithValidPlannedDeparture_returnsObjectWithExpectedRawDepartureTimePlanned(int rawValue) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::%d:::::::::::::atis message:20180101160000:20180101150000::::", rawValue);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::%d:::::::::::::atis message:20180101160000:20180101150000::::",
+            rawValue //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -2530,10 +2944,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({ "-1", "abc", "1a", "a1" })
     public void testParse_atcWithInvalidPlannedDeparture_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::%s:::::::::::::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::%s:::::::::::::atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2560,10 +2977,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="departure time actual">
     @Test
-    @DataProvider({"0", "30", "2359", "123456789"})
+    @DataProvider({ "0", "30", "2359", "123456789" })
     public void testParse_connectedPilotWithValidActualDeparture_returnsObjectWithExpectedRawDepartureTimeActual(int rawValue) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:%d:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", rawValue);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:%d:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            rawValue //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -2574,10 +2994,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({ "-1", "abc", "1a", "a1" })
     public void testParse_connectedPilotWithInvalidActualDeparture_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:%s:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:%s:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2602,10 +3025,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "30", "2359", "123456789"})
+    @DataProvider({ "0", "30", "2359", "123456789" })
     public void testParse_prefiledPilotWithValidActualDeparture_returnsObjectWithExpectedRawDepartureTimeActual(int rawValue) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:%d:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", rawValue);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:%d:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            rawValue //
+        );
         parser.setIsParsingPrefileSection(true);
 
         // Act
@@ -2616,10 +3042,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({ "-1", "abc", "1a", "a1" })
     public void testParse_prefiledPilotWithInvalidActualDeparture_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:%s:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:%s:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2644,10 +3073,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "30", "2359", "123456789"})
+    @DataProvider({ "0", "30", "2359", "123456789" })
     public void testParse_atcWithValidActualDeparture_returnsObjectWithExpectedRawDepartureTimeActual(int rawValue) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::%d::::::::::::atis message:20180101160000:20180101150000::::", rawValue);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::%d::::::::::::atis message:20180101160000:20180101150000::::",
+            rawValue //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -2658,10 +3090,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1"})
+    @DataProvider({ "-1", "abc", "1a", "a1" })
     public void testParse_atcWithInvalidActualDeparture_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::%s::::::::::::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::%s::::::::::::atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2691,7 +3126,10 @@ public class ClientParserTest {
     @UseDataProvider("dataProviderHoursAndMinutesAndDuration")
     public void testParse_connectedPilotWithValidPlannedEnroute_returnsObjectWithExpectedFiledTimeEnroute(int hours, int minutes, Duration expectedDuration) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:%d:%d:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", hours, minutes);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:%d:%d:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            hours, minutes //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -2702,10 +3140,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"abc", "1a", "a1"})
+    @DataProvider({ "abc", "1a", "a1" })
     public void testParse_connectedPilotWithInvalidPlannedHoursEnroute_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:%s:0:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:%s:0:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2717,10 +3158,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"abc", "1a", "a1"})
+    @DataProvider({ "abc", "1a", "a1" })
     public void testParse_connectedPilotWithInvalidPlannedMinutesEnroute_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:0:%s:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:0:%s:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2732,10 +3176,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "1"})
+    @DataProvider({ "0", "1" })
     public void testParse_connectedPilotWithPlannedHoursEnrouteButWithoutPlannedMinutesEnroute_throwsIllegalArgumentException(int hours) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:%d::3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", hours);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:%d::3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            hours //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2747,10 +3194,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "1"})
+    @DataProvider({ "0", "1" })
     public void testParse_connectedPilotWithPlannedMinutesEnrouteButWithoutPlannedHoursEnroute_throwsIllegalArgumentException(int minutes) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000::%d:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", minutes);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000::%d:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            minutes //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2778,7 +3228,10 @@ public class ClientParserTest {
     @UseDataProvider("dataProviderHoursAndMinutesAndDuration")
     public void testParse_prefiledPilotWithValidPlannedEnroute_returnsObjectWithExpectedFiledTimeEnroute(int hours, int minutes, Duration expectedDuration) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:%d:%d:3:0:EDDW:remark:DCT:0:0:0:0:::::::", hours, minutes);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:%d:%d:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            hours, minutes //
+        );
         parser.setIsParsingPrefileSection(true);
 
         // Act
@@ -2789,10 +3242,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"abc", "1a", "a1"})
+    @DataProvider({ "abc", "1a", "a1" })
     public void testParse_prefiledPilotWithInvalidPlannedHoursEnroute_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:%s:0:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:%s:0:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2804,10 +3260,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"abc", "1a", "a1"})
+    @DataProvider({ "abc", "1a", "a1" })
     public void testParse_prefiledPilotWithInvalidPlannedMinutesEnroute_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:0:%s:3:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:0:%s:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2819,10 +3278,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "1"})
+    @DataProvider({ "0", "1" })
     public void testParse_prefiledPilotWithPlannedHoursEnrouteButWithoutPlannedMinutesEnroute_throwsIllegalArgumentException(int hours) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:%d::3:0:EDDW:remark:DCT:0:0:0:0:::::::", hours);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:%d::3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            hours //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2834,10 +3296,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "1"})
+    @DataProvider({ "0", "1" })
     public void testParse_prefiledPilotWithPlannedMinutesEnrouteButWithoutPlannedHoursEnroute_throwsIllegalArgumentException(int minutes) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000::%d:3:0:EDDW:remark:DCT:0:0:0:0:::::::", minutes);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000::%d:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            minutes //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2866,7 +3331,10 @@ public class ClientParserTest {
     @UseDataProvider("dataProviderHoursAndMinutesAndDuration")
     public void testParse_atcWithValidPlannedEnroute_returnsObjectWithExpectedFiledTimeEnroute(int hours, int minutes, Duration expectedDuration) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::%d:%d::::::::::atis message:20180101160000:20180101150000::::", hours, minutes);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::%d:%d::::::::::atis message:20180101160000:20180101150000::::",
+            hours, minutes //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -2877,10 +3345,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"abc", "1a", "a1"})
+    @DataProvider({ "abc", "1a", "a1" })
     public void testParse_atcWithInvalidPlannedHoursEnroute_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::%s:0::::::::::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::%s:0::::::::::atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2892,10 +3363,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"abc", "1a", "a1"})
+    @DataProvider({ "abc", "1a", "a1" })
     public void testParse_atcWithInvalidPlannedMinutesEnroute_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::0:%s::::::::::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::0:%s::::::::::atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2907,10 +3381,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "1"})
+    @DataProvider({ "0", "1" })
     public void testParse_atcWithPlannedHoursEnrouteButWithoutPlannedMinutesEnroute_throwsIllegalArgumentException(int hours) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::%d:::::::::::atis message:20180101160000:20180101150000::::", hours);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::%d:::::::::::atis message:20180101160000:20180101150000::::",
+            hours //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2922,10 +3399,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "1"})
+    @DataProvider({ "0", "1" })
     public void testParse_atcWithPlannedMinutesEnrouteButWithoutPlannedHoursEnroute_throwsIllegalArgumentException(int minutes) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::%d::::::::::atis message:20180101160000:20180101150000::::", minutes);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::%d::::::::::atis message:20180101160000:20180101150000::::",
+            minutes //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2955,7 +3435,10 @@ public class ClientParserTest {
     @UseDataProvider("dataProviderHoursAndMinutesAndDuration")
     public void testParse_connectedPilotWithValidPlannedFuel_returnsObjectWithExpectedFiledTimeFuel(int hours, int minutes, Duration expectedDuration) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:%d:%d:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", hours, minutes);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:%d:%d:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            hours, minutes //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -2966,10 +3449,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"abc", "1a", "a1"})
+    @DataProvider({ "abc", "1a", "a1" })
     public void testParse_connectedPilotWithInvalidPlannedHoursFuel_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:%s:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:%s:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2981,10 +3467,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"abc", "1a", "a1"})
+    @DataProvider({ "abc", "1a", "a1" })
     public void testParse_connectedPilotWithInvalidPlannedMinutesFuel_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:0:%s:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:0:%s:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -2996,10 +3485,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "1"})
+    @DataProvider({ "0", "1" })
     public void testParse_connectedPilotWithPlannedHoursFuelButWithoutPlannedMinutesFuel_throwsIllegalArgumentException(int hours) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:%d::EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", hours);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:%d::EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            hours //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -3011,10 +3503,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "1"})
+    @DataProvider({ "0", "1" })
     public void testParse_connectedPilotWithPlannedMinutesFuelButWithoutPlannedHoursFuel_throwsIllegalArgumentException(int minutes) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30::%d:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", minutes);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30::%d:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            minutes //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -3042,7 +3537,10 @@ public class ClientParserTest {
     @UseDataProvider("dataProviderHoursAndMinutesAndDuration")
     public void testParse_prefiledPilotWithValidPlannedFuel_returnsObjectWithExpectedFiledTimeFuel(int hours, int minutes, Duration expectedDuration) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:%d:%d:EDDW:remark:DCT:0:0:0:0:::::::", hours, minutes);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:%d:%d:EDDW:remark:DCT:0:0:0:0:::::::",
+            hours, minutes //
+        );
         parser.setIsParsingPrefileSection(true);
 
         // Act
@@ -3053,10 +3551,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"abc", "1a", "a1"})
+    @DataProvider({ "abc", "1a", "a1" })
     public void testParse_prefiledPilotWithInvalidPlannedHoursFuel_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:%s:0:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:%s:0:EDDW:remark:DCT:0:0:0:0:::::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -3068,10 +3569,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"abc", "1a", "a1"})
+    @DataProvider({ "abc", "1a", "a1" })
     public void testParse_prefiledPilotWithInvalidPlannedMinutesFuel_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:0:%s:EDDW:remark:DCT:0:0:0:0:::::::", input);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:0:%s:EDDW:remark:DCT:0:0:0:0:::::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -3083,10 +3587,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "1"})
+    @DataProvider({ "0", "1" })
     public void testParse_prefiledPilotWithPlannedHoursFuelButWithoutPlannedMinutesFuel_throwsIllegalArgumentException(int hours) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:%d::EDDW:remark:DCT:0:0:0:0:::::::", hours);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:%d::EDDW:remark:DCT:0:0:0:0:::::::",
+            hours //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -3098,10 +3605,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "1"})
+    @DataProvider({ "0", "1" })
     public void testParse_prefiledPilotWithPlannedMinutesFuelButWithoutPlannedHoursFuel_throwsIllegalArgumentException(int minutes) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30::%d:EDDW:remark:DCT:0:0:0:0:::::::", minutes);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30::%d:EDDW:remark:DCT:0:0:0:0:::::::",
+            minutes //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -3130,7 +3640,10 @@ public class ClientParserTest {
     @UseDataProvider("dataProviderHoursAndMinutesAndDuration")
     public void testParse_atcWithValidPlannedFuel_returnsObjectWithExpectedFiledTimeFuel(int hours, int minutes, Duration expectedDuration) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::%d:%d::::::::atis message:20180101160000:20180101150000::::", hours, minutes);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::%d:%d::::::::atis message:20180101160000:20180101150000::::",
+            hours, minutes //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -3141,10 +3654,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"abc", "1a", "a1"})
+    @DataProvider({ "abc", "1a", "a1" })
     public void testParse_atcWithInvalidPlannedHoursFuel_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::%s:0::::::::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::%s:0::::::::atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -3156,10 +3672,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"abc", "1a", "a1"})
+    @DataProvider({ "abc", "1a", "a1" })
     public void testParse_atcWithInvalidPlannedMinutesFuel_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::0:%s::::::::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::0:%s::::::::atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -3171,10 +3690,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "1"})
+    @DataProvider({ "0", "1" })
     public void testParse_atcWithPlannedHoursFuelButWithoutPlannedMinutesFuel_throwsIllegalArgumentException(int hours) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::%d:::::::::atis message:20180101160000:20180101150000::::", hours);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::%d:::::::::atis message:20180101160000:20180101150000::::",
+            hours //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -3186,10 +3708,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"0", "1"})
+    @DataProvider({ "0", "1" })
     public void testParse_atcWithPlannedMinutesFuelButWithoutPlannedHoursFuel_throwsIllegalArgumentException(int minutes) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::%d::::::::atis message:20180101160000:20180101150000::::", minutes);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::%d::::::::atis message:20180101160000:20180101150000::::",
+            minutes //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -3216,10 +3741,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="filed alternate airport">
     @Test
-    @DataProvider({"", "EDDT", "05S"})
+    @DataProvider({ "", "EDDT", "05S" })
     public void testParse_connectedPilot_returnsObjectWithExpectedFiledAlternateAirportCode(String expectedAirportCode) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:%s:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedAirportCode);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:%s:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            expectedAirportCode //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -3230,10 +3758,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"", "EDDT", "05S"})
+    @DataProvider({ "", "EDDT", "05S" })
     public void testParse_prefiledPilot_returnsObjectWithExpectedFiledAlternateAirportCode(String expectedAirportCode) {
         // Arrange
-        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:%s:remark:DCT:0:0:0:0:::::::", expectedAirportCode);
+        String line = String.format(
+            "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:%s:remark:DCT:0:0:0:0:::::::",
+            expectedAirportCode //
+        );
         parser.setIsParsingPrefileSection(true);
 
         // Act
@@ -3244,7 +3775,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"", "EDDT", "05S"})
+    @DataProvider({ "", "EDDT", "05S" })
     public void testParse_atc_returnsObjectWithExpectedFiledAlternateAirportCode(String expectedAirportCode) {
         // An ATC with a flight plan doesn't make any sense but can actually be
         // found on data files...
@@ -3253,7 +3784,10 @@ public class ClientParserTest {
         // sense.
 
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::::%s:::::::atis message:20180101160000:20180101150000::::", expectedAirportCode);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::::%s:::::::atis message:20180101160000:20180101150000::::",
+            expectedAirportCode //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -3266,10 +3800,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="flight plan remarks">
     @Test
-    @DataProvider({"", "my remarks", "+-/;.#!\"%&()=_"})
+    @DataProvider({ "", "my remarks", "+-/;.#!\"%&()=_" })
     public void testParse_connectedPilot_returnsObjectWithExpectedFlightPlanRemarks(String expectedRemarks) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:%s:DCT:0:0:0:0:::20180101094500:270:29.92:1013:", expectedRemarks);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:%s:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
+            expectedRemarks //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -3280,10 +3817,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"", "my remarks", "+-/;.#!\"%&()=_"})
+    @DataProvider({ "", "my remarks", "+-/;.#!\"%&()=_" })
     public void testParse_prefiledPilot_returnsObjectWithExpectedFlightPlanRemarks(String expectedRemarks) {
         // Arrange
-        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:%s:DCT:0:0:0:0:::::::", expectedRemarks);
+        String line = String.format(
+            "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:%s:DCT:0:0:0:0:::::::",
+            expectedRemarks //
+        );
         parser.setIsParsingPrefileSection(true);
 
         // Act
@@ -3294,7 +3834,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"", "my remarks", "+-/;.#!\"%&()=_"})
+    @DataProvider({ "", "my remarks", "+-/;.#!\"%&()=_" })
     public void testParse_atc_returnsObjectWithExpectedFlightPlanRemarks(String expectedRemarks) {
         // An ATC with a flight plan doesn't make any sense but can actually be
         // found on data files...
@@ -3303,7 +3843,10 @@ public class ClientParserTest {
         // sense.
 
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::%s::::::atis message:20180101160000:20180101150000::::", expectedRemarks);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::%s::::::atis message:20180101160000:20180101150000::::",
+            expectedRemarks //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -3316,10 +3859,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="filed route">
     @Test
-    @DataProvider({"", "DCT", "SID1A/12L WPT UA123 ANASA DCT ENTRY STAR2B/31R", "just special chars +#-.,%\\"})
+    @DataProvider({ "", "DCT", "SID1A/12L WPT UA123 ANASA DCT ENTRY STAR2B/31R", "just special chars +#-.,%\\" })
     public void testParse_connectedPilot_returnsObjectWithExpectedFiledRoute(String expectedRoute) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:%s:0:0:0:0:::20180101094500:270:29.92:1013:", expectedRoute);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:%s:0:0:0:0:::20180101094500:270:29.92:1013:",
+            expectedRoute //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -3330,10 +3876,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"", "DCT", "SID1A/12L WPT UA123 ANASA DCT ENTRY STAR2B/31R", "just special chars +#-.,%\\"})
+    @DataProvider({ "", "DCT", "SID1A/12L WPT UA123 ANASA DCT ENTRY STAR2B/31R", "just special chars +#-.,%\\" })
     public void testParse_prefiledPilot_returnsObjectWithExpectedFiledRoute(String expectedRoute) {
         // Arrange
-        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remarks:%s:0:0:0:0:::::::", expectedRoute);
+        String line = String.format(
+            "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remarks:%s:0:0:0:0:::::::",
+            expectedRoute //
+        );
         parser.setIsParsingPrefileSection(true);
 
         // Act
@@ -3344,7 +3893,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"", "DCT", "SID1A/12L WPT UA123 ANASA DCT ENTRY STAR2B/31R", "just special chars +#-.,%\\"})
+    @DataProvider({ "", "DCT", "SID1A/12L WPT UA123 ANASA DCT ENTRY STAR2B/31R", "just special chars +#-.,%\\" })
     public void testParse_atc_returnsObjectWithExpectedFiledRoute(String expectedRoute) {
         // An ATC with a flight plan doesn't make any sense but can actually be
         // found on data files...
@@ -3353,7 +3902,10 @@ public class ClientParserTest {
         // sense.
 
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::::::%s:::::atis message:20180101160000:20180101150000::::", expectedRoute);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::::::%s:::::atis message:20180101160000:20180101150000::::",
+            expectedRoute //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -3366,10 +3918,27 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="departure airport latitude">
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({
+        "12.34567",
+        "-80.23456",
+        "0",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_connectedPilotWithDepartureAirportLatitude_returnsObjectWithExpectedDepartureAirportLatitude(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:%s:0:0:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:%s:0:0:0:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         double expectedOutput = Double.parseDouble(input);
@@ -3395,10 +3964,27 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({
+        "12.34567",
+        "-80.23456",
+        "0",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_prefiledPilotWithDepartureAirportLatitude_returnsObjectWithExpectedDepartureAirportLatitude(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:%s:0:0:0:::::::", input);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:%s:0:0:0:::::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         double expectedOutput = Double.parseDouble(input);
@@ -3411,7 +3997,21 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({
+        "12.34567",
+        "-80.23456",
+        "0",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_prefiledPilotWithoutDepartureAirportLatitude_returnsObjectWithNaNAsDepartureAirportLatitude(String input) {
         // Arrange
         String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT::0:0:0:::::::";
@@ -3425,10 +4025,27 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({
+        "12.34567",
+        "-80.23456",
+        "0",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_atcWithDepartureAirportLatitude_returnsObjectWithExpectedDepartureAirportLatitude(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::%s::::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::%s::::atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         double expectedOutput = Double.parseDouble(input);
@@ -3456,10 +4073,27 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="departure airport longitude">
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({
+        "12.34567",
+        "-80.23456",
+        "0",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_connectedPilotWithDepartureAirportLongitude_returnsObjectWithExpectedDepartureAirportLongitude(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:%s:0:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:%s:0:0:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         double expectedOutput = Double.parseDouble(input);
@@ -3485,10 +4119,27 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({
+        "12.34567",
+        "-80.23456",
+        "0",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_prefiledPilotWithDepartureAirportLongitude_returnsObjectWithExpectedDepartureAirportLongitude(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:%s:0:0:::::::", input);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:%s:0:0:::::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         double expectedOutput = Double.parseDouble(input);
@@ -3501,7 +4152,21 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({
+        "12.34567",
+        "-80.23456",
+        "0",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_prefiledPilotWithoutDepartureAirportLongitude_returnsObjectWithNaNAsDepartureAirportLongitude(String input) {
         // Arrange
         String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0::0:0:::::::";
@@ -3515,10 +4180,27 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({
+        "12.34567",
+        "-80.23456",
+        "0",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_atcWithDepartureAirportLongitude_returnsObjectWithExpectedDepartureAirportLongitude(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::::::::%s:::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::::::::%s:::atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         double expectedOutput = Double.parseDouble(input);
@@ -3546,10 +4228,27 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="destination airport latitude">
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({ ""
+        + "12.34567",
+        "-80.23456",
+        "0",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_connectedPilotWithDestinationAirportLatitude_returnsObjectWithExpectedDestinationAirportLatitude(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:%s:0:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:%s:0:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         double expectedOutput = Double.parseDouble(input);
@@ -3575,10 +4274,27 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({
+        "12.34567",
+        "-80.23456",
+        "0",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_prefiledPilotWithDestinationAirportLatitude_returnsObjectWithExpectedDestinationAirportLatitude(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:%s:0:::::::", input);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:%s:0:::::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         double expectedOutput = Double.parseDouble(input);
@@ -3591,7 +4307,21 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({
+        "12.34567",
+        "-80.23456",
+        "0",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_prefiledPilotWithoutDestinationAirportLatitude_returnsObjectWithNaNAsDestinationAirportLatitude(String input) {
         // Arrange
         String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0::0:::::::";
@@ -3605,10 +4335,27 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({
+        "12.34567",
+        "-80.23456",
+        "0",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_atcWithDestinationAirportLatitude_returnsObjectWithExpectedDestinationAirportLatitude(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::%s::atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::%s::atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         double expectedOutput = Double.parseDouble(input);
@@ -3636,10 +4383,27 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="destination airport longitude">
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({
+        "12.34567",
+        "-80.23456",
+        "0",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_connectedPilotWithDestinationAirportLongitude_returnsObjectWithExpectedDestinationAirportLongitude(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:%s:::20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:%s:::20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         double expectedOutput = Double.parseDouble(input);
@@ -3665,10 +4429,27 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({
+        "12.34567",
+        "-80.23456",
+        "0",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_prefiledPilotWithDestinationAirportLongitude_returnsObjectWithExpectedDestinationAirportLongitude(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:%s:::::::", input);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:%s:::::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         double expectedOutput = Double.parseDouble(input);
@@ -3681,7 +4462,21 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({
+        "12.34567",
+        "-80.23456",
+        "0",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_prefiledPilotWithoutDestinationAirportLongitude_returnsObjectWithNaNAsDestinationAirportLongitude(String input) {
         // Arrange
         String line = "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0::::::::";
@@ -3695,10 +4490,27 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"12.34567", "-80.23456", "0", "1", "-0", "-1.234e-5", "-1.234E-5", "-1.234E-05", "-1.234E02", "-1.234E+2", "-1.234E+02", "9999", "-9999"})
+    @DataProvider({
+        "12.34567",
+        "-80.23456",
+        "0",
+        "1",
+        "-0",
+        "-1.234e-5",
+        "-1.234E-5",
+        "-1.234E-05",
+        "-1.234E02",
+        "-1.234E+2",
+        "-1.234E+02",
+        "9999",
+        "-9999"
+    })
     public void testParse_atcWithDestinationAirportLongitude_returnsObjectWithExpectedDestinationAirportLongitude(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::::::::::%s:atis message:20180101160000:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::::::::::%s:atis message:20180101160000:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         double expectedOutput = Double.parseDouble(input);
@@ -3783,7 +4595,10 @@ public class ClientParserTest {
     @UseDataProvider("dataProviderControllerMessageRawAndDecoded")
     public void testParse_atcWithControllerMessage_returnsObjectWithExpectedControllerMessage(String rawMessage, String expectedMessage) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::%s:20180101160000:20180101150000::::", rawMessage);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::%s:20180101160000:20180101150000::::",
+            rawMessage //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -3810,10 +4625,14 @@ public class ClientParserTest {
     @Test
     @UseDataProvider("dataProviderFullTimestampStringAndObject")
     public void testParse_connectedPilotWithValidLastAtisReceived_returnsObjectWithNullForControllerMessageLastUpdated(String input, Instant _instant) {
-        // server appears to randomly assign some ATIS timestamp to pilots in format 9...
+        // server appears to randomly assign some ATIS timestamp to pilots in format
+        // 9...
 
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0::%s:20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0::%s:20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -3824,10 +4643,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-123", "abc", "1a", "a1"})
+    @DataProvider({ "-123", "abc", "1a", "a1" })
     public void testParse_connectedPilotWithInvalidLastAtisReceived_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0::%s:20180101094500:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0::%s:20180101094500:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -3868,7 +4690,10 @@ public class ClientParserTest {
     @UseDataProvider("dataProviderFullTimestampStringAndObject")
     public void testParse_prefiledPilotWithValidLastAtisReceived_throwsIllegalArgumentException(String input, Instant _instant) {
         // Arrange
-        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::%s:::::", input);
+        String line = String.format(
+            "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::%s:::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -3880,10 +4705,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-123", "abc", "1a", "a1"})
+    @DataProvider({ "-123", "abc", "1a", "a1" })
     public void testParse_prefiledPilotWithInvalidLastAtisReceived_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::%s:::::", input);
+        String line = String.format(
+            "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::%s:::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -3924,7 +4752,10 @@ public class ClientParserTest {
     @UseDataProvider("dataProviderFullTimestampStringAndObject")
     public void testParse_atcWithValidLastAtisReceived_returnsObjectWithExpectedControllerMessageLastUpdated(String input, Instant expectedInstant) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:%s:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:%s:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -3935,10 +4766,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-123", "abc", "1a", "a1"})
+    @DataProvider({ "-123", "abc", "1a", "a1" })
     public void testParse_atcWithInvalidLastAtisReceived_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:%s:20180101150000::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:%s:20180101150000::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -3979,7 +4813,10 @@ public class ClientParserTest {
     @UseDataProvider("dataProviderFullTimestampStringAndObject")
     public void testParse_connectedPilotWithValidLogonTime_throwsIllegalArgumentException(String input, Instant expectedInstant) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::%s:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::%s:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -3990,10 +4827,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-123", "abc", "1a", "a1"})
+    @DataProvider({ "-123", "abc", "1a", "a1" })
     public void testParse_connectedPilotWithInvalidLogonTime_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::%s:270:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::%s:270:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -4022,7 +4862,10 @@ public class ClientParserTest {
     @UseDataProvider("dataProviderFullTimestampStringAndObject")
     public void testParse_prefiledPilotWithValidLogonTime_throwsIllegalArgumentException(String input, Instant _instant) {
         // Arrange
-        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::%s::::", input);
+        String line = String.format(
+            "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::%s::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -4034,10 +4877,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-123", "abc", "1a", "a1"})
+    @DataProvider({ "-123", "abc", "1a", "a1" })
     public void testParse_prefiledPilotWithInvalidLogonTime_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::%s::::", input);
+        String line = String.format(
+            "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::%s::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -4065,7 +4911,10 @@ public class ClientParserTest {
     @UseDataProvider("dataProviderFullTimestampStringAndObject")
     public void testParse_atcWithValidLogonTime_returnsObjectWithExpectedLogonTime(String input, Instant expectedInstant) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:20180101160000:%s::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:20180101160000:%s::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -4076,10 +4925,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-123", "abc", "1a", "a1"})
+    @DataProvider({ "-123", "abc", "1a", "a1" })
     public void testParse_atcWithInvalidLogonTime_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:20180101160000:%s::::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:20180101160000:%s::::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -4106,10 +4958,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="heading">
     @Test
-    @DataProvider({"0", "123", "359"})
+    @DataProvider({ "0", "123", "359" })
     public void testParse_connectedPilotWithValidRegularHeading_returnsObjectWithExpectedHeading(int expectedHeading) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:%d:29.92:1013:", expectedHeading);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:%d:29.92:1013:",
+            expectedHeading //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -4122,7 +4977,7 @@ public class ClientParserTest {
     @Test
     public void testParse_connectedPilotWithValid360Heading_returnsObjectWithZeroHeading() {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:360:29.92:1013:");
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:360:29.92:1013:";
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -4133,10 +4988,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1", "361", "1080"})
+    @DataProvider({ "-1", "abc", "1a", "a1", "361", "1080" })
     public void testParse_connectedPilotWithInvalidHeading_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:%s:29.92:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:%s:29.92:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -4161,10 +5019,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"1", "123", "359", "360"})
+    @DataProvider({ "1", "123", "359", "360" })
     public void testParse_prefiledPilotWithValidNonZeroHeading_throwsIllegalArgumentException(int heading) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::::%d:::", heading);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::::%d:::",
+            heading //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -4176,10 +5037,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1", "361", "1080"})
+    @DataProvider({ "-1", "abc", "1a", "a1", "361", "1080" })
     public void testParse_prefiledPilotWithInvalidHeading_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::::%s:::", input);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::::%s:::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -4204,10 +5068,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"1", "123", "359", "360"})
+    @DataProvider({ "1", "123", "359", "360" })
     public void testParse_atcWithValidNonZeroHeading_throwsIllegalArgumentException(int heading) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000:%d:::", heading);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000:%d:::",
+            heading //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -4219,10 +5086,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1", "abc", "1a", "a1", "361", "1080"})
+    @DataProvider({ "-1", "abc", "1a", "a1", "361", "1080" })
     public void testParse_atcWithInvalidHeading_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000:%s:::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000:%s:::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -4249,10 +5119,14 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="QNH Inch Mercury">
     @Test
-    @DataProvider({"29.92", "2.992e02", "30", "27.9", "-1", "-29.92", "-2.992e02", "-2.992E5", "-2.992E05", "-2.992E-1", "-2.992E+1", "-2.992E+01"})
+    @DataProvider({ "29.92", "2.992e02", "30", "27.9", "-1", "-29.92", "-2.992e02", "-2.992E5", "-2.992E05",
+        "-2.992E-1", "-2.992E+1", "-2.992E+01" })
     public void testParse_connectedPilotWithValidQnhIHg_returnsObjectWithExpectedQnhInchMercury(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:%s:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:%s:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         double expectedOutput = Double.parseDouble(input);
@@ -4265,10 +5139,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"abc", "1a", "a1"})
+    @DataProvider({ "abc", "1a", "a1" })
     public void testParse_connectedPilotWithInvalidQnhIHg_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:%s:1013:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:%s:1013:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -4293,10 +5170,14 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"29.92", "2.992e02", "30", "27.9", "-1", "-29.92", "-2.992e02", "-2.992E5", "-2.992E05", "-2.992E-1", "-2.992E+1", "-2.992E+01"})
+    @DataProvider({ "29.92", "2.992e02", "30", "27.9", "-1", "-29.92", "-2.992e02", "-2.992E5", "-2.992E05",
+        "-2.992E-1", "-2.992E+1", "-2.992E+01" })
     public void testParse_prefiledPilotWithValidQnhIhg_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::%s::", input);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::%s::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -4308,10 +5189,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"abc", "1a", "a1"})
+    @DataProvider({ "abc", "1a", "a1" })
     public void testParse_prefiledPilotWithInvalidQnhIHg_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::%s::", input);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::%s::",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -4336,10 +5220,26 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"29.92", "2.992e02", "30", "27.9", "-1", "-29.92", "-2.992e02", "-2.992E5", "-2.992E05", "-2.992E-1", "-2.992E+1", "-2.992E+01"})
+    @DataProvider({
+        "29.92",
+        "2.992e02",
+        "30",
+        "27.9",
+        "-1",
+        "-29.92",
+        "-2.992e02",
+        "-2.992E5",
+        "-2.992E05",
+        "-2.992E-1",
+        "-2.992E+1",
+        "-2.992E+01"
+    })
     public void testParse_atcWithValidQnhIHg_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::%s::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::%s::",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -4351,10 +5251,12 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"abc", "1a", "a1"})
+    @DataProvider({ "abc", "1a", "a1" })
     public void testParse_atcWithInvalidQnhIHg_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::%s::", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::%s::",
+            input);
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -4381,10 +5283,13 @@ public class ClientParserTest {
 
     // <editor-fold defaultstate="collapsed" desc="QNH Hectopascal">
     @Test
-    @DataProvider({"-12345", "0", "997", "1013", "1030"})
+    @DataProvider({ "-12345", "0", "997", "1013", "1030" })
     public void testParse_connectedPilotWithValidQnhMB_returnsObjectWithExpectedQnhHectopascal(int expectedQnh) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:%d:", expectedQnh);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:%d:",
+            expectedQnh //
+        );
         parser.setIsParsingPrefileSection(false);
 
         // Act
@@ -4395,10 +5300,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1.0", "29.92", "1e03", "abc", "1a", "a1"})
+    @DataProvider({ "-1.0", "29.92", "1e03", "abc", "1a", "a1" })
     public void testParse_connectedPilotWithInvalidQnhMB_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:%s:", input);
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:%s:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -4423,10 +5331,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-12345", "0", "997", "1013", "1030"})
+    @DataProvider({ "-12345", "0", "997", "1013", "1030" })
     public void testParse_prefiledPilotWithValidQnhMB_returnsObjectWithNegativeQnhHectopascal(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::::::%s:", input);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::::::%s:",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         // Act
@@ -4437,10 +5348,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1.0", "29.92", "1e03", "abc", "1a", "a1"})
+    @DataProvider({ "-1.0", "29.92", "1e03", "abc", "1a", "a1" })
     public void testParse_prefiledPilotWithInvalidQnhMB_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::::::%s:", input);
+        String line = String.format(
+            "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::::::%s:",
+            input //
+        );
         parser.setIsParsingPrefileSection(true);
 
         thrown.expect(IllegalArgumentException.class);
@@ -4465,10 +5379,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-12345", "-1", "997", "1013", "1030"})
+    @DataProvider({ "-12345", "-1", "997", "1013", "1030" })
     public void testParse_atcWithValidNonZeroQnhMB_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000:::%s:", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000:::%s:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -4480,10 +5397,13 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({"-1.0", "29.92", "1e03", "abc", "1a", "a1"})
+    @DataProvider({ "-1.0", "29.92", "1e03", "abc", "1a", "a1" })
     public void testParse_atcWithInvalidQnhMB_throwsIllegalArgumentException(String input) {
         // Arrange
-        String line = String.format("EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000:::%s:", input);
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000:::%s:",
+            input //
+        );
         parser.setIsParsingPrefileSection(false);
 
         thrown.expect(IllegalArgumentException.class);
@@ -4521,7 +5441,8 @@ public class ClientParserTest {
     }
     // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="special: client type detection/tolerance">
+    // <editor-fold defaultstate="collapsed" desc="special: client type
+    // detection/tolerance">
     @Test
     public void testParse_ghostWithPositionHeadingQNHTransponderLogonTimeAndServerIdInOnlineSection_returnsObjectAsEffectiveConnectedPilotWithExpectedData() {
         // Occurence on 12 Oct 2017 (with server ID):
@@ -4656,4 +5577,6 @@ public class ClientParserTest {
         assertThat(result.getServedFrequencyKilohertz(), is(equalTo(124525)));
     }
     // </editor-fold>
+
+    // TODO: migrate to JUnit 5 and make NetBeans editor-folds @Nested classes
 }

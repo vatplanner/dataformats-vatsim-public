@@ -1,8 +1,19 @@
 package org.vatplanner.dataformats.vatsimpublic.graph;
 
+import static java.util.Arrays.asList;
+import static org.vatplanner.dataformats.vatsimpublic.entities.status.BarometricPressure.UNIT_HECTOPASCALS;
+import static org.vatplanner.dataformats.vatsimpublic.entities.status.BarometricPressure.UNIT_INCHES_OF_MERCURY;
+import static org.vatplanner.dataformats.vatsimpublic.entities.status.GeoCoordinates.UNIT_FEET;
+import static org.vatplanner.dataformats.vatsimpublic.parser.ClientType.ATC_CONNECTED;
+import static org.vatplanner.dataformats.vatsimpublic.parser.ClientType.PILOT_CONNECTED;
+import static org.vatplanner.dataformats.vatsimpublic.parser.ClientType.PILOT_PREFILED;
+import static org.vatplanner.dataformats.vatsimpublic.utils.CollectionHelpers.findPrevious;
+import static org.vatplanner.dataformats.vatsimpublic.utils.TimeHelpers.findClosestPlausibleTimestampForFlightPlanField;
+import static org.vatplanner.dataformats.vatsimpublic.utils.TimeHelpers.isLessOrEqualThan;
+import static org.vatplanner.dataformats.vatsimpublic.utils.ValueHelpers.inRange;
+
 import java.time.Duration;
 import java.time.Instant;
-import static java.util.Arrays.asList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,11 +21,10 @@ import java.util.SortedSet;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.BarometricPressure;
-import static org.vatplanner.dataformats.vatsimpublic.entities.status.BarometricPressure.UNIT_HECTOPASCALS;
-import static org.vatplanner.dataformats.vatsimpublic.entities.status.BarometricPressure.UNIT_INCHES_OF_MERCURY;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.CommunicationMode;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Connection;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Facility;
@@ -23,7 +33,6 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.FlightEvent;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FlightPlan;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FlightPlanType;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.GeoCoordinates;
-import static org.vatplanner.dataformats.vatsimpublic.entities.status.GeoCoordinates.UNIT_FEET;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Member;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Report;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.SimpleEquipmentSpecification;
@@ -39,16 +48,9 @@ import org.vatplanner.dataformats.vatsimpublic.icao.ICAOField10PBNParser;
 import org.vatplanner.dataformats.vatsimpublic.icao.NavigationApproachCapability;
 import org.vatplanner.dataformats.vatsimpublic.parser.Client;
 import org.vatplanner.dataformats.vatsimpublic.parser.ClientType;
-import static org.vatplanner.dataformats.vatsimpublic.parser.ClientType.ATC_CONNECTED;
-import static org.vatplanner.dataformats.vatsimpublic.parser.ClientType.PILOT_CONNECTED;
-import static org.vatplanner.dataformats.vatsimpublic.parser.ClientType.PILOT_PREFILED;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
-import static org.vatplanner.dataformats.vatsimpublic.utils.CollectionHelpers.findPrevious;
 import org.vatplanner.dataformats.vatsimpublic.utils.TimeHelpers;
-import static org.vatplanner.dataformats.vatsimpublic.utils.TimeHelpers.findClosestPlausibleTimestampForFlightPlanField;
-import static org.vatplanner.dataformats.vatsimpublic.utils.TimeHelpers.isLessOrEqualThan;
-import static org.vatplanner.dataformats.vatsimpublic.utils.ValueHelpers.inRange;
 
 /**
  * Imports parsed {@link DataFile}s to a graph of de-duplicated and indexed
@@ -61,8 +63,16 @@ public class GraphImport {
     private final StatusEntityFactory entityFactory;
     private final GraphIndex index = new GraphIndex();
 
-    private static final Duration MAXIMUM_AGE_FOR_CONTINUED_FLIGHT = Duration.ofMinutes(30); // TODO: fine-tune and/or make configurable; compensate for missed data files as well as client connection loss
-    private static final Duration MAXIMUM_AGE_FOR_CONTINUED_FLIGHT_ON_RECONSTRUCTION = Duration.ofMinutes(10); // TODO: fine-tune and/or make configurable
+    /*
+     * TODO: fine-tune and/or make configurable; compensate for missed data files as
+     * well as client connection loss
+     */
+    private static final Duration MAXIMUM_AGE_FOR_CONTINUED_FLIGHT = Duration.ofMinutes(30);
+
+    /*
+     * TODO: fine- tune and/or make configurable
+     */
+    private static final Duration MAXIMUM_AGE_FOR_CONTINUED_FLIGHT_ON_RECONSTRUCTION = Duration.ofMinutes(10);
 
     private static final int MINIMUM_FLIGHT_PLAN_REVISION = 0;
     private static final int MINIMUM_VATSIM_ID = 0;
@@ -76,19 +86,19 @@ public class GraphImport {
 
     /**
      * Lowest ground speed in knots to consider an airplane to be airborne
-     * (obviously does not apply to rotary-wing aircraft such as helicopters).
-     * While minimum airborne IAS for airplanes is usually around 70kt, we only
-     * have ground speed and need to take typical wind speeds into account which
-     * are subtracted from IAS.
+     * (obviously does not apply to rotary-wing aircraft such as helicopters). While
+     * minimum airborne IAS for airplanes is usually around 70kt, we only have
+     * ground speed and need to take typical wind speeds into account which are
+     * subtracted from IAS.
      */
     private static final int MINIMUM_GROUND_SPEED_AIRBORNE = 50;
 
     /**
-     * According to Wikipedia the fastest airplane so far flew with ~3500kph
-     * "air speed" (IAS? TAS?). We add a bit of extra for ground speed and allow
-     * some extra margin for simmers to determine the maximum plausible ground
-     * speed to be encountered online. Everything else can be seen as erroneous
-     * indication (fast-forward playback or whatever).
+     * According to Wikipedia the fastest airplane so far flew with ~3500kph "air
+     * speed" (IAS? TAS?). We add a bit of extra for ground speed and allow some
+     * extra margin for simmers to determine the maximum plausible ground speed to
+     * be encountered online. Everything else can be seen as erroneous indication
+     * (fast-forward playback or whatever).
      *
      * <p>
      * Source: https://en.wikipedia.org/wiki/Flight_airspeed_record
@@ -97,7 +107,8 @@ public class GraphImport {
     private static final int MAXIMUM_PLAUSIBLE_GROUND_SPEED = (int) Math.round(4000 * FACTOR_KPH_TO_NM);
 
     private static final Duration MINIMUM_FLIGHT_DURATION = Duration.ofMinutes(5);
-    private static final Duration MAXIMUM_FLIGHT_DURATION = Duration.ofHours(48); // ... let's allow some in-air refueling because we are simming
+    private static final Duration MAXIMUM_FLIGHT_DURATION = Duration.ofHours(48); // ... let's allow some in-air
+                                                                                  // refueling because we are simming
 
     private static final Pattern PATTERN_VALID_TRANSPONDER_CODE = Pattern.compile("^[0-7]{0,4}$");
 
@@ -105,16 +116,15 @@ public class GraphImport {
      * Callsigns used by system services (should be ignored on import).
      */
     private static final Set<String> SYSTEM_SERVICE_CALLSIGNS = new HashSet<String>(asList(
-            "AFVDATA",
-            "AFV-SLURPER",
-            "DATA",
-            "DATASVR",
-            "SUP"
+        "AFVDATA",
+        "AFV-SLURPER",
+        "DATA",
+        "DATASVR",
+        "SUP" //
     ));
 
     /**
-     * Creates a new graph import using the given factory to instantiate
-     * entities.
+     * Creates a new graph import using the given factory to instantiate entities.
      *
      * @param entityFactory factory to instantiate entities
      */
@@ -123,14 +133,13 @@ public class GraphImport {
     }
 
     /**
-     * Imports the given {@link DataFile} to the graph. All files must be
-     * provided sequentially in ascending order of recording time
-     * ({@link DataFileMetaData#getTimestamp()}). Importing multiple files with
-     * an identical timestamp is also not supported. Time must advance strictly.
-     * This also means that an import must not be carried out in parallel.
+     * Imports the given {@link DataFile} to the graph. All files must be provided
+     * sequentially in ascending order of recording time
+     * ({@link DataFileMetaData#getTimestamp()}). Importing multiple files with an
+     * identical timestamp is also not supported. Time must advance strictly. This
+     * also means that an import must not be carried out in parallel.
      *
-     * @param dataFile file to import to graph; recording time must advance
-     * strictly
+     * @param dataFile file to import to graph; recording time must advance strictly
      * @return imported {@link Report}, null if not imported
      */
     public Report importDataFile(final DataFile dataFile) {
@@ -148,7 +157,10 @@ public class GraphImport {
         }
 
         if (index.hasReportAfterRecordTime(recordTime)) {
-            LOGGER.warn("report recorded at {} is older than an already imported one but import must be performed in increasing order of record time; not importing", recordTime);
+            LOGGER.warn(
+                "report recorded at {} is older than an already imported one but import must be performed in increasing order of record time; not importing",
+                recordTime //
+            );
             return null;
         }
 
@@ -214,7 +226,8 @@ public class GraphImport {
             }
 
             // do not continue if reconnected
-            if ((facility != null) && (client.getLogonTime() != null) && !client.getLogonTime().equals(facility.getConnection().getLogonTime())) {
+            if ((facility != null) && (client.getLogonTime() != null)
+                && !client.getLogonTime().equals(facility.getConnection().getLogonTime())) {
                 facility = null;
             }
         }
@@ -223,13 +236,16 @@ public class GraphImport {
         if (facility == null) {
             Connection connection = createConnection(client);
             if (connection == null) {
-                LOGGER.warn("report recorded at {}: unable to record connection for connected ATC {} (internal connection record could not be found nor created)", report.getRecordTime(), name);
+                LOGGER.warn(
+                    "report recorded at {}: unable to record connection for connected ATC {} (internal connection record could not be found nor created)",
+                    report.getRecordTime(), name //
+                );
                 return;
             }
 
             facility = entityFactory.createFacility(name)
-                    .setConnection(connection)
-                    .setType(client.getFacilityType());
+                .setConnection(connection)
+                .setType(client.getFacilityType());
 
             connection.getMember().addFacility(facility);
         }
@@ -264,17 +280,19 @@ public class GraphImport {
         RealNameHomeBaseExtractor nameExtractor = new RealNameHomeBaseExtractor(client.getRealName());
 
         return entityFactory.createConnection(member, client.getLogonTime())
-                .setProtocolVersion(client.getProtocolVersion())
-                .setRating(client.getControllerRating())
-                .setServerId(client.getServerId())
-                .setRealName(nameExtractor.getRealName())
-                .setHomeBase(nameExtractor.getHomeBase());
+            .setProtocolVersion(client.getProtocolVersion())
+            .setRating(client.getControllerRating())
+            .setServerId(client.getServerId())
+            .setRealName(nameExtractor.getRealName())
+            .setHomeBase(nameExtractor.getHomeBase());
     }
 
     private void importFlightConnected(final Report report, final Client client) {
         Instant logonTime = client.getLogonTime();
         if (logonTime == null) {
-            throw new UnsupportedOperationException("log on time is mandatory to import connected flights; report recorded " + report.getRecordTime());
+            throw new UnsupportedOperationException(
+                "log on time is mandatory to import connected flights; report recorded " + report.getRecordTime() //
+            );
         }
 
         Member member = getMember(client);
@@ -290,16 +308,16 @@ public class GraphImport {
             Report previousReport = index.getLatestReportBefore(report);
             if (previousReport != null) {
                 List<Flight> matchingFlights = previousReport.getFlights()
-                        .stream()
-                        .filter(x -> callsign.equals(x.getCallsign()))
-                        .filter(x -> x.getLatestConnection() != null)
-                        .filter(
-                                x -> isLessOrEqualThan(
-                                        Duration.between(x.getLatestConnection().getLogonTime(), logonTime),
-                                        MAXIMUM_AGE_FOR_CONTINUED_FLIGHT_ON_RECONSTRUCTION
-                                )
-                        )
-                        .collect(Collectors.toList());
+                    .stream()
+                    .filter(x -> callsign.equals(x.getCallsign()))
+                    .filter(x -> x.getLatestConnection() != null)
+                    .filter(
+                        x -> isLessOrEqualThan(
+                            Duration.between(x.getLatestConnection().getLogonTime(), logonTime),
+                            MAXIMUM_AGE_FOR_CONTINUED_FLIGHT_ON_RECONSTRUCTION //
+                        ) //
+                    )
+                    .collect(Collectors.toList());
 
                 if (matchingFlights.size() == 1) {
                     member = matchingFlights.get(0).getMember();
@@ -308,27 +326,31 @@ public class GraphImport {
         }
 
         if (member == null) {
-            LOGGER.warn("report recorded at {}: unable to identify member for connected pilot {} (may occur on broken datafiles if fuzzy reconstruction fails)", report.getRecordTime(), callsign);
+            LOGGER.warn(
+                "report recorded at {}: unable to identify member for connected pilot {} (may occur on broken datafiles if fuzzy reconstruction fails)",
+                report.getRecordTime(), callsign //
+            );
             return;
         }
 
         // find last flight of member under same callsign
         Flight flight = member.getFlights()
-                .stream()
-                .filter(x -> x.getCallsign().equals(callsign))
-                .max((x, y) -> x.getLatestVisibleTime().compareTo(y.getLatestVisibleTime()))
-                .orElse(null);
+            .stream()
+            .filter(x -> x.getCallsign().equals(callsign))
+            .max((x, y) -> x.getLatestVisibleTime().compareTo(y.getLatestVisibleTime()))
+            .orElse(null);
 
         // search for an existing pilot connection with same logon time
         Connection connection = member.getFlights()
-                .stream()
-                .flatMap(x -> x.getConnections().stream())
-                .filter(x -> logonTime.equals(x.getLogonTime()))
-                .findFirst()
-                .orElse(null);
+            .stream()
+            .flatMap(x -> x.getConnections().stream())
+            .filter(x -> logonTime.equals(x.getLogonTime()))
+            .findFirst()
+            .orElse(null);
 
         // only if fuzzy reconstruction is running:
-        // if no existing connection was found, try to reuse the previous flight's connection
+        // if no existing connection was found, try to reuse the previous flight's
+        // connection
         if (needsFuzzyReconstruction && (connection == null) && (flight != null)) {
             connection = flight.getLatestConnection();
         }
@@ -349,9 +371,13 @@ public class GraphImport {
 
         // reset flight if last connection exceeds retention time
         if ((flight != null) && (connection != null)) {
-            Duration timeSinceLastSeen = Duration.between(connection.getLastReport().getRecordTime(), report.getRecordTime());
+            Duration timeSinceLastSeen = Duration.between(connection.getLastReport().getRecordTime(),
+                report.getRecordTime());
             if (!isLessOrEqualThan(timeSinceLastSeen, MAXIMUM_AGE_FOR_CONTINUED_FLIGHT)) {
-                // TODO: check if we actually got at least 1 or 2 reports since then, otherwise we may have had a network outage
+                /*
+                 * TODO: check if we actually got at least 1 or 2 reports since then, otherwise
+                 * we may have had a network outage
+                 */
                 flight = null;
                 flightPlan = null;
             }
@@ -398,7 +424,10 @@ public class GraphImport {
         if (connection != null) {
             connection.seenInReport(report);
         } else {
-            LOGGER.warn("report recorded at {}: unable to record connection for connected pilot {} (internal connection record could not be found nor created)", report.getRecordTime(), callsign);
+            LOGGER.warn(
+                "report recorded at {}: unable to record connection for connected pilot {} (internal connection record could not be found nor created)",
+                report.getRecordTime(), callsign //
+            );
         }
 
         // add track point
@@ -407,11 +436,17 @@ public class GraphImport {
         // create new flight plan if available but not continued
         if ((flightPlan == null) && clientHasFlightPlan) {
             getFlightPlan(flight, report, client)
-                    .seenInReport(report);
+                .seenInReport(report);
         }
 
-        // TODO: check distance between last and current position for plausibility and start new flight if aircraft "jumped" to a new location?
-        // TODO: track flight phases and mark flight completed after landing, trigger new flight when aircraft moves/departs again?
+        /*
+         * TODO: check distance between last and current position for plausibility and
+         * start new flight if aircraft "jumped" to a new location?
+         */
+        /*
+         * TODO: track flight phases and mark flight completed after landing, trigger
+         * new flight when aircraft moves/departs again?
+         */
     }
 
     private boolean isSameFlight(final FlightPlan flightPlan, final Client client) {
@@ -420,7 +455,8 @@ public class GraphImport {
         }
 
         if (flightPlan.getRevision() > client.getFlightPlanRevision()) {
-            // flight plan revision is strictly ascending; if it moves backward, flight plan has been deleted and refiled
+            // flight plan revision is strictly ascending; if it moves backward, flight plan
+            // has been deleted and refiled
             return false;
         }
 
@@ -464,9 +500,16 @@ public class GraphImport {
         flight.addTrackPoint(trackPoint);
 
         // check for events and mark
-        // TODO: analyze much earlier in import and use information about flight phase to split flights on (i.e. only one takeoff and landing per flight)
+        /*
+         * TODO: analyze much earlier in import and use information about flight phase
+         * to split flights on (i.e. only one takeoff and landing per flight)
+         */
         // TODO: mark only if multiple track points have confirmed stable condition
-        // TODO: take difference in height from start position into account to determine airborne state (would allow state for rotary-wing aircraft to be detected more reliably)
+        /*
+         * TODO: take difference in height from start position into account to determine
+         * airborne state (would allow state for rotary-wing aircraft to be detected
+         * more reliably)
+         */
         boolean wasAirborne = flight.isAirborne();
         boolean hasLanded = flight.hasLanded();
         boolean hasSpeedToBeAirborne = (trackPoint.getGroundSpeed() >= MINIMUM_GROUND_SPEED_AIRBORNE);
@@ -488,7 +531,8 @@ public class GraphImport {
         // check coordinates for validity
         double latitude = client.getLatitude();
         double longitude = client.getLongitude();
-        boolean inRange = inRange(latitude, MINIMUM_LATITUDE, MAXIMUM_LATITUDE) && inRange(longitude, MINIMUM_LONGITUDE, MAXIMUM_LONGITUDE);
+        boolean inRange = inRange(latitude, MINIMUM_LATITUDE, MAXIMUM_LATITUDE)
+            && inRange(longitude, MINIMUM_LONGITUDE, MAXIMUM_LONGITUDE);
         if (!inRange) {
             // don't allow track points without coordinates
             // TODO: try to correct lat/lon if out of range instead of ignoring it
@@ -502,7 +546,8 @@ public class GraphImport {
         // set coordinates
         trackPoint.setGeoCoordinates(new GeoCoordinates(latitude, longitude, client.getAltitudeFeet(), UNIT_FEET));
 
-        // prefer QNH measured in inHg as it provides higher precision in data files (at least 2 decimal places)
+        // prefer QNH measured in inHg as it provides higher precision in data files (at
+        // least 2 decimal places)
         BarometricPressure localQnh = null;
         double qnhInchMercury = client.getQnhInchMercury();
         if (!Double.isNaN(qnhInchMercury)) {
@@ -548,12 +593,11 @@ public class GraphImport {
     }
 
     /**
-     * Searches for a continued flight by checking airports filed on flight
-     * plan. Also, VATSIM ID and callsign has to match as that pair of
-     * information uniquely identifies flights. At most the given number of
-     * maximum reports recorded before the given new report are searched if
-     * their age, compared to the new report, does not exceed
-     * {@link #MAXIMUM_AGE_FOR_CONTINUED_FLIGHT}.
+     * Searches for a continued flight by checking airports filed on flight plan.
+     * Also, VATSIM ID and callsign has to match as that pair of information
+     * uniquely identifies flights. At most the given number of maximum reports
+     * recorded before the given new report are searched if their age, compared to
+     * the new report, does not exceed {@link #MAXIMUM_AGE_FOR_CONTINUED_FLIGHT}.
      *
      * @param newReport new report to lookup a flight for
      * @param client client to lookup a flight for
@@ -561,7 +605,8 @@ public class GraphImport {
      * @return flight matching all criteria, null if not found
      * @see #findMatchingFlightByFlightPlanAirports(Report, Client)
      */
-    private Flight findContinuedFlightByFlightPlanAirports(final Report newReport, final Client client, final int maxReports) {
+    private Flight findContinuedFlightByFlightPlanAirports(final Report newReport, final Client client,
+        final int maxReports) {
         Report report = newReport;
         int checkedReports = 0;
         while ((checkedReports++ < maxReports) && (report = index.getLatestReportBefore(report)) != null) {
@@ -582,8 +627,14 @@ public class GraphImport {
 
     private void importFlightPrefiled(final Report report, final Client client) {
         // a prefiled flight should also have been listed in the previous report
-        // TODO: check if assumption is always true or if search needs to include some older reports as well
-        // TODO: check if flight plan has same revision but content has changed - in that case flight has been canceled & refiled
+        /*
+         * TODO: check if assumption is always true or if search needs to include some
+         * older reports as well
+         */
+        /*
+         * TODO: check if flight plan has same revision but content has changed - in
+         * that case flight has been canceled & refiled
+         */
         Flight flight = findContinuedFlightByFlightPlanAirports(report, client, 1);
         if (flight != null && !flight.getTrack().isEmpty() && !flight.isReconstructed(report)) {
             // pre-filed flights should not have track points yet,
@@ -594,7 +645,8 @@ public class GraphImport {
         if (flight == null) {
             Member member = getMember(client);
             if (member == null) {
-                LOGGER.warn("report recorded at {}: unable to record prefiling for {} (unknown member)", report.getRecordTime(), client.getCallsign());
+                LOGGER.warn("report recorded at {}: unable to record prefiling for {} (unknown member)",
+                    report.getRecordTime(), client.getCallsign());
                 return;
             }
 
@@ -605,24 +657,28 @@ public class GraphImport {
         report.addFlight(flight);
 
         getFlightPlan(flight, report, client)
-                .seenInReport(report);
+            .seenInReport(report);
     }
 
     private FlightPlan getFlightPlan(final Flight flight, final Report report, final Client client) {
         int flightPlanRevision = client.getFlightPlanRevision();
         FlightPlan flightPlan = flight.getFlightPlans() // TODO: move to Flight
-                .stream()
-                .filter(x -> x.getRevision() == flightPlanRevision)
-                .findFirst()
-                .orElse(null);
+            .stream()
+            .filter(x -> x.getRevision() == flightPlanRevision)
+            .findFirst()
+            .orElse(null);
 
         if (flightPlan == null) {
             int altitudeFeet = new AltitudeParser(client.getRawFiledAltitude()).getFeet();
-            CommunicationMode communicationMode = new RemarksExtractor(client.getFlightPlanRemarks()).getCommunicationMode();
+            CommunicationMode communicationMode = //
+                new RemarksExtractor(client.getFlightPlanRemarks())
+                    .getCommunicationMode();
             FlightPlanType flightPlanType = FlightPlanType.resolveFlightPlanCode(client.getRawFlightPlanType());
 
             AircraftTypeExtractor aircraftTypeExtractor = new AircraftTypeExtractor(client.getAircraftType());
-            WakeTurbulenceCategory wakeTurbulenceCategory = WakeTurbulenceCategory.resolveFlightPlanCode(aircraftTypeExtractor.getWakeCategory());
+            WakeTurbulenceCategory wakeTurbulenceCategory = WakeTurbulenceCategory.resolveFlightPlanCode( //
+                aircraftTypeExtractor.getWakeCategory() //
+            );
 
             String equipmentCode = aircraftTypeExtractor.getEquipmentCode();
             SimpleEquipmentSpecification simpleEquipmentSpecification = null;
@@ -633,19 +689,25 @@ public class GraphImport {
                 // TODO: save information
 
                 ICAOField10PBNParser icaoField10PBNParser = new ICAOField10PBNParser(equipmentCode);
-                Set<CommunicationCapability> communicationCapabilities = icaoField10PBNParser.getCommunicationCapabilities();
-                Set<NavigationApproachCapability> navigationApproachCapabilities = icaoField10PBNParser.getNavigationApproachCapabilities();
+                Set<CommunicationCapability> communicationCapabilities = //
+                    icaoField10PBNParser.getCommunicationCapabilities();
+                Set<NavigationApproachCapability> navigationApproachCapabilities = //
+                    icaoField10PBNParser.getNavigationApproachCapabilities();
 
                 // Plausability check:
-                // Information makes no sense if there was only one designator provided. This does not include the "standard"
-                // designator which will decode to separate capabilities for communication and navigation (total of at least
-                // 2 if left unexpanded).
-                // Assume the user used a simple equipment specification instead of the proper ICAO code if it was just a
-                // single character.
-                // Examples: Just "G" indicates GNSS without any other navigation capability and also no way of communication.
-                //           Just "L" indicates ILS and nothing else...
-                //           Just "Q" means absolutely nothing in terms of ICAO capability.
-                //           => all 3 examples lead to proper SimpleEquipmentSpecification though
+                // Information makes no sense if there was only one designator provided. This
+                // does not include the "standard" designator which will decode to separate
+                // capabilities for communication and navigation (total of at least 2 if left
+                // unexpanded).
+                // Assume the user used a simple equipment specification instead of the proper
+                // ICAO code if it was just a single character.
+                //
+                // Examples:
+                // Just "G" indicates GNSS without any other navigation capability and
+                // also no way of communication.
+                // Just "L" indicates ILS and nothing else...
+                // Just "Q" means absolutely nothing in terms of ICAO capability.
+                // => all 3 examples lead to proper SimpleEquipmentSpecification though
                 int totalDesignators = communicationCapabilities.size() + navigationApproachCapabilities.size();
                 if ((totalDesignators == 1) && (equipmentCode.length() == 1)) {
                     simpleEquipmentSpecification = SimpleEquipmentSpecification.resolveFlightPlanCode(equipmentCode);
@@ -653,26 +715,34 @@ public class GraphImport {
             }
 
             flightPlan = entityFactory.createFlightPlan(flight, flightPlanRevision)
-                    .setAircraftType(aircraftTypeExtractor.getAircraftType())
-                    .setAlternateAirportCode(client.getFiledAlternateAirportCode())
-                    .setAltitudeFeet(altitudeFeet)
-                    .setCommunicationMode(communicationMode)
-                    .setDepartureAirportCode(client.getFiledDepartureAirportCode())
-                    .setDestinationAirportCode(client.getFiledDestinationAirportCode())
-                    .setEstimatedTimeEnroute(nullDurationIfOutOfRange(client.getFiledTimeEnroute(), MINIMUM_FLIGHT_DURATION, MAXIMUM_FLIGHT_DURATION))
-                    .setEstimatedTimeFuel(nullDurationIfOutOfRange(client.getFiledTimeFuel(), MINIMUM_FLIGHT_DURATION, MAXIMUM_FLIGHT_DURATION))
-                    .setFlightPlanType(flightPlanType)
-                    .setRemarks(client.getFlightPlanRemarks())
-                    .setRoute(client.getFiledRoute())
-                    .setSimpleEquipmentSpecification(simpleEquipmentSpecification)
-                    .setTrueAirSpeed(client.getFiledTrueAirSpeed())
-                    .setWakeTurbulenceCategory(wakeTurbulenceCategory)
-                    .seenInReport(report); // needs to be set for timestamps to be guessed
+                .setAircraftType(aircraftTypeExtractor.getAircraftType())
+                .setAlternateAirportCode(client.getFiledAlternateAirportCode())
+                .setAltitudeFeet(altitudeFeet)
+                .setCommunicationMode(communicationMode)
+                .setDepartureAirportCode(client.getFiledDepartureAirportCode())
+                .setDestinationAirportCode(client.getFiledDestinationAirportCode())
+                .setEstimatedTimeEnroute(nullDurationIfOutOfRange( //
+                    client.getFiledTimeEnroute(), MINIMUM_FLIGHT_DURATION, MAXIMUM_FLIGHT_DURATION //
+                ))
+                .setEstimatedTimeFuel(nullDurationIfOutOfRange( //
+                    client.getFiledTimeFuel(), MINIMUM_FLIGHT_DURATION, MAXIMUM_FLIGHT_DURATION //
+                ))
+                .setFlightPlanType(flightPlanType)
+                .setRemarks(client.getFlightPlanRemarks())
+                .setRoute(client.getFiledRoute())
+                .setSimpleEquipmentSpecification(simpleEquipmentSpecification)
+                .setTrueAirSpeed(client.getFiledTrueAirSpeed())
+                .setWakeTurbulenceCategory(wakeTurbulenceCategory)
+                .seenInReport(report); // needs to be set for timestamps to be guessed
 
             flight.addFlightPlan(flightPlan);
 
-            Instant departureTimeActual = findClosestPlausibleTimestampForFlightPlanField(flight, client.getRawDepartureTimeActual());
-            Instant departureTimePlanned = findClosestPlausibleTimestampForFlightPlanField(flight, client.getRawDepartureTimePlanned());
+            Instant departureTimeActual = findClosestPlausibleTimestampForFlightPlanField( //
+                flight, client.getRawDepartureTimeActual() //
+            );
+            Instant departureTimePlanned = findClosestPlausibleTimestampForFlightPlanField( //
+                flight, client.getRawDepartureTimePlanned() //
+            );
             flightPlan.setDepartureTimeActual(departureTimeActual);
             flightPlan.setDepartureTimePlanned(departureTimePlanned);
         }
@@ -682,16 +752,20 @@ public class GraphImport {
 
     private Flight findMatchingFlightByFlightPlanAirports(final Report report, final Client client) {
         return report.getFlights()
-                .stream()
-                .filter(x -> x.getMember().getVatsimId() == client.getVatsimID() && x.getCallsign().equals(client.getCallsign()))
-                .map(Flight::getFlightPlans)
-                .filter(not(SortedSet::isEmpty))
-                .map(SortedSet::last)
-                .filter(x -> x.getDepartureAirportCode().equals(client.getFiledDepartureAirportCode()) // TODO: ignore case or normalize?
-                /*     */ && x.getDestinationAirportCode().equals(client.getFiledDestinationAirportCode()))
-                .map(FlightPlan::getFlight)
-                .findFirst()
-                .orElse(null);
+            .stream()
+            .filter(x -> x.getMember().getVatsimId() == client.getVatsimID()
+                && x.getCallsign().equals(client.getCallsign()))
+            .map(Flight::getFlightPlans)
+            .filter(not(SortedSet::isEmpty))
+            .map(SortedSet::last)
+            // TODO: ignore case or normalize airport codes?
+            .filter(
+                x -> x.getDepartureAirportCode().equals(client.getFiledDepartureAirportCode())
+                    && x.getDestinationAirportCode().equals(client.getFiledDestinationAirportCode()) //
+            )
+            .map(FlightPlan::getFlight)
+            .findFirst()
+            .orElse(null);
     }
 
     private static <T> Predicate<T> not(Predicate<T> predicate) {
@@ -703,12 +777,18 @@ public class GraphImport {
     }
 
     private Duration nullDurationIfOutOfRange(Duration duration, Duration minimum, Duration maximum) {
-        if ((duration != null) && !TimeHelpers.isLessThan(duration, minimum) && TimeHelpers.isLessOrEqualThan(duration, maximum)) {
+        if ((duration != null) //
+            && !TimeHelpers.isLessThan(duration, minimum)
+            && TimeHelpers.isLessOrEqualThan(duration, maximum) //
+        ) {
             return duration;
         }
 
         return null;
     }
 
-    // TODO: "unit tests"... integration tests make more sense, i.e. create a series of data files, import them and check for expected outcome
+    /*
+     * TODO: "unit tests"... integration tests make more sense, i.e. create a series
+     * of data files, import them and check for expected outcome
+     */
 }

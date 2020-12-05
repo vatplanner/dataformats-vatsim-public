@@ -10,11 +10,13 @@ import java.util.Collections;
  * <p>
  * Information is usually updated about once per minute by data servers. The
  * policy is to obey the requested minimum delay between requests as specified
- * in the data file's meta data section.</p>
+ * in the data file's meta data section.
+ * </p>
  * <p>
  * Online pilots, pilot prefilings and online ATC share the same data format, so
  * they are combined into one common {@link #clients} collection and
- * distinguished by {@link ClientType}.</p>
+ * distinguished by {@link ClientType}.
+ * </p>
  */
 public class DataFile implements ParserLogEntryCollector {
 

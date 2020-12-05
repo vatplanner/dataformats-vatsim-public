@@ -1,15 +1,20 @@
 package org.vatplanner.dataformats.vatsimpublic.parser;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.Assert.assertThat;
+
 import java.util.function.UnaryOperator;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 
 @RunWith(DataProviderRunner.class)
 public class DataFileSectionLineProcessorTest {
@@ -19,12 +24,12 @@ public class DataFileSectionLineProcessorTest {
 
     @DataProvider
     public static Object[][] dataProviderStrings() {
-        return new Object[][]{ //
-            new Object[]{""}, //
-            new Object[]{"just a one-liner"}, //
-            new Object[]{"just a one-liner terminated\n"}, //
-            new Object[]{"\n\r\n\r\r\n\r"}, //
-            new Object[]{";some comment\r\n!GENERAL:\r\nABC = 1\r\nSECOND = 123\r\n!SOMETHINGELSE:\r\n!GENERAL:\r\nABC = 0\r\n"}, //
+        return new Object[][] { //
+            { "" }, //
+            { "just a one-liner" }, //
+            { "just a one-liner terminated\n" }, //
+            { "\n\r\n\r\r\n\r" }, //
+            { ";some comment\r\n!GENERAL:\r\nABC = 1\r\nSECOND = 123\r\n!SOMETHINGELSE:\r\n!GENERAL:\r\nABC = 0\r\n" }, //
         };
     }
 
@@ -33,18 +38,48 @@ public class DataFileSectionLineProcessorTest {
         UnaryOperator<String> function1 = s -> "prefix " + s + " postfix";
         UnaryOperator<String> function2 = String::toLowerCase;
 
-        return new Object[][]{ //
-            new Object[]{"", "SECTION", function1, ""}, //
-            new Object[]{"\n", "SECTION", function1, "\n"}, //
-            new Object[]{"A", "SECTION", function1, "A"}, //
-            new Object[]{"!SECTION:\nA\n\n", "SECTION", function1, "!SECTION:\nprefix A postfix\n\n"}, //
-            new Object[]{"!SECTION:\nA\n\n", "sEcTIOn", function1, "!SECTION:\nprefix A postfix\n\n"}, //
-            new Object[]{"!SECTION:\n;comments should not be processed\nA\n; trailing\n", "SECTION", function1, "!SECTION:\n;comments should not be processed\nprefix A postfix\n; trailing\n"}, //
-            new Object[]{"!SECTION:\nA\nB\n\rC", "SECTION", function1, "!SECTION:\nprefix A postfix\nprefix B postfix\n\rprefix C postfix"}, //
-            new Object[]{"!SECTION:\nA\n!ANOTHERSECTION:\nB\n!SECTION:\nC", "SECTION", function1, "!SECTION:\nprefix A postfix\n!ANOTHERSECTION:\nB\n!SECTION:\nprefix C postfix"}, //
-            new Object[]{"!SECTION:\nA\n!ANOTHERSECTION:\nB\n!SECTION:\nC", "ANOTHERSECTION", function1, "!SECTION:\nA\n!ANOTHERSECTION:\nprefix B postfix\n!SECTION:\nC"}, //
-            new Object[]{"!SECTION:\r\nA\r\n\nB\nC", "SECTION", function2, "!SECTION:\r\na\r\n\nb\nc"}, //
-            new Object[]{";WHATEVER\n!SECTION:\nSOMECONTENT = 1", "SECTION", function2, ";WHATEVER\n!SECTION:\nsomecontent = 1"}, //
+        return new Object[][] { //
+            { "", "SECTION", function1, "" }, //
+            { "\n", "SECTION", function1, "\n" }, //
+            { "A", "SECTION", function1, "A" }, //
+            { "!SECTION:\nA\n\n", "SECTION", function1, "!SECTION:\nprefix A postfix\n\n" }, //
+            { "!SECTION:\nA\n\n", "sEcTIOn", function1, "!SECTION:\nprefix A postfix\n\n" }, //
+            {
+                "!SECTION:\n;comments should not be processed\nA\n; trailing\n",
+                "SECTION",
+                function1,
+                "!SECTION:\n;comments should not be processed\nprefix A postfix\n; trailing\n"
+            }, //
+            {
+                "!SECTION:\nA\nB\n\rC",
+                "SECTION",
+                function1,
+                "!SECTION:\nprefix A postfix\nprefix B postfix\n\rprefix C postfix"
+            }, //
+            {
+                "!SECTION:\nA\n!ANOTHERSECTION:\nB\n!SECTION:\nC",
+                "SECTION",
+                function1,
+                "!SECTION:\nprefix A postfix\n!ANOTHERSECTION:\nB\n!SECTION:\nprefix C postfix"
+            }, //
+            {
+                "!SECTION:\nA\n!ANOTHERSECTION:\nB\n!SECTION:\nC",
+                "ANOTHERSECTION",
+                function1,
+                "!SECTION:\nA\n!ANOTHERSECTION:\nprefix B postfix\n!SECTION:\nC"
+            }, //
+            {
+                "!SECTION:\r\nA\r\n\nB\nC",
+                "SECTION",
+                function2,
+                "!SECTION:\r\na\r\n\nb\nc"
+            }, //
+            {
+                ";WHATEVER\n!SECTION:\nSOMECONTENT = 1",
+                "SECTION",
+                function2,
+                ";WHATEVER\n!SECTION:\nsomecontent = 1"
+            }, //
         };
     }
 

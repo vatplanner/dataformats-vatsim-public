@@ -73,11 +73,11 @@ public class AircraftTypeExtractor implements ParsedTypeData {
     /**
      * Returns the extracted aircraft type. Although users should enter an ICAO
      * code, quite often the actual data entered as type is something else. This
-     * will require mapping to correct for input errors if the information
-     * should be interpreted further.
+     * will require mapping to correct for input errors if the information should be
+     * interpreted further.
      *
      * @return aircraft type (should but may not be an ICAO code); null if
-     * unavailable
+     *         unavailable
      */
     @Override
     public String getAircraftType() {
@@ -86,12 +86,12 @@ public class AircraftTypeExtractor implements ParsedTypeData {
 
     /**
      * Returns the extracted equipment code. Simplified codes use just a single
-     * letter while detailed modern ICAO-codes are more extensive descriptions
-     * which require additional parsing. The supplied information may be
-     * inaccurate or wrong due to complexity or (at least for the simple
-     * one-letter codes) conflicts between real-world ICAO and VATSIM flight
-     * plan codes. If really needed, this information should be checked for
-     * plausibility depending on the specified aircraft type.
+     * letter while detailed modern ICAO-codes are more extensive descriptions which
+     * require additional parsing. The supplied information may be inaccurate or
+     * wrong due to complexity or (at least for the simple one-letter codes)
+     * conflicts between real-world ICAO and VATSIM flight plan codes. If really
+     * needed, this information should be checked for plausibility depending on the
+     * specified aircraft type.
      *
      * @return equipment code; null if unavailable
      */
@@ -101,9 +101,9 @@ public class AircraftTypeExtractor implements ParsedTypeData {
     }
 
     /**
-     * Returns the extracted wake category code letter. This may be inaccurate.
-     * If reliable information is needed, look up the aircraft type on an
-     * authoritative database.
+     * Returns the extracted wake category code letter. This may be inaccurate. If
+     * reliable information is needed, look up the aircraft type on an authoritative
+     * database.
      *
      * @return wake category code letter; null if unavailable
      */

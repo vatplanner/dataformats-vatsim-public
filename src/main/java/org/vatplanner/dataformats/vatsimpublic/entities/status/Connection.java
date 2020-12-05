@@ -50,8 +50,8 @@ public class Connection {
     }
 
     /**
-     * Returns the last processed {@link Report} (so far) this connection
-     * appears in.
+     * Returns the last processed {@link Report} (so far) this connection appears
+     * in.
      *
      * @return last processed report this connection appears in
      */
@@ -60,8 +60,8 @@ public class Connection {
     }
 
     /**
-     * Updates first/last report if the given report exceeds currently known
-     * time span.
+     * Updates first/last report if the given report exceeds currently known time
+     * span.
      *
      * @param report report to process updates for
      * @return this instance for method-chaining
@@ -91,11 +91,10 @@ public class Connection {
 
     /**
      * Returns the user's real name as entered for this connection. This may be
-     * different from the user's actual name as it can be decided on each
-     * connection and is not checked. Since 2019 VATSIM Code of Conduct also
-     * permits to use a shortened name, just the given name or the VATSIM ID in
-     * place of the full name previously required. This information thus only
-     * has limited value.
+     * different from the user's actual name as it can be decided on each connection
+     * and is not checked. Since 2019 VATSIM Code of Conduct also permits to use a
+     * shortened name, just the given name or the VATSIM ID in place of the full
+     * name previously required. This information thus only has limited value.
      *
      * @return user's "real name" as entered for this connection
      */
@@ -109,10 +108,10 @@ public class Connection {
     }
 
     /**
-     * Returns the "home base" the user has entered for this connection. In
-     * theory this should be a 4-letter ICAO code for an airport. While most
-     * pilots set this to the airport closest to their actual home, it can be
-     * set to anything and thus only holds limited value.
+     * Returns the "home base" the user has entered for this connection. In theory
+     * this should be a 4-letter ICAO code for an airport. While most pilots set
+     * this to the airport closest to their actual home, it can be set to anything
+     * and thus only holds limited value.
      *
      * @return "home base" entered for this connection
      */
@@ -159,7 +158,10 @@ public class Connection {
     }
 
     public Connection setServerId(String serverId) {
-        // TODO: parser result may be null; ignore null - we may have seen a ghost, importer should set server ID for every report again
+        /*
+         * TODO: parser result may be null; ignore null - we may have seen a ghost,
+         * importer should set server ID for every report again
+         */
         this.serverId = serverId;
         return this;
     }

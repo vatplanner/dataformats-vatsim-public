@@ -1,10 +1,13 @@
 package org.vatplanner.dataformats.vatsimpublic.parser;
 
-import org.vatplanner.dataformats.vatsimpublic.parser.NetworkInformationParser;
-import org.vatplanner.dataformats.vatsimpublic.parser.NetworkInformation;
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThat;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -15,11 +18,15 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
+
 import uk.org.lidalia.slf4jtest.LoggingEvent;
 import uk.org.lidalia.slf4jtest.TestLogger;
 import uk.org.lidalia.slf4jtest.TestLoggerFactory;
@@ -31,15 +38,15 @@ public class NetworkInformationParserTest {
 
     @DataProvider
     public static String[] dataProviderExpectedDefinitionComments() {
-        return new String[]{
+        return new String[] {
             "; msg0         - message to be displayed at application startup"
         };
     }
 
     @DataProvider
     public static Object[][] dataProviderNonMatchingDefinitionComment() {
-        return new Object[][]{
-            new Object[]{"; msg0         - something unexpected", "msg0", "something unexpected"}
+        return new Object[][] {
+            { "; msg0         - something unexpected", "msg0", "something unexpected" }
         };
     }
 
@@ -72,7 +79,11 @@ public class NetworkInformationParserTest {
         NetworkInformationParser.parse("unknownTestKey=This is the value");
 
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
-        LoggingEvent expectedEvent = LoggingEvent.warn("Unrecognized key \"{}\", value \"{}\"", "unknownTestKey", "This is the value");
+        LoggingEvent expectedEvent = LoggingEvent.warn(
+            "Unrecognized key \"{}\", value \"{}\"",
+            "unknownTestKey",
+            "This is the value" //
+        );
         assertThat(loggingEvents, contains(expectedEvent));
     }
 
@@ -99,7 +110,11 @@ public class NetworkInformationParserTest {
         NetworkInformationParser.parse(input);
 
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
-        LoggingEvent expectedEvent = LoggingEvent.warn("Mismatch in definition comment for key \"{}\": \"{}\"", key, definition);
+        LoggingEvent expectedEvent = LoggingEvent.warn(
+            "Mismatch in definition comment for key \"{}\": \"{}\"",
+            key,
+            definition //
+        );
         assertThat(loggingEvents, contains(expectedEvent));
     }
 
@@ -108,7 +123,11 @@ public class NetworkInformationParserTest {
         NetworkInformationParser.parse("; somethingNew - we should inform user about the change");
 
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
-        LoggingEvent expectedEvent = LoggingEvent.info("Definition comment found for unknown key \"{}\": \"{}\"", "somethingNew", "we should inform user about the change");
+        LoggingEvent expectedEvent = LoggingEvent.info(
+            "Definition comment found for unknown key \"{}\": \"{}\"",
+            "somethingNew",
+            "we should inform user about the change" //
+        );
         assertThat(loggingEvents, contains(expectedEvent));
     }
 
@@ -141,7 +160,10 @@ public class NetworkInformationParserTest {
         NetworkInformationParser.parse("some unexpected line");
 
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
-        LoggingEvent expectedEvent = LoggingEvent.warn("Uninterpretable line in network file: \"{}\"", "some unexpected line");
+        LoggingEvent expectedEvent = LoggingEvent.warn(
+            "Uninterpretable line in network file: \"{}\"",
+            "some unexpected line" //
+        );
         assertThat(loggingEvents, contains(expectedEvent));
     }
 
@@ -158,7 +180,10 @@ public class NetworkInformationParserTest {
         NetworkInformationParser.parse("; ABC.:12-34:.. - used by WhazzUp only");
 
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
-        LoggingEvent expectedEvent = LoggingEvent.warn("WhazzUp format may have changed, header definition: \"{}\"", "ABC.:12-34:..");
+        LoggingEvent expectedEvent = LoggingEvent.warn(
+            "WhazzUp format may have changed, header definition: \"{}\"",
+            "ABC.:12-34:.." //
+        );
         assertThat(loggingEvents, contains(expectedEvent));
     }
 
@@ -300,7 +325,9 @@ public class NetworkInformationParserTest {
         String definition = "1234:EXAMPLE";
         String expected = "54321:WHATSTHAT";
 
-        NetworkInformation res = NetworkInformationParser.parse("; " + definition + "         - used by WhazzUp only\n" + expected);
+        NetworkInformation res = NetworkInformationParser.parse(
+            "; " + definition + "         - used by WhazzUp only\n" + expected //
+        );
 
         String actual = res.getWhazzUpString();
         assertThat(actual, is(expected));

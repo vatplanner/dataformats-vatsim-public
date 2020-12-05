@@ -30,8 +30,7 @@ public enum FlightPlanType {
     }
 
     /**
-     * Returns the single-letter code used to identify this type in flight
-     * plans.
+     * Returns the single-letter code used to identify this type in flight plans.
      *
      * @return single-letter code used in flight plans
      */
@@ -40,8 +39,8 @@ public enum FlightPlanType {
     }
 
     /**
-     * Resolves the given flight plan code to a flight plan type. Returns null
-     * if no such type has been defined or input is empty or null.
+     * Resolves the given flight plan code to a flight plan type. Returns null if no
+     * such type has been defined or input is empty or null.
      *
      * @param flightPlanCode flight plan code to resolve
      * @return type matching the code; null if not found or no code was entered
@@ -53,7 +52,8 @@ public enum FlightPlanType {
         }
 
         if (flightPlanCode.length() != 1) {
-            throw new IllegalArgumentException("flight plan type code must only have one letter; was: \"" + flightPlanCode + "\"");
+            throw new IllegalArgumentException(
+                "flight plan type code must only have one letter; was: \"" + flightPlanCode + "\"");
         }
 
         return INDEXED_BY_CODE.get(flightPlanCode.toUpperCase().charAt(0));

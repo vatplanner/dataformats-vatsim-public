@@ -1,53 +1,55 @@
 package org.vatplanner.dataformats.vatsimpublic.extraction.aircrafttype;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 
 @RunWith(DataProviderRunner.class)
 public class FAADomesticTypeFormatExtractorTest {
 
     @DataProvider
     public static Object[][] dataProviderFAATypeFormatStringsAndExpectedExtraction() {
-        return new Object[][]{
+        return new Object[][] {
             // input, type, wake category, equipment code
-            {"B738/L", "B738", null, "L"},
-            {"C550/G", "C550", null, "G"},
-            {"H/A359/L", "A359", "H", "L"},
-            {"B78X", "B78X", null, null},
-            {"H/A333", "A333", "H", null},
-            {"Boeing 737-800", "Boeing 737-800", null, null},
-            {"Boeing 737-800/L", "Boeing 737-800", null, "L"},
-            {"M/Boeing 737-800/L", "Boeing 737-800", "M", "L"},
-            {"M/Boeing 737-800", "Boeing 737-800", "M", null}, //
+            { "B738/L", "B738", null, "L" },
+            { "C550/G", "C550", null, "G" },
+            { "H/A359/L", "A359", "H", "L" },
+            { "B78X", "B78X", null, null },
+            { "H/A333", "A333", "H", null },
+            { "Boeing 737-800", "Boeing 737-800", null, null },
+            { "Boeing 737-800/L", "Boeing 737-800", null, "L" },
+            { "M/Boeing 737-800/L", "Boeing 737-800", "M", "L" },
+            { "M/Boeing 737-800", "Boeing 737-800", "M", null }, //
         };
     }
 
     @DataProvider
     public static Object[][] dataProviderInvalidInput() {
-        return new Object[][]{
-            {"a"},
-            {"M/B738/L-S"},
-            {"M/B738/L/S"},
-            {"M-S/B738/L"},
-            {"M/S/B738/L"},
-            {"/"},
-            {"//"},
-            {"///"}, //
+        return new Object[][] {
+            { "a" },
+            { "M/B738/L-S" },
+            { "M/B738/L/S" },
+            { "M-S/B738/L" },
+            { "M/S/B738/L" },
+            { "/" },
+            { "//" },
+            { "///" }, //
         };
     }
 
     @DataProvider
     public static Object[][] dataProviderEmptyInput() {
-        return new Object[][]{
-            {null},
-            {""}, //
+        return new Object[][] {
+            { null },
+            { "" }, //
         };
     }
 

@@ -1,14 +1,16 @@
 package org.vatplanner.dataformats.vatsimpublic.entities.status;
 
+import static java.util.Collections.unmodifiableCollection;
+import static org.vatplanner.dataformats.vatsimpublic.entities.status.Facility.normalizeFacilityName;
+
 import java.time.Instant;
 import java.util.Collection;
-import static java.util.Collections.unmodifiableCollection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import static org.vatplanner.dataformats.vatsimpublic.entities.status.Facility.normalizeFacilityName;
+
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
 
 /**
@@ -28,9 +30,8 @@ public class Report {
      * Creates a new report for the given timestamp.
      * <p>
      * <b>Warning:</b> Make sure the timestamp is unique in a graph, i.e. do not
-     * import multiple data files which were created at the same time. This is
-     * due to {@link Report} objects being used to de-duplicate and sort other
-     * entities.
+     * import multiple data files which were created at the same time. This is due
+     * to {@link Report} objects being used to de-duplicate and sort other entities.
      * </p>
      *
      * @param recordTime time of recording the report (must be unique in graph)
@@ -54,7 +55,7 @@ public class Report {
      *
      * @param name facility name to look up, will be normalized
      * @return facility recorded under given name on this report; null if not
-     * recorded
+     *         recorded
      */
     public Facility getFacilityByName(String name) {
         return facilitiesByName.get(normalizeFacilityName(name));
@@ -77,22 +78,21 @@ public class Report {
     }
 
     /**
-     * Returns all flights visible on this report. Interrupted flights
-     * (connection loss) are not listed although they may be continued by a
-     * later report.
+     * Returns all flights visible on this report. Interrupted flights (connection
+     * loss) are not listed although they may be continued by a later report.
      *
      * @return flights visible on this report
      */
     public Collection<Flight> getFlights() {
         return flightsByCallsign.values() //
-                .stream() //
-                .flatMap(Set::stream) //
-                .collect(Collectors.toList());
+            .stream() //
+            .flatMap(Set::stream) //
+            .collect(Collectors.toList());
     }
 
     /**
-     * Adds the given flight to the report. If the flight has already been
-     * added, it is not added again.
+     * Adds the given flight to the report. If the flight has already been added, it
+     * is not added again.
      *
      * @param flight flight to be added to this report
      * @return this instance for method-chaining
@@ -105,7 +105,6 @@ public class Report {
         return this;
     }
 
-    // TODO: add getter to lookup flights for callsign
     /**
      * Returns the time a record has been created. This is equal to the time a
      * processed data file has originally been created (see
@@ -120,8 +119,8 @@ public class Report {
     /**
      * Returns the total number of connected clients at time of record creation.
      * This is an information directly available from data files (see
-     * {@link DataFileMetaData#getNumberOfConnectedClients()}) and may be
-     * different from the number of parsed flights and facilities.
+     * {@link DataFileMetaData#getNumberOfConnectedClients()}) and may be different
+     * from the number of parsed flights and facilities.
      *
      * @return total number of connected clients
      */
@@ -135,4 +134,5 @@ public class Report {
     }
 
     // TODO: unit tests
+    // TODO: add getter to lookup flights for callsign
 }

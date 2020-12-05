@@ -1,8 +1,9 @@
 package org.vatplanner.dataformats.vatsimpublic.extraction;
 
+import static org.vatplanner.dataformats.vatsimpublic.utils.UnitConversion.metersToFeet;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import static org.vatplanner.dataformats.vatsimpublic.utils.UnitConversion.metersToFeet;
 
 /**
  * Attempts to parse the given altitude string. Altitudes can be specified in
@@ -19,7 +20,6 @@ import static org.vatplanner.dataformats.vatsimpublic.utils.UnitConversion.meter
  * </p>
  */
 public class AltitudeParser {
-
     private final int value;
     private final boolean isUnitFeet;
 
@@ -54,7 +54,8 @@ public class AltitudeParser {
         s = PATTERN_UNWANTED_CHARS.matcher(s).replaceAll("");
         s = PATTERN_UNWANTED_LEADING_CHARS.matcher(s).replaceFirst("");
 
-        // metric format may be used in ICAO format (to be multiplied) or as an exact number
+        // metric format may be used in ICAO format (to be multiplied) or as an exact
+        // number
         boolean isIcaoMetric = PATTERN_ICAO_METRIC.matcher(s).matches();
         isUnitFeet = !PATTERN_METRIC.matcher(s).matches();
 
@@ -119,8 +120,8 @@ public class AltitudeParser {
     }
 
     /**
-     * Returns the parsed altitude value in feet. The value has automatically
-     * been converted from meters, if necessary.
+     * Returns the parsed altitude value in feet. The value has automatically been
+     * converted from meters, if necessary.
      *
      * @return altitude in feet; negative if unavailable
      */

@@ -1,12 +1,14 @@
 package org.vatplanner.dataformats.vatsimpublic.graph;
 
+import static java.util.Collections.unmodifiableCollection;
+
 import java.time.Instant;
 import java.util.Collection;
-import static java.util.Collections.unmodifiableCollection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Member;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.Report;
 
@@ -20,8 +22,8 @@ public class GraphIndex {
     private final NavigableMap<Instant, Report> reportsByRecordTime = new TreeMap<>();
 
     /**
-     * Adds a new member to the index. Members are uniquely identified by VATSIM
-     * ID, so two different members must not have the same ID.
+     * Adds a new member to the index. Members are uniquely identified by VATSIM ID,
+     * so two different members must not have the same ID.
      *
      * @param member member to add; unique by VATSIM ID
      */
@@ -42,8 +44,7 @@ public class GraphIndex {
     }
 
     /**
-     * Returns the latest report indexed before the given report's recording
-     * time.
+     * Returns the latest report indexed before the given report's recording time.
      *
      * @param report report to look up next oldest (previous) report for
      * @return next oldest report by recording time; null if unavailable

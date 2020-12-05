@@ -1,9 +1,10 @@
 package org.vatplanner.dataformats.vatsimpublic.extraction;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import static org.vatplanner.dataformats.vatsimpublic.utils.StringUtils.nullIfEmpty;
 import static org.vatplanner.dataformats.vatsimpublic.utils.StringUtils.nullIfNumeric;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Attempts to split the raw name field used in data files into actual name and
@@ -47,8 +48,8 @@ public class RealNameHomeBaseExtractor {
     }
 
     /**
-     * Returns the home base airport code. This should usually be a 4-letter
-     * ICAO code.
+     * Returns the home base airport code. This should usually be a 4-letter ICAO
+     * code.
      *
      * @return home base airport code; null if unavailable
      */

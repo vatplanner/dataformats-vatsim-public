@@ -33,9 +33,9 @@ public class FSDServer {
     }
 
     /**
-     * Returns the server's network address. May be a host name or IP address.
-     * May be invalid (although highly unlikely), as no validation is being
-     * performed on parsing.
+     * Returns the server's network address. May be a host name or IP address. May
+     * be invalid (although highly unlikely), as no validation is being performed on
+     * parsing.
      *
      * @return server network address (host name or IP address)
      */
@@ -63,8 +63,8 @@ public class FSDServer {
     }
 
     /**
-     * Returns the server name. The name is not the server's address/host name
-     * or ID but may actually contain a longer description text.
+     * Returns the server name. The name is not the server's address/host name or ID
+     * but may actually contain a longer description text.
      *
      * @return server name (not address or ID, used as a description text)
      */
@@ -80,8 +80,8 @@ public class FSDServer {
     /**
      * Returns if clients are allowed to connect to this server.
      *
-     * @return Are clients allowed to connect to this server? (true = allowed,
-     * false = not allowed)
+     * @return Are clients allowed to connect to this server? (true = allowed, false
+     *         = not allowed)
      */
     public boolean isClientConnectionAllowed() {
         return clientConnectionAllowed;
@@ -104,7 +104,8 @@ public class FSDServer {
         boolean isAddressEqual = equalsNullSafe(this, other, FSDServer::getAddress);
         boolean isLocationEqual = equalsNullSafe(this, other, FSDServer::getLocation);
         boolean isNameEqual = equalsNullSafe(this, other, FSDServer::getName);
-        boolean isClientConnectionAllowedEqual = (this.isClientConnectionAllowed() == other.isClientConnectionAllowed());
+        boolean isClientConnectionAllowedEqual = //
+            (this.isClientConnectionAllowed() == other.isClientConnectionAllowed());
 
         return isIdEqual && isAddressEqual && isLocationEqual && isNameEqual && isClientConnectionAllowedEqual;
     }

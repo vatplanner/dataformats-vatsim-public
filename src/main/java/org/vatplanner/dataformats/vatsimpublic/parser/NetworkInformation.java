@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,8 +37,8 @@ public class NetworkInformation {
     static final String PARAMETER_KEY_URL_USER_STATISTICS = "user0";
 
     /**
-     * Returns a list of all URLs for the given key. URLs will be returned in
-     * order of their insertion.
+     * Returns a list of all URLs for the given key. URLs will be returned in order
+     * of their insertion.
      *
      * @param key key to retrieve URLs for
      * @return URLs in order
@@ -53,20 +54,19 @@ public class NetworkInformation {
     }
 
     /**
-     * Parses and remembers the given URL string for the given key. URLs will
-     * retain their order of insertion.
+     * Parses and remembers the given URL string for the given key. URLs will retain
+     * their order of insertion.
      *
      * @param key key to identify list of URLs by
      * @param value URL string to parse
-     * @return Could the URL be parsed and has it been registered to the given
-     * key?
+     * @return Could the URL be parsed and has it been registered to the given key?
      */
     boolean addAsUrl(final String key, final String value) {
         URL url = null;
         try {
             url = new URL(value);
         } catch (MalformedURLException ex) {
-            LOGGER.warn("URL for key \"{}\" is malformed: \"{}\"", new Object[]{key, value}, ex);
+            LOGGER.warn("URL for key \"{}\" is malformed: \"{}\"", new Object[] { key, value }, ex);
         }
 
         if (url == null) {
@@ -125,25 +125,25 @@ public class NetworkInformation {
 
     /**
      * Returns all ATIS URLs. Calling these with parameter
-     * <code>?callsign=...</code> is supposed to return only ATIS information
-     * for the given station. Use, however, is discouraged if retrieving the
-     * data file is a more reasonable option. While only one URL should be
-     * returned according to documentation from the file header, be prepared to
-     * choose one randomly if multiple appear.
+     * <code>?callsign=...</code> is supposed to return only ATIS information for
+     * the given station. Use, however, is discouraged if retrieving the data file
+     * is a more reasonable option. While only one URL should be returned according
+     * to documentation from the file header, be prepared to choose one randomly if
+     * multiple appear.
      *
      * @return URLs to retrieve ATIS information from by adding
-     * <code>?callsign=...</code>
-     * @deprecated as of October 2018 network information file header states
-     * service has been discontinued, controller info and ATIS should be read
-     * from data file instead
+     *         <code>?callsign=...</code>
+     * @deprecated as of October 2018 network information file header states service
+     *             has been discontinued, controller info and ATIS should be read
+     *             from data file instead
      */
     public List<URL> getAtisUrls() {
         return getUrlsByKey(PARAMETER_KEY_URL_ATIS);
     }
 
     /**
-     * Returns all data file URLs. The data file contains information about
-     * online stations, pilots and pre-filings.
+     * Returns all data file URLs. The data file contains information about online
+     * stations, pilots and pre-filings.
      *
      * @return URLs to retrieve a copy of the current data file from
      */
@@ -159,18 +159,18 @@ public class NetworkInformation {
      * multiple appear.
      *
      * @return URLs to retrieve METAR information from by adding
-     * <code>?id=...</code>
+     *         <code>?id=...</code>
      */
     public List<URL> getMetarUrls() {
         return getUrlsByKey(PARAMETER_KEY_URL_METAR);
     }
 
     /**
-     * Returns all superseding URLs. If any such URLs are set they should be
-     * treated like a redirect as they point to the location of a more recent
-     * status.txt file (the raw file of this information). While only one URL
-     * should be returned according to documentation from the file header, be
-     * prepared to choose one randomly if multiple appear.
+     * Returns all superseding URLs. If any such URLs are set they should be treated
+     * like a redirect as they point to the location of a more recent status.txt
+     * file (the raw file of this information). While only one URL should be
+     * returned according to documentation from the file header, be prepared to
+     * choose one randomly if multiple appear.
      *
      * @return URLs to follow for a more recent version of this information
      */
@@ -179,8 +179,8 @@ public class NetworkInformation {
     }
 
     /**
-     * Returns all server file URLs. The server file contains connection and
-     * meta information about VATSIM protocol servers.
+     * Returns all server file URLs. The server file contains connection and meta
+     * information about VATSIM protocol servers.
      *
      * @return URLS to retrieve a copy of the current server file from
      */
@@ -189,10 +189,10 @@ public class NetworkInformation {
     }
 
     /**
-     * Returns all user statistics URLs. Lists URLs where official user
-     * statistics can be retrieved from. While only one URL should be returned
-     * according to documentation from the file header, be prepared to choose
-     * one randomly if multiple appear.
+     * Returns all user statistics URLs. Lists URLs where official user statistics
+     * can be retrieved from. While only one URL should be returned according to
+     * documentation from the file header, be prepared to choose one randomly if
+     * multiple appear.
      *
      * @return
      */

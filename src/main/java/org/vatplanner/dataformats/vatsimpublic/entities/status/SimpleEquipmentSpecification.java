@@ -46,22 +46,23 @@ public enum SimpleEquipmentSpecification {
     V(false, Navigation.GNSS, Transponder.NONE),
     S(false, Navigation.GNSS, Transponder.NO_MODE_C),
     G(false, Navigation.GNSS, Transponder.MODE_C), //
-    //
+
     // additional "legacy" VATSIM codes
     E(false, Navigation.RNAV_FMS_DME_DME, Transponder.MODE_C),
     F(false, Navigation.RNAV_FMS_DME_DME_IRU, Transponder.MODE_C),
-    R(false, Navigation.GNSS, Transponder.MODE_C), // alias to G, only difference: confirming ANP meets RNP; ICAO field 10 specification: field 18 (remarks) must contain PBN/ (not mandatory on VATSIM)
+    R(false, Navigation.GNSS, Transponder.MODE_C), // alias to G, only difference: confirming ANP meets RNP; ICAO field
+                                                   // 10 specification: field 18 (remarks) must contain PBN/ (not
+                                                   // mandatory on VATSIM)
     J(true, Navigation.RNAV_FMS_DME_DME, Transponder.MODE_C),
     K(true, Navigation.RNAV_FMS_DME_DME_IRU, Transponder.MODE_C),
     Q(true, Navigation.GNSS, Transponder.MODE_C); // alias to L, only difference: confirming ANP meets RNP
 
     /**
      * Constants used to indicate level of navigation capability. Higher level
-     * values extend capabilities compared to lower levels: The higher the
-     * level, the more capable/accurate an aircraft can navigate.
+     * values extend capabilities compared to lower levels: The higher the level,
+     * the more capable/accurate an aircraft can navigate.
      */
     private static class Navigation {
-
         private static final byte UNSPECIFIC = -1;
         private static final byte NO_DME = 0;
         private static final byte DME = 1;
@@ -81,7 +82,6 @@ public enum SimpleEquipmentSpecification {
      * extend features indicated by lower levels.
      */
     private static class Transponder {
-
         private static final byte FAILED = -1;
         private static final byte NONE = 0;
         private static final byte NO_MODE_C = 1;
@@ -102,42 +102,41 @@ public enum SimpleEquipmentSpecification {
 
     /**
      * Checks if equipment is capable for Basic Area Navigation (B-RNAV). In the
-     * real-world, B-RNAV is defined by Required Navigation Performance (RNP) of
-     * 5 nautical miles for at least 95% of time. This may not be guaranteed in
+     * real-world, B-RNAV is defined by Required Navigation Performance (RNP) of 5
+     * nautical miles for at least 95% of time. This may not be guaranteed in
      * context of flight simulation.
      * <p>
-     * For simple evaluation in context of flight simulation, a flight
-     * management system without INS is assumed sufficient. However, this
-     * assumption will generally be wrong over vast open spaces without any
-     * DME/VOR coverage (e.g. oceans).
+     * For simple evaluation in context of flight simulation, a flight management
+     * system without INS is assumed sufficient. However, this assumption will
+     * generally be wrong over vast open spaces without any DME/VOR coverage (e.g.
+     * oceans).
      * </p>
      * <p>
-     * In flight simulation, B-RNAV capable aircraft are usually "classic
-     * airliners" such as (in worst case) a Boeing 727 with CIVA which may
-     * actually provide even less accuracy/features than originally required but
-     * will still do its job in most cases. It may also be understood by virtual
-     * pilots as "only being able to fly from VOR to VOR" which would most
-     * likely not qualify as B-RNAV in real-world aviation and thus be used
-     * misleadingly. As a result, pilots on VATSIM indicating only B-RNAV
-     * equipment usually cannot be expected to be able to follow instructions to
-     * procedures not already on their flight plan or directs to fixes not
-     * derivable from radio navigation.
+     * In flight simulation, B-RNAV capable aircraft are usually "classic airliners"
+     * such as (in worst case) a Boeing 727 with CIVA which may actually provide
+     * even less accuracy/features than originally required but will still do its
+     * job in most cases. It may also be understood by virtual pilots as "only being
+     * able to fly from VOR to VOR" which would most likely not qualify as B-RNAV in
+     * real-world aviation and thus be used misleadingly. As a result, pilots on
+     * VATSIM indicating only B-RNAV equipment usually cannot be expected to be able
+     * to follow instructions to procedures not already on their flight plan or
+     * directs to fixes not derivable from radio navigation.
      * </p>
      *
      * @return true if equipment indicates Basic Area Navigation (B-RNAV)
-     * capability, false if not
+     *         capability, false if not
      */
     public boolean hasBasicAreaNavigation() {
         return (navigationCapability >= Navigation.MINIMUM_LEVEL_BRNAV);
     }
 
     /**
-     * Checks if equipment is capable for Precision Area Navigation (P-RNAV). In
-     * the real-world, P-RNAV is defined by Required Navigation Performance
-     * (RNP) of 1 nautical miles for at least 95% of time.
+     * Checks if equipment is capable for Precision Area Navigation (P-RNAV). In the
+     * real-world, P-RNAV is defined by Required Navigation Performance (RNP) of 1
+     * nautical miles for at least 95% of time.
      * <p>
-     * For simple evaluation in context of flight simulation, a flight
-     * management system with GNSS is assumed sufficient.
+     * For simple evaluation in context of flight simulation, a flight management
+     * system with GNSS is assumed sufficient.
      * </p>
      * <p>
      * In flight simulation, all "modern airliners" or modernized "classic
@@ -147,20 +146,19 @@ public enum SimpleEquipmentSpecification {
      * </p>
      *
      * @return true if equipment indicates Precision Area Navigation (P-RNAV)
-     * capability, false if not
+     *         capability, false if not
      */
     public boolean hasPrecisionAreaNavigation() {
         return (navigationCapability >= Navigation.MINIMUM_LEVEL_PRNAV);
     }
 
     /**
-     * Checks if the equipment is capable for Reduced Vertical Separation
-     * Minimum (RVSM). RVSM means that altimeter readings of an aircraft are
-     * accurate enough to reduce vertical separation without compromising
-     * safety.
+     * Checks if the equipment is capable for Reduced Vertical Separation Minimum
+     * (RVSM). RVSM means that altimeter readings of an aircraft are accurate enough
+     * to reduce vertical separation without compromising safety.
      *
      * @return true if equipment indicates Reduced Vertical Separation Minimum
-     * (RVSM) capability, false if not
+     *         (RVSM) capability, false if not
      */
     public boolean hasReducedVerticalSeparationMinimum() {
         return isRvsmCapable;
@@ -171,9 +169,9 @@ public enum SimpleEquipmentSpecification {
      * means that altitude information is transmitted additional to an
      * identification code.
      * <p>
-     * On VATSIM, mode C capability currently does not have any relevance as
-     * pilot clients always transmit altitude independent of a transponder and
-     * indicate mode C for all aircraft while the transponder is set active.
+     * On VATSIM, mode C capability currently does not have any relevance as pilot
+     * clients always transmit altitude independent of a transponder and indicate
+     * mode C for all aircraft while the transponder is set active.
      * </p>
      *
      * @return true if equipment is capable of transponder mode C, false if not
@@ -184,12 +182,12 @@ public enum SimpleEquipmentSpecification {
 
     /**
      * Resolves the given flight plan code to a simple equipment specification.
-     * Returns null if no such specification has been defined or input is empty
-     * or null.
+     * Returns null if no such specification has been defined or input is empty or
+     * null.
      *
      * @param flightPlanCode flight plan code to resolve
      * @return specification matching the code; null if not found or no code was
-     * entered
+     *         entered
      * @throws IllegalArgumentException if code exceeds one letter
      */
     public static SimpleEquipmentSpecification resolveFlightPlanCode(String flightPlanCode) {
@@ -198,7 +196,8 @@ public enum SimpleEquipmentSpecification {
         }
 
         if (flightPlanCode.length() != 1) {
-            throw new IllegalArgumentException("flight plan equipment code must only have one letter; was: \"" + flightPlanCode + "\"");
+            throw new IllegalArgumentException(
+                "flight plan equipment code must only have one letter; was: \"" + flightPlanCode + "\"");
         }
 
         try {
@@ -207,5 +206,6 @@ public enum SimpleEquipmentSpecification {
             return null;
         }
     }
+
     // TODO: add unit tests
 }

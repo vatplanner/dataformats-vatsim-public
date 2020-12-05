@@ -2,6 +2,7 @@ package org.vatplanner.dataformats.vatsimpublic.extraction;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.vatplanner.dataformats.vatsimpublic.entities.status.CommunicationMode;
 
 /**
@@ -9,7 +10,10 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.CommunicationMode
  */
 public class RemarksExtractor {
 
-    private static final Pattern PATTERN_SPLIT = Pattern.compile("^.*?/" + groupForCommunicationModes() + "/.*$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_SPLIT = Pattern.compile(//
+        "^.*?/" + groupForCommunicationModes() + "/.*$", //
+        Pattern.CASE_INSENSITIVE //
+    );
     private static final int PATTERN_SPLIT_COMMUNICATION_MODE = 1;
 
     private final CommunicationMode communicationMode;

@@ -30,22 +30,27 @@ public class GeneralSectionParser {
 
     /**
      * Parses all information from the given lines to a {@link DataFileMetaData}
-     * object. All lines are expected to contain the proper syntax used by
-     * VATSIM data.txt files and not to be empty or a comment.
+     * object. All lines are expected to contain the proper syntax used by VATSIM
+     * data.txt files and not to be empty or a comment.
      *
-     * @param lines lines to be parsed; lines must not be empty, comments or
-     * null
-     * @param logEntryCollector collecting log entries produced by parsing the
-     * given lines
-     * @param sectionName section name as read from data file, used to identify
-     * log messages
+     * @param lines lines to be parsed; lines must not be empty, comments or null
+     * @param logEntryCollector collecting log entries produced by parsing the given
+     *        lines
+     * @param sectionName section name as read from data file, used to identify log
+     *        messages
      * @return all parsed data in a {@link DataFileMetaData} object
      */
     public DataFileMetaData parse(Collection<String> lines, ParserLogEntryCollector logEntryCollector, String sectionName) {
         DataFileMetaData metaData = new DataFileMetaData();
 
         if ((lines == null) || lines.isEmpty()) {
-            logEntryCollector.addParserLogEntry(new ParserLogEntry(sectionName, null, true, "meta data is missing or empty", null));
+            logEntryCollector.addParserLogEntry(new ParserLogEntry( //
+                sectionName, //
+                null, //
+                true, //
+                "meta data is missing or empty", //
+                null //
+            ));
             return metaData;
         }
 
@@ -56,41 +61,41 @@ public class GeneralSectionParser {
                 String value = matcher.group(PATTERN_KEYVALUE_VALUE);
 
                 switch (key) {
-                    case KEY_VERSION:
-                        metaData.setVersionFormat(Integer.parseInt(value));
-                        break;
+                case KEY_VERSION:
+                    metaData.setVersionFormat(Integer.parseInt(value));
+                    break;
 
-                    case KEY_RELOAD:
-                        metaData.setMinimumDataFileRetrievalInterval(Duration.ofSeconds(Math.round(Double.parseDouble(value) * 60.0)));
-                        break;
+                case KEY_RELOAD:
+                    metaData.setMinimumDataFileRetrievalInterval(
+                        Duration.ofSeconds(Math.round(Double.parseDouble(value) * 60.0)));
+                    break;
 
-                    case KEY_ATIS_ALLOW_MIN:
-                        metaData.setMinimumAtisRetrievalInterval(Duration.ofMinutes(Integer.parseInt(value)));
-                        break;
+                case KEY_ATIS_ALLOW_MIN:
+                    metaData.setMinimumAtisRetrievalInterval(Duration.ofMinutes(Integer.parseInt(value)));
+                    break;
 
-                    case KEY_CONNECTED_CLIENTS:
-                        metaData.setNumberOfConnectedClients(Integer.parseInt(value));
-                        break;
+                case KEY_CONNECTED_CLIENTS:
+                    metaData.setNumberOfConnectedClients(Integer.parseInt(value));
+                    break;
 
-                    case KEY_UNIQUE_USERS:
-                        metaData.setNumberOfUniqueConnectedUsers(Integer.parseInt(value));
-                        break;
+                case KEY_UNIQUE_USERS:
+                    metaData.setNumberOfUniqueConnectedUsers(Integer.parseInt(value));
+                    break;
 
-                    case KEY_UPDATE:
-                        metaData.setTimestamp(DATE_TIME_FORMATTER.parse(value, LocalDateTime::from).toInstant(ZoneOffset.UTC));
-                        break;
+                case KEY_UPDATE:
+                    metaData
+                        .setTimestamp(DATE_TIME_FORMATTER.parse(value, LocalDateTime::from).toInstant(ZoneOffset.UTC));
+                    break;
 
-                    default:
-                        logEntryCollector.addParserLogEntry(
-                                new ParserLogEntry(
-                                        sectionName,
-                                        line,
-                                        true,
-                                        "key " + key + " is unknown and could not be parsed",
-                                        null
-                                )
-                        );
-                        break;
+                default:
+                    logEntryCollector.addParserLogEntry(new ParserLogEntry( //
+                        sectionName, //
+                        line, //
+                        true, //
+                        "key " + key + " is unknown and could not be parsed", //
+                        null //
+                    ));
+                    break;
                 }
             }
         }

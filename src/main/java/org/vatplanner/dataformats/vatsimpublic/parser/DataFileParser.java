@@ -13,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +40,10 @@ public class DataFileParser {
 
     private static final int LOWEST_SUPPORTED_FORMAT_VERSION = 8;
     private static final int HIGHEST_SUPPORTED_FORMAT_VERSION = 9;
-    private static final String SUPPORTED_FORMAT_VERSIONS_STRING = String.format("%d..%d", LOWEST_SUPPORTED_FORMAT_VERSION, HIGHEST_SUPPORTED_FORMAT_VERSION);
+    private static final String SUPPORTED_FORMAT_VERSIONS_STRING = String.format( //
+        "%d..%d", //
+        LOWEST_SUPPORTED_FORMAT_VERSION, HIGHEST_SUPPORTED_FORMAT_VERSION //
+    );
 
     GeneralSectionParser getGeneralSectionParser() {
         return new GeneralSectionParser();
@@ -66,8 +70,8 @@ public class DataFileParser {
     }
 
     /**
-     * Parses a whole file given as the provided CharSequence (or String).
-     * Original file is expected to have been read with ISO8859-1 character set.
+     * Parses a whole file given as the provided CharSequence (or String). Original
+     * file is expected to have been read with ISO8859-1 character set.
      *
      * @param s CharSequence containing the complete file to be parsed
      * @return all parsed information collected in one {@link DataFile} object
@@ -79,9 +83,9 @@ public class DataFileParser {
     }
 
     /**
-     * Wraps given parser function to catch and log IllegalArgumentException
-     * into a {@link ParserLogEntryCollector}. Caught exceptions result in null
-     * being returned instead.
+     * Wraps given parser function to catch and log IllegalArgumentException into a
+     * {@link ParserLogEntryCollector}. Caught exceptions result in null being
+     * returned instead.
      *
      * @param <U> output type of wrapped function
      * @param wrappedFunction function to be wrapped by exception handling
@@ -89,7 +93,8 @@ public class DataFileParser {
      * @param collector collector for all generated {@link ParserLogEntry}s
      * @return function adding exception handling to original wrapped function
      */
-    private <U> Function<String, U> logExceptionsFrom(Function<String, U> wrappedFunction, String section, ParserLogEntryCollector collector) {
+    private <U> Function<String, U> logExceptionsFrom(Function<String, U> wrappedFunction, String section,
+        ParserLogEntryCollector collector) {
         // QUESTION: catch any Exception?
         return (String line) -> {
             try {
@@ -112,11 +117,11 @@ public class DataFileParser {
     }
 
     /**
-     * Parses a whole file by reading from the given {@link BufferedReader}.
-     * Content is expected to have been opened with ISO8859-1 character set.
+     * Parses a whole file by reading from the given {@link BufferedReader}. Content
+     * is expected to have been opened with ISO8859-1 character set.
      *
      * @param br {@link BufferedReader} providing access to the complete file
-     * contents to be parsed
+     *        contents to be parsed
      * @return all parsed information collected in one {@link DataFile} object
      */
     public DataFile parse(BufferedReader br) {
@@ -129,47 +134,57 @@ public class DataFileParser {
         Map<String, List<String>> relevantLinesBySection = readRelevantLinesBySection(br);
 
         DataFile dataFile = createDataFile();
-        dataFile.setMetaData(generalSectionParser.parse(relevantLinesBySection.get(SECTION_NAME_GENERAL), dataFile, SECTION_NAME_GENERAL));
+        dataFile.setMetaData( //
+            generalSectionParser.parse( //
+                relevantLinesBySection.get(SECTION_NAME_GENERAL), //
+                dataFile, //
+                SECTION_NAME_GENERAL //
+            ) //
+        );
 
         verifyDataFormatVersion(dataFile);
 
-        Stream<Client> onlineClientsStream = relevantLinesBySection.getOrDefault(SECTION_NAME_CLIENTS, new ArrayList<>()).stream()
-                .map(logExceptionsFrom(onlineClientParser::parse, SECTION_NAME_CLIENTS, dataFile))
-                .filter(Objects::nonNull);
+        Stream<Client> onlineClientsStream = relevantLinesBySection
+            .getOrDefault(SECTION_NAME_CLIENTS, new ArrayList<>()) //
+            .stream()
+            .map(logExceptionsFrom(onlineClientParser::parse, SECTION_NAME_CLIENTS, dataFile))
+            .filter(Objects::nonNull);
 
-        Stream<Client> prefileClientsStream = relevantLinesBySection.getOrDefault(SECTION_NAME_PREFILE, new ArrayList<>()).stream()
-                .map(logExceptionsFrom(prefileClientParser::parse, SECTION_NAME_PREFILE, dataFile))
-                .filter(Objects::nonNull);
+        Stream<Client> prefileClientsStream = relevantLinesBySection
+            .getOrDefault(SECTION_NAME_PREFILE, new ArrayList<>()) //
+            .stream()
+            .map(logExceptionsFrom(prefileClientParser::parse, SECTION_NAME_PREFILE, dataFile))
+            .filter(Objects::nonNull);
 
         Stream<Client> allClientsStream = Stream.concat(onlineClientsStream, prefileClientsStream);
         dataFile.setClients(allClientsStream.collect(Collectors.toCollection(ArrayList::new)));
 
         dataFile.setFsdServers(
-                relevantLinesBySection.getOrDefault(SECTION_NAME_SERVERS, new ArrayList<>())
-                        .stream()
-                        .map(logExceptionsFrom(fsdServerParser::parse, SECTION_NAME_SERVERS, dataFile))
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toCollection(ArrayList::new))
+            relevantLinesBySection.getOrDefault(SECTION_NAME_SERVERS, new ArrayList<>())
+                .stream()
+                .map(logExceptionsFrom(fsdServerParser::parse, SECTION_NAME_SERVERS, dataFile))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(ArrayList::new)) //
         );
 
         dataFile.setVoiceServers(
-                relevantLinesBySection.getOrDefault(SECTION_NAME_VOICE_SERVERS, new ArrayList<>())
-                        .stream()
-                        .map(logExceptionsFrom(voiceServerParser::parse, SECTION_NAME_VOICE_SERVERS, dataFile))
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toCollection(ArrayList::new))
+            relevantLinesBySection.getOrDefault(SECTION_NAME_VOICE_SERVERS, new ArrayList<>())
+                .stream()
+                .map(logExceptionsFrom(voiceServerParser::parse, SECTION_NAME_VOICE_SERVERS, dataFile))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(ArrayList::new)) //
         );
 
         return dataFile;
     }
 
     /**
-     * Reads all lines and groups those that are relevant by section in the
-     * returned {@link Map}.
+     * Reads all lines and groups those that are relevant by section in the returned
+     * {@link Map}.
      *
      * @param br {@link BufferedReader} providing the lines to be read
-     * @return a map grouping all lines by section (key: section name, value:
-     * list of lines)
+     * @return a map grouping all lines by section (key: section name, value: list
+     *         of lines)
      */
     private Map<String, List<String>> readRelevantLinesBySection(BufferedReader br) {
         String currentSectionName;
@@ -227,7 +242,8 @@ public class DataFileParser {
             int actualVersion = metaData.getVersionFormat();
 
             if (actualVersion < LOWEST_SUPPORTED_FORMAT_VERSION || actualVersion > HIGHEST_SUPPORTED_FORMAT_VERSION) {
-                msg = "metadata reports unsupported format version " + actualVersion + " (supported: " + SUPPORTED_FORMAT_VERSIONS_STRING + ")";
+                msg = "metadata reports unsupported format version " + actualVersion //
+                    + " (supported: " + SUPPORTED_FORMAT_VERSIONS_STRING + ")";
             }
         }
 
@@ -235,11 +251,11 @@ public class DataFileParser {
             LOGGER.warn(msg);
 
             dataFile.addParserLogEntry(new ParserLogEntry(
-                    SECTION_NAME_GENERAL,
-                    null,
-                    false,
-                    msg,
-                    null
+                SECTION_NAME_GENERAL,
+                null,
+                false,
+                msg,
+                null //
             ));
         }
     }

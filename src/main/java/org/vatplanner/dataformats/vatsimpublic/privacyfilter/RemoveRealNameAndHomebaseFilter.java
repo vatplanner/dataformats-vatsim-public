@@ -1,10 +1,12 @@
 package org.vatplanner.dataformats.vatsimpublic.privacyfilter;
 
+import static org.vatplanner.dataformats.vatsimpublic.utils.CollectionHelpers.asUnmodifiableSet;
+
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.vatplanner.dataformats.vatsimpublic.parser.ClientFields;
-import static org.vatplanner.dataformats.vatsimpublic.utils.CollectionHelpers.asUnmodifiableSet;
 
 /**
  * Privacy filter which implements clearing of real name field (containing real
@@ -14,7 +16,9 @@ import static org.vatplanner.dataformats.vatsimpublic.utils.CollectionHelpers.as
  */
 public class RemoveRealNameAndHomebaseFilter implements VerifiableClientFilter<String> {
 
-    private static final Set<ClientFields.FieldAccess<String>> AFFECTED_FIELDS = asUnmodifiableSet(ClientFields.StringFields.REAL_NAME);
+    private static final Set<ClientFields.FieldAccess<String>> AFFECTED_FIELDS = asUnmodifiableSet(
+        ClientFields.StringFields.REAL_NAME //
+    );
 
     private static final Pattern PATTERN = Pattern.compile("^([^:]*:[^:]*:)[^:]*(:.*)$");
     private static final String PATTERN_REPLACEMENT = "$1$2";

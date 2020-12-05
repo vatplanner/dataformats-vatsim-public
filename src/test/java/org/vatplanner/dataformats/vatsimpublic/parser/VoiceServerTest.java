@@ -1,11 +1,13 @@
 package org.vatplanner.dataformats.vatsimpublic.parser;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 
 @RunWith(DataProviderRunner.class)
 public class VoiceServerTest {
@@ -59,25 +61,29 @@ public class VoiceServerTest {
 
     @Test
     @DataProvider({
-        //              object A                                        ||                    object B
+        // object A || object B
         // address
         "some.server.net, Somewhere,  Some Name,        true,  ab c12 3,  someserver.net,  Somewhere,  Some Name,        true,  ab c12 3", // 0
         "whatever,        Don't Know, Yet another name, false, ,          what.ever,       Don't Know, Yet another name, false,         ", // 1
         "whatever,        Don't Know, Yet another name, false, ,          null,            Don't Know, Yet another name, false,         ", // 3
         "null,            Don't Know, Yet another name, false, ,          whatever,        Don't Know, Yet another name, false,         ", // 4
+
         // location
         "some.server.net, Somewhere,  Some Name,        true,  ab c12 3,  some.server.net, Some where, Some Name,        true,  ab c12 3", // 5
         "whatever,        Don't Know, Yet another name, false, ,          whatever,        Dont Know,  Yet another name, false,         ", // 6
         "whatever,        Don't Know, Yet another name, false, ,          whatever,        null,       Yet another name, false,         ", // 7
         "whatever,        null, Yet another name, false, ,                whatever,        Don't Know, Yet another name, false,         ", // 8
+
         // name
         "some.server.net, Somewhere,  Some Name,        true,  ab c12 3,  some.server.net, Somewhere,  Any Name,         true,  ab c12 3", // 9
         "whatever,        Don't Know, Yet another name, false, ,          whatever,        Don't Know, Some other name,  false,         ", // 10
         "whatever,        Don't Know, Yet another name, false, ,          whatever,        Don't Know, null,             false,         ", // 11
         "whatever,        Don't Know, null,             false, ,          whatever,        Don't Know, Yet another name, false,         ", // 12
+
         // client connection allowed
         "some.server.net, Somewhere,  Some Name,        true,  ab c12 3,  some.server.net, Somewhere,  Some Name,        false, ab c12 3", // 13
         "whatever,        Don't Know, Yet another name, false, ,          whatever,        Don't Know, Yet another name, true,          ", // 14
+
         // raw server type
         "some.server.net, Somewhere,  Some Name,        true,  ab c12 3,  some.server.net, Somewhere,  Some Name,        true,  ab c1 23", // 15
         "whatever,        Don't Know, Yet another name, false, ,          whatever,        Don't Know, Yet another name, false, a       ", // 16
@@ -98,11 +104,11 @@ public class VoiceServerTest {
 
     private VoiceServer createVoiceServer(String address, String location, String name, boolean clientConnectionAllowed, String rawServerType) {
         return new VoiceServer()
-                .setAddress(address)
-                .setClientConnectionAllowed(clientConnectionAllowed)
-                .setLocation(location)
-                .setName(name)
-                .setRawServerType(rawServerType);
+            .setAddress(address)
+            .setClientConnectionAllowed(clientConnectionAllowed)
+            .setLocation(location)
+            .setName(name)
+            .setRawServerType(rawServerType);
     }
 
 }

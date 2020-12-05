@@ -1,6 +1,7 @@
 package org.vatplanner.dataformats.vatsimpublic.testutils;
 
 import java.util.Optional;
+
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 
@@ -29,8 +30,7 @@ public class OptionalMatchers {
     }
 
     /**
-     * Returns a matcher checking if an {@link Optional} holds the expected
-     * value.
+     * Returns a matcher checking if an {@link Optional} holds the expected value.
      *
      * @param <T> type of expectation
      * @param expectation expected value to be held

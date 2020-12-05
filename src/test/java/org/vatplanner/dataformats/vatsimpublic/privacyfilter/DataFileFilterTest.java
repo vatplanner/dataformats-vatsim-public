@@ -1,16 +1,19 @@
 package org.vatplanner.dataformats.vatsimpublic.privacyfilter;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import static org.mockito.Mockito.mock;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
 import org.vatplanner.dataformats.vatsimpublic.testutils.Holder;
+
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 
 @RunWith(DataProviderRunner.class)
 public class DataFileFilterTest {
@@ -34,7 +37,8 @@ public class DataFileFilterTest {
         // FIXME: temporarily, remove when feature is implemented
 
         // Arrange
-        DataFileFilterConfiguration configuration = new DataFileFilterConfiguration()
+        DataFileFilterConfiguration configuration = //
+            new DataFileFilterConfiguration()
                 .setRemoveStreamingChannels(true);
 
         thrown.expect(UnsupportedOperationException.class);
@@ -46,7 +50,7 @@ public class DataFileFilterTest {
     }
 
     @Test
-    @DataProvider({"-1", "0", "1", "7", "9", "10"})
+    @DataProvider({ "-1", "0", "1", "7", "9", "10" })
     public void testIsFormatVersionSupported_unsupported_returnsFalse(int formatVersion) {
         // Arrange
         DataFileFilter filter = createAnyFilterForIndependentMethods();
@@ -111,7 +115,7 @@ public class DataFileFilterTest {
     }
 
     @Test
-    @DataProvider({"true", "false"})
+    @DataProvider({ "true", "false" })
     public void testCheckEqualMetadata_notNull_returnsObjectEquality(boolean expectedResult) {
         // Arrange
         Holder<DataFileMetaData> holderA = new Holder<>();
@@ -146,7 +150,8 @@ public class DataFileFilterTest {
     }
 
     private DataFileFilter createAnyFilterForIndependentMethods() {
-        DataFileFilterConfiguration configuration = new DataFileFilterConfiguration() //
+        DataFileFilterConfiguration configuration = //
+            new DataFileFilterConfiguration() //
                 .setRemoveRealNameAndHomebase(true);
         return new DataFileFilter(configuration);
     }

@@ -69,8 +69,8 @@ public class GeoCoordinates {
     }
 
     /**
-     * Returns the altitude measured in feet. If altitude was given in meters,
-     * it will be automatically converted.
+     * Returns the altitude measured in feet. If altitude was given in meters, it
+     * will be automatically converted.
      *
      * @return altitude in feet
      */
@@ -83,8 +83,8 @@ public class GeoCoordinates {
     }
 
     /**
-     * Returns the altitude measured in meters. If altitude was given in feet,
-     * it will be automatically converted.
+     * Returns the altitude measured in meters. If altitude was given in feet, it
+     * will be automatically converted.
      *
      * @return altitude in meters
      */
@@ -97,10 +97,10 @@ public class GeoCoordinates {
     }
 
     /**
-     * Converts the altitude to a flight level (hundreds of feet at standard
-     * QNH). The local QNH valid at current location is required to calculate
-     * this; it is specific to the client's simulation environment, and
-     * available from the associated {@link TrackPoint}.
+     * Converts the altitude to a flight level (hundreds of feet at standard QNH).
+     * The local QNH valid at current location is required to calculate this; it is
+     * specific to the client's simulation environment, and available from the
+     * associated {@link TrackPoint}.
      *
      * @param qnh local QNH specific to client's simulation environment
      * @return flight level; negative if unavailable
@@ -117,7 +117,11 @@ public class GeoCoordinates {
 
     @Override
     public String toString() {
-        return String.format("GeoCoordinates(%.5f, %.5f, %d%s)", latitude, longitude, altitude, isAltitudeUnitFeet ? "ft" : "m");
+        return String.format(//
+            "GeoCoordinates(%.5f, %.5f, %d%s)", //
+            latitude, longitude, altitude,
+            isAltitudeUnitFeet ? "ft" : "m" //
+        );
     }
 
     // TODO: unit tests

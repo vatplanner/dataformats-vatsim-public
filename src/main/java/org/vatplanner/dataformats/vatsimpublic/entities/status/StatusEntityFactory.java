@@ -45,13 +45,12 @@ public interface StatusEntityFactory {
      * Creates a new instance of {@link FacilityMessage}.
      *
      * <p>
-     * Please refer to {@link FacilityMessage#FacilityMessage(Facility)} for
-     * latest complete documentation.
+     * Please refer to {@link FacilityMessage#FacilityMessage(Facility)} for latest
+     * complete documentation.
      * </p>
      *
      * @param facility facility who published the message
-     * @return new instance of {@link FacilityMessage} created with given
-     * argument
+     * @return new instance of {@link FacilityMessage} created with given argument
      * @see FacilityMessage#FacilityMessage(Facility)
      */
     FacilityMessage createFacilityMessage(Facility facility);
@@ -66,7 +65,7 @@ public interface StatusEntityFactory {
      *
      * @param member member performing or filing this flight
      * @param callsign actual (connected) or intended (pre-filed) callsign to be
-     * used on this flight
+     *        used on this flight
      * @return new instance of {@link Flight} created with given arguments
      * @see Flight#Flight(Member, String)
      */
@@ -91,8 +90,7 @@ public interface StatusEntityFactory {
      * Creates a new instance of {@link Member}.
      *
      * <p>
-     * Please refer to {@link Member#Member(int)} for latest complete
-     * documentation.
+     * Please refer to {@link Member#Member(int)} for latest complete documentation.
      * </p>
      *
      * @param vatsimId VATSIM ID of member

@@ -31,8 +31,11 @@ public class BarometricPressure {
 
     private static final double PLAUSIBILITY_TOLERANCE_FACTOR = 0.01;
 
-    private static final double MINIMUM_PLAUSIBLE_QNH_HPA = LOWEST_OBSERVED_QNH_HPA - LOWEST_OBSERVED_QNH_HPA * PLAUSIBILITY_TOLERANCE_FACTOR;
-    private static final double MAXIMUM_PLAUSIBLE_QNH_HPA = HIGHEST_OBSERVED_QNH_HPA + HIGHEST_OBSERVED_QNH_HPA * PLAUSIBILITY_TOLERANCE_FACTOR;
+    private static final double MINIMUM_PLAUSIBLE_QNH_HPA = //
+        LOWEST_OBSERVED_QNH_HPA - LOWEST_OBSERVED_QNH_HPA * PLAUSIBILITY_TOLERANCE_FACTOR;
+
+    private static final double MAXIMUM_PLAUSIBLE_QNH_HPA = //
+        HIGHEST_OBSERVED_QNH_HPA + HIGHEST_OBSERVED_QNH_HPA * PLAUSIBILITY_TOLERANCE_FACTOR;
 
     private static final double MINIMUM_PLAUSIBLE_QNH_INHG = hectopascalsToInchesOfMercury(MINIMUM_PLAUSIBLE_QNH_HPA);
     private static final double MAXIMUM_PLAUSIBLE_QNH_INHG = hectopascalsToInchesOfMercury(MAXIMUM_PLAUSIBLE_QNH_HPA);
@@ -51,8 +54,8 @@ public class BarometricPressure {
     }
 
     /**
-     * Returns the value in inches of mercury (inHg). Value will be
-     * automatically converted if defined by another unit.
+     * Returns the value in inches of mercury (inHg). Value will be automatically
+     * converted if defined by another unit.
      *
      * @return value in inches of mercury (inHg)
      */
@@ -79,8 +82,7 @@ public class BarometricPressure {
     }
 
     /**
-     * Creates a new value container describing given value in hectopascals
-     * (hPa).
+     * Creates a new value container describing given value in hectopascals (hPa).
      *
      * @param value value in hectopascals (hPa)
      * @return new value container
@@ -123,8 +125,8 @@ public class BarometricPressure {
 
     /**
      * Creates a new instance holding given value with unit information if the
-     * specified pressure is plausible to appear as local QNH (barometric
-     * pressure at sea level) on earth. Otherwise returns null.
+     * specified pressure is plausible to appear as local QNH (barometric pressure
+     * at sea level) on earth. Otherwise returns null.
      *
      * @param value value
      * @param isUnitInchesOfMercury unit; use constants provided by this class

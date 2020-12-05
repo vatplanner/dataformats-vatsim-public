@@ -1,8 +1,10 @@
 package org.vatplanner.dataformats.vatsimpublic.privacyfilter;
 
 import java.util.List;
+
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
+import org.vatplanner.dataformats.vatsimpublic.privacyfilter.errorhandling.ErrorHandlingStrategy;
 
 /**
  * A simple first-tool-in-line filter attempting to provide a limited degree of
@@ -63,11 +65,11 @@ public class DataFileFilter {
 
     /**
      * Initializes a new data filter for given configuration. Note that
-     * configuration must be final; any later modification to configuration may
-     * not apply to this filter instance or yield unexpected results.
+     * configuration must be final; any later modification to configuration may not
+     * apply to this filter instance or yield unexpected results.
      *
-     * @param configuration configuration for this filter instance, must be
-     * final and not null
+     * @param configuration configuration for this filter instance, must be final
+     *        and not null
      */
     public DataFileFilter(DataFileFilterConfiguration configuration) {
         if (configuration == null) {
@@ -75,7 +77,7 @@ public class DataFileFilter {
         }
 
         filterChain = getVerifiableClientFilterFactory()
-                .buildFromConfiguration(configuration);
+            .buildFromConfiguration(configuration);
 
         this.configuration = configuration;
     }
@@ -85,15 +87,14 @@ public class DataFileFilter {
     }
 
     /**
-     * Checks if the given format version is officially supported. Format
-     * version is available from {@link DataFileMetaData#getVersionFormat()}.
-     * Data format may change in the future in which case the filter may have to
-     * be updated. It is recommended to check compatibility before attempting to
-     * apply the filter.
+     * Checks if the given format version is officially supported. Format version is
+     * available from {@link DataFileMetaData#getVersionFormat()}. Data format may
+     * change in the future in which case the filter may have to be updated. It is
+     * recommended to check compatibility before attempting to apply the filter.
      *
      * @param formatVersion version to query support for
      * @return Is given format version supported? (true = supported, false =
-     * unsupported)
+     *         unsupported)
      */
     public boolean isFormatVersionSupported(int formatVersion) {
         return (formatVersion == SUPPORTED_FORMAT_VERSION);
@@ -103,39 +104,42 @@ public class DataFileFilter {
      * Filters the given raw data file as configured and returns the result.
      * Filtering may result in some form of data corruption, so you may want to
      * parse & verify the result using
-     * {@link #verifyNoAdditionalLogMessages(DataFile, DataFile)} afterwards.
-     * Error handling will be performed as configured through strategies.
+     * {@link #verifyNoAdditionalLogMessages(DataFile, DataFile)} afterwards. Error
+     * handling will be performed as configured through strategies.
      * <p>
-     * <b>Disclaimer (again):</b> The filter may fail to apply properly and not
-     * only corrupt data but also fail to implement all configured filtering
-     * steps as you would expect. Use at your own risk and read the full
-     * disclaimer on class JavaDoc before use!
+     * <b>Disclaimer (again):</b> The filter may fail to apply properly and not only
+     * corrupt data but also fail to implement all configured filtering steps as you
+     * would expect. Use at your own risk and read the full disclaimer on class
+     * JavaDoc before use!
      * </p>
      *
      * @param formatVersion format version as available from
-     * {@link DataFileMetaData#getVersionFormat()} after parsing
+     *        {@link DataFileMetaData#getVersionFormat()} after parsing
      * @param original raw data file to apply filter to
      * @return filtered data file (may be erroneous or incompletely filtered!)
      */
     public String filter(int formatVersion, String original) {
-        // QUESTION: return an object with a filter error log instead of just the datafile string?
+        /*
+         * QUESTION: return an object with a filter error log instead of just the
+         * datafile string?
+         */
         // FIXME: implement
         // FIXME: use checkEqualMetadata
         return null;
     }
 
     /**
-     * Checks if the filtered {@link DataFile} only lost information where it
-     * has been requested to be removed, as compared to original file.
-     * Verification is based on configuration provided to constructor.
+     * Checks if the filtered {@link DataFile} only lost information where it has
+     * been requested to be removed, as compared to original file. Verification is
+     * based on configuration provided to constructor.
      *
      * @param original file parsed from original raw data
      * @param filtered file parsed from filtered output
      * @return Is all non-filtered data still present 1:1 on filtered DataFile?
-     * (true = all data OK; false = filtered file lost data which should not
-     * have been removed)
+     *         (true = all data OK; false = filtered file lost data which should not
+     *         have been removed)
      * @deprecated always verified; configurable by
-     * {@link DataFileFilterConfiguration#setUnwantedModificationErrorHandlingStrategy(ErrorHandlingStrategy)}
+     *             {@link DataFileFilterConfiguration#setUnwantedModificationErrorHandlingStrategy(ErrorHandlingStrategy)}
      */
     @Deprecated
     public boolean verifyOnlyWantedModifications(DataFile original, DataFile filtered) {
@@ -144,13 +148,13 @@ public class DataFileFilter {
     }
 
     /**
-     * Checks that no additional log messages are found in filtered
-     * {@link DataFile} as compared to original file.
+     * Checks that no additional log messages are found in filtered {@link DataFile}
+     * as compared to original file.
      *
      * @param original file parsed from original raw data
      * @param filtered file parsed from filtered output
-     * @return Are no additional log messages found in filtered DataFile? (true
-     * = no additional log messages; false = additional log messages found)
+     * @return Are no additional log messages found in filtered DataFile? (true = no
+     *         additional log messages; false = additional log messages found)
      */
     public boolean verifyNoAdditionalLogMessages(DataFile original, DataFile filtered) {
         // FIXME: implement

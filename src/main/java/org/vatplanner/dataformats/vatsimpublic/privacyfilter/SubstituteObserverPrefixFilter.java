@@ -1,10 +1,12 @@
 package org.vatplanner.dataformats.vatsimpublic.privacyfilter;
 
+import static org.vatplanner.dataformats.vatsimpublic.utils.CollectionHelpers.asUnmodifiableSet;
+
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.vatplanner.dataformats.vatsimpublic.parser.ClientFields;
-import static org.vatplanner.dataformats.vatsimpublic.utils.CollectionHelpers.asUnmodifiableSet;
 
 /**
  * Privacy filter which implements substitution of all observer call signs to a
@@ -14,7 +16,9 @@ import static org.vatplanner.dataformats.vatsimpublic.utils.CollectionHelpers.as
  */
 public class SubstituteObserverPrefixFilter implements VerifiableClientFilter<String> {
 
-    private static final Set<ClientFields.FieldAccess<String>> AFFECTED_FIELDS = asUnmodifiableSet(ClientFields.StringFields.CALLSIGN);
+    private static final Set<ClientFields.FieldAccess<String>> AFFECTED_FIELDS = asUnmodifiableSet(
+        ClientFields.StringFields.CALLSIGN //
+    );
 
     private static final String OBSERVER_SUFFIX = "_OBS";
     private static final String OBSERVER_REPLACEMENT = "XX_OBS";
