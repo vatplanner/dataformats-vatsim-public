@@ -61,41 +61,42 @@ public class GeneralSectionParser {
                 String value = matcher.group(PATTERN_KEYVALUE_VALUE);
 
                 switch (key) {
-                case KEY_VERSION:
-                    metaData.setVersionFormat(Integer.parseInt(value));
-                    break;
+                    case KEY_VERSION:
+                        metaData.setVersionFormat(Integer.parseInt(value));
+                        break;
 
-                case KEY_RELOAD:
-                    metaData.setMinimumDataFileRetrievalInterval(
-                        Duration.ofSeconds(Math.round(Double.parseDouble(value) * 60.0)));
-                    break;
+                    case KEY_RELOAD:
+                        metaData.setMinimumDataFileRetrievalInterval(
+                            Duration.ofSeconds(Math.round(Double.parseDouble(value) * 60.0)));
+                        break;
 
-                case KEY_ATIS_ALLOW_MIN:
-                    metaData.setMinimumAtisRetrievalInterval(Duration.ofMinutes(Integer.parseInt(value)));
-                    break;
+                    case KEY_ATIS_ALLOW_MIN:
+                        metaData.setMinimumAtisRetrievalInterval(Duration.ofMinutes(Integer.parseInt(value)));
+                        break;
 
-                case KEY_CONNECTED_CLIENTS:
-                    metaData.setNumberOfConnectedClients(Integer.parseInt(value));
-                    break;
+                    case KEY_CONNECTED_CLIENTS:
+                        metaData.setNumberOfConnectedClients(Integer.parseInt(value));
+                        break;
 
-                case KEY_UNIQUE_USERS:
-                    metaData.setNumberOfUniqueConnectedUsers(Integer.parseInt(value));
-                    break;
+                    case KEY_UNIQUE_USERS:
+                        metaData.setNumberOfUniqueConnectedUsers(Integer.parseInt(value));
+                        break;
 
-                case KEY_UPDATE:
-                    metaData
-                        .setTimestamp(DATE_TIME_FORMATTER.parse(value, LocalDateTime::from).toInstant(ZoneOffset.UTC));
-                    break;
+                    case KEY_UPDATE:
+                        metaData
+                            .setTimestamp(
+                                DATE_TIME_FORMATTER.parse(value, LocalDateTime::from).toInstant(ZoneOffset.UTC));
+                        break;
 
-                default:
-                    logEntryCollector.addParserLogEntry(new ParserLogEntry( //
-                        sectionName, //
-                        line, //
-                        true, //
-                        "key " + key + " is unknown and could not be parsed", //
-                        null //
-                    ));
-                    break;
+                    default:
+                        logEntryCollector.addParserLogEntry(new ParserLogEntry( //
+                            sectionName, //
+                            line, //
+                            true, //
+                            "key " + key + " is unknown and could not be parsed", //
+                            null //
+                        ));
+                        break;
                 }
             }
         }

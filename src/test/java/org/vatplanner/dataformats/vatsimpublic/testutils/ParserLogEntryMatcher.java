@@ -33,8 +33,7 @@ public class ParserLogEntryMatcher extends TypeSafeMatcher<ParserLogEntry> {
      * @param throwableMatcher matcher to be applied to
      *        {@link ParserLogEntry#getThrowable()}
      */
-    public ParserLogEntryMatcher(Matcher<String> sectionMatcher, Matcher<String> lineContentMatcher,
-        Matcher<Boolean> isLineRejectedMatcher, Matcher<String> messageMatcher, Matcher<Throwable> throwableMatcher) {
+    public ParserLogEntryMatcher(Matcher<String> sectionMatcher, Matcher<String> lineContentMatcher, Matcher<Boolean> isLineRejectedMatcher, Matcher<String> messageMatcher, Matcher<Throwable> throwableMatcher) {
         this.sectionMatcher = sectionMatcher;
         this.lineContentMatcher = lineContentMatcher;
         this.isLineRejectedMatcher = isLineRejectedMatcher;

@@ -20,8 +20,7 @@ public class VerifiableClientFilterFactory {
      * @throws UnconfiguredException when configuration does not request any feature
      *         at all
      */
-    public List<VerifiableClientFilter<?>> buildFromConfiguration(DataFileFilterConfiguration configuration)
-        throws UnconfiguredException {
+    public List<VerifiableClientFilter<?>> buildFromConfiguration(DataFileFilterConfiguration configuration) throws UnconfiguredException {
         if (configuration == null) {
             throw new IllegalArgumentException("unable to build filter chain from null configuration");
         }

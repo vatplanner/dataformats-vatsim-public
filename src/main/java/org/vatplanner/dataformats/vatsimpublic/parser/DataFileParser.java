@@ -93,8 +93,7 @@ public class DataFileParser {
      * @param collector collector for all generated {@link ParserLogEntry}s
      * @return function adding exception handling to original wrapped function
      */
-    private <U> Function<String, U> logExceptionsFrom(Function<String, U> wrappedFunction, String section,
-        ParserLogEntryCollector collector) {
+    private <U> Function<String, U> logExceptionsFrom(Function<String, U> wrappedFunction, String section, ParserLogEntryCollector collector) {
         // QUESTION: catch any Exception?
         return (String line) -> {
             try {

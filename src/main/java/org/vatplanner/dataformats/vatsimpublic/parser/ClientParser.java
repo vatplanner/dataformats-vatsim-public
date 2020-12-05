@@ -409,8 +409,7 @@ public class ClientParser {
      * @throws IllegalArgumentException if serving a frequency while not allowed or
      *         frequency does not make any sense
      */
-    private int parseServedFrequencyMegahertzToKilohertz(String s, boolean allowServing)
-        throws IllegalArgumentException {
+    private int parseServedFrequencyMegahertzToKilohertz(String s, boolean allowServing) throws IllegalArgumentException {
         if (s.isEmpty()) {
             return -1;
         } else {
@@ -544,8 +543,7 @@ public class ClientParser {
      * @return original value if allowed, null if not allowed and empty
      * @throws IllegalArgumentException if not allowed and not empty
      */
-    private String filterFlightPlanField(String flightPlanValue, boolean isAllowedToFillFlightPlan)
-        throws IllegalArgumentException {
+    private String filterFlightPlanField(String flightPlanValue, boolean isAllowedToFillFlightPlan) throws IllegalArgumentException {
         if (isAllowedToFillFlightPlan) {
             return flightPlanValue;
         }
@@ -594,8 +592,7 @@ public class ClientParser {
      *         set
      * @throws IllegalArgumentException if expectation of server ID is violated
      */
-    private String filterServerId(String serverId, boolean isEffectiveClientTypeOnline,
-        boolean hasChangedOnlineStateByGuessing) throws IllegalArgumentException {
+    private String filterServerId(String serverId, boolean isEffectiveClientTypeOnline, boolean hasChangedOnlineStateByGuessing) throws IllegalArgumentException {
         boolean hasNoServerId = serverId.isEmpty();
 
         boolean availabilityMatchesOnlineState = isEffectiveClientTypeOnline ^ hasNoServerId;
@@ -875,8 +872,7 @@ public class ClientParser {
      * @throws IllegalArgumentException if mandatory but not available, only one
      *         string is empty or parsing error
      */
-    private Duration parseDuration(String hoursString, String minutesString, boolean isMandatory)
-        throws IllegalArgumentException {
+    private Duration parseDuration(String hoursString, String minutesString, boolean isMandatory) throws IllegalArgumentException {
         boolean emptyHours = hoursString.isEmpty();
         boolean emptyMinutes = minutesString.isEmpty();
         boolean oneEmptyButNotTheOther = emptyHours ^ emptyMinutes;

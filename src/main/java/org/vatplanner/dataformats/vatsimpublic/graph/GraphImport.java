@@ -605,8 +605,7 @@ public class GraphImport {
      * @return flight matching all criteria, null if not found
      * @see #findMatchingFlightByFlightPlanAirports(Report, Client)
      */
-    private Flight findContinuedFlightByFlightPlanAirports(final Report newReport, final Client client,
-        final int maxReports) {
+    private Flight findContinuedFlightByFlightPlanAirports(final Report newReport, final Client client, final int maxReports) {
         Report report = newReport;
         int checkedReports = 0;
         while ((checkedReports++ < maxReports) && (report = index.getLatestReportBefore(report)) != null) {
