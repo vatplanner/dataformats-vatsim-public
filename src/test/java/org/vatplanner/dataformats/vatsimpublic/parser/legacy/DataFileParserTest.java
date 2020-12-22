@@ -1,5 +1,6 @@
 package org.vatplanner.dataformats.vatsimpublic.parser.legacy;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
@@ -9,7 +10,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -35,6 +35,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.vatplanner.dataformats.vatsimpublic.parser.Client;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
+import org.vatplanner.dataformats.vatsimpublic.parser.DataFileFormat;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
 import org.vatplanner.dataformats.vatsimpublic.parser.FSDServer;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
@@ -171,6 +172,21 @@ public class DataFileParserTest {
 
         // Assert
         assertThat(result, is(sameInstance(expectedObject)));
+    }
+
+    @Test
+    public void testParse_always_returnsDataFileWithFormatIndicatedAsLegacy() {
+        // Arrange
+        String lines = buildDataFileForSection("GENERAL");
+
+        doReturn(null).when(mockGeneralSectionParser).parse(any(Collection.class), any(ParserLogEntryCollector.class),
+            anyString());
+
+        // Act
+        DataFile dataFile = spyParser.parse(lines);
+
+        // Assert
+        assertThat(dataFile.getFormat(), is(equalTo(DataFileFormat.LEGACY)));
     }
 
     @Test

@@ -6,8 +6,8 @@ import java.time.Duration;
 import java.time.Instant;
 
 /**
- * Meta data found in the <code>GENERAL</code> section of VATSIM's data.txt
- * status file.
+ * Meta data found in the <code>general</code> section of VATSIM's data status
+ * file.
  */
 public class DataFileMetaData {
 

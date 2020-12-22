@@ -17,6 +17,10 @@ import org.slf4j.LoggerFactory;
  * once "on application start" to reduce server load.
  */
 public class NetworkInformationParser {
+    /*
+     * TODO: I suspect network information will remain as-is but JSON format has
+     * already been asked for - expect it and move to legacy package early?
+     */
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkInformationParser.class.getName());
 

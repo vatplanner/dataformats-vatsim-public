@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vatplanner.dataformats.vatsimpublic.parser.Client;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
+import org.vatplanner.dataformats.vatsimpublic.parser.DataFileFormat;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntryCollector;
@@ -138,6 +139,7 @@ public class DataFileParser {
         Map<String, List<String>> relevantLinesBySection = readRelevantLinesBySection(br);
 
         DataFile dataFile = createDataFile();
+        dataFile.setFormat(DataFileFormat.LEGACY);
         dataFile.setMetaData( //
             generalSectionParser.parse( //
                 relevantLinesBySection.get(SECTION_NAME_GENERAL), //

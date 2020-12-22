@@ -25,6 +25,8 @@ public class DataFile implements ParserLogEntryCollector {
     private Collection<FSDServer> fsdServers;
     private Collection<Client> clients;
 
+    private DataFileFormat format = null;
+
     private final ArrayList<ParserLogEntry> parserLogEntries = new ArrayList<>();
 
     public DataFileMetaData getMetaData() {
@@ -57,6 +59,20 @@ public class DataFile implements ParserLogEntryCollector {
 
     public void setClients(Collection<Client> clients) {
         this.clients = clients;
+    }
+
+    /**
+     * Returns the data file format. This is no official field but indicates which
+     * parser was used to generate a parsed {@link DataFile} object.
+     * 
+     * @return format of data file indicating applied parser
+     */
+    public DataFileFormat getFormat() {
+        return format;
+    }
+
+    public void setFormat(DataFileFormat format) {
+        this.format = format;
     }
 
     @Override

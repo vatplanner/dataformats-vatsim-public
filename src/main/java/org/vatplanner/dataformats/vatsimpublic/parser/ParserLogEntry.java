@@ -7,6 +7,8 @@ package org.vatplanner.dataformats.vatsimpublic.parser;
  * can also be collected by log entries.
  */
 public class ParserLogEntry {
+    // TODO: rename from "line" (legacy format) to "entry" (universal)
+    // TODO: constants for rejected information?
 
     private final String section;
     private final String lineContent;
