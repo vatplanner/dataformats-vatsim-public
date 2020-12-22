@@ -10,11 +10,13 @@ import static org.vatplanner.dataformats.vatsimpublic.entities.status.Controller
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating.I;
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating.I2;
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating.I3;
+import static org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating.INAC;
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating.OBS;
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating.S1;
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating.S2;
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating.S3;
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating.SUP;
+import static org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating.SUS;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -34,6 +36,8 @@ public class ControllerRatingTest {
     @DataProvider
     public static Object[][] dataProviderIdAndEnum() {
         return new Object[][] {
+            new Object[] { -1, INAC },
+            new Object[] { 0, SUS },
             new Object[] { 1, OBS },
             new Object[] { 2, S1 },
             new Object[] { 3, S2 },
@@ -61,7 +65,7 @@ public class ControllerRatingTest {
     }
 
     @Test
-    @DataProvider({ "-2", "0", "100" })
+    @DataProvider({ "-2", "13", "100" })
     public void testResolveStatusFileId_unknownId_throwsIllegalArgumentException(int unknownId) {
         // Arrange
         thrown.expect(IllegalArgumentException.class);

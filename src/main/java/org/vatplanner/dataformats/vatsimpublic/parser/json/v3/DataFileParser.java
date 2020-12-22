@@ -53,6 +53,18 @@ public class DataFileParser {
                 out, //
                 (Consumer<JsonObject>) x -> out.setMetaData(generalSectionProcessor.deserialize(x, out)) //
             );
+
+            // TODO: servers
+
+            // TODO: facilities, establish mapping to FacilityType
+            // TODO: pilot_ratings, establish mapping to new enum (did not exist before)
+            // TODO: ratings, establish mapping to ControllerRating
+
+            // TODO: atis (needs facility mapping)
+            // TODO: controllers (needs facility and ratings mappings)
+            // TODO: pilots (needs pilot_ratings mapping)
+            // TODO: prefiles
+
         } catch (JsonException | ClassCastException ex) {
             LOGGER.warn("Failed to parse JSON format on root level", ex);
         }

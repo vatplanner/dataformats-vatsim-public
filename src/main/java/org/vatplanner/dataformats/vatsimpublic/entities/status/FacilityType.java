@@ -79,8 +79,8 @@ public enum FacilityType {
     }
 
     /**
-     * Resolves the given ID as used on status files (data.txt) to the corresponding
-     * {@link FacilityType} enum.
+     * Resolves the given ID as used on legacy status files (data.txt) to the
+     * corresponding {@link FacilityType} enum.
      *
      * @param statusFileId ID as used on data.txt status file
      * @return resolved enumeration object or null if unknown

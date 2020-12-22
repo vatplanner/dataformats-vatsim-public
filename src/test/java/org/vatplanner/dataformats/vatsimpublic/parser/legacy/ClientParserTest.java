@@ -15,9 +15,12 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -2020,9 +2023,26 @@ public class ClientParserTest {
         assertThat(result.getControllerRating(), is(nullValue()));
     }
 
+    @DataProvider
+    public static Object[][] dataProviderValidNonZeroControllerRatingIds() {
+        List<Object[]> out = new ArrayList<Object[]>();
+
+        Object[][] original = ControllerRatingTest.dataProviderIdAndEnum();
+        for (Object[] pair : original) {
+            if ((int) pair[0] != 0) {
+                out.add(pair);
+            }
+        }
+
+        assertThat("at most one rating must have been filtered out", out.size(),
+            is(Matchers.greaterThanOrEqualTo(original.length - 1)));
+
+        return out.toArray(new Object[0][0]);
+    }
+
     @Test
-    @UseDataProvider(value = "dataProviderIdAndEnum", location = ControllerRatingTest.class)
-    public void testParse_prefiledPilotWithValidRating_throwsIllegalArgumentException(int controllerRatingId, ControllerRating _controllerRating) {
+    @UseDataProvider("dataProviderValidNonZeroControllerRatingIds")
+    public void testParse_prefiledPilotWithValidNonZeroRating_throwsIllegalArgumentException(int controllerRatingId, ControllerRating _controllerRating) {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::%d::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
@@ -2039,7 +2059,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({ "-1", "abc", "1a", "a1", "99" })
+    @DataProvider({ "-2", "abc", "1a", "a1", "99" })
     public void testParse_prefiledPilotWithInvalidNonZeroRating_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format(
@@ -2074,7 +2094,7 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({ "-1", "abc", "1a", "a1", "0", "99" })
+    @DataProvider({ "-2", "abc", "1a", "a1", "13", "99" })
     public void testParse_atcWithInvalidRating_throwsIllegalArgumentException(String input) {
         // Arrange
         String line = String.format(

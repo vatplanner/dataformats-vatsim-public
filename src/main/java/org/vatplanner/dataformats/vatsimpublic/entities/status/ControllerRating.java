@@ -38,6 +38,16 @@ import java.util.TreeMap;
  */
 public enum ControllerRating {
     /**
+     * "Inactive" according to JSON data feed from December 2020.
+     */
+    INAC(-1),
+
+    /**
+     * "Suspended" according to JSON data feed from December 2020.
+     */
+    SUS(0),
+
+    /**
      * Observer/pilot is the default rating, all accounts may connect as observers
      * in ATC clients or as pilots in pilot clients. This is the lowest and only
      * rating available without having started ATC training. It is meaningless while
@@ -131,8 +141,8 @@ public enum ControllerRating {
     }
 
     /**
-     * Resolves the given ID as used on status files (data.txt) to the corresponding
-     * {@link ControllerRating} enum.
+     * Resolves the given ID as used on legacy status files (data.txt) to the
+     * corresponding {@link ControllerRating} enum.
      *
      * @param statusFileId ID as used on data.txt status file
      * @return resolved enumeration object or null if unknown
