@@ -19,59 +19,65 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         
-        <!--<powermock.version>1.6.5</powermock.version>-->
+        <slf4j.version>1.7.21</slf4j.version>
+        <jsonSimple.version>3.1.1</jsonSimple.version>
+        
+        <junit.version>4.13.1</junit.version>
+        <junitDataprovider.version>1.11.0</junitDataprovider.version>
+        <hamcrest.version>2.0.0.0</hamcrest.version>
+        <mockito.version>2.17.0</mockito.version>
+        <slf4jTest.version>1.2.0</slf4jTest.version>
     </properties>
     
     <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-junit</artifactId>
-            <version>2.0.0.0</version>
-            <scope>test</scope>
-        </dependency>
+    	<!-- runtime dependencies -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.21</version>
+            <version>${slf4j.version}</version>
         </dependency>
+        
+        <dependency>
+            <groupId>com.github.cliftonlabs</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>${jsonSimple.version}</version>
+        </dependency>
+    
+        <!-- test dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-junit</artifactId>
+            <version>${hamcrest.version}</version>
+            <scope>test</scope>
+        </dependency>
+        
         <dependency>
             <groupId>uk.org.lidalia</groupId>
             <artifactId>slf4j-test</artifactId>
-            <version>1.2.0</version>
+            <version>${slf4jTest.version}</version>
             <scope>test</scope>
         </dependency>
+        
         <dependency>
             <groupId>com.tngtech.java</groupId>
             <artifactId>junit-dataprovider</artifactId>
-            <version>1.11.0</version>
+            <version>${junitDataprovider.version}</version>
             <scope>test</scope>
         </dependency>
+        
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>2.17.0</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4</artifactId>
-            <version>${powermock.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito2</artifactId>
-            <version>${powermock.version}</version>
-            <scope>test</scope>
-        </dependency>
-        -->
     </dependencies>
     
     <build>
