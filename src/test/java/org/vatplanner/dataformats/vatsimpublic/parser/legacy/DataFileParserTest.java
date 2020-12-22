@@ -1,4 +1,4 @@
-package org.vatplanner.dataformats.vatsimpublic.parser;
+package org.vatplanner.dataformats.vatsimpublic.parser.legacy;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
@@ -33,6 +33,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.vatplanner.dataformats.vatsimpublic.parser.Client;
+import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
+import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
+import org.vatplanner.dataformats.vatsimpublic.parser.FSDServer;
+import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
+import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntryCollector;
+import org.vatplanner.dataformats.vatsimpublic.parser.VoiceServer;
 
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;

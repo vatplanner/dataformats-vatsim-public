@@ -31,7 +31,7 @@ public class DataFile implements ParserLogEntryCollector {
         return metaData;
     }
 
-    void setMetaData(DataFileMetaData metaData) {
+    public void setMetaData(DataFileMetaData metaData) {
         this.metaData = metaData;
     }
 
@@ -39,7 +39,7 @@ public class DataFile implements ParserLogEntryCollector {
         return voiceServers;
     }
 
-    void setVoiceServers(Collection<VoiceServer> voiceServers) {
+    public void setVoiceServers(Collection<VoiceServer> voiceServers) {
         this.voiceServers = voiceServers;
     }
 
@@ -47,7 +47,7 @@ public class DataFile implements ParserLogEntryCollector {
         return fsdServers;
     }
 
-    void setFsdServers(Collection<FSDServer> fsdServers) {
+    public void setFsdServers(Collection<FSDServer> fsdServers) {
         this.fsdServers = fsdServers;
     }
 
@@ -55,7 +55,7 @@ public class DataFile implements ParserLogEntryCollector {
         return clients;
     }
 
-    void setClients(Collection<Client> clients) {
+    public void setClients(Collection<Client> clients) {
         this.clients = clients;
     }
 

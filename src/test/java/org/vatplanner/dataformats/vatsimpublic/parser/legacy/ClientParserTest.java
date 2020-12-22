@@ -1,4 +1,4 @@
-package org.vatplanner.dataformats.vatsimpublic.parser;
+package org.vatplanner.dataformats.vatsimpublic.parser.legacy;
 
 import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.emptyString;
@@ -27,6 +27,8 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRatingTest;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityTypeTest;
+import org.vatplanner.dataformats.vatsimpublic.parser.Client;
+import org.vatplanner.dataformats.vatsimpublic.parser.ClientType;
 
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;

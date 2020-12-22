@@ -27,7 +27,7 @@ public class FSDServer {
         return id;
     }
 
-    FSDServer setId(String id) {
+    public FSDServer setId(String id) {
         this.id = id;
         return this;
     }
@@ -43,7 +43,7 @@ public class FSDServer {
         return address;
     }
 
-    FSDServer setAddress(String address) {
+    public FSDServer setAddress(String address) {
         this.address = address;
         return this;
     }
@@ -57,7 +57,7 @@ public class FSDServer {
         return location;
     }
 
-    FSDServer setLocation(String location) {
+    public FSDServer setLocation(String location) {
         this.location = location;
         return this;
     }
@@ -72,7 +72,7 @@ public class FSDServer {
         return name;
     }
 
-    FSDServer setName(String name) {
+    public FSDServer setName(String name) {
         this.name = name;
         return this;
     }
@@ -87,7 +87,7 @@ public class FSDServer {
         return clientConnectionAllowed;
     }
 
-    FSDServer setClientConnectionAllowed(boolean clientConnectionAllowed) {
+    public FSDServer setClientConnectionAllowed(boolean clientConnectionAllowed) {
         this.clientConnectionAllowed = clientConnectionAllowed;
         return this;
     }

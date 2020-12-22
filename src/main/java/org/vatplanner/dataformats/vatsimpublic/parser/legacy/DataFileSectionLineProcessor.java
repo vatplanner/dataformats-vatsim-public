@@ -1,4 +1,4 @@
-package org.vatplanner.dataformats.vatsimpublic.parser;
+package org.vatplanner.dataformats.vatsimpublic.parser.legacy;
 
 import java.util.ArrayList;
 import java.util.HashMap;

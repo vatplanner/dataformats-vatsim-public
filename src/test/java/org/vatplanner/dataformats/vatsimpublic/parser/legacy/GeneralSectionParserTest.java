@@ -1,4 +1,4 @@
-package org.vatplanner.dataformats.vatsimpublic.parser;
+package org.vatplanner.dataformats.vatsimpublic.parser.legacy;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
@@ -19,6 +19,10 @@ import java.util.Collection;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
+import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
+import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
+import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntryCollector;
 
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;

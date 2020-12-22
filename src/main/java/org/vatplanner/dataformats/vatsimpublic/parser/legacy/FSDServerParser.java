@@ -1,7 +1,10 @@
-package org.vatplanner.dataformats.vatsimpublic.parser;
+package org.vatplanner.dataformats.vatsimpublic.parser.legacy;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
+import org.vatplanner.dataformats.vatsimpublic.parser.FSDServer;
 
 /**
  * Parses information about VATSIM FSD servers as available from VATSIM's

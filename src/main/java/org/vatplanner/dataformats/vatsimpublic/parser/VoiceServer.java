@@ -36,7 +36,7 @@ public class VoiceServer {
         return address;
     }
 
-    VoiceServer setAddress(String address) {
+    public VoiceServer setAddress(String address) {
         this.address = address;
         return this;
     }
@@ -50,7 +50,7 @@ public class VoiceServer {
         return location;
     }
 
-    VoiceServer setLocation(String location) {
+    public VoiceServer setLocation(String location) {
         this.location = location;
         return this;
     }
@@ -65,7 +65,7 @@ public class VoiceServer {
         return name;
     }
 
-    VoiceServer setName(String name) {
+    public VoiceServer setName(String name) {
         this.name = name;
         return this;
     }
@@ -80,7 +80,7 @@ public class VoiceServer {
         return clientConnectionAllowed;
     }
 
-    VoiceServer setClientConnectionAllowed(boolean clientConnectionAllowed) {
+    public VoiceServer setClientConnectionAllowed(boolean clientConnectionAllowed) {
         this.clientConnectionAllowed = clientConnectionAllowed;
         return this;
     }
@@ -99,7 +99,7 @@ public class VoiceServer {
         return rawServerType;
     }
 
-    VoiceServer setRawServerType(String rawServerType) {
+    public VoiceServer setRawServerType(String rawServerType) {
         this.rawServerType = rawServerType;
         return this;
     }

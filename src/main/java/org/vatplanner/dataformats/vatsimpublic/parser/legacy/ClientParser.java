@@ -1,4 +1,4 @@
-package org.vatplanner.dataformats.vatsimpublic.parser;
+package org.vatplanner.dataformats.vatsimpublic.parser.legacy;
 
 import java.nio.charset.Charset;
 import java.time.Duration;
@@ -13,6 +13,9 @@ import java.util.regex.Pattern;
 
 import org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
+import org.vatplanner.dataformats.vatsimpublic.parser.Client;
+import org.vatplanner.dataformats.vatsimpublic.parser.ClientType;
+import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 
 /**
  * Parses {@link Client} information as given by VATSIM's data.txt status files

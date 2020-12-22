@@ -23,7 +23,7 @@ public class ParserLogEntry {
      * @param message log message (must not be null!)
      * @param throwable throwable/exception (may be null)
      */
-    ParserLogEntry(String section, String lineContent, boolean isLineRejected, String message, Throwable throwable) {
+    public ParserLogEntry(String section, String lineContent, boolean isLineRejected, String message, Throwable throwable) {
         if (message == null) {
             throw new IllegalArgumentException("Message must not be null!");
         }

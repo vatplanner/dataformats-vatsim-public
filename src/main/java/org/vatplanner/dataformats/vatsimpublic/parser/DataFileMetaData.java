@@ -27,7 +27,7 @@ public class DataFileMetaData {
         return versionFormat;
     }
 
-    DataFileMetaData setVersionFormat(int versionFormat) {
+    public DataFileMetaData setVersionFormat(int versionFormat) {
         this.versionFormat = versionFormat;
         return this;
     }
@@ -42,7 +42,7 @@ public class DataFileMetaData {
         return timestamp;
     }
 
-    DataFileMetaData setTimestamp(Instant timestamp) {
+    public DataFileMetaData setTimestamp(Instant timestamp) {
         this.timestamp = timestamp;
         return this;
     }
@@ -66,7 +66,7 @@ public class DataFileMetaData {
         return numberOfConnectedClients;
     }
 
-    DataFileMetaData setNumberOfConnectedClients(int numberOfConnectedClients) {
+    public DataFileMetaData setNumberOfConnectedClients(int numberOfConnectedClients) {
         this.numberOfConnectedClients = numberOfConnectedClients;
         return this;
     }
@@ -118,7 +118,7 @@ public class DataFileMetaData {
         return minimumDataFileRetrievalInterval;
     }
 
-    DataFileMetaData setMinimumDataFileRetrievalInterval(Duration minimumDataFileRetrievalInterval) {
+    public DataFileMetaData setMinimumDataFileRetrievalInterval(Duration minimumDataFileRetrievalInterval) {
         this.minimumDataFileRetrievalInterval = minimumDataFileRetrievalInterval;
         return this;
     }
@@ -149,7 +149,7 @@ public class DataFileMetaData {
         return minimumAtisRetrievalInterval;
     }
 
-    DataFileMetaData setMinimumAtisRetrievalInterval(Duration minimumAtisRetrievalInterval) {
+    public DataFileMetaData setMinimumAtisRetrievalInterval(Duration minimumAtisRetrievalInterval) {
         this.minimumAtisRetrievalInterval = minimumAtisRetrievalInterval;
         return this;
     }

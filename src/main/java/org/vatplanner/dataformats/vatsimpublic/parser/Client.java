@@ -177,7 +177,7 @@ public class Client {
         return callsign;
     }
 
-    void setCallsign(String callsign) {
+    public void setCallsign(String callsign) {
         this.callsign = callsign;
     }
 
@@ -215,7 +215,7 @@ public class Client {
         return vatsimID;
     }
 
-    void setVatsimID(int vatsimID) {
+    public void setVatsimID(int vatsimID) {
         this.vatsimID = vatsimID;
     }
 
@@ -237,7 +237,7 @@ public class Client {
         return realName;
     }
 
-    void setRealName(String realName) {
+    public void setRealName(String realName) {
         this.realName = realName;
     }
 
@@ -258,7 +258,7 @@ public class Client {
         return rawClientType;
     }
 
-    void setRawClientType(ClientType rawClientType) {
+    public void setRawClientType(ClientType rawClientType) {
         this.rawClientType = rawClientType;
     }
 
@@ -306,7 +306,7 @@ public class Client {
         return effectiveClientType;
     }
 
-    void setEffectiveClientType(ClientType effectiveClientType) {
+    public void setEffectiveClientType(ClientType effectiveClientType) {
         this.effectiveClientType = effectiveClientType;
     }
 
@@ -324,7 +324,7 @@ public class Client {
         return servedFrequencyKilohertz;
     }
 
-    void setServedFrequencyKilohertz(int servedFrequencyKilohertz) {
+    public void setServedFrequencyKilohertz(int servedFrequencyKilohertz) {
         this.servedFrequencyKilohertz = servedFrequencyKilohertz;
     }
 
@@ -353,7 +353,7 @@ public class Client {
         return latitude;
     }
 
-    void setLatitude(double latitude) {
+    public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
 
@@ -383,7 +383,7 @@ public class Client {
         return longitude;
     }
 
-    void setLongitude(double longitude) {
+    public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
 
@@ -404,7 +404,7 @@ public class Client {
         return altitudeFeet;
     }
 
-    void setAltitudeFeet(int altitudeFeet) {
+    public void setAltitudeFeet(int altitudeFeet) {
         this.altitudeFeet = altitudeFeet;
     }
 
@@ -426,7 +426,7 @@ public class Client {
         return groundSpeed;
     }
 
-    void setGroundSpeed(int groundSpeed) {
+    public void setGroundSpeed(int groundSpeed) {
         this.groundSpeed = groundSpeed;
     }
 
@@ -462,7 +462,7 @@ public class Client {
         return aircraftType;
     }
 
-    void setAircraftType(String aircraftType) {
+    public void setAircraftType(String aircraftType) {
         this.aircraftType = aircraftType;
     }
 
@@ -485,7 +485,7 @@ public class Client {
         return filedTrueAirSpeed;
     }
 
-    void setFiledTrueAirSpeed(int filedTrueAirSpeed) {
+    public void setFiledTrueAirSpeed(int filedTrueAirSpeed) {
         this.filedTrueAirSpeed = filedTrueAirSpeed;
     }
 
@@ -502,7 +502,7 @@ public class Client {
         return filedDepartureAirportCode;
     }
 
-    void setFiledDepartureAirportCode(String filedDepartureAirportCode) {
+    public void setFiledDepartureAirportCode(String filedDepartureAirportCode) {
         this.filedDepartureAirportCode = filedDepartureAirportCode;
     }
 
@@ -525,7 +525,7 @@ public class Client {
         return rawFiledAltitude;
     }
 
-    void setRawFiledAltitude(String rawFiledAltitude) {
+    public void setRawFiledAltitude(String rawFiledAltitude) {
         this.rawFiledAltitude = rawFiledAltitude;
     }
 
@@ -542,7 +542,7 @@ public class Client {
         return filedDestinationAirportCode;
     }
 
-    void setFiledDestinationAirportCode(String filedDestinationAirportCode) {
+    public void setFiledDestinationAirportCode(String filedDestinationAirportCode) {
         this.filedDestinationAirportCode = filedDestinationAirportCode;
     }
 
@@ -558,7 +558,7 @@ public class Client {
         return serverId;
     }
 
-    void setServerId(String serverId) {
+    public void setServerId(String serverId) {
         this.serverId = serverId;
     }
 
@@ -578,7 +578,7 @@ public class Client {
         return protocolVersion;
     }
 
-    void setProtocolVersion(int protocolVersion) {
+    public void setProtocolVersion(int protocolVersion) {
         this.protocolVersion = protocolVersion;
     }
 
@@ -603,7 +603,7 @@ public class Client {
         return controllerRating;
     }
 
-    void setControllerRating(ControllerRating controllerRating) {
+    public void setControllerRating(ControllerRating controllerRating) {
         this.controllerRating = controllerRating;
     }
 
@@ -650,7 +650,7 @@ public class Client {
         return transponderCodeDecimal;
     }
 
-    void setTransponderCodeDecimal(int transponderCodeDecimal) {
+    public void setTransponderCodeDecimal(int transponderCodeDecimal) {
         this.transponderCodeDecimal = transponderCodeDecimal;
     }
 
@@ -664,7 +664,7 @@ public class Client {
         return facilityType;
     }
 
-    void setFacilityType(FacilityType facilityType) {
+    public void setFacilityType(FacilityType facilityType) {
         this.facilityType = facilityType;
     }
 
@@ -684,7 +684,7 @@ public class Client {
         return visualRange;
     }
 
-    void setVisualRange(int visualRange) {
+    public void setVisualRange(int visualRange) {
         this.visualRange = visualRange;
     }
 
@@ -706,7 +706,7 @@ public class Client {
         return flightPlanRevision;
     }
 
-    void setFlightPlanRevision(int flightPlanRevision) {
+    public void setFlightPlanRevision(int flightPlanRevision) {
         this.flightPlanRevision = flightPlanRevision;
     }
 
@@ -725,7 +725,7 @@ public class Client {
         return rawFlightPlanType;
     }
 
-    void setRawFlightPlanType(String rawFlightPlanType) {
+    public void setRawFlightPlanType(String rawFlightPlanType) {
         this.rawFlightPlanType = rawFlightPlanType;
     }
 
@@ -821,7 +821,7 @@ public class Client {
         return filedTimeEnroute;
     }
 
-    void setFiledTimeEnroute(Duration filedTimeEnroute) {
+    public void setFiledTimeEnroute(Duration filedTimeEnroute) {
         this.filedTimeEnroute = filedTimeEnroute;
     }
 
@@ -837,7 +837,7 @@ public class Client {
         return filedTimeFuel;
     }
 
-    void setFiledTimeFuel(Duration filedTimeFuel) {
+    public void setFiledTimeFuel(Duration filedTimeFuel) {
         this.filedTimeFuel = filedTimeFuel;
     }
 
@@ -854,7 +854,7 @@ public class Client {
         return filedAlternateAirportCode;
     }
 
-    void setFiledAlternateAirportCode(String filedAlternateAirportCode) {
+    public void setFiledAlternateAirportCode(String filedAlternateAirportCode) {
         this.filedAlternateAirportCode = filedAlternateAirportCode;
     }
 
@@ -877,7 +877,7 @@ public class Client {
         return flightPlanRemarks;
     }
 
-    void setFlightPlanRemarks(String flightPlanRemarks) {
+    public void setFlightPlanRemarks(String flightPlanRemarks) {
         this.flightPlanRemarks = flightPlanRemarks;
     }
 
@@ -897,7 +897,7 @@ public class Client {
         return filedRoute;
     }
 
-    void setFiledRoute(String filedRoute) {
+    public void setFiledRoute(String filedRoute) {
         this.filedRoute = filedRoute;
     }
 
@@ -912,7 +912,7 @@ public class Client {
         return departureAirportLatitude;
     }
 
-    void setDepartureAirportLatitude(double departureAirportLatitude) {
+    public void setDepartureAirportLatitude(double departureAirportLatitude) {
         this.departureAirportLatitude = departureAirportLatitude;
     }
 
@@ -927,7 +927,7 @@ public class Client {
         return departureAirportLongitude;
     }
 
-    void setDepartureAirportLongitude(double departureAirportLongitude) {
+    public void setDepartureAirportLongitude(double departureAirportLongitude) {
         this.departureAirportLongitude = departureAirportLongitude;
     }
 
@@ -942,7 +942,7 @@ public class Client {
         return destinationAirportLatitude;
     }
 
-    void setDestinationAirportLatitude(double destinationAirportLatitude) {
+    public void setDestinationAirportLatitude(double destinationAirportLatitude) {
         this.destinationAirportLatitude = destinationAirportLatitude;
     }
 
@@ -957,7 +957,7 @@ public class Client {
         return destinationAirportLongitude;
     }
 
-    void setDestinationAirportLongitude(double destinationAirportLongitude) {
+    public void setDestinationAirportLongitude(double destinationAirportLongitude) {
         this.destinationAirportLongitude = destinationAirportLongitude;
     }
 
@@ -983,7 +983,7 @@ public class Client {
         return controllerMessage;
     }
 
-    void setControllerMessage(String controllerMessage) {
+    public void setControllerMessage(String controllerMessage) {
         this.controllerMessage = controllerMessage;
     }
 
@@ -998,7 +998,7 @@ public class Client {
         return controllerMessageLastUpdated;
     }
 
-    void setControllerMessageLastUpdated(Instant controllerMessageLastUpdated) {
+    public void setControllerMessageLastUpdated(Instant controllerMessageLastUpdated) {
         this.controllerMessageLastUpdated = controllerMessageLastUpdated;
     }
 
@@ -1012,7 +1012,7 @@ public class Client {
         return logonTime;
     }
 
-    void setLogonTime(Instant logonTime) {
+    public void setLogonTime(Instant logonTime) {
         this.logonTime = logonTime;
     }
 
@@ -1027,7 +1027,7 @@ public class Client {
         return heading;
     }
 
-    void setHeading(int heading) {
+    public void setHeading(int heading) {
         this.heading = heading;
     }
 
@@ -1055,7 +1055,7 @@ public class Client {
         return qnhInchMercury;
     }
 
-    void setQnhInchMercury(double qnhInchMercury) {
+    public void setQnhInchMercury(double qnhInchMercury) {
         this.qnhInchMercury = qnhInchMercury;
     }
 
@@ -1082,7 +1082,7 @@ public class Client {
         return qnhHectopascal;
     }
 
-    void setQnhHectopascal(int qnhHectopascal) {
+    public void setQnhHectopascal(int qnhHectopascal) {
         this.qnhHectopascal = qnhHectopascal;
     }
 

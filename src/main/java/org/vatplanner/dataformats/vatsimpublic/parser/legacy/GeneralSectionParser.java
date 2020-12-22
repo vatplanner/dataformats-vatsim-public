@@ -1,4 +1,4 @@
-package org.vatplanner.dataformats.vatsimpublic.parser;
+package org.vatplanner.dataformats.vatsimpublic.parser.legacy;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -7,6 +7,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
+import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
+import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
+import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntryCollector;
 
 /**
  * Parses meta information about a VATSIM data.txt status file as available from

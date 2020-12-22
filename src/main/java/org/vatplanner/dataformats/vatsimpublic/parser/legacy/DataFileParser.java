@@ -1,4 +1,4 @@
-package org.vatplanner.dataformats.vatsimpublic.parser;
+package org.vatplanner.dataformats.vatsimpublic.parser.legacy;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
@@ -16,6 +16,11 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vatplanner.dataformats.vatsimpublic.parser.Client;
+import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
+import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
+import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
+import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntryCollector;
 
 /**
  * Parses a complete VATSIM status data.txt file to {@link DataFile}. File
