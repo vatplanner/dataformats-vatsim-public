@@ -52,7 +52,7 @@ public class DataFileParser {
     public DataFile parse(Reader br) {
         GeneralSectionJsonProcessor generalSectionProcessor = new GeneralSectionJsonProcessor();
         FSDServerJsonProcessor fsdServerProcessor = new FSDServerJsonProcessor();
-        FacilitiesJsonProcessor facilitiesProcessor = new FacilitiesJsonProcessor();
+        IdNameMappingProcessor idNameMappingProcessor = new IdNameMappingProcessor();
 
         DataFile out = new DataFile();
         out.setFormat(DataFileFormat.JSON3);
@@ -82,10 +82,16 @@ public class DataFileParser {
                 root::getCollection, //
                 RootLevelKey.FACILITIES, //
                 JsonArray.class, //
-                FacilitiesJsonProcessor.SECTION_NAME, //
+                RootLevelKey.FACILITIES.getKey(), //
                 out, //
-                (Function<JsonArray, Map<Integer, FacilityType>>) x -> facilitiesProcessor
-                    .deserializeMappingFromJsonIdToEnum(x, out) //
+                (Function<JsonArray, Map<Integer, FacilityType>>) x -> idNameMappingProcessor
+                    .deserializeMappingFromJsonId( //
+                        x, //
+                        FacilityType::resolveShortName, //
+                        FacilityType.values(), //
+                        RootLevelKey.FACILITIES.getKey(), //
+                        out //
+                    ) //
             ).orElse(new HashMap<Integer, FacilityType>());
 
             // TODO: pilot_ratings, establish mapping to new enum (did not exist before)
