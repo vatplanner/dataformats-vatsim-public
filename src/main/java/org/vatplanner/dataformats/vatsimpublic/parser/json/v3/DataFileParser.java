@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileFormat;
@@ -78,7 +79,7 @@ public class DataFileParser {
                 (Consumer<JsonArray>) x -> out.setFsdServers(fsdServerProcessor.deserializeMultiple(x, out)) //
             );
 
-            Map<Integer, FacilityType> facilitiesByJsonId = JsonHelpers.processMandatory( //
+            Map<Integer, FacilityType> facilityTypeByJsonId = JsonHelpers.processMandatory( //
                 root::getCollection, //
                 RootLevelKey.FACILITIES, //
                 JsonArray.class, //
@@ -94,8 +95,23 @@ public class DataFileParser {
                     ) //
             ).orElse(new HashMap<Integer, FacilityType>());
 
+            Map<Integer, ControllerRating> controllerRatingByJsonId = JsonHelpers.processMandatory( //
+                root::getCollection, //
+                RootLevelKey.RATINGS, //
+                JsonArray.class, //
+                RootLevelKey.RATINGS.getKey(), //
+                out, //
+                (Function<JsonArray, Map<Integer, ControllerRating>>) x -> idNameMappingProcessor
+                    .deserializeMappingFromJsonId( //
+                        x, //
+                        ControllerRating::resolveShortName, //
+                        ControllerRating.values(), //
+                        RootLevelKey.RATINGS.getKey(), //
+                        out //
+                    ) //
+            ).orElse(new HashMap<Integer, ControllerRating>());
+
             // TODO: pilot_ratings, establish mapping to new enum (did not exist before)
-            // TODO: ratings, establish mapping to ControllerRating
 
             // TODO: atis (needs facility mapping)
             // TODO: controllers (needs facility and ratings mappings)

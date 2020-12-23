@@ -2,6 +2,7 @@ package org.vatplanner.dataformats.vatsimpublic.entities.status;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating.ADM;
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating.C1;
@@ -49,7 +50,8 @@ public class ControllerRatingTest {
             new Object[] { 9, I2 },
             new Object[] { 10, I3 },
             new Object[] { 11, SUP },
-            new Object[] { 12, ADM }, };
+            new Object[] { 12, ADM },
+        };
     }
 
     @Test
@@ -74,5 +76,49 @@ public class ControllerRatingTest {
         ControllerRating.resolveStatusFileId(unknownId);
 
         // Assert (nothing to do)
+    }
+
+    @DataProvider
+    public static Object[][] dataProviderShortNameAndEnum() {
+        return new Object[][] {
+            new Object[] { "INAC", INAC },
+            new Object[] { "SUS", SUS },
+            new Object[] { "OBS", OBS },
+            new Object[] { "S1", S1 },
+            new Object[] { "S2", S2 },
+            new Object[] { "S3", S3 },
+            new Object[] { "C1", C1 },
+            new Object[] { "C2", C2 },
+            new Object[] { "C3", C3 },
+            new Object[] { "I1", I },
+            new Object[] { "I2", I2 },
+            new Object[] { "I3", I3 },
+            new Object[] { "SUP", SUP },
+            new Object[] { "ADM", ADM },
+        };
+    }
+
+    @Test
+    @UseDataProvider("dataProviderShortNameAndEnum")
+    public void testResolveShortName_knownShortName_expectedEnum(String shortName, ControllerRating expectedRating) {
+        // Arrange (nothing to do)
+
+        // Act
+        ControllerRating result = ControllerRating.resolveShortName(shortName);
+
+        // Assert
+        assertThat(result, is(equalTo(expectedRating)));
+    }
+
+    @Test
+    @DataProvider({ "", "INA", "I" })
+    public void testResolveShortName_unknownShortName_throwsIllegalArgumentException(String unknownShortName) {
+        // Arrange (nothing to do)
+
+        // Act
+        ControllerRating result = ControllerRating.resolveShortName(unknownShortName);
+
+        // Assert
+        assertThat(result, is(nullValue()));
     }
 }

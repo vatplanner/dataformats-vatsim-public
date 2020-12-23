@@ -158,4 +158,32 @@ public enum ControllerRating {
 
         throw new IllegalArgumentException(String.format("unknown controller rating ID %d", statusFileId));
     }
+
+    /**
+     * Resolves the given short name to the corresponding {@link ControllerRating}
+     * enum.
+     *
+     * @param shortName short name of facility to resolve
+     * @return resolved enumeration object or null if unknown
+     */
+    public static ControllerRating resolveShortName(String shortName) {
+        // as of December 2020 no extra mapping is needed as enum names correspond to
+        // the short names used in JSON except for "I1" which needs to resolve to I
+        // instead
+
+        if ("I1".equals(shortName)) {
+            return I;
+        } else if ("I".equals(shortName)) {
+            return null;
+        }
+
+        ControllerRating result = null;
+        try {
+            result = valueOf(shortName);
+        } catch (IllegalArgumentException ex) {
+            // expected if enum does not exist
+        }
+
+        return result;
+    }
 }
