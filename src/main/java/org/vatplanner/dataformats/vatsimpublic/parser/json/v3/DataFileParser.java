@@ -1,10 +1,14 @@
 package org.vatplanner.dataformats.vatsimpublic.parser.json.v3;
 
 import java.io.Reader;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileFormat;
 
@@ -48,6 +52,7 @@ public class DataFileParser {
     public DataFile parse(Reader br) {
         GeneralSectionJsonProcessor generalSectionProcessor = new GeneralSectionJsonProcessor();
         FSDServerJsonProcessor fsdServerProcessor = new FSDServerJsonProcessor();
+        FacilitiesJsonProcessor facilitiesProcessor = new FacilitiesJsonProcessor();
 
         DataFile out = new DataFile();
         out.setFormat(DataFileFormat.JSON3);
@@ -73,7 +78,16 @@ public class DataFileParser {
                 (Consumer<JsonArray>) x -> out.setFsdServers(fsdServerProcessor.deserializeMultiple(x, out)) //
             );
 
-            // TODO: facilities, establish mapping to FacilityType
+            Map<Integer, FacilityType> facilitiesByJsonId = JsonHelpers.processMandatory( //
+                root::getCollection, //
+                RootLevelKey.FACILITIES, //
+                JsonArray.class, //
+                FacilitiesJsonProcessor.SECTION_NAME, //
+                out, //
+                (Function<JsonArray, Map<Integer, FacilityType>>) x -> facilitiesProcessor
+                    .deserializeMappingFromJsonIdToEnum(x, out) //
+            ).orElse(new HashMap<Integer, FacilityType>());
+
             // TODO: pilot_ratings, establish mapping to new enum (did not exist before)
             // TODO: ratings, establish mapping to ControllerRating
 

@@ -2,6 +2,7 @@ package org.vatplanner.dataformats.vatsimpublic.entities.status;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType.APPROACH_DEPARTURE;
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType.CENTER;
@@ -60,5 +61,41 @@ public class FacilityTypeTest {
         FacilityType.resolveStatusFileId(unknownId);
 
         // Assert (nothing to do)
+    }
+
+    @DataProvider
+    public static Object[][] dataProviderShortNameAndEnum() {
+        return new Object[][] {
+            new Object[] { "OBS", OBSERVER },
+            new Object[] { "FSS", FSS },
+            new Object[] { "DEL", DELIVERY },
+            new Object[] { "GND", GROUND },
+            new Object[] { "TWR", TOWER },
+            new Object[] { "APP", APPROACH_DEPARTURE },
+            new Object[] { "CTR", CENTER }, };
+    }
+
+    @Test
+    @UseDataProvider("dataProviderShortNameAndEnum")
+    public void testResolveShortName_knownShortName_expectedEnum(String shortName, FacilityType expectedFacilityType) {
+        // Arrange (nothing to do)
+
+        // Act
+        FacilityType result = FacilityType.resolveShortName(shortName);
+
+        // Assert
+        assertThat(result, is(equalTo(expectedFacilityType)));
+    }
+
+    @Test
+    @DataProvider({ "", "ctr", "GN" })
+    public void testResolveShortName_unknownShortName_returnsNull(String unknownShortName) {
+        // Arrange (nothing to do)
+
+        // Act
+        FacilityType result = FacilityType.resolveShortName(unknownShortName);
+
+        // Assert
+        assertThat(result, is(nullValue()));
     }
 }
