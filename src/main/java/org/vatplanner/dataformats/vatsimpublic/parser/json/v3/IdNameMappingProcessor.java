@@ -26,14 +26,71 @@ import com.github.cliftonlabs.json_simple.JsonObject;
  * </ul>
  */
 public class IdNameMappingProcessor {
-    private static enum Key implements JsonKey {
+    /**
+     * Provides sets of {@link JsonKey}s used on processing.
+     */
+    public static class JsonKeys {
+        private final JsonKey id;
+        private final JsonKey shortName;
+        private final JsonKey longName;
+
+        private JsonKeys(JsonKey id, JsonKey shortName, JsonKey longName) {
+            this.id = id;
+            this.shortName = shortName;
+            this.longName = longName;
+        }
+
+        /**
+         * Returns a set of {@link ShortKey}s as used on JSON v3 format for facilities
+         * and controller ratings.
+         * 
+         * @return set of {@link ShortKey}s
+         */
+        public static JsonKeys shortKeys() {
+            return new JsonKeys(ShortKey.ID, ShortKey.SHORT_NAME, ShortKey.LONG_NAME);
+        }
+
+        /**
+         * Returns a set of {@link LongKey}s as used on JSON v3 format for pilot
+         * ratings.
+         * 
+         * @return set of {@link LongKey}s
+         */
+        public static JsonKeys longKeys() {
+            return new JsonKeys(LongKey.ID, LongKey.SHORT_NAME, LongKey.LONG_NAME);
+        }
+    }
+
+    private static enum ShortKey implements JsonKey {
         ID("id"),
         SHORT_NAME("short"),
         LONG_NAME("long");
 
         private String key;
 
-        private Key(String key) {
+        private ShortKey(String key) {
+            this.key = key;
+        }
+
+        @Override
+        public String getKey() {
+            return key;
+        }
+
+        @Override
+        public Object getValue() {
+            return null;
+        }
+    }
+
+    private static enum LongKey implements JsonKey {
+        ID("id"),
+        SHORT_NAME("short_name"),
+        LONG_NAME("long_name");
+
+        private String key;
+
+        private LongKey(String key) {
             this.key = key;
         }
 
@@ -69,6 +126,12 @@ public class IdNameMappingProcessor {
         public String toString() {
             return "JsonEntry[id=" + id + ", shortName=" + shortName + ", longName=" + longName + "]";
         }
+    }
+
+    private final JsonKeys jsonKeys;
+
+    public IdNameMappingProcessor(JsonKeys jsonKeys) {
+        this.jsonKeys = jsonKeys;
     }
 
     /**
@@ -162,7 +225,7 @@ public class IdNameMappingProcessor {
 
         JsonHelpers.processMandatory( //
             object::getInteger, //
-            Key.ID, //
+            jsonKeys.id, //
             section, //
             logCollector, //
             out::setId //
@@ -170,7 +233,7 @@ public class IdNameMappingProcessor {
 
         JsonHelpers.processMandatory( //
             object::getString, //
-            Key.SHORT_NAME, //
+            jsonKeys.shortName, //
             section, //
             logCollector, //
             out::setShortName //
@@ -178,7 +241,7 @@ public class IdNameMappingProcessor {
 
         JsonHelpers.processMandatory( //
             object::getString, //
-            Key.LONG_NAME, //
+            jsonKeys.longName, //
             section, //
             logCollector, //
             out::setLongName //

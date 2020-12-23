@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.PilotRating;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileFormat;
 
@@ -53,7 +54,12 @@ public class DataFileParser {
     public DataFile parse(Reader br) {
         GeneralSectionJsonProcessor generalSectionProcessor = new GeneralSectionJsonProcessor();
         FSDServerJsonProcessor fsdServerProcessor = new FSDServerJsonProcessor();
-        IdNameMappingProcessor idNameMappingProcessor = new IdNameMappingProcessor();
+        IdNameMappingProcessor shortKeyIdNameMappingProcessor = new IdNameMappingProcessor(
+            IdNameMappingProcessor.JsonKeys.shortKeys() //
+        );
+        IdNameMappingProcessor longKeyIdNameMappingProcessor = new IdNameMappingProcessor(
+            IdNameMappingProcessor.JsonKeys.longKeys() //
+        );
 
         DataFile out = new DataFile();
         out.setFormat(DataFileFormat.JSON3);
@@ -85,7 +91,7 @@ public class DataFileParser {
                 JsonArray.class, //
                 RootLevelKey.FACILITIES.getKey(), //
                 out, //
-                (Function<JsonArray, Map<Integer, FacilityType>>) x -> idNameMappingProcessor
+                (Function<JsonArray, Map<Integer, FacilityType>>) x -> shortKeyIdNameMappingProcessor
                     .deserializeMappingFromJsonId( //
                         x, //
                         FacilityType::resolveShortName, //
@@ -101,7 +107,7 @@ public class DataFileParser {
                 JsonArray.class, //
                 RootLevelKey.RATINGS.getKey(), //
                 out, //
-                (Function<JsonArray, Map<Integer, ControllerRating>>) x -> idNameMappingProcessor
+                (Function<JsonArray, Map<Integer, ControllerRating>>) x -> shortKeyIdNameMappingProcessor
                     .deserializeMappingFromJsonId( //
                         x, //
                         ControllerRating::resolveShortName, //
@@ -111,7 +117,21 @@ public class DataFileParser {
                     ) //
             ).orElse(new HashMap<Integer, ControllerRating>());
 
-            // TODO: pilot_ratings, establish mapping to new enum (did not exist before)
+            Map<Integer, PilotRating> pilotRatingByJsonId = JsonHelpers.processMandatory( //
+                root::getCollection, //
+                RootLevelKey.PILOT_RATINGS, //
+                JsonArray.class, //
+                RootLevelKey.PILOT_RATINGS.getKey(), //
+                out, //
+                (Function<JsonArray, Map<Integer, PilotRating>>) x -> longKeyIdNameMappingProcessor
+                    .deserializeMappingFromJsonId( //
+                        x, //
+                        PilotRating::resolveShortName, //
+                        PilotRating.values(), //
+                        RootLevelKey.PILOT_RATINGS.getKey(), //
+                        out //
+                    ) //
+            ).orElse(new HashMap<Integer, PilotRating>());
 
             // TODO: atis (needs facility mapping)
             // TODO: controllers (needs facility and ratings mappings)
