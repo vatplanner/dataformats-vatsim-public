@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileFormat;
 
+import com.github.cliftonlabs.json_simple.JsonArray;
 import com.github.cliftonlabs.json_simple.JsonException;
 import com.github.cliftonlabs.json_simple.JsonKey;
 import com.github.cliftonlabs.json_simple.JsonObject;
@@ -17,7 +18,15 @@ public class DataFileParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataFileParser.class);
 
     private static enum RootLevelKey implements JsonKey {
-        GENERAL("general");
+        GENERAL("general"),
+        SERVERS("servers"),
+        RATINGS("ratings"),
+        PILOT_RATINGS("pilot_ratings"),
+        FACILITIES("facilities"),
+        ATIS("atis"),
+        CONTROLLERS("controllers"),
+        PILOTS("pilots"),
+        PREFILES("prefiles");
 
         private final String key;
 
@@ -38,6 +47,7 @@ public class DataFileParser {
 
     public DataFile parse(Reader br) {
         GeneralSectionJsonProcessor generalSectionProcessor = new GeneralSectionJsonProcessor();
+        FSDServerJsonProcessor fsdServerProcessor = new FSDServerJsonProcessor();
 
         DataFile out = new DataFile();
         out.setFormat(DataFileFormat.JSON3);
@@ -54,7 +64,14 @@ public class DataFileParser {
                 (Consumer<JsonObject>) x -> out.setMetaData(generalSectionProcessor.deserialize(x, out)) //
             );
 
-            // TODO: servers
+            JsonHelpers.processMandatory( //
+                root::getCollection, //
+                RootLevelKey.SERVERS, //
+                JsonArray.class, //
+                FSDServerJsonProcessor.SECTION_NAME, //
+                out, //
+                (Consumer<JsonArray>) x -> out.setFsdServers(fsdServerProcessor.deserializeMultiple(x, out)) //
+            );
 
             // TODO: facilities, establish mapping to FacilityType
             // TODO: pilot_ratings, establish mapping to new enum (did not exist before)
