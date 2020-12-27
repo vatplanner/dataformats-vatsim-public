@@ -21,7 +21,6 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
  * <ul>
  * <li>{@link #facilityType}</li>
  * <li>{@link #servedFrequencyKilohertz}</li>
- * <li>{@link #lastUpdated}</li>
  * <li>{@link #controllerMessage}</li>
  * <li>{@link #controllerRating}</li>
  * <li>{@link #visualRange}</li>
@@ -48,14 +47,6 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
  * <li>{@link #qnhInchMercury}</li>
  * <li>{@link #flightPlanRemarks}</li>
  * <li>{@link #filedRoute}</li>
- * </ul>
- * </li>
- * <li>Not seen being used in the wild but still defined by format:
- * <ul>
- * <li>{@link #departureAirportLatitude}</li>
- * <li>{@link #departureAirportLongitude}</li>
- * <li>{@link #destinationAirportLatitude}</li>
- * <li>{@link #destinationAirportLongitude}</li>
  * </ul>
  * </li>
  * </ul>
@@ -88,7 +79,7 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
  * times or station's spatial coverage. May contain a URL to the voice room on
  * first line if prefixed with "$ ". Voice rooms are superseded by "Audio for
  * VATSIM" starting 14 October 2019. Update timestamps are provided by
- * {@link #lastUpdated}.</li>
+ * {@link #lastUpdated} for legacy data files.</li>
  * <li>{@link #realName}: By convention, pilots should add a 4-letter ICAO code
  * for their "home base". Pilots often choose the closest airport to their
  * actual home.</li>
@@ -805,6 +796,10 @@ public class Client {
      * in UTC and in format HHmm, represented as unsigned integer and thus omitting
      * leading zeros (30 => 0:30 UTC, 1340 => 13:40 UTC).
      * <p>
+     * This field is no longer available from data files as of JSON v3. It was
+     * previously available from legacy data files.
+     * </p>
+     * <p>
      * <strong>It is not known who or what sets this field and when.</strong>
      * Instead of relying on this field it is advisable to determine the time of
      * departure by searching the actual track for first occurence of high
@@ -822,8 +817,8 @@ public class Client {
      * Returns a negative value if unavailable.
      * </p>
      *
-     * @return (unreliable) actual time of departure; negative if unavailable; see
-     *         full description for issues
+     * @return (unreliable) actual time of departure; negative if unavailable (no
+     *         longer available since JSON v3); see full description for issues
      */
     public int getRawDepartureTimeActual() {
         return rawDepartureTimeActual;

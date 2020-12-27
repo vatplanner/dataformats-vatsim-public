@@ -1,7 +1,8 @@
 package org.vatplanner.dataformats.vatsimpublic.parser.legacy;
 
+import static org.vatplanner.dataformats.vatsimpublic.parser.ParserHelpers.parseDuration;
+
 import java.nio.charset.Charset;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -859,61 +860,6 @@ public class ClientParser {
             // no need to throw/log the resulting exception...
             return null;
         }
-    }
-
-    /**
-     * Parses the given strings for hours and minutes to a {@link Duration} object.
-     * If both strings are empty, null is returned. If only one string is empty, an
-     * {@link IllegalArgumentException} will be thrown. If duration is mandatory,
-     * strings must not be empty or {@link IllegalArgumentException} will be thrown.
-     * Excessive values for minutes (>59) are valid and add to hours.
-     *
-     * @param hoursString string containing hours to be parsed
-     * @param minutesString string containing minutes to be parsed
-     * @param isMandatory Is the duration mandatory?
-     * @return strings interpreted as duration; null if unavailable
-     * @throws IllegalArgumentException if mandatory but not available, only one
-     *         string is empty or parsing error
-     */
-    private Duration parseDuration(String hoursString, String minutesString, boolean isMandatory) throws IllegalArgumentException {
-        boolean emptyHours = hoursString.isEmpty();
-        boolean emptyMinutes = minutesString.isEmpty();
-        boolean oneEmptyButNotTheOther = emptyHours ^ emptyMinutes;
-
-        if (oneEmptyButNotTheOther) {
-            throw new IllegalArgumentException(
-                "either hours (\""
-                    + hoursString
-                    + "\") or minutes (\""
-                    + minutesString
-                    + "\") was empty but not the other; such inconsistency is not allowed");
-        }
-
-        boolean bothEmpty = emptyHours && emptyMinutes;
-
-        if (bothEmpty) {
-            if (isMandatory) {
-                throw new IllegalArgumentException("hours and minutes are mandatory but both strings were empty");
-            }
-
-            return null;
-        }
-
-        int hours = Integer.parseInt(hoursString);
-        int minutes = Integer.parseInt(minutesString);
-
-        // Unfortunately, negative values can be entered. If that happens, we
-        // need to use consistently negative values for hours and minutes. A mix
-        // of a different sign on one part of this calculation could cause
-        // a positive result, making it impossible to filter out such nonsense
-        // at a later stage of processing this information.
-        if ((hours < 0) && (minutes > 0)) {
-            minutes = -minutes;
-        } else if ((hours > 0) && (minutes < 0)) {
-            hours = -hours;
-        }
-
-        return Duration.ofMinutes(hours * 60 + minutes);
     }
 
     /**

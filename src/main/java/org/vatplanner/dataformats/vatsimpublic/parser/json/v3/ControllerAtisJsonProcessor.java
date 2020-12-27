@@ -240,4 +240,6 @@ public class ControllerAtisJsonProcessor {
 
         return String.join(LINE_SEPARATOR, lines);
     }
+
+    // TODO: unit tests
 }

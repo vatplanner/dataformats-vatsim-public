@@ -63,6 +63,8 @@ public class DataFileParser {
         IdNameMappingProcessor longKeyIdNameMappingProcessor = new IdNameMappingProcessor(
             IdNameMappingProcessor.JsonKeys.longKeys() //
         );
+        FlightPlanJsonProcessor flightPlanProcessor = new FlightPlanJsonProcessor();
+        PrefileJsonProcessor prefileProcessor = new PrefileJsonProcessor(flightPlanProcessor);
 
         DataFile out = new DataFile();
         out.setFormat(DataFileFormat.JSON3);
@@ -161,7 +163,15 @@ public class DataFileParser {
             );
 
             // TODO: pilots (needs pilot_ratings mapping)
-            // TODO: prefiles
+
+            JsonHelpers.processMandatory( //
+                root::getCollection, //
+                RootLevelKey.PREFILES, //
+                JsonArray.class, //
+                PrefileJsonProcessor.SECTION_NAME, //
+                out, //
+                (Consumer<JsonArray>) x -> clients.addAll(prefileProcessor.deserializeMultiple(x, out)) //
+            );
 
             out.setClients(clients);
         } catch (JsonException | ClassCastException ex) {
