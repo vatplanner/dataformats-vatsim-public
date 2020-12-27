@@ -4665,24 +4665,6 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({ "-123", "abc", "1a", "a1" })
-    public void testParse_connectedPilotWithInvalidLastAtisReceived_throwsIllegalArgumentException(String input) {
-        // Arrange
-        String line = String.format(
-            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0::%s:20180101094500:270:29.92:1013:",
-            input //
-        );
-        parser.setIsParsingPrefileSection(false);
-
-        thrown.expect(IllegalArgumentException.class);
-
-        // Act
-        parser.parse(line);
-
-        // Assert (nothing to do)
-    }
-
-    @Test
     public void testParse_connectedPilotWithDummyLastAtisReceived_returnsObjectWithNullForControllerMessageLastUpdated() {
         // Arrange
         String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0::00010101000000:20180101094500:270:29.92:1013:";
@@ -4706,42 +4688,6 @@ public class ClientParserTest {
 
         // Assert
         assertThat(result.getControllerMessageLastUpdated(), is(nullValue()));
-    }
-
-    @Test
-    @UseDataProvider("dataProviderFullTimestampStringAndObject")
-    public void testParse_prefiledPilotWithValidLastAtisReceived_throwsIllegalArgumentException(String input, Instant _instant) {
-        // Arrange
-        String line = String.format(
-            "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::%s:::::",
-            input //
-        );
-        parser.setIsParsingPrefileSection(true);
-
-        thrown.expect(IllegalArgumentException.class);
-
-        // Act
-        parser.parse(line);
-
-        // Assert (nothing to do)
-    }
-
-    @Test
-    @DataProvider({ "-123", "abc", "1a", "a1" })
-    public void testParse_prefiledPilotWithInvalidLastAtisReceived_throwsIllegalArgumentException(String input) {
-        // Arrange
-        String line = String.format(
-            "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::%s:::::",
-            input //
-        );
-        parser.setIsParsingPrefileSection(true);
-
-        thrown.expect(IllegalArgumentException.class);
-
-        // Act
-        parser.parse(line);
-
-        // Assert (nothing to do)
     }
 
     @Test
@@ -4788,24 +4734,6 @@ public class ClientParserTest {
     }
 
     @Test
-    @DataProvider({ "-123", "abc", "1a", "a1" })
-    public void testParse_atcWithInvalidLastAtisReceived_throwsIllegalArgumentException(String input) {
-        // Arrange
-        String line = String.format(
-            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:%s:20180101150000::::",
-            input //
-        );
-        parser.setIsParsingPrefileSection(false);
-
-        thrown.expect(IllegalArgumentException.class);
-
-        // Act
-        parser.parse(line);
-
-        // Assert (nothing to do)
-    }
-
-    @Test
     public void testParse_atcWithDummyLastAtisReceived_returnsObjectWithNullForControllerMessageLastUpdated() {
         // Arrange
         String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:00010101000000:20180101150000::::";
@@ -4827,6 +4755,193 @@ public class ClientParserTest {
 
         // Assert
         assertThat(result.getControllerMessageLastUpdated(), is(nullValue()));
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="last updated timestamp">
+    @Test
+    @UseDataProvider("dataProviderFullTimestampStringAndObject")
+    public void testParse_connectedPilotWithValidLastAtisReceived_returnsObjectWithNullForLastUpdated(String input, Instant _instant) {
+        // server appears to randomly assign some ATIS timestamp to pilots in format
+        // 9...
+
+        // Arrange
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0::%s:20180101094500:270:29.92:1013:",
+            input //
+        );
+        parser.setIsParsingPrefileSection(false);
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert (nothing to do)
+        assertThat(result.getLastUpdated(), is(nullValue()));
+    }
+
+    @Test
+    @DataProvider({ "-123", "abc", "1a", "a1" })
+    public void testParse_connectedPilotWithInvalidLastAtisReceived_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format(
+            "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0::%s:20180101094500:270:29.92:1013:",
+            input //
+        );
+        parser.setIsParsingPrefileSection(false);
+
+        thrown.expect(IllegalArgumentException.class);
+
+        // Act
+        parser.parse(line);
+
+        // Assert (nothing to do)
+    }
+
+    @Test
+    public void testParse_connectedPilotWithDummyLastAtisReceived_returnsObjectWithNullForLastUpdated() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0::00010101000000:20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getLastUpdated(), is(nullValue()));
+    }
+
+    @Test
+    public void testParse_connectedPilotWithoutLastAtisReceived_returnsObjectWithNullForLastUpdated() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getLastUpdated(), is(nullValue()));
+    }
+
+    @Test
+    @UseDataProvider("dataProviderFullTimestampStringAndObject")
+    public void testParse_prefiledPilotWithValidLastAtisReceived_throwsIllegalArgumentException(String input, Instant _instant) {
+        // Arrange
+        String line = String.format(
+            "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::%s:::::",
+            input //
+        );
+        parser.setIsParsingPrefileSection(true);
+
+        thrown.expect(IllegalArgumentException.class);
+
+        // Act
+        parser.parse(line);
+
+        // Assert (nothing to do)
+    }
+
+    @Test
+    @DataProvider({ "-123", "abc", "1a", "a1" })
+    public void testParse_prefiledPilotWithInvalidLastAtisReceived_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format(
+            "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::%s:::::",
+            input //
+        );
+        parser.setIsParsingPrefileSection(true);
+
+        thrown.expect(IllegalArgumentException.class);
+
+        // Act
+        parser.parse(line);
+
+        // Assert (nothing to do)
+    }
+
+    @Test
+    public void testParse_prefiledPilotWithDummyLastAtisReceived_returnsObjectWithNullForLastUpdated() {
+        // Arrange
+        String line = "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::00010101000000:::::";
+        parser.setIsParsingPrefileSection(true);
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getLastUpdated(), is(nullValue()));
+    }
+
+    @Test
+    public void testParse_prefiledPilotWithoutLastAtisReceived_returnsObjectWithNullForLastUpdated() {
+        // Arrange
+        String line = "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getLastUpdated(), is(nullValue()));
+    }
+
+    @Test
+    @UseDataProvider("dataProviderFullTimestampStringAndObject")
+    public void testParse_atcWithValidLastAtisReceived_returnsObjectWithExpectedLastUpdated(String input, Instant expectedInstant) {
+        // Arrange
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:%s:20180101150000::::",
+            input //
+        );
+        parser.setIsParsingPrefileSection(false);
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getLastUpdated(), is(equalTo(expectedInstant)));
+    }
+
+    @Test
+    @DataProvider({ "-123", "abc", "1a", "a1" })
+    public void testParse_atcWithInvalidLastAtisReceived_throwsIllegalArgumentException(String input) {
+        // Arrange
+        String line = String.format(
+            "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:%s:20180101150000::::",
+            input //
+        );
+        parser.setIsParsingPrefileSection(false);
+
+        thrown.expect(IllegalArgumentException.class);
+
+        // Act
+        parser.parse(line);
+
+        // Assert (nothing to do)
+    }
+
+    @Test
+    public void testParse_atcWithDummyLastAtisReceived_returnsObjectWithNullForLastUpdated() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:00010101000000:20180101150000::::";
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getLastUpdated(), is(nullValue()));
+    }
+
+    @Test
+    public void testParse_atcWithoutLastAtisReceived_returnsObjectWithNullForLastUpdated() {
+        // Arrange
+        String line = "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message::20180101150000::::";
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getLastUpdated(), is(nullValue()));
     }
     // </editor-fold>
 

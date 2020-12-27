@@ -21,7 +21,7 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
  * <ul>
  * <li>{@link #facilityType}</li>
  * <li>{@link #servedFrequencyKilohertz}</li>
- * <li>{@link #controllerMessageLastUpdated}</li>
+ * <li>{@link #lastUpdated}</li>
  * <li>{@link #controllerMessage}</li>
  * <li>{@link #controllerRating}</li>
  * <li>{@link #visualRange}</li>
@@ -88,7 +88,7 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
  * times or station's spatial coverage. May contain a URL to the voice room on
  * first line if prefixed with "$ ". Voice rooms are superseded by "Audio for
  * VATSIM" starting 14 October 2019. Update timestamps are provided by
- * {@link #controllerMessageLastUpdated}.</li>
+ * {@link #lastUpdated}.</li>
  * <li>{@link #realName}: By convention, pilots should add a 4-letter ICAO code
  * for their "home base". Pilots often choose the closest airport to their
  * actual home.</li>
@@ -164,7 +164,7 @@ public class Client {
     // ATC only
     private String controllerMessage; // decode "atis_message": first line prefixed "$ " => voice URL; multi-line
                                       // formatting with "^" and special character as CR LF?
-    private Instant controllerMessageLastUpdated; // time_last_atis_received
+    private Instant lastUpdated; // time_last_atis_received
 
     // ATIS only
     private String atisDesignator;
@@ -1030,13 +1030,41 @@ public class Client {
      *
      * @return timestamp of last {@link #controllerMessage} update; null if
      *         unavailable
+     * @deprecated use {@link #getLastUpdated()} instead
      */
+    @Deprecated
     public Instant getControllerMessageLastUpdated() {
-        return controllerMessageLastUpdated;
+        return lastUpdated;
     }
 
-    public void setControllerMessageLastUpdated(Instant controllerMessageLastUpdated) {
-        this.controllerMessageLastUpdated = controllerMessageLastUpdated;
+    /**
+     * Returns the "last updated" timestamp which has different meanings depending
+     * on data file format and client type.
+     * 
+     * <p>
+     * If data has been read from a legacy format, the timestamp of last
+     * {@link #controllerMessage} update will be returned. It is only supposed to
+     * hold values for {@link ClientType#ATC_CONNECTED} (which includes ATIS
+     * stations).
+     * </p>
+     * 
+     * <p>
+     * If data has been read from JSON v3 format, timestamps will be available for
+     * all client types but the meaning of this field is currently unknown.
+     * </p>
+     * 
+     * <p>
+     * Returns null if unavailable.
+     * </p>
+     *
+     * @return timestamp of "last update" (see full JavaDoc); null if unavailable
+     */
+    public Instant getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(Instant lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 
     /**

@@ -192,7 +192,7 @@ public class ControllerAtisJsonProcessor {
             sectionName, //
             logCollector, //
             Instant::parse //
-        ).ifPresent(out::setControllerMessageLastUpdated);
+        ).ifPresent(out::setLastUpdated);
 
         JsonHelpers.processMandatory( //
             object::getString, //

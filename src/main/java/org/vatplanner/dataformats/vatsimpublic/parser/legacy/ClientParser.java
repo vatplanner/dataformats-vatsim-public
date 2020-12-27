@@ -265,7 +265,7 @@ public class ClientParser {
             if (!isATC) {
                 lastAtisReceived = null;
             }
-            client.setControllerMessageLastUpdated(lastAtisReceived);
+            client.setLastUpdated(lastAtisReceived);
 
             client.setLogonTime( //
                 requireNonNullIf( //
