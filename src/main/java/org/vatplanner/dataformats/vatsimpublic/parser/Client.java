@@ -101,8 +101,6 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
  * </ul>
  */
 public class Client {
-    // FIXME: set and document remaining default values as used by legacy parser
-
     /**
      * If this minimum frequency (in kilohertz) is used by an ATC client the ATC
      * client is believed not to be providing any service. Such placeholder
@@ -123,12 +121,12 @@ public class Client {
     private int groundSpeed = -1;
 
     // filing
-    private String aircraftType; // B738/M, H/A332/X, B737
+    private String aircraftType = ""; // B738/M, H/A332/X, B737
     private int filedTrueAirSpeed = 0;
-    private String filedDepartureAirportCode;
-    private String rawFiledAltitude; // 30000, FL300, F300, maybe even worse raw user input (don't pilot clients
-                                     // validate this field?!)
-    private String filedDestinationAirportCode;
+    private String filedDepartureAirportCode = "";
+    private String rawFiledAltitude = ""; // 30000, FL300, F300, maybe even worse raw user input (don't pilot clients
+                                          // validate this field?!)
+    private String filedDestinationAirportCode = "";
 
     // actual data
     private String serverId;
@@ -140,15 +138,16 @@ public class Client {
 
     // filing
     private int flightPlanRevision = -1;
-    private String rawFlightPlanType; // I = IFR, V = VFR; unfortunately user-defined, e.g. also seen: S (scheduled)
+    private String rawFlightPlanType = ""; // I = IFR, V = VFR
+                                           // unfortunately user-defined, e.g. also seen: S (scheduled)
     private int rawDepartureTimePlanned = -1; // may be 0; values can omit leading zeros! may contain garbage
     private int rawDepartureTimeActual = -1; // may be 0, may be equal, may be actual value - who or what sets this?
                                              // Values can omit leading zeros! may contain garbage
     private Duration filedTimeEnroute; // data: two fields, hours + minutes
     private Duration filedTimeFuel; // data: two fields, hours + minutes
-    private String filedAlternateAirportCode;
-    private String flightPlanRemarks;
-    private String filedRoute;
+    private String filedAlternateAirportCode = "";
+    private String flightPlanRemarks = "";
+    private String filedRoute = "";
 
     @Deprecated
     private double departureAirportLatitude = Double.NaN; // seems unused, always 0
@@ -472,7 +471,7 @@ public class Client {
      * </p>
      *
      * @return aircraft type; may deviate from wake/ICAO-type/equipment syntax and
-     *         value
+     *         value; empty if unavailable
      */
     public String getAircraftType() {
         return aircraftType;
@@ -512,7 +511,8 @@ public class Client {
      * free-text field.
      * </p>
      *
-     * @return departure airport code listed on flight plan of this client
+     * @return departure airport code listed on flight plan of this client; empty if
+     *         unavailable
      */
     public String getFiledDepartureAirportCode() {
         return filedDepartureAirportCode;
@@ -535,7 +535,8 @@ public class Client {
      * <strong>Example values:</strong> 30000, FL300, F300
      * </p>
      *
-     * @return unprocessed planned altitude listed on flight plan
+     * @return unprocessed planned altitude listed on flight plan; empty if
+     *         unavailable
      */
     public String getRawFiledAltitude() {
         return rawFiledAltitude;
@@ -552,7 +553,8 @@ public class Client {
      * free-text field.
      * </p>
      *
-     * @return destination airport code listed on flight plan of this client
+     * @return destination airport code listed on flight plan of this client; empty
+     *         if unavailable
      */
     public String getFiledDestinationAirportCode() {
         return filedDestinationAirportCode;
@@ -741,7 +743,7 @@ public class Client {
      * which belongs in a company preflight briefing but not an ICAO flight plan).
      * </p>
      *
-     * @return raw flight plan type as chosen by user
+     * @return raw flight plan type as chosen by user; empty if unavailable
      */
     public String getRawFlightPlanType() {
         return rawFlightPlanType;
@@ -870,7 +872,8 @@ public class Client {
      * free-text field.
      * </p>
      *
-     * @return alternate airport code listed on flight plan of this client
+     * @return alternate airport code listed on flight plan of this client; empty if
+     *         unavailable
      */
     public String getFiledAlternateAirportCode() {
         return filedAlternateAirportCode;
@@ -893,7 +896,7 @@ public class Client {
      * PBN/..., DOF/... etc.).
      * </p>
      *
-     * @return remarks on flight plan
+     * @return remarks on flight plan; empty if unavailable
      */
     public String getFlightPlanRemarks() {
         return flightPlanRemarks;
@@ -913,7 +916,7 @@ public class Client {
      * Online ATC stations may or may not amend the flight plan as they see need.
      * </p>
      *
-     * @return route as filed on flight plan
+     * @return route as filed on flight plan; empty if unavailable
      */
     public String getFiledRoute() {
         return filedRoute;
