@@ -68,6 +68,7 @@ public class DataFileParser {
 
         DataFile out = new DataFile();
         out.setFormat(DataFileFormat.JSON3);
+        out.setVoiceServers(new ArrayList<>());
 
         try {
             JsonObject root = (JsonObject) Jsoner.deserialize(br);
