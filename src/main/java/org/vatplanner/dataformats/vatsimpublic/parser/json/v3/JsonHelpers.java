@@ -103,6 +103,15 @@ public class JsonHelpers {
         consumeSafelyLogging(object, section, "key " + key.getKey(), logCollector, consumer);
     }
 
+    public static <T> void processOptional(Function<JsonKey, ?> parentAccessor, JsonKey key, Class<T> targetClass, String section, ParserLogEntryCollector logCollector, Consumer<T> consumer) {
+        T object = getOptional(parentAccessor, key, targetClass, section, logCollector).orElse(null);
+        if (object == null) {
+            return;
+        }
+
+        consumeSafelyLogging(object, section, "key " + key.getKey(), logCollector, consumer);
+    }
+
     public static <T, U> Optional<U> processMandatory(Function<JsonKey, T> parentAccessor, JsonKey key, Class<T> targetClass, String section, ParserLogEntryCollector logCollector, Function<T, U> function) {
         T object = getMandatory(parentAccessor, key, targetClass, section, logCollector).orElse(null);
         if (object == null) {

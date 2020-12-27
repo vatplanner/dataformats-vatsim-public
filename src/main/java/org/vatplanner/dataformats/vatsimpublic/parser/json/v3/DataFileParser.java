@@ -143,6 +143,7 @@ public class DataFileParser {
                 facilityTypeByJsonId, controllerRatingByJsonId);
             ControllerAtisJsonProcessor controllerProcessor = new ControllerAtisJsonProcessor(ClientType.ATC_CONNECTED,
                 facilityTypeByJsonId, controllerRatingByJsonId);
+            PilotJsonProcessor pilotProcessor = new PilotJsonProcessor(flightPlanProcessor, pilotRatingByJsonId);
 
             JsonHelpers.processMandatory( //
                 root::getCollection, //
@@ -162,7 +163,14 @@ public class DataFileParser {
                 (Consumer<JsonArray>) x -> clients.addAll(controllerProcessor.deserializeMultiple(x, out)) //
             );
 
-            // TODO: pilots (needs pilot_ratings mapping)
+            JsonHelpers.processMandatory( //
+                root::getCollection, //
+                RootLevelKey.PILOTS, //
+                JsonArray.class, //
+                PilotJsonProcessor.SECTION_NAME, //
+                out, //
+                (Consumer<JsonArray>) x -> clients.addAll(pilotProcessor.deserializeMultiple(x, out)) //
+            );
 
             JsonHelpers.processMandatory( //
                 root::getCollection, //

@@ -6,6 +6,7 @@ import java.time.Instant;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.BarometricPressure;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.PilotRating;
 
 /**
  * Combines information about VATSIM online pilots, prefiled flight plans and
@@ -24,6 +25,11 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
  * <li>{@link #controllerMessage}</li>
  * <li>{@link #controllerRating}</li>
  * <li>{@link #visualRange}</li>
+ * </ul>
+ * </li>
+ * <li>ATIS only:
+ * <ul>
+ * <li>{@link #atisDesignator}</li>
  * </ul>
  * </li>
  * <li>Pilot and prefiled flight plans only:
@@ -47,6 +53,11 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
  * <li>{@link #qnhInchMercury}</li>
  * <li>{@link #flightPlanRemarks}</li>
  * <li>{@link #filedRoute}</li>
+ * </ul>
+ * </li>
+ * <li>Pilot only:
+ * <ul>
+ * <li>{@link #pilotRating}</li>
  * </ul>
  * </li>
  * </ul>
@@ -167,6 +178,7 @@ public class Client {
     private int heading = -1;
     private double qnhInchMercury = Double.NaN;
     private int qnhHectopascal = -1;
+    private PilotRating pilotRating;
 
     /**
      * Returns the call sign the client is being identified by. The call sign is
@@ -601,15 +613,16 @@ public class Client {
      * {@link ControllerRating} for details.
      * </p>
      * <p>
-     * This is only meaningful for ATC clients and only for one session. If an
-     * ATC-permitted user is connected as a pilot, rating will always be
-     * {@link ControllerRating#OBS} for the pilot session regardless of user's
-     * actual controller rating. Prefiled flight plans do not indicate any
-     * controller rating and thus return null.
+     * This is only meaningful for ATC clients and only for one session. On legacy
+     * data files if an ATC-permitted user is connected as a pilot, rating will
+     * always be {@link ControllerRating#OBS} for the pilot session regardless of
+     * user's actual controller rating. Prefiled flight plans do not indicate any
+     * controller rating and thus return null. On JSON v3 format only serving ATC
+     * and ATIS stations can advertise a {@link ControllerRating}.
      * </p>
      *
-     * @return client's controller rating during this session; null for prefiled
-     *         flight plans
+     * @return client's controller rating during this session; null if unavailable
+     *         (pilots/prefilings on JSON v3 or prefilings on legacy format)
      */
     public ControllerRating getControllerRating() {
         return controllerRating;
@@ -1163,4 +1176,22 @@ public class Client {
         this.qnhHectopascal = qnhHectopascal;
     }
 
+    /**
+     * Returns the pilot's rating at time of session. Pilot ratings are not
+     * available from legacy data files.
+     * 
+     * <p>
+     * See {@link PilotRating} for a detailed explanation.
+     * </p>
+     * 
+     * @return pilot's rating at time of session; null if unavailable (only
+     *         available since JSON v3)
+     */
+    public PilotRating getPilotRating() {
+        return pilotRating;
+    }
+
+    public void setPilotRating(PilotRating pilotRating) {
+        this.pilotRating = pilotRating;
+    }
 }
