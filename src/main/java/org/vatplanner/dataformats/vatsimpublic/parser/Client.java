@@ -148,9 +148,17 @@ public class Client {
     private String filedAlternateAirportCode;
     private String flightPlanRemarks;
     private String filedRoute;
+
+    @Deprecated
     private double departureAirportLatitude; // seems unused, always 0
+
+    @Deprecated
     private double departureAirportLongitude; // seems unused, always 0
+
+    @Deprecated
     private double destinationAirportLatitude; // seems unused, always 0
+
+    @Deprecated
     private double destinationAirportLongitude; // seems unused, always 0
 
     // ATC only
@@ -306,6 +314,10 @@ public class Client {
      * @see #getRawClientType()
      */
     public ClientType getEffectiveClientType() {
+        /*
+         * FIXME: update JavaDoc for JSON v3 after testing, currently no detection is
+         * performed and it may (hopefully) no longer be needed
+         */
         return effectiveClientType;
     }
 
@@ -567,7 +579,9 @@ public class Client {
 
     /**
      * Returns the protocol version the client is using for communication with
-     * servers. Negative if not available (e.g. on prefiled flight plans).
+     * servers. Negative if not available (e.g. on prefiled flight plans). The field
+     * was removed from JSON v3 and thus will always be unavailable from recent JSON
+     * data files.
      * <p>
      * If protocol version is negative/unavailable although {@link #rawClientType}
      * indicates an online connection, client may be a "ghost" on VATSIM servers.
@@ -575,7 +589,8 @@ public class Client {
      * misbehaviour. {@link #rawClientType} then may have been guessed by parser.
      * </p>
      *
-     * @return protocol version of client; negative if unavailable
+     * @return protocol version of client; negative if unavailable (removed from
+     *         JSON v3 format)
      */
     public int getProtocolVersion() {
         return protocolVersion;
@@ -692,18 +707,21 @@ public class Client {
     }
 
     /**
-     * Returns the flight plan revision number.
+     * Returns the flight plan revision number if data has been read from legacy
+     * format. JSON formats no longer publish the VATSIM-internal revision number
+     * and will always return a negative number instead.
      * <p>
-     * Every time a flight plan gets updated, the revision number will be increased
-     * by 1. First revision starts counting at 0.
+     * Every time a flight plan got updated, the revision number was increased by 1.
+     * First revision started counting at 0.
      * </p>
      * <p>
-     * The revision number is mandatory for prefiled flight plans, otherwise it is
-     * optional. If revision number is undefined, a negative value will be returned.
+     * The revision number was mandatory for prefiled flight plans on legacy format,
+     * otherwise it was optional. If revision number is undefined, a negative value
+     * will be returned.
      * </p>
      *
      * @return revision of currently listed flight plan, counting starts at 0;
-     *         negative if unavailable
+     *         negative if unavailable (always unavailable since JSON v3)
      */
     public int getFlightPlanRevision() {
         return flightPlanRevision;
@@ -910,11 +928,15 @@ public class Client {
      * Returns {@link Double#NaN} if unavailable.
      *
      * @return departure airport latitude
+     * @deprecated field has never been seen used since start of this library and
+     *             was removed in JSON v3; pending removal
      */
+    @Deprecated
     public double getDepartureAirportLatitude() {
         return departureAirportLatitude;
     }
 
+    @Deprecated
     public void setDepartureAirportLatitude(double departureAirportLatitude) {
         this.departureAirportLatitude = departureAirportLatitude;
     }
@@ -925,11 +947,15 @@ public class Client {
      * Returns {@link Double#NaN} if unavailable.
      *
      * @return departure airport longitude
+     * @deprecated field has never been seen used since start of this library and
+     *             was removed in JSON v3; pending removal
      */
+    @Deprecated
     public double getDepartureAirportLongitude() {
         return departureAirportLongitude;
     }
 
+    @Deprecated
     public void setDepartureAirportLongitude(double departureAirportLongitude) {
         this.departureAirportLongitude = departureAirportLongitude;
     }
@@ -940,11 +966,15 @@ public class Client {
      * Returns {@link Double#NaN} if unavailable.
      *
      * @return destination airport latitude
+     * @deprecated field has never been seen used since start of this library and
+     *             was removed in JSON v3; pending removal
      */
+    @Deprecated
     public double getDestinationAirportLatitude() {
         return destinationAirportLatitude;
     }
 
+    @Deprecated
     public void setDestinationAirportLatitude(double destinationAirportLatitude) {
         this.destinationAirportLatitude = destinationAirportLatitude;
     }
@@ -955,11 +985,15 @@ public class Client {
      * Returns {@link Double#NaN} if unavailable.
      *
      * @return destination airport longitude
+     * @deprecated field has never been seen used since start of this library and
+     *             was removed in JSON v3; pending removal
      */
+    @Deprecated
     public double getDestinationAirportLongitude() {
         return destinationAirportLongitude;
     }
 
+    @Deprecated
     public void setDestinationAirportLongitude(double destinationAirportLongitude) {
         this.destinationAirportLongitude = destinationAirportLongitude;
     }
