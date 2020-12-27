@@ -167,7 +167,7 @@ public class Client {
     private Instant lastUpdated; // time_last_atis_received
 
     // ATIS only
-    private String atisDesignator;
+    private String atisDesignator = "";
 
     // all connected
     private Instant logonTime;
@@ -1074,7 +1074,7 @@ public class Client {
     /**
      * Returns the ATIS designator (rotating code letter) or null if unavailable.
      * 
-     * @return ATIS designator; null if unavailable
+     * @return ATIS designator; empty if unavailable
      */
     public String getAtisDesignator() {
         return atisDesignator;
