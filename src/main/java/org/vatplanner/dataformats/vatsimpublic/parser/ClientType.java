@@ -21,5 +21,27 @@ public enum ClientType {
     /**
      * A controller currently connected to VATSIM network.
      */
-    ATC_CONNECTED;
+    ATC_CONNECTED,
+
+    /**
+     * ATIS stations are indicated separate from regular controller clients
+     * ({@link #ATC_CONNECTED}) in JSON data files. Legacy format lists ATIS
+     * stations as {@link #ATC_CONNECTED}.
+     * 
+     * <p>
+     * As of December 2020 every ATIS station still is provided by an active
+     * controller but this might change in the future according to plans laid out at
+     * time of AFV introduction (Q3 2019). The formerly announced plan is to
+     * separate ATIS stations from controllers and provide permanent "offline"
+     * service at some point. This has not been implemented yet but may warrant a
+     * dedicated {@link ClientType} indication as already available on JSON v3
+     * format.
+     * </p>
+     * 
+     * <p>
+     * For compatibility, unless needed otherwise, {@link #ATIS} stations can be
+     * processed as {@link #ATC_CONNECTED}.
+     * </p>
+     */
+    ATIS;
 }

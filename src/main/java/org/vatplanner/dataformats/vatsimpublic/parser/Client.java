@@ -158,6 +158,9 @@ public class Client {
                                       // formatting with "^" and special character as CR LF?
     private Instant controllerMessageLastUpdated; // time_last_atis_received
 
+    // ATIS only
+    private String atisDesignator;
+
     // all connected
     private Instant logonTime;
 
@@ -1000,6 +1003,19 @@ public class Client {
 
     public void setControllerMessageLastUpdated(Instant controllerMessageLastUpdated) {
         this.controllerMessageLastUpdated = controllerMessageLastUpdated;
+    }
+
+    /**
+     * Returns the ATIS designator (rotating code letter) or null if unavailable.
+     * 
+     * @return ATIS designator; null if unavailable
+     */
+    public String getAtisDesignator() {
+        return atisDesignator;
+    }
+
+    public void setAtisDesignator(String atisDesignator) {
+        this.atisDesignator = atisDesignator;
     }
 
     /**

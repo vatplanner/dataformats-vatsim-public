@@ -4978,6 +4978,63 @@ public class ClientParserTest {
     }
     // </editor-fold>
 
+    // <editor-fold defaultstate="collapsed" desc="ATIS designator">
+    @Test
+    public void testParse_connectedPilot_returnsObjectWithNullForAtisDesignator() {
+        // Arrange
+        String line = "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:";
+        parser.setIsParsingPrefileSection(false);
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getAtisDesignator(), is(nullValue()));
+    }
+
+    @Test
+    public void testParse_prefiledPilot_returnsObjectWithNullForAtisDesignator() {
+        // Arrange
+        String line = "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::";
+        parser.setIsParsingPrefileSection(true);
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getAtisDesignator(), is(nullValue()));
+    }
+
+    @Test
+    @UseDataProvider("dataProviderControllerMessageRawAndDecoded")
+    public void testParse_atcWithControllerMessage_returnsObjectWithNullForAtisDesignator(String rawMessage, String _message) {
+        // Arrange
+        String line = String.format(
+            "EDDT_ATIS:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::%s:20180101160000:20180101150000::::",
+            rawMessage //
+        );
+        parser.setIsParsingPrefileSection(false);
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getAtisDesignator(), is(nullValue()));
+    }
+
+    @Test
+    public void testParse_atcWithoutControllerMessage_returnsObjectWithNullForAtisDesignator() {
+        // Arrange
+        String line = "EDDT_ATIS:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50:::::::::::::::::20180101160000:20180101150000::::";
+
+        // Act
+        Client result = parser.parse(line);
+
+        // Assert
+        assertThat(result.getAtisDesignator(), is(nullValue()));
+    }
+    // </editor-fold>
+
     // <editor-fold defaultstate="collapsed" desc="heading">
     @Test
     @DataProvider({ "0", "123", "359" })

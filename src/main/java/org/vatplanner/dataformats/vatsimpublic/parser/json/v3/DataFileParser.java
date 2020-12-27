@@ -1,6 +1,7 @@
 package org.vatplanner.dataformats.vatsimpublic.parser.json.v3;
 
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -11,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.PilotRating;
+import org.vatplanner.dataformats.vatsimpublic.parser.Client;
+import org.vatplanner.dataformats.vatsimpublic.parser.ClientType;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileFormat;
 
@@ -133,11 +136,34 @@ public class DataFileParser {
                     ) //
             ).orElse(new HashMap<Integer, PilotRating>());
 
-            // TODO: atis (needs facility mapping)
-            // TODO: controllers (needs facility and ratings mappings)
+            ArrayList<Client> clients = new ArrayList<Client>();
+            ControllerAtisJsonProcessor atisProcessor = new ControllerAtisJsonProcessor(ClientType.ATIS,
+                facilityTypeByJsonId, controllerRatingByJsonId);
+            ControllerAtisJsonProcessor controllerProcessor = new ControllerAtisJsonProcessor(ClientType.ATC_CONNECTED,
+                facilityTypeByJsonId, controllerRatingByJsonId);
+
+            JsonHelpers.processMandatory( //
+                root::getCollection, //
+                RootLevelKey.ATIS, //
+                JsonArray.class, //
+                ControllerAtisJsonProcessor.SECTION_NAME_ATIS, //
+                out, //
+                (Consumer<JsonArray>) x -> clients.addAll(atisProcessor.deserializeMultiple(x, out)) //
+            );
+
+            JsonHelpers.processMandatory( //
+                root::getCollection, //
+                RootLevelKey.CONTROLLERS, //
+                JsonArray.class, //
+                ControllerAtisJsonProcessor.SECTION_NAME_CONTROLLERS, //
+                out, //
+                (Consumer<JsonArray>) x -> clients.addAll(controllerProcessor.deserializeMultiple(x, out)) //
+            );
+
             // TODO: pilots (needs pilot_ratings mapping)
             // TODO: prefiles
 
+            out.setClients(clients);
         } catch (JsonException | ClassCastException ex) {
             LOGGER.warn("Failed to parse JSON format on root level", ex);
         }

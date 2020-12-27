@@ -26,11 +26,26 @@ public class JsonHelpers {
             ));
         }
 
+        return Optional.of(object);
+    }
+
+    public static <T> Optional<T> getOptional(Function<JsonKey, T> parentAccessor, JsonKey key, String section, ParserLogEntryCollector logCollector) {
+        T object = parentAccessor.apply(key);
+
         return Optional.ofNullable(object);
     }
 
     public static <T> void processMandatory(Function<JsonKey, T> parentAccessor, JsonKey key, String section, ParserLogEntryCollector logCollector, Consumer<T> consumer) {
         T object = getMandatory(parentAccessor, key, section, logCollector).orElse(null);
+        if (object == null) {
+            return;
+        }
+
+        consumeSafelyLogging(object, section, "key " + key.getKey(), logCollector, consumer);
+    }
+
+    public static <T> void processOptional(Function<JsonKey, T> parentAccessor, JsonKey key, String section, ParserLogEntryCollector logCollector, Consumer<T> consumer) {
+        T object = getOptional(parentAccessor, key, section, logCollector).orElse(null);
         if (object == null) {
             return;
         }
@@ -49,6 +64,16 @@ public class JsonHelpers {
 
     public static <T> Optional<T> getMandatory(Function<JsonKey, ?> parentAccessor, JsonKey key, Class<T> targetClass, String section, ParserLogEntryCollector logCollector) {
         Object object = getMandatory(parentAccessor, key, section, logCollector).orElse(null);
+
+        return cast(object, targetClass, section, "key " + key.getKey(), logCollector);
+    }
+
+    public static <T> Optional<T> getOptional(Function<JsonKey, ?> parentAccessor, JsonKey key, Class<T> targetClass, String section, ParserLogEntryCollector logCollector) {
+        Object object = getOptional(parentAccessor, key, section, logCollector).orElse(null);
+
+        if (object == null) {
+            return Optional.empty();
+        }
 
         return cast(object, targetClass, section, "key " + key.getKey(), logCollector);
     }
@@ -87,6 +112,15 @@ public class JsonHelpers {
         return applySafelyLogging(object, section, "key " + key.getKey(), logCollector, function);
     }
 
+    public static <T, U> Optional<U> processOptional(Function<JsonKey, T> parentAccessor, JsonKey key, Class<T> targetClass, String section, ParserLogEntryCollector logCollector, Function<T, U> function) {
+        T object = getOptional(parentAccessor, key, targetClass, section, logCollector).orElse(null);
+        if (object == null) {
+            return Optional.empty();
+        }
+
+        return applySafelyLogging(object, section, "key " + key.getKey(), logCollector, function);
+    }
+
     public static <T, U> List<U> processArraySkipOnError(JsonArray array, Class<T> itemTargetClass, String section, ParserLogEntryCollector logCollector, Function<T, U> function) {
         List<U> out = new ArrayList<U>();
 
@@ -102,6 +136,44 @@ public class JsonHelpers {
         }
 
         return out;
+    }
+
+    public static <T, U> Optional<List<U>> processArrayFailEmptyOnError(JsonArray array, Class<T> itemTargetClass, String section, ParserLogEntryCollector logCollector, Function<T, U> function) {
+        List<U> out = new ArrayList<U>();
+
+        int i = -1;
+        for (Object item : array) {
+            i++;
+            String location = "index " + i;
+
+            Optional<T> itemCast = cast(item, itemTargetClass, section, location, logCollector);
+            if (!itemCast.isPresent()) {
+                logCollector.addParserLogEntry(new ParserLogEntry( //
+                    section, //
+                    location, //
+                    true, //
+                    "single item cast has failed, whole array will be discarded", //
+                    null //
+                ));
+                return Optional.empty();
+            }
+
+            Optional<U> result = applySafelyLogging(itemCast.get(), section, location, logCollector, function);
+            if (!result.isPresent()) {
+                logCollector.addParserLogEntry(new ParserLogEntry( //
+                    section, //
+                    location, //
+                    true, //
+                    "single item function application has failed, whole array will be discarded", //
+                    null //
+                ));
+                return Optional.empty();
+            }
+
+            out.add(result.get());
+        }
+
+        return Optional.of(out);
     }
 
     private static <T, U> Optional<U> applySafelyLogging(T object, String section, String location, ParserLogEntryCollector logCollector, Function<T, U> function) {
