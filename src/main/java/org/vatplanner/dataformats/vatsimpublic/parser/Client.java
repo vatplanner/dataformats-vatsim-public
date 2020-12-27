@@ -101,6 +101,7 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
  * </ul>
  */
 public class Client {
+    // FIXME: set and document remaining default values as used by legacy parser
 
     /**
      * If this minimum frequency (in kilohertz) is used by an ATC client the ATC
@@ -111,19 +112,19 @@ public class Client {
     public static final int FREQUENCY_KILOHERTZ_PLACEHOLDER_MINIMUM = 199000;
 
     private String callsign; // also on prefiling
-    private int vatsimID; // also on prefiling
-    private String realName; // may include home base for pilots; also on prefiling
+    private int vatsimID = -1; // also on prefiling
+    private String realName = ""; // may include home base for pilots; also on prefiling
     private ClientType rawClientType;
     private ClientType effectiveClientType;
-    private int servedFrequencyKilohertz; // ATC only
-    private double latitude;
-    private double longitude;
-    private int altitudeFeet;
-    private int groundSpeed;
+    private int servedFrequencyKilohertz = -1; // ATC only
+    private double latitude = Double.NaN;
+    private double longitude = Double.NaN;
+    private int altitudeFeet = 0;
+    private int groundSpeed = -1;
 
     // filing
     private String aircraftType; // B738/M, H/A332/X, B737
-    private int filedTrueAirSpeed;
+    private int filedTrueAirSpeed = 0;
     private String filedDepartureAirportCode;
     private String rawFiledAltitude; // 30000, FL300, F300, maybe even worse raw user input (don't pilot clients
                                      // validate this field?!)
@@ -131,18 +132,18 @@ public class Client {
 
     // actual data
     private String serverId;
-    private int protocolVersion;
+    private int protocolVersion = -1;
     private ControllerRating controllerRating;
-    private int transponderCodeDecimal;
+    private int transponderCodeDecimal = -1;
     private FacilityType facilityType;
-    private int visualRange; // nm
+    private int visualRange = -1; // nm
 
     // filing
-    private int flightPlanRevision;
+    private int flightPlanRevision = -1;
     private String rawFlightPlanType; // I = IFR, V = VFR; unfortunately user-defined, e.g. also seen: S (scheduled)
-    private int rawDepartureTimePlanned; // may be 0; values can omit leading zeros! may contain garbage
-    private int rawDepartureTimeActual; // may be 0, may be equal, may be actual value - who or what sets this? Values
-                                        // can omit leading zeros! may contain garbage
+    private int rawDepartureTimePlanned = -1; // may be 0; values can omit leading zeros! may contain garbage
+    private int rawDepartureTimeActual = -1; // may be 0, may be equal, may be actual value - who or what sets this?
+                                             // Values can omit leading zeros! may contain garbage
     private Duration filedTimeEnroute; // data: two fields, hours + minutes
     private Duration filedTimeFuel; // data: two fields, hours + minutes
     private String filedAlternateAirportCode;
@@ -150,20 +151,20 @@ public class Client {
     private String filedRoute;
 
     @Deprecated
-    private double departureAirportLatitude; // seems unused, always 0
+    private double departureAirportLatitude = Double.NaN; // seems unused, always 0
 
     @Deprecated
-    private double departureAirportLongitude; // seems unused, always 0
+    private double departureAirportLongitude = Double.NaN; // seems unused, always 0
 
     @Deprecated
-    private double destinationAirportLatitude; // seems unused, always 0
+    private double destinationAirportLatitude = Double.NaN; // seems unused, always 0
 
     @Deprecated
-    private double destinationAirportLongitude; // seems unused, always 0
+    private double destinationAirportLongitude = Double.NaN; // seems unused, always 0
 
     // ATC only
-    private String controllerMessage; // decode "atis_message": first line prefixed "$ " => voice URL; multi-line
-                                      // formatting with "^" and special character as CR LF?
+    private String controllerMessage = ""; // decode "atis_message": first line prefixed "$ " => voice URL; multi-line
+                                           // formatting with "^" and special character as CR LF?
     private Instant lastUpdated; // time_last_atis_received
 
     // ATIS only
@@ -173,9 +174,9 @@ public class Client {
     private Instant logonTime;
 
     // Pilots only
-    private int heading;
-    private double qnhInchMercury;
-    private int qnhHectopascal;
+    private int heading = -1;
+    private double qnhInchMercury = Double.NaN;
+    private int qnhHectopascal = -1;
 
     /**
      * Returns the call sign the client is being identified by. The call sign is
