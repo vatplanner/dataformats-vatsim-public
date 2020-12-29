@@ -22,6 +22,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.vatplanner.dataformats.vatsimpublic.parser.DataFileFormat;
 import org.vatplanner.dataformats.vatsimpublic.parser.NetworkInformation;
 
 import com.tngtech.java.junit.dataprovider.DataProvider;
@@ -317,7 +318,7 @@ public class NetworkInformationParserTest {
     }
 
     @Test
-    public void testParse_fullExample1_resultContainsExpectedDataFileURLs() throws MalformedURLException {
+    public void testParse_fullExample1_resultContainsExpectedLegacyDataFileURLs() throws MalformedURLException {
         // Arrange
         BufferedReader br = getBufferedReaderForTestResource("fullexample1.txt");
 
@@ -325,12 +326,29 @@ public class NetworkInformationParserTest {
         NetworkInformation res = NetworkInformationParser.parse(br);
 
         // Assert
-        List<URL> dataFileUrls = res.getDataFileUrls();
+        List<URL> dataFileUrls = res.getDataFileUrls(DataFileFormat.LEGACY);
 
         assertThat(dataFileUrls.size(), is(3));
         assertThat(dataFileUrls.get(0), is(equalTo(new URL("http://where-ever.com/fetchme.txt"))));
         assertThat(dataFileUrls.get(1), is(equalTo(new URL("http://some.where.else/fetchme2.txt"))));
         assertThat(dataFileUrls.get(2), is(equalTo(new URL("http://checking-misplaced.out.of.group/"))));
+    }
+
+    @Test
+    public void testParse_fullExample1_resultContainsExpectedJsonDataFileURLs() throws MalformedURLException {
+        // Arrange
+        BufferedReader br = getBufferedReaderForTestResource("fullexample1.txt");
+
+        // Act
+        NetworkInformation res = NetworkInformationParser.parse(br);
+
+        // Assert
+        List<URL> dataFileUrls = res.getDataFileUrls(DataFileFormat.JSON3);
+
+        assertThat(dataFileUrls.size(), is(3));
+        assertThat(dataFileUrls.get(0), is(equalTo(new URL("http://where-ever.com/fetchme.json"))));
+        assertThat(dataFileUrls.get(1), is(equalTo(new URL("http://some.where.else/fetchme2.json"))));
+        assertThat(dataFileUrls.get(2), is(equalTo(new URL("http://checking-json-misplaced.out.of.group/"))));
     }
 
     @Test

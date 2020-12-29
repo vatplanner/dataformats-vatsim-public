@@ -10,19 +10,16 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vatplanner.dataformats.vatsimpublic.parser.DataFileFormat;
 import org.vatplanner.dataformats.vatsimpublic.parser.NetworkInformation;
 
 /**
- * Parses status.txt which defines meta information such as reference URLs to
- * fetch other information from. The policy is to fetch that information only
- * once "on application start" to reduce server load.
+ * Parses legacy status.txt which defines meta information such as reference
+ * URLs to fetch other information from. The policy was to fetch that
+ * information only once "on application start" to reduce server load; for
+ * current policy see the original file.
  */
 public class NetworkInformationParser {
-    /*
-     * TODO: I suspect network information will remain as-is but JSON format has
-     * already been asked for - expect it and move to legacy package early?
-     */
-
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkInformationParser.class.getName());
 
     // we don't actually know what that string is trying to tell us but we
@@ -44,10 +41,16 @@ public class NetworkInformationParser {
 
     private static final Pattern PATTERN_COMMENT_OR_SPACE = Pattern.compile("^(;.*|\\s*)$");
 
+    private static final String PARAMETER_KEY_URL_DATA_FILE_LEGACY = "url0";
+    private static final String PARAMETER_KEY_URL_DATA_FILE_JSON_1 = "json0";
+    private static final String PARAMETER_KEY_URL_DATA_FILE_JSON_3 = "json3";
+
     private static final Map<String, Pattern> expectedDefinitionPatternsByParameterKey = toStringPatternMap(
         new Object[][] {
             { NetworkInformation.PARAMETER_KEY_MESSAGE_STARTUP, Pattern.compile(".*application startup.*") },
-            { NetworkInformation.PARAMETER_KEY_URL_DATA_FILE, Pattern.compile(".*complete data.*") },
+            { PARAMETER_KEY_URL_DATA_FILE_LEGACY, Pattern.compile(".*complete data.*") },
+            { PARAMETER_KEY_URL_DATA_FILE_JSON_1, Pattern.compile(".*JSON data file.*") },
+            { PARAMETER_KEY_URL_DATA_FILE_JSON_3, Pattern.compile(".*JSON.* 3.*") },
             { NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, Pattern.compile(".*servers list.*") },
             { NetworkInformation.PARAMETER_KEY_URL_MOVED, Pattern.compile(".*more updated status.*") },
             { NetworkInformation.PARAMETER_KEY_URL_METAR, Pattern.compile(".*passing a parameter.*\\?id=.*") },
@@ -142,12 +145,24 @@ public class NetworkInformationParser {
                             break;
 
                         case NetworkInformation.PARAMETER_KEY_URL_ATIS:
-                        case NetworkInformation.PARAMETER_KEY_URL_DATA_FILE:
                         case NetworkInformation.PARAMETER_KEY_URL_METAR:
                         case NetworkInformation.PARAMETER_KEY_URL_MOVED:
                         case NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE:
                         case NetworkInformation.PARAMETER_KEY_URL_USER_STATISTICS:
                             info.addAsUrl(key, value);
+                            break;
+
+                        case PARAMETER_KEY_URL_DATA_FILE_LEGACY:
+                            info.addAsDataFileUrl(DataFileFormat.LEGACY.getJsonNetworkInformationKey(), value);
+                            break;
+
+                        case PARAMETER_KEY_URL_DATA_FILE_JSON_1:
+                            // to be removed in early 2021, JSON v3 should be used instead, so just ignore
+                            // and do not process these old v1 entries
+                            break;
+
+                        case PARAMETER_KEY_URL_DATA_FILE_JSON_3:
+                            info.addAsDataFileUrl(DataFileFormat.JSON3.getJsonNetworkInformationKey(), value);
                             break;
 
                         default:
