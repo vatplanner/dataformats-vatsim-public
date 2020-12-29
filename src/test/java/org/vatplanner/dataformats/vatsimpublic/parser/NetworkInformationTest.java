@@ -40,35 +40,51 @@ public class NetworkInformationTest {
 
     @Test
     public void testGetMessagesStartup_initially_listIsUnmodifiable() {
+        // Arrange
         NetworkInformation info = new NetworkInformation();
 
         List<String> startupMessages = info.getStartupMessages();
         thrown.expect(UnsupportedOperationException.class);
+
+        // Act
         startupMessages.add("test");
+
+        // Assert (nothing to do)
     }
 
     @Test
     public void testGetMessagesStartup_initially_returnsEmptyCollection() {
+        // Arrange
         NetworkInformation info = new NetworkInformation();
 
+        // Act
         List<String> startupMessages = info.getStartupMessages();
+
+        // Assert
         assertThat(startupMessages, is(empty()));
     }
 
     @Test
     public void testGetMessagesStartup_initially_returnsList() {
+        // Arrange
         NetworkInformation info = new NetworkInformation();
 
+        // Act
         List<String> startupMessages = info.getStartupMessages();
+
+        // Assert
         assertThat(startupMessages, is(instanceOf(List.class)));
     }
 
     @Test
     public void testAddAsUrl_malformedUrl_logsWarning() {
+        // Arrange
         NetworkInformation info = new NetworkInformation();
 
+        // Act
         info.addAsUrl("test", "this-is-not-a-url");
 
+        // Assert
         // it seems we can not easily compare events which wrap a Throwable :(
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
         assertThat(loggingEvents.size(), is(1));
@@ -84,59 +100,77 @@ public class NetworkInformationTest {
 
     @Test
     public void testAddAsUrl_malformedUrl_returnsFalse() {
+        // Arrange
         NetworkInformation info = new NetworkInformation();
 
+        // Act
         boolean success = info.addAsUrl("test", "this-is-not-a-url");
 
+        // Assert
         assertThat(success, is(false));
     }
 
     @Test
     public void testAddAsUrl_validUniqueUrl_doesNotLog() {
+        // Arrange
         NetworkInformation info = new NetworkInformation();
 
+        // Act
         info.addAsUrl("test", "http://www.test.com/test?test=123&test");
 
+        // Assert
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
         assertThat(loggingEvents, is(emptyIterable()));
     }
 
     @Test
     public void testAddAsUrl_validUniqueUrl_returnsTrue() {
+        // Arrange
         NetworkInformation info = new NetworkInformation();
 
+        // Act
         boolean success = info.addAsUrl("test", "http://www.test.com/test?test=123&test");
 
+        // Assert
         assertThat(success, is(true));
     }
 
     @Test
     public void testGetUrlsByKey_undefinedKey_returnsEmptyList() {
+        // Arrange
         NetworkInformation info = new NetworkInformation();
 
+        // Act
         List<URL> res = info.getUrlsByKey("surely-undefined");
 
+        // Assert
         assertThat(res, is(empty()));
     }
 
     @Test
     public void testGetUrlsByKey_knownKeyWithoutData_returnsEmptyList() {
+        // Arrange
         NetworkInformation info = new NetworkInformation();
 
+        // Act
         List<URL> res = info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_DATA_FILE);
 
+        // Assert
         assertThat(res, is(empty()));
     }
 
     @Test
     public void testGetUrlsByKey_knownKeyWithData_returnsSameDataInOrder() throws MalformedURLException {
+        // Arrange
         NetworkInformation info = new NetworkInformation();
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_DATA_FILE, "http://a.com/");
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_DATA_FILE, "http://b.com/");
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_DATA_FILE, "http://c.com/");
 
+        // Act
         List<URL> res = info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_DATA_FILE);
 
+        // Assert
         assertThat(res.size(), is(3));
         assertThat(res.get(0), is(equalTo(new URL("http://a.com/"))));
         assertThat(res.get(1), is(equalTo(new URL("http://b.com/"))));
@@ -145,8 +179,13 @@ public class NetworkInformationTest {
 
     @Test
     public void testGetUrlsByKey_undefinedKey_listIsUnmodifiable() throws MalformedURLException {
+        // Arrange
         NetworkInformation info = new NetworkInformation();
+
+        // Act
         List<URL> res = info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_DATA_FILE);
+
+        // Assert
         thrown.expect(UnsupportedOperationException.class);
 
         res.add(new URL("http://test.de/"));
@@ -154,9 +193,14 @@ public class NetworkInformationTest {
 
     @Test
     public void testGetUrlsByKey_knownKeyWithData_listIsUnmodifiable() throws MalformedURLException {
+        // Arrange
         NetworkInformation info = new NetworkInformation();
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_DATA_FILE, "http://a.com/");
+
+        // Act
         List<URL> res = info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_DATA_FILE);
+
+        // Assert
         thrown.expect(UnsupportedOperationException.class);
 
         res.add(new URL("http://test.de/"));
@@ -164,14 +208,17 @@ public class NetworkInformationTest {
 
     @Test
     public void testGetUrlsByKey_mixedKeys_listContainsOnlyAssignedDataInOrder() throws MalformedURLException {
+        // Arrange
         NetworkInformation info = new NetworkInformation();
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_DATA_FILE, "http://a.com/");
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, "http://b.com/");
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_MOVED, "http://c.com/");
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, "http://d.com/");
 
+        // Act
         List<URL> res = info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
 
+        // Assert
         assertThat(res.size(), is(2));
         assertThat(res.get(0), is(equalTo(new URL("http://b.com/"))));
         assertThat(res.get(1), is(equalTo(new URL("http://d.com/"))));
@@ -179,80 +226,101 @@ public class NetworkInformationTest {
 
     @Test
     public void testGetUrlsByKey_duplicateURLs_areRetained() throws MalformedURLException {
+        // Arrange
         NetworkInformation info = new NetworkInformation();
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, "http://1.com/");
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, "http://1.com/");
 
+        // Act
         List<URL> res = info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
 
+        // Assert
         assertThat(res.size(), is(2));
         assertThat(res.get(0), is(equalTo(new URL("http://1.com/"))));
         assertThat(res.get(1), is(equalTo(new URL("http://1.com/"))));
     }
 
     @Test
-    public void testGetAtisUrls_proxiesGetURLsByKey() {
+    public void testGetAtisUrls_always_proxiesGetURLsByKey() {
+        // Arrange
         List<URL> expectedList = new ArrayList<>();
         NetworkInformation info = spy(new NetworkInformation());
         when(info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_ATIS)).thenReturn(expectedList);
 
+        // Act
         List<URL> res = info.getAtisUrls();
 
+        // Assert
         assertThat(res, is(sameInstance(expectedList)));
     }
 
     @Test
-    public void testGetDataFileUrls_proxiesGetURLsByKey() {
+    public void testGetDataFileUrls_always_proxiesGetURLsByKey() {
+        // Arrange
         List<URL> expectedList = new ArrayList<>();
         NetworkInformation info = spy(new NetworkInformation());
         when(info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_DATA_FILE)).thenReturn(expectedList);
 
+        // Act
         List<URL> res = info.getDataFileUrls();
 
+        // Assert
         assertThat(res, is(sameInstance(expectedList)));
     }
 
     @Test
-    public void testGetMetarUrls_proxiesGetURLsByKey() {
+    public void testGetMetarUrls_always_proxiesGetURLsByKey() {
+        // Arrange
         List<URL> expectedList = new ArrayList<>();
         NetworkInformation info = spy(new NetworkInformation());
         when(info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_METAR)).thenReturn(expectedList);
 
+        // Act
         List<URL> res = info.getMetarUrls();
 
+        // Assert
         assertThat(res, is(sameInstance(expectedList)));
     }
 
     @Test
-    public void testGetMovedToUrls_proxiesGetURLsByKey() {
+    public void testGetMovedToUrls_always_proxiesGetURLsByKey() {
+        // Arrange
         List<URL> expectedList = new ArrayList<>();
         NetworkInformation info = spy(new NetworkInformation());
         when(info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_MOVED)).thenReturn(expectedList);
 
+        // Act
         List<URL> res = info.getMovedToUrls();
 
+        // Assert
         assertThat(res, is(sameInstance(expectedList)));
     }
 
     @Test
-    public void testGetServersFileUrls_proxiesGetURLsByKey() {
+    public void testGetServersFileUrls_always_proxiesGetURLsByKey() {
+        // Arrange
         List<URL> expectedList = new ArrayList<>();
         NetworkInformation info = spy(new NetworkInformation());
         when(info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE)).thenReturn(expectedList);
 
+        // Act
         List<URL> res = info.getServersFileUrls();
 
+        // Assert
         assertThat(res, is(sameInstance(expectedList)));
     }
 
     @Test
-    public void testGetUserStatisticsUrls_proxiesGetURLsByKey() {
+    public void testGetUserStatisticsUrls_always_proxiesGetURLsByKey() {
+        // Arrange
         List<URL> expectedList = new ArrayList<>();
         NetworkInformation info = spy(new NetworkInformation());
         when(info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_USER_STATISTICS)).thenReturn(expectedList);
 
+        // Act
         List<URL> res = info.getUserStatisticsUrls();
 
+        // Assert
         assertThat(res, is(sameInstance(expectedList)));
     }
 }
