@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntryCollector;
+import org.vatplanner.dataformats.vatsimpublic.parser.json.JsonHelpers;
 
 import com.github.cliftonlabs.json_simple.JsonArray;
 import com.github.cliftonlabs.json_simple.JsonKey;

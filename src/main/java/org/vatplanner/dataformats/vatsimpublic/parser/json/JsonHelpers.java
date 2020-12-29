@@ -1,4 +1,4 @@
-package org.vatplanner.dataformats.vatsimpublic.parser.json.v3;
+package org.vatplanner.dataformats.vatsimpublic.parser.json;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +42,16 @@ public class JsonHelpers {
         }
 
         consumeSafelyLogging(object, section, "key " + key.getKey(), logCollector, consumer);
+    }
+
+    public static <T> void processMandatoryUnsafe(Function<JsonKey, T> parentAccessor, JsonKey key, Consumer<T> consumer) {
+        T object = parentAccessor.apply(key);
+
+        if (object == null) {
+            throw new RuntimeException("key " + key.getKey() + " is undefined");
+        }
+
+        consumer.accept(object);
     }
 
     public static <T> void processOptional(Function<JsonKey, T> parentAccessor, JsonKey key, String section, ParserLogEntryCollector logCollector, Consumer<T> consumer) {

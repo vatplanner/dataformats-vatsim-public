@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.vatplanner.dataformats.vatsimpublic.parser.Client;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserHelpers;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntryCollector;
+import org.vatplanner.dataformats.vatsimpublic.parser.json.JsonHelpers;
 
 import com.github.cliftonlabs.json_simple.JsonKey;
 import com.github.cliftonlabs.json_simple.JsonObject;

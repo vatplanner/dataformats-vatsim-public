@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntryCollector;
+import org.vatplanner.dataformats.vatsimpublic.parser.json.JsonHelpers;
 
 import com.github.cliftonlabs.json_simple.JsonKey;
 import com.github.cliftonlabs.json_simple.JsonObject;

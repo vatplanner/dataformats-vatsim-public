@@ -12,6 +12,7 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.PilotRating;
 import org.vatplanner.dataformats.vatsimpublic.parser.Client;
 import org.vatplanner.dataformats.vatsimpublic.parser.ClientType;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntryCollector;
+import org.vatplanner.dataformats.vatsimpublic.parser.json.JsonHelpers;
 
 import com.github.cliftonlabs.json_simple.JsonArray;
 import com.github.cliftonlabs.json_simple.JsonKey;
