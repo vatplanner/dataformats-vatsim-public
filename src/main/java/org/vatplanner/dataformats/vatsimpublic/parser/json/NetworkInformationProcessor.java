@@ -19,8 +19,8 @@ import com.github.cliftonlabs.json_simple.Jsoner;
  * Parses status.json which defines meta information such as reference URLs to
  * fetch other information from.
  */
-public class NetworkInformationParser {
-    private static final Logger LOGGER = LoggerFactory.getLogger(NetworkInformationParser.class);
+public class NetworkInformationProcessor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetworkInformationProcessor.class);
 
     private static enum RootLevelKey implements JsonKey {
         DATA_FILES("data"),
@@ -44,7 +44,7 @@ public class NetworkInformationParser {
         }
     }
 
-    public NetworkInformation parse(Reader br) {
+    public NetworkInformation deserialize(Reader br) {
         NetworkInformation out = new NetworkInformation();
 
         try {

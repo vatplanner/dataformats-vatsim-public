@@ -24,8 +24,8 @@ import com.github.cliftonlabs.json_simple.JsonKey;
 import com.github.cliftonlabs.json_simple.JsonObject;
 import com.github.cliftonlabs.json_simple.Jsoner;
 
-public class DataFileParser {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataFileParser.class);
+public class DataFileProcessor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataFileProcessor.class);
 
     private static enum RootLevelKey implements JsonKey {
         GENERAL("general"),
@@ -55,7 +55,7 @@ public class DataFileParser {
         }
     }
 
-    public DataFile parse(Reader br) {
+    public DataFile deserialize(Reader br) {
         GeneralSectionJsonProcessor generalSectionProcessor = new GeneralSectionJsonProcessor();
         FSDServerJsonProcessor fsdServerProcessor = new FSDServerJsonProcessor();
         IdNameMappingProcessor shortKeyIdNameMappingProcessor = new IdNameMappingProcessor(
