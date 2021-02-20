@@ -289,6 +289,14 @@ public class GraphImport {
             .setHomeBase(nameExtractor.getHomeBase());
     }
 
+    private boolean hasFlightPlan(Client client) {
+        return !(client.getFiledDepartureAirportCode().isEmpty() //
+            && client.getFiledDestinationAirportCode().isEmpty() //
+            && client.getFiledAlternateAirportCode().isEmpty() //
+            && client.getFiledRoute().isEmpty() //
+            && client.getFlightPlanRemarks().isEmpty());
+    }
+
     private void importFlightConnected(final Report report, final Client client) {
         Instant logonTime = client.getLogonTime();
         if (logonTime == null) {
@@ -299,7 +307,7 @@ public class GraphImport {
 
         Member member = getMember(client);
         String callsign = client.getCallsign();
-        boolean clientHasFlightPlan = (client.getFlightPlanRevision() >= MINIMUM_FLIGHT_PLAN_REVISION);
+        boolean clientHasFlightPlan = hasFlightPlan(client);
 
         // Strange network errors exist where essential data is missing.
         // (e.g. during CTP East 2019 in reports created 0951z-1147z)
