@@ -5,6 +5,7 @@ import static org.vatplanner.dataformats.vatsimpublic.entities.status.Barometric
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.BarometricPressure.UNIT_INCHES_OF_MERCURY;
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.GeoCoordinates.UNIT_FEET;
 import static org.vatplanner.dataformats.vatsimpublic.parser.ClientType.ATC_CONNECTED;
+import static org.vatplanner.dataformats.vatsimpublic.parser.ClientType.ATIS;
 import static org.vatplanner.dataformats.vatsimpublic.parser.ClientType.PILOT_CONNECTED;
 import static org.vatplanner.dataformats.vatsimpublic.parser.ClientType.PILOT_PREFILED;
 import static org.vatplanner.dataformats.vatsimpublic.utils.CollectionHelpers.findPrevious;
@@ -188,7 +189,8 @@ public class GraphImport {
             importFlightConnected(report, client);
         } else if (clientType == PILOT_PREFILED) {
             importFlightPrefiled(report, client);
-        } else if (clientType == ATC_CONNECTED) {
+        } else if (clientType == ATC_CONNECTED || clientType == ATIS) {
+            // FIXME: check if ATIS is handled correctly
             importFacility(report, client);
         } else if (clientType == null) {
             // TODO: log client not imported
