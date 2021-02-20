@@ -1,6 +1,7 @@
 package org.vatplanner.dataformats.vatsimpublic.parser.json.v3;
 
 import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +17,7 @@ import org.vatplanner.dataformats.vatsimpublic.parser.Client;
 import org.vatplanner.dataformats.vatsimpublic.parser.ClientType;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileFormat;
+import org.vatplanner.dataformats.vatsimpublic.parser.Parser;
 import org.vatplanner.dataformats.vatsimpublic.parser.json.JsonHelpers;
 
 import com.github.cliftonlabs.json_simple.JsonArray;
@@ -24,7 +26,7 @@ import com.github.cliftonlabs.json_simple.JsonKey;
 import com.github.cliftonlabs.json_simple.JsonObject;
 import com.github.cliftonlabs.json_simple.Jsoner;
 
-public class DataFileProcessor {
+public class DataFileProcessor implements Parser<DataFile> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataFileProcessor.class);
 
     private static enum RootLevelKey implements JsonKey {
@@ -55,7 +57,8 @@ public class DataFileProcessor {
         }
     }
 
-    public DataFile deserialize(Reader br) {
+    @Override
+    public DataFile deserialize(Reader reader) {
         GeneralSectionJsonProcessor generalSectionProcessor = new GeneralSectionJsonProcessor();
         FSDServerJsonProcessor fsdServerProcessor = new FSDServerJsonProcessor();
         IdNameMappingProcessor shortKeyIdNameMappingProcessor = new IdNameMappingProcessor(
@@ -72,7 +75,7 @@ public class DataFileProcessor {
         out.setVoiceServers(new ArrayList<>());
 
         try {
-            JsonObject root = (JsonObject) Jsoner.deserialize(br);
+            JsonObject root = (JsonObject) Jsoner.deserialize(reader);
 
             JsonHelpers.processMandatory( //
                 root::getMap, //
@@ -189,6 +192,11 @@ public class DataFileProcessor {
         }
 
         return out;
+    }
+
+    @Override
+    public DataFile deserialize(CharSequence s) {
+        return deserialize(new StringReader(s.toString()));
     }
 
     // TODO: unit tests

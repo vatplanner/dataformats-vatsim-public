@@ -1,6 +1,7 @@
 package org.vatplanner.dataformats.vatsimpublic.parser.legacy;
 
 import java.io.BufferedReader;
+import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import org.vatplanner.dataformats.vatsimpublic.parser.Client;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileFormat;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
+import org.vatplanner.dataformats.vatsimpublic.parser.Parser;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntryCollector;
 
@@ -29,7 +31,7 @@ import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntryCollector;
  * {@link BufferedReader}. Parsing is thread-safe so one instance of a
  * {@link DataFileParser} can be reused multiple times, even in parallel.
  */
-public class DataFileParser {
+public class DataFileParser implements Parser<DataFile> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataFileParser.class);
 
@@ -82,10 +84,11 @@ public class DataFileParser {
      * @param s CharSequence containing the complete file to be parsed
      * @return all parsed information collected in one {@link DataFile} object
      */
-    public DataFile parse(CharSequence s) {
+    @Override
+    public DataFile deserialize(CharSequence s) {
         BufferedReader br = new BufferedReader(new StringReader(s.toString()));
 
-        return parse(br);
+        return deserialize(br);
     }
 
     /**
@@ -122,19 +125,27 @@ public class DataFileParser {
     }
 
     /**
-     * Parses a whole file by reading from the given {@link BufferedReader}. Content
-     * is expected to have been opened with ISO8859-1 character set.
+     * Parses a whole file by reading from the given {@link Reader}. Content is
+     * expected to have been opened with ISO8859-1 character set.
      *
-     * @param br {@link BufferedReader} providing access to the complete file
-     *        contents to be parsed
+     * @param reader {@link Reader} providing access to the complete file contents
+     *        to be parsed
      * @return all parsed information collected in one {@link DataFile} object
      */
-    public DataFile parse(BufferedReader br) {
+    @Override
+    public DataFile deserialize(Reader reader) {
         GeneralSectionParser generalSectionParser = getGeneralSectionParser();
         ClientParser onlineClientParser = getOnlineClientParser();
         ClientParser prefileClientParser = getPrefileClientParser();
         FSDServerParser fsdServerParser = getFSDServerParser();
         VoiceServerParser voiceServerParser = getVoiceServerParser();
+
+        BufferedReader br;
+        if (reader instanceof BufferedReader) {
+            br = (BufferedReader) reader;
+        } else {
+            br = new BufferedReader(reader);
+        }
 
         Map<String, List<String>> relevantLinesBySection = readRelevantLinesBySection(br);
 
