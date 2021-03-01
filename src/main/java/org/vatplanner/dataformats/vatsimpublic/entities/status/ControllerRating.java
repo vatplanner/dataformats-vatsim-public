@@ -186,4 +186,14 @@ public enum ControllerRating {
 
         return result;
     }
+
+    /**
+     * Returns the ID used to refer to this {@link ControllerRating} in legacy data
+     * files.
+     * 
+     * @return ID used in legacy data files
+     */
+    public int getLegacyId() {
+        return statusFileId;
+    }
 }

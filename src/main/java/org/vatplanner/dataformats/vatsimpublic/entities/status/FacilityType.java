@@ -111,4 +111,14 @@ public enum FacilityType {
     public static FacilityType resolveShortName(String shortName) {
         return typeByShortName.get(shortName);
     }
+
+    /**
+     * Returns the ID used to refer to this {@link FacilityType} in legacy data
+     * files.
+     * 
+     * @return ID used in legacy data files
+     */
+    public int getLegacyId() {
+        return statusFileId;
+    }
 }
