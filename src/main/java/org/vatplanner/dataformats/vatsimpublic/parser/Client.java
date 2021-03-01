@@ -416,7 +416,8 @@ public class Client {
      * If no altitude is available, 0 will be assumed.
      * </p>
      *
-     * @return longitude the client is currently located at; 0 if unavailable
+     * @return altitude the client is currently located at, measured in feet; 0 if
+     *         unavailable
      */
     public int getAltitudeFeet() {
         return altitudeFeet;
