@@ -62,7 +62,9 @@ public class LegacyDataFileWriter implements Writer<DataFile> {
         bw.append(LINE_END);
 
         bw.append("RELOAD = ");
-        bw.append(Long.toString(metaData.getMinimumDataFileRetrievalInterval().getSeconds())); // TODO: round up
+        bw.append(Integer.toString(
+            (int) Math.ceil(metaData.getMinimumDataFileRetrievalInterval().getSeconds() / 60.0) //
+        ));
         bw.append(LINE_END);
 
         bw.append("UPDATE = ");
