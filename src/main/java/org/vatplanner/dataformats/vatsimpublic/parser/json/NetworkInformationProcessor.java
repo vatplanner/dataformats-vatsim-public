@@ -1,6 +1,8 @@
 package org.vatplanner.dataformats.vatsimpublic.parser.json;
 
+import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -8,6 +10,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vatplanner.dataformats.vatsimpublic.parser.NetworkInformation;
+import org.vatplanner.dataformats.vatsimpublic.parser.Parser;
 
 import com.github.cliftonlabs.json_simple.JsonArray;
 import com.github.cliftonlabs.json_simple.JsonException;
@@ -19,7 +22,7 @@ import com.github.cliftonlabs.json_simple.Jsoner;
  * Parses status.json which defines meta information such as reference URLs to
  * fetch other information from.
  */
-public class NetworkInformationProcessor {
+public class NetworkInformationProcessor implements Parser<NetworkInformation> {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkInformationProcessor.class);
 
     private static enum RootLevelKey implements JsonKey {
@@ -44,11 +47,21 @@ public class NetworkInformationProcessor {
         }
     }
 
-    public NetworkInformation deserialize(Reader br) {
+    @Override
+    public NetworkInformation deserialize(CharSequence s) {
+        try (Reader reader = new StringReader(s.toString())) {
+            return deserialize(reader);
+        } catch (IOException ex) {
+            throw new RuntimeException("deserialization failed", ex);
+        }
+    }
+
+    @Override
+    public NetworkInformation deserialize(Reader reader) {
         NetworkInformation out = new NetworkInformation();
 
         try {
-            JsonObject root = (JsonObject) Jsoner.deserialize(br);
+            JsonObject root = (JsonObject) Jsoner.deserialize(reader);
 
             JsonHelpers.processMandatoryUnsafe( //
                 root::getMap, //
