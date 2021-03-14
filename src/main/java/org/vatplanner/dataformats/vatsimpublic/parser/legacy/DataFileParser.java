@@ -1,6 +1,7 @@
 package org.vatplanner.dataformats.vatsimpublic.parser.legacy;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -86,9 +87,14 @@ public class DataFileParser implements Parser<DataFile> {
      */
     @Override
     public DataFile deserialize(CharSequence s) {
-        BufferedReader br = new BufferedReader(new StringReader(s.toString()));
-
-        return deserialize(br);
+        try (
+            StringReader sr = new StringReader(s.toString());
+            BufferedReader br = new BufferedReader(sr) //
+        ) {
+            return deserialize(br);
+        } catch (IOException ex) {
+            throw new RuntimeException("deserialization failed", ex);
+        }
     }
 
     /**

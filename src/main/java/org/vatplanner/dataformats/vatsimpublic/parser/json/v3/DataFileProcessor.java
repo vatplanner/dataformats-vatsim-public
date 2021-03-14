@@ -1,5 +1,6 @@
 package org.vatplanner.dataformats.vatsimpublic.parser.json.v3;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -196,7 +197,11 @@ public class DataFileProcessor implements Parser<DataFile> {
 
     @Override
     public DataFile deserialize(CharSequence s) {
-        return deserialize(new StringReader(s.toString()));
+        try (Reader reader = new StringReader(s.toString())) {
+            return deserialize(reader);
+        } catch (IOException ex) {
+            throw new RuntimeException("deserialization failed", ex);
+        }
     }
 
     // TODO: unit tests

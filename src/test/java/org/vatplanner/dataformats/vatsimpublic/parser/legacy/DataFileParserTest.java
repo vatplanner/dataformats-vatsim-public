@@ -13,6 +13,7 @@ import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -24,9 +25,11 @@ import static org.vatplanner.dataformats.vatsimpublic.testutils.ParserLogEntryMa
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -146,19 +149,18 @@ public class DataFileParserTest {
     @DataProvider({ "", "  ab \r cd  \r\n ef \n g " })
     public void testDeserialize_CharSequence_forwardsInputWrappedInBufferedReader(String s) throws IOException {
         // Arrange
-        doReturn(null).when(spyParser).deserialize(any(BufferedReader.class));
+        AtomicReference<String> capturedString = new AtomicReference<String>();
+        doAnswer(invocation -> {
+            BufferedReader br = invocation.getArgument(0);
+            capturedString.set(readBuffer(br, s.length() + 1));
+            return null;
+        }).when(spyParser).deserialize(any(Reader.class));
 
         // Act
         spyParser.deserialize((CharSequence) s);
 
         // Assert
-        ArgumentCaptor<BufferedReader> captor = ArgumentCaptor.forClass(BufferedReader.class);
-        verify(spyParser).deserialize(captor.capture());
-        BufferedReader br = captor.getValue();
-
-        String brContent = readBuffer(br, s.length() + 1);
-
-        assertThat(brContent, is(equalTo(s)));
+        assertThat(capturedString.get(), is(equalTo(s)));
     }
 
     @Test
