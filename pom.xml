@@ -4,7 +4,7 @@
     <groupId>org.vatplanner</groupId>
     <artifactId>dataformats-vatsim-public</artifactId>
     <name>VATSIM Public Data Formats</name>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.1-pre210402</version>
     <packaging>jar</packaging>
     
     <url>https://github.com/vatplanner/dataformats-vatsim-public</url>
