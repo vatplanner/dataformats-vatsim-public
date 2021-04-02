@@ -1,10 +1,14 @@
 package org.vatplanner.dataformats.vatsimpublic.parser.legacy;
 
+import static java.util.Arrays.asList;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,6 +48,11 @@ public class NetworkInformationParser {
     private static final String PARAMETER_KEY_URL_DATA_FILE_LEGACY = "url0";
     private static final String PARAMETER_KEY_URL_DATA_FILE_JSON_1 = "json0";
     private static final String PARAMETER_KEY_URL_DATA_FILE_JSON_3 = "json3";
+
+    private static final Set<String> IGNORED_KEYS = new HashSet<String>(asList( //
+        "servers.live", //
+        "voice0" //
+    ));
 
     private static final Map<String, Pattern> expectedDefinitionPatternsByParameterKey = toStringPatternMap(
         new Object[][] {
@@ -166,7 +175,9 @@ public class NetworkInformationParser {
                             break;
 
                         default:
-                            LOGGER.warn("Unrecognized key \"{}\", value \"{}\"", key, value);
+                            if (!IGNORED_KEYS.contains(key)) {
+                                LOGGER.warn("Unrecognized key \"{}\", value \"{}\"", key, value);
+                            }
                     }
 
                     // line is finished, stop parsing

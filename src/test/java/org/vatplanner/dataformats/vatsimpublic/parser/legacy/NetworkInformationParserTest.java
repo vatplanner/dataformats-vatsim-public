@@ -97,6 +97,22 @@ public class NetworkInformationParserTest {
     }
 
     @Test
+    @DataProvider({ //
+        "servers.live=someServer", //
+        "voice0=someValue", //
+    })
+    public void testParse_ignoredKey_doesNotLogWarning(String line) {
+        // Arrange (nothing to do)
+
+        // Act
+        NetworkInformationParser.parse(line);
+
+        // Assert
+        List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
+        assertThat(loggingEvents, is(empty()));
+    }
+
+    @Test
     public void testParse_regularComment_doesNotLogWarning() {
         // Arrange (nothing to do)
 
