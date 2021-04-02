@@ -7,10 +7,12 @@
     <version>0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     
+    <url>https://github.com/vatplanner/dataformats-vatsim-public</url>
+    
     <licenses>
         <license>
-            <name>MIT license</name>
-            <url>LICENSE.md</url>
+            <name>MIT</name>
+            <url>https://opensource.org/licenses/MIT</url>
         </license>
     </licenses>
     
