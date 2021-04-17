@@ -1,111 +1,159 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>org.vatplanner</groupId>
-    <artifactId>dataformats-vatsim-public</artifactId>
-    <name>VATSIM Public Data Formats</name>
-    <version>0.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
-    
-    <url>https://github.com/vatplanner/dataformats-vatsim-public</url>
-    
-    <licenses>
-        <license>
-            <name>MIT</name>
-            <url>https://opensource.org/licenses/MIT</url>
-        </license>
-    </licenses>
-    
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        
-        <slf4j.version>1.7.21</slf4j.version>
-        <jsonSimple.version>3.1.1</jsonSimple.version>
-        
-        <junit.version>4.13.1</junit.version>
-        <junitDataprovider.version>1.11.0</junitDataprovider.version>
-        <hamcrest.version>2.0.0.0</hamcrest.version>
-        <mockito.version>2.17.0</mockito.version>
-        <slf4jTest.version>1.2.0</slf4jTest.version>
-    </properties>
-    
-    <dependencies>
-    	<!-- runtime dependencies -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.github.cliftonlabs</groupId>
-            <artifactId>json-simple</artifactId>
-            <version>${jsonSimple.version}</version>
-        </dependency>
-    
-        <!-- test dependencies -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-junit</artifactId>
-            <version>${hamcrest.version}</version>
-            <scope>test</scope>
-        </dependency>
-        
-        <dependency>
-            <groupId>uk.org.lidalia</groupId>
-            <artifactId>slf4j-test</artifactId>
-            <version>${slf4jTest.version}</version>
-            <scope>test</scope>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.tngtech.java</groupId>
-            <artifactId>junit-dataprovider</artifactId>
-            <version>${junitDataprovider.version}</version>
-            <scope>test</scope>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>${mockito.version}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-    
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.eluder.coveralls</groupId>
-                <artifactId>coveralls-maven-plugin</artifactId>
-                <version>4.3.0</version>
-                <configuration>
-                    <repoToken>${env.coveralls_token}</repoToken>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.0</version>
-                <executions>
-                    <execution>
-                        <id>prepare-agent</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-    
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.vatplanner</groupId>
+	<artifactId>dataformats-vatsim-public</artifactId>
+	<name>VATSIM Public Data Formats</name>
+	<description>library for parsing and processing publicly accessible VATSIM data formats</description>
+	<version>0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<url>https://github.com/vatplanner/dataformats-vatsim-public</url>
+
+	<licenses>
+		<license>
+			<name>MIT</name>
+			<url>https://opensource.org/licenses/MIT</url>
+		</license>
+	</licenses>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+
+		<slf4j.version>1.7.21</slf4j.version>
+		<jsonSimple.version>3.1.1</jsonSimple.version>
+
+		<junit.version>4.13.1</junit.version>
+		<junitDataprovider.version>1.11.0</junitDataprovider.version>
+		<hamcrest.version>2.0.0.0</hamcrest.version>
+		<mockito.version>2.17.0</mockito.version>
+		<slf4jTest.version>1.2.0</slf4jTest.version>
+
+		<maven.source.version>3.2.0</maven.source.version>
+		<maven.javadoc.version>3.2.0</maven.javadoc.version>
+	</properties>
+
+	<scm>
+		<connection>scm:git:git://github.com/vatplanner/dataformats-vatsim-public.git</connection>
+		<developerConnection>scm:git:ssh://github.com:vatplanner/dataformats-vatsim-public.git</developerConnection>
+		<url>https://github.com/vatplanner/dataformats-vatsim-public</url>
+	</scm>
+
+	<developers>
+		<developer>
+			<name>Daniel Neugebauer</name>
+			<email>dneuge@energiequant.de</email>
+			<url>http://www.energiequant.de/</url>
+		</developer>
+	</developers>
+
+	<dependencies>
+		<!-- runtime dependencies -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.github.cliftonlabs</groupId>
+			<artifactId>json-simple</artifactId>
+			<version>${jsonSimple.version}</version>
+		</dependency>
+
+		<!-- test dependencies -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-junit</artifactId>
+			<version>${hamcrest.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>uk.org.lidalia</groupId>
+			<artifactId>slf4j-test</artifactId>
+			<version>${slf4jTest.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.tngtech.java</groupId>
+			<artifactId>junit-dataprovider</artifactId>
+			<version>${junitDataprovider.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>${mockito.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>${maven.source.version}</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>${maven.javadoc.version}</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.eluder.coveralls</groupId>
+				<artifactId>coveralls-maven-plugin</artifactId>
+				<version>4.3.0</version>
+				<configuration>
+					<repoToken>${env.coveralls_token}</repoToken>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.0</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
 </project>
