@@ -26,6 +26,7 @@ import org.vatplanner.dataformats.vatsimpublic.entities.TimeSpan;
  * Flights can only be identified uniquely at time of each report by a tuple of
  * both member/VATSIM ID and callsign. Just using one criteria is not
  * sufficient:
+ * </p>
  * <ul>
  * <li>Members are technically able (but in most cases just not permitted) to
  * connect multiple times, so the VATSIM ID alone does not uniquely identify a
@@ -36,7 +37,6 @@ import org.vatplanner.dataformats.vatsimpublic.entities.TimeSpan;
  * pre-filed flight plans be revoked upon connection of another member using
  * that same callsign.</li>
  * </ul>
- * </p>
  */
 public class Flight {
 

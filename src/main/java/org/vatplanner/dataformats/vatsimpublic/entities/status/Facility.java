@@ -2,7 +2,6 @@ package org.vatplanner.dataformats.vatsimpublic.entities.status;
 
 import static java.util.Collections.unmodifiableSortedSet;
 
-import java.time.Instant;
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -184,11 +183,12 @@ public class Facility {
 
     /**
      * Adds a message to this facility. See
-     * {@link #seenMessage(Report, String, Instant)} for easier handling of updates.
+     * {@link #seenMessage(Report, String, StatusEntityFactory)} for easier handling
+     * of updates.
      *
      * @param message message to be added
      * @return this instance for method-chaining
-     * @see #seenMessage(Report, String, Instant)
+     * @see #seenMessage(Report, String, StatusEntityFactory)
      */
     public Facility addMessage(FacilityMessage message) {
         // TODO: ensure message not already added

@@ -16,9 +16,14 @@ public class DataFileSectionLineProcessor
     // TODO: reference factory class when implemented
 
     /**
+     * Creates a new processor for the given datafile-formatted content.
+     *
+     * @param s datafile-formatted content
+     * 
      * @deprecated use classes from
      *             {@link org.vatplanner.dataformats.vatsimpublic.parser.legacy}
      *             directly or access parsers via factory
+     * @see org.vatplanner.dataformats.vatsimpublic.parser.legacy.DataFileSectionLineProcessor#DataFileSectionLineProcessor(String)
      */
     @Deprecated
     public DataFileSectionLineProcessor(String s) {

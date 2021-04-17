@@ -84,7 +84,7 @@ public class TimeHelpers {
      * @param a left operand
      * @param b right operand
      * @return true if <code>a</code>&le;<code>b</code>, false if
-     *         <code>a</code>><code>b</code>
+     *         <code>a</code>&gt;<code>b</code>
      */
     public static boolean isLessOrEqualThan(Duration a, Duration b) {
         return a.compareTo(b) <= 0;

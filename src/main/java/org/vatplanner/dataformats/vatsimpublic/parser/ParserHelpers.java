@@ -15,7 +15,7 @@ public class ParserHelpers {
      * If both strings are empty, null is returned. If only one string is empty, an
      * {@link IllegalArgumentException} will be thrown. If duration is mandatory,
      * strings must not be empty or {@link IllegalArgumentException} will be thrown.
-     * Excessive values for minutes (>59) are valid and add to hours.
+     * Excessive values for minutes (&gt;59) are valid and add to hours.
      *
      * @param hoursString string containing hours to be parsed
      * @param minutesString string containing minutes to be parsed
@@ -79,7 +79,7 @@ public class ParserHelpers {
      * <p>
      * If duration is mandatory, strings must not be empty or
      * {@link IllegalArgumentException} will be thrown. Excessive values for minutes
-     * (>59) are valid and add to hours.
+     * (&gt;59) are valid and add to hours.
      * </p>
      *
      * @param s string containing hours and minutes to be parsed

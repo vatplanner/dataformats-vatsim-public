@@ -3,6 +3,7 @@ package org.vatplanner.dataformats.vatsimpublic.entities.status;
 import java.util.HashMap;
 import java.util.Map;
 
+// @formatter:off
 /**
  * Pilot ratings indicate the attested competence of pilots on the VATSIM
  * network. Ratings are earned through training and tests by an "Authorized
@@ -36,11 +37,12 @@ import java.util.Map;
  * </p>
  * 
  * <ul>
- * <li>https://www.vatsim.net/news/restructuring-pilot-rating-system</li>
- * <li>https://forums.vatsim.net/topic/28712-new-vatsim-rating/?do=findComment&comment=166767</li>
- * <li>https://forums.vatsim.net/topic/28695-vatsim-webmasters-and-pilot-ratings/?do=findComment&comment=166638</li>
+ * <li><a href="https://www.vatsim.net/news/restructuring-pilot-rating-system">https://www.vatsim.net/news/restructuring-pilot-rating-system</a></li>
+ * <li><a href="https://forums.vatsim.net/topic/28712-new-vatsim-rating/?do=findComment&amp;comment=166767">https://forums.vatsim.net/topic/28712-new-vatsim-rating/?do=findComment&amp;comment=166767</a></li>
+ * <li><a href="https://forums.vatsim.net/topic/28695-vatsim-webmasters-and-pilot-ratings/?do=findComment&amp;comment=166638">https://forums.vatsim.net/topic/28695-vatsim-webmasters-and-pilot-ratings/?do=findComment&amp;comment=166638</a></li>
  * </ul>
  */
+//@formatter:on
 public enum PilotRating {
     /**
      * Held by pilots who have not completed any pilot training yet.

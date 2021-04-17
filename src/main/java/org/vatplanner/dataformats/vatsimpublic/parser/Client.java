@@ -299,7 +299,7 @@ public class Client {
      * cockpit or bad login?) as well as {@link ControllerRating#SUP} (supervisor on
      * duty while flying?). This can be noticed by ATC clients "leaking" pilot
      * client information into the data file such as {@link #heading} or
-     * {@link #groundSpeed} > 0 while indicating a placeholder frequency
+     * {@link #groundSpeed} &gt; 0 while indicating a placeholder frequency
      * ({@link #servedFrequencyKilohertz}) and no {@link #controllerMessage} which
      * are clear signs of a pilot client being connected without providing ATC
      * services at the same time. The {@link #effectiveClientType} shall correct
@@ -439,7 +439,7 @@ public class Client {
      * principle. They will always return a negative value.
      * </p>
      *
-     * @return ground speed in knots (valid: >= 0); negative value if unavailable
+     * @return ground speed in knots (valid: &ge; 0); negative value if unavailable
      */
     public int getGroundSpeed() {
         return groundSpeed;
@@ -763,7 +763,7 @@ public class Client {
      * plan. This is a supposed to be a rough estimation of the time a pilot plans
      * the aircraft to become airborne. The time is supposed to be entered in UTC in
      * format HHmm, represented as unsigned integer and thus omitting leading zeros
-     * (30 => 0:30 UTC, 1340 => 13:40 UTC).
+     * (30 becomes 0:30 UTC, 1340 becomes 13:40 UTC).
      * <p>
      * Returns a negative value if unavailable.
      * </p>
@@ -808,7 +808,7 @@ public class Client {
     /**
      * Returns what has been entered as actual time of departure. Values seem to be
      * in UTC and in format HHmm, represented as unsigned integer and thus omitting
-     * leading zeros (30 => 0:30 UTC, 1340 => 13:40 UTC).
+     * leading zeros (30 becomes 0:30 UTC, 1340 becomes 13:40 UTC).
      * <p>
      * This field is no longer available from data files as of JSON v3. It was
      * previously available from legacy data files.
@@ -817,9 +817,9 @@ public class Client {
      * <strong>It is not known who or what sets this field and when.</strong>
      * Instead of relying on this field it is advisable to determine the time of
      * departure by searching the actual track for first occurence of high
-     * {@link #groundSpeed} (>80 kt) and a simultaneous significant (for example
-     * >200 ft/min) increase of {@link #altitudeFeet} (high speed + intentional
-     * climb => takeoff).
+     * {@link #groundSpeed} (&gt;80 kt) and a simultaneous significant (for example
+     * &gt;200 ft/min) increase of {@link #altitudeFeet} as high speed and
+     * intentional climb usually indicate a takeoff.
      * </p>
      * <p>
      * Additional to not knowing who sets this field, it exhibits a number of issues

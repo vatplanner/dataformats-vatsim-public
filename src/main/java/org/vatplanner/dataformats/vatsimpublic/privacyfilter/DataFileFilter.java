@@ -103,7 +103,7 @@ public class DataFileFilter {
     /**
      * Filters the given raw data file as configured and returns the result.
      * Filtering may result in some form of data corruption, so you may want to
-     * parse & verify the result using
+     * parse and verify the result using
      * {@link #verifyNoAdditionalLogMessages(DataFile, DataFile)} afterwards. Error
      * handling will be performed as configured through strategies.
      * <p>

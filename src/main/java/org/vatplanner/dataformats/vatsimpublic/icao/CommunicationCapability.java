@@ -29,10 +29,10 @@ import java.util.Set;
  *
  * <p>
  * Resources used to collect these designators:
+ * </p>
  * <ul>
  * <li>https://contentzone.eurocontrol.int/fpl/</li>
  * </ul>
- * </p>
  *
  * <p>
  * <b>DISCLAIMER: THIS CLASS IS INTENDED TO BE USED ONLY IN THE CONTEXT OF
@@ -63,13 +63,14 @@ public enum CommunicationCapability {
     ATC_SATVOICE_INMARSAT('M', 1),
     ATC_SATVOICE_MTSAT('M', 2),
     ATC_SATVOICE_IRIDIUM('M', 3),
+    // @formatter:off
     /**
      * Required Communication Performance of 400 seconds provided through CPDLC.
      * CPDLC in flight simulation is provided through networks which also have a
      * latency that cannot be guaranteed by users and is not intentionally simulated
      * but will generally be less than established real-world RCP.
      *
-     * @see https://code7700.com/communications_rcp.htm
+     * @see <a href="https://code7700.com/communications_rcp.htm">https://code7700.com/communications_rcp.htm</a>
      */
     RCP_400_CPDLC('P', 1),
     /**
@@ -78,7 +79,7 @@ public enum CommunicationCapability {
      * latency that cannot be guaranteed by users and is not intentionally simulated
      * but will generally be less than established real-world RCP.
      *
-     * @see https://code7700.com/communications_rcp.htm
+     * @see <a href="https://code7700.com/communications_rcp.htm">https://code7700.com/communications_rcp.htm</a>
      */
     RCP_240_CPDLC('P', 2),
     /**
@@ -86,8 +87,9 @@ public enum CommunicationCapability {
      * Does not make any sense to declare in flight simulation as there is no
      * SATCOM.
      *
-     * @see https://code7700.com/communications_rcp.htm
+     * @see <a href="https://code7700.com/communications_rcp.htm">https://code7700.com/communications_rcp.htm</a>
      */
+    // @formatter:on
     RCP_400_SATVOICE('P', 3),
     UHF_RTF('U', -1),
     VHF_RTF('V', -1),

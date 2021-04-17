@@ -80,7 +80,7 @@ public class DataFileFilterConfiguration {
     /**
      * By VATSIM Code of Conduct, observers are required to log in with a call sign
      * ending in "_OBS". It is common practice to choose the initial characters of a
-     * user's real name as a prefix (e.g. John Doe => "JD_OBS").
+     * user's real name as a prefix (e.g. John Doe using "JD_OBS").
      * <p>
      * When set to true, all callsigns ending in "_OBS" will be substituted by a
      * generic alias "XX_OBS".
@@ -171,7 +171,7 @@ public class DataFileFilterConfiguration {
      * <p>
      * Users may intend to advise each other about personal situations which could
      * be troublesome to store permanently and possibly associate them with during
-     * data collection & analysis. One example would be a pilot with physical
+     * data collection and analysis. One example would be a pilot with physical
      * disability wanting to advise controllers of their situation's unintentional
      * impact on their performance. While that information is very useful while
      * actively participating in live online service, it is generally unwanted

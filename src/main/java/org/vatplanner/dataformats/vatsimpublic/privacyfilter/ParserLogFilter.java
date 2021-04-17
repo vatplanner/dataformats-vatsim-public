@@ -19,6 +19,7 @@ public class ParserLogFilter {
      * @param dataFile data file to shorten log lines for
      * @param maxRawLogLineLength maximum number of characters in raw log lines to
      *        keep, 0 to clear completely
+     * @return {@link DataFile} holding shortened log lines only
      */
     public DataFile shortenLogLineContent(DataFile dataFile, int maxRawLogLineLength) {
         // FIXME: implement

@@ -15,11 +15,11 @@ import java.util.Set;
  *
  * <p>
  * Resources used to collect these designators:
+ * </p>
  * <ul>
  * <li>https://contentzone.eurocontrol.int/fpl/</li>
  * <li>https://www.icao.int/safety/FITS/DocumentLibrary/FITS-Library/Guidance_Item%2010_18.pdf</li>
  * </ul>
- * </p>
  *
  * <p>
  * <b>DISCLAIMER: THIS CLASS IS INTENDED TO BE USED ONLY IN THE CONTEXT OF
@@ -56,6 +56,7 @@ public enum NavigationApproachCapability {
     INS('I', -1),
     ILS('L', -1),
     RNP_4('L', 1),
+    // @formatter:off
     /**
      * <code>M</code> has been removed by 2012 ICAO update as OMEGA navigation
      * system (dated 1971) has been shut down in 1997. <code>M</code> codes (with a
@@ -63,8 +64,9 @@ public enum NavigationApproachCapability {
      * 2012 update. Keeping it in this decoder in case somebody actually tries to
      * simulate OMEGA...
      *
-     * @see https://en.wikipedia.org/wiki/Omega_(navigation_system)
+     * @see <a href="https://en.wikipedia.org/wiki/Omega_(navigation_system)">https://en.wikipedia.org/wiki/Omega_(navigation_system)</a>
      */
+    // @formatter:on
     OMEGA('M', -1),
     VOR('O', -1),
     BASIC_RNP_1_ALL_PERMITTED_SENSORS('O', 1),

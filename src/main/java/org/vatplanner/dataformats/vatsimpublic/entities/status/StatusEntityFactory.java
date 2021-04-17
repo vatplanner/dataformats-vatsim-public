@@ -37,7 +37,7 @@ public interface StatusEntityFactory {
      *
      * @param name raw facility name
      * @return new instance of {@link Facility} created with given argument
-     * @see Facility#Facililty(String)
+     * @see Facility#Facility(String)
      */
     Facility createFacility(String name);
 
