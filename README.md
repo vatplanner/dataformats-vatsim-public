@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.com/vatplanner/dataformats-vatsim-public.svg?branch=master)](https://travis-ci.com/vatplanner/dataformats-vatsim-public)
 [![Coverage Status](https://coveralls.io/repos/github/vatplanner/dataformats-vatsim-public/badge.svg?branch=master)](https://coveralls.io/github/vatplanner/dataformats-vatsim-public?branch=master)
+[![Maven Central](https://img.shields.io/maven-central/v/org.vatplanner/dataformats-vatsim-public.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22org.vatplanner%22%20AND%20a:%22dataformats-vatsim-public%22)
+[![JavaDoc](https://javadoc.io/badge2/org.vatplanner/dataformats-vatsim-public/javadoc.svg)](https://javadoc.io/doc/org.vatplanner/dataformats-vatsim-public)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
 
 This library's goal is to provide parsers and entities for data formats used by [VATSIM](https://www.vatsim.net/) and provided *publicly*. It's *not* possible to connect to the actual network using this library as VATSIM uses an undisclosed (NDA'd) network protocol and the network is only permitted to be connected to with authorized software. Actually, this library doesn't connect at all, it just parses and will require you to fetch all source data and feed it into the parser yourself... :)
@@ -13,27 +15,34 @@ The scope of this project is rather small but an essential part of a bigger proj
 Implemented:
 
 - parsers to work with raw data:
-  - `NetworkInformationParser` parses the initial `status.txt` file (providing URLs to fetch further information from)
-  - `DataFileParser` parses publicly accessible `vatsim-data.txt` file (containing all stations & pilots currently online as well as pre-filed flight plans)
-- `GraphImport`: import of parsed `DataFile`s to a deduplicated graph structure
+  - VATSIM status information (data feed):
+    - `NetworkInformation` holds basic meta data such as URLs concerning data feed and other VATSIM services and is provided through initial `status.txt` or `status.json` files
+    - `DataFile`s (the so called "data feed") contain all ATC stations & pilots currently online as well as pre-filed flight plans and can be parsed from publicly accessible JSON data feed file. Legacy `vatsim-data.txt` files are also still supported.
+    - legacy version 8/9 and JSON v3 formats are supported
+  - [VAT-Spy data](https://github.com/vatsimnetwork/vatspy-data-project):
+    - `VatSpyFileParser` parses the `VATSpy.dat` file holding information about countries, airports, FIRs/UIRs and the international date line
+    - `FIRBoundaryFileParser` parses the `FIRBoundaries.dat` file holding more detailed sector information and outlines
+- `NetworkInformation` and `DataFile`s can also be encoded to legacy format version 8/9
+- `GraphImport` imports parsed `DataFile`s (snapshots in time) to a deduplicated graph structure
   - splits connections spanning multiple flights
   - continues flights on client connection losses
   - attempts to continue previous flight if data file splits information
   - ignores service clients (AFVDATA etc.)
 
-Under construction:
-
-- privacy filter to help removing personal information from data files before they are parsed or archived (*should not be used yet*)
-
 Planned:
 
+- parsing of online transceiver list (due to be implemented very soon)
 - parsing of EuroScope sector files (defining VATSIM air spaces and airport ground layouts)
+- encoding of `NetworkInformation` and `DataFile` to JSON formats
+- privacy filter to help removing personal information from data files
+  - *do not use the existing implementation* (it was never ready for production) as it is subject to a full rewrite because the old approach can no longer be applied to JSON formats
+
 
 ## Current API State
 
-API is currently not stable and may change without notice.
+API is currently not stable and may change without notice. Restructuring of the whole project is currently pending (#18). A stable release should be expected after restructuring is complete; `0.1-pre`-releases are published prior to that.
 
-**Privacy filter is under construction and should not be attempted to be used yet.**
+**Privacy filter was under construction and is now deprecated as it requires a major rework due to JSON format introduction. It should not be used in current state.**
 
 ## Examples and Development Tools
 
@@ -53,7 +62,7 @@ VATSIM uses some data in the same way as in real-world aviation, for example ICA
 
 ### Privacy filtering
 
-**Privacy filter is under construction and should not be attempted to be used yet.**
+**Privacy filter was under construction and is now deprecated as it requires a major rework due to JSON format introduction. It should not be used in current state.**
 
 As a fallout from GPDR and local law and regulations, it appeared to make sense to implement a privacy filter to help with removal of some information from data files. However, even in case that it should work properly, it will not magically make your program compliant with any data protection laws. Read the full disclaimer and all JavaDoc documentation before attempting to use it:
 
@@ -94,7 +103,8 @@ Some technical policies stressed explicitely on the initial `status.txt` file sh
  * `vatsim-data.txt` and `vatsim-servers.txt` (not supported yet) should be loaded from randomly chosen servers in a round-robin fashion, i.e. decide a random server each time you download the files
    * June 2020: VATSIM now uses server-side load balancing for data feeds, so only one URL is now provided but the feature for cooperative client-side load balancing still exists, so expect to see multiple URLs at some point and continue to choose one randomly even if you currently only see one.
  * obey the minimum `RELOAD` intervals if specified in/parsed from those files
-   * June 2020: Temporarilly, reload intervals have been observed to have been practically removed by using floating point values. The limit has however been reset to 1 minute now (was 2 minutes a year ago). There is no longer any mention of reload intervals other than the now unexplained header field. It still does not make sense to fetch more often as current data seems to be updated at most once per minute.
+   * June 2020: Temporarily, reload intervals have been observed to have been practically removed by using floating point values. The limit has however been reset to 1 minute now (was 2 minutes a year ago). There is no longer any mention of reload intervals other than the now unexplained header field. It still does not make sense to fetch more often as current data seems to be updated at most once per minute.
+   * April 2021: Multiple official sources have recently communicated update and fetch intervals of 15 seconds but the reload interval field on JSON v3 format still exists with a granularity of minutes and has not changed (indicated minimum interval is still 1 minute). Check latest official VATSIM policies and statements on how to determine the actual reload interval wanted by VATSIM.
 
 Further or updated policies may be in effect; please read all available VATSIM-provided documents and regularly check the raw source files you are feeding into these parsers.
 
