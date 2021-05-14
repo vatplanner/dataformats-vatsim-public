@@ -27,7 +27,8 @@
 		<slf4j.version>1.7.21</slf4j.version>
 		<jsonSimple.version>3.1.1</jsonSimple.version>
 
-		<junit.version>4.13.1</junit.version>
+		<junit.version>5.7.1</junit.version>
+		<assertj.version>3.19.0</assertj.version>
 		<junitDataprovider.version>1.11.0</junitDataprovider.version>
 		<hamcrest.version>2.0.0.0</hamcrest.version>
 		<mockito.version>2.17.0</mockito.version>
@@ -37,6 +38,7 @@
 		<maven.javadoc.version>3.2.0</maven.javadoc.version>
 		<maven.gpg.version>1.6</maven.gpg.version>
 		<maven.nexusStaging.version>1.6.7</maven.nexusStaging.version>
+		<maven.surefire.version>3.0.0-M5</maven.surefire.version>
 	</properties>
 
 	<scm>
@@ -52,6 +54,18 @@
 			<url>http://www.energiequant.de/</url>
 		</developer>
 	</developers>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>${junit.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
 		<!-- runtime dependencies -->
@@ -69,9 +83,27 @@
 
 		<!-- test dependencies -->
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>${assertj.version}</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -106,6 +138,12 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${maven.surefire.version}</version>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
@@ -152,6 +190,7 @@
 					<repoToken>${env.coveralls_token}</repoToken>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
