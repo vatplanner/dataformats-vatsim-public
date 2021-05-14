@@ -1,4 +1,4 @@
-package org.vatplanner.dataformats.vatsimpublic.parser.vatspy;
+package org.vatplanner.dataformats.vatsimpublic.utils;
 
 public class GeoPoint2D {
     private final double latitude;

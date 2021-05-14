@@ -7,6 +7,8 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.vatplanner.dataformats.vatsimpublic.utils.GeoPoint2D;
+
 public class GeoPoint2DParser implements Function<String, GeoPoint2D> {
     private static final Pattern PATTERN = Pattern.compile(
         "(" + SUBPATTERN_FLOATING_POINT + ")\\|(" + SUBPATTERN_FLOATING_POINT + ")" //

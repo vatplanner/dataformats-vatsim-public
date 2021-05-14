@@ -2,6 +2,8 @@ package org.vatplanner.dataformats.vatsimpublic.parser.vatspy;
 
 import java.util.Optional;
 
+import org.vatplanner.dataformats.vatsimpublic.utils.GeoPoint2D;
+
 public class Airport {
     private final String icaoCode;
     private final String name;

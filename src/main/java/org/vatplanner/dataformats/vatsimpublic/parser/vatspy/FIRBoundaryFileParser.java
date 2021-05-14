@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vatplanner.dataformats.vatsimpublic.parser.Parser;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
+import org.vatplanner.dataformats.vatsimpublic.utils.GeoPoint2D;
 
 /**
  * Parser for the <code>FIRBoundaries.dat</code> file of VAT-Spy.

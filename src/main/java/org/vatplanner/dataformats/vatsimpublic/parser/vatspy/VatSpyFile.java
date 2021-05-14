@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntryCollector;
+import org.vatplanner.dataformats.vatsimpublic.utils.GeoPoint2D;
 
 public class VatSpyFile implements ParserLogEntryCollector {
     private final Collection<Airport> airports = new ArrayList<>();
