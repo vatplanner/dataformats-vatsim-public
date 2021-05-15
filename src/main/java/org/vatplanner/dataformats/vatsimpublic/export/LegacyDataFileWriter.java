@@ -20,6 +20,7 @@ import org.vatplanner.dataformats.vatsimpublic.parser.ClientType;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
 import org.vatplanner.dataformats.vatsimpublic.parser.FSDServer;
+import org.vatplanner.dataformats.vatsimpublic.utils.StringUtils;
 
 /**
  * Provides serialization for a {@link DataFile} object back to the legacy
@@ -30,6 +31,8 @@ public class LegacyDataFileWriter implements Writer<DataFile> {
 
     private static final String LINE_END = "\n";
     private static final char SEPARATOR = ':';
+    private static final char COMMENT_PREFIX = ';';
+    private static final String HEADER_PREFIX = COMMENT_PREFIX + " ";
 
     private static final String FORMAT_VERSION = "8";
 
@@ -49,6 +52,37 @@ public class LegacyDataFileWriter implements Writer<DataFile> {
         new byte[] { (byte) 0x5E, (byte) 0xA7 },
         Charset.forName("ISO-8859-1") //
     );
+
+    private final String header;
+
+    public LegacyDataFileWriter() {
+        this.header = "";
+    }
+
+    /**
+     * Creates a new {@link LegacyDataFileWriter} prepending all output with the
+     * given header. The given header is automatically prefixed to indicate a
+     * comment. Multiple lines can be provided; line end sequences are automatically
+     * converted as needed.
+     * 
+     * @param header header to be prepended to all output
+     */
+    public LegacyDataFileWriter(String header) {
+        this.header = endWithEmptyCommentLine(
+            StringUtils.prefixLines(
+                HEADER_PREFIX,
+                StringUtils.unifyLineEnds(LINE_END, header) //
+            ) //
+        );
+    }
+
+    private String endWithEmptyCommentLine(String s) {
+        if (StringUtils.endsWithLineBreak(s)) {
+            return s + COMMENT_PREFIX + LINE_END;
+        }
+
+        return s + LINE_END + COMMENT_PREFIX + LINE_END;
+    }
 
     private void encodeGeneralSection(DataFile content, BufferedWriter bw) throws IOException {
         // TODO: share constants with parser
@@ -81,10 +115,12 @@ public class LegacyDataFileWriter implements Writer<DataFile> {
     }
 
     private void encodeSectionStart(String sectionName, BufferedWriter bw) throws IOException {
-        bw.append(";");
+        bw.append(COMMENT_PREFIX);
         bw.append(LINE_END);
-        bw.append(";");
+
+        bw.append(COMMENT_PREFIX);
         bw.append(LINE_END);
+
         bw.append("!" + sectionName + ":");
         bw.append(LINE_END);
     }
@@ -415,6 +451,8 @@ public class LegacyDataFileWriter implements Writer<DataFile> {
         try {
             OutputStreamWriter osw = new OutputStreamWriter(os, StandardCharsets.ISO_8859_1);
             BufferedWriter bw = new BufferedWriter(osw);
+
+            bw.append(header);
 
             // Header as present in last revision (including whitespace). Not sure why this
             // was kept while other headers had been removed; maybe some client needs these?

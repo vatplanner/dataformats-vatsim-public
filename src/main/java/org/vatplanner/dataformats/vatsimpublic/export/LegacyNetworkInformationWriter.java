@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileFormat;
 import org.vatplanner.dataformats.vatsimpublic.parser.NetworkInformation;
+import org.vatplanner.dataformats.vatsimpublic.utils.StringUtils;
 
 /**
  * Provides serialization for a {@link NetworkInformation} object back to the
@@ -23,11 +24,28 @@ public class LegacyNetworkInformationWriter implements Writer<NetworkInformation
 
     private static final String LINE_END = "\n";
     private static final char SEPARATOR = '=';
+    private static final char COMMENT_PREFIX = ';';
+    private static final String HEADER_PREFIX = COMMENT_PREFIX + " ";
 
     private final String header;
 
+    public LegacyNetworkInformationWriter() {
+        this.header = "";
+    }
+
+    /**
+     * Creates a new {@link LegacyNetworkInformationWriter} prepending all output
+     * with the given header. The given header is automatically prefixed to indicate
+     * a comment. Multiple lines can be provided; line end sequences are
+     * automatically converted as needed.
+     * 
+     * @param header header to be prepended to all output
+     */
     public LegacyNetworkInformationWriter(String header) {
-        this.header = header;
+        this.header = StringUtils.prefixLines(
+            HEADER_PREFIX,
+            StringUtils.unifyLineEnds(LINE_END, header) //
+        );
     }
 
     @Override
@@ -39,9 +57,9 @@ public class LegacyNetworkInformationWriter implements Writer<NetworkInformation
             bw.append(header);
             bw.append(LINE_END);
 
-            bw.append(";");
+            bw.append(COMMENT_PREFIX);
             bw.append(LINE_END);
-            bw.append(";");
+            bw.append(COMMENT_PREFIX);
             bw.append(LINE_END);
 
             bw.append(content.getWhazzUpString());
@@ -55,10 +73,11 @@ public class LegacyNetworkInformationWriter implements Writer<NetworkInformation
             encodeAllUrls("metar0", content.getMetarUrls(), bw);
             encodeAllUrls("user0", content.getUserStatisticsUrls(), bw);
 
-            bw.append(";");
+            bw.append(COMMENT_PREFIX);
             bw.append(LINE_END);
 
-            bw.append("; END");
+            bw.append(COMMENT_PREFIX);
+            bw.append(" END");
             bw.append(LINE_END);
 
             bw.flush();
