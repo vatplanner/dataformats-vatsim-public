@@ -30,7 +30,7 @@ public class LegacyNetworkInformationWriter implements Writer<NetworkInformation
     private final String header;
 
     public LegacyNetworkInformationWriter() {
-        this.header = "";
+        this.header = COMMENT_PREFIX + LINE_END;
     }
 
     /**
@@ -42,10 +42,20 @@ public class LegacyNetworkInformationWriter implements Writer<NetworkInformation
      * @param header header to be prepended to all output
      */
     public LegacyNetworkInformationWriter(String header) {
-        this.header = StringUtils.prefixLines(
-            HEADER_PREFIX,
-            StringUtils.unifyLineEnds(LINE_END, header) //
+        this.header = endWithEmptyCommentLine(
+            StringUtils.prefixLines(
+                HEADER_PREFIX,
+                StringUtils.unifyLineEnds(LINE_END, header) //
+            ) //
         );
+    }
+
+    private String endWithEmptyCommentLine(String s) {
+        if (StringUtils.endsWithLineBreak(s)) {
+            return s + COMMENT_PREFIX + LINE_END;
+        }
+
+        return s + LINE_END + COMMENT_PREFIX + LINE_END;
     }
 
     @Override
@@ -55,12 +65,6 @@ public class LegacyNetworkInformationWriter implements Writer<NetworkInformation
             BufferedWriter bw = new BufferedWriter(osw);
 
             bw.append(header);
-            bw.append(LINE_END);
-
-            bw.append(COMMENT_PREFIX);
-            bw.append(LINE_END);
-            bw.append(COMMENT_PREFIX);
-            bw.append(LINE_END);
 
             bw.append(content.getWhazzUpString());
             bw.append(LINE_END);
