@@ -85,7 +85,7 @@ public class DataFile implements ParserLogEntryCollector {
     @Override
     public Collection<ParserLogEntry> getParserLogEntries() {
         synchronized (parserLogEntries) {
-            return Collections.unmodifiableCollection(parserLogEntries);
+            return Collections.unmodifiableCollection(new ArrayList<>(parserLogEntries));
         }
     }
 }
