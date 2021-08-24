@@ -10,9 +10,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
-import org.vatplanner.dataformats.vatsimpublic.parser.NetworkInformationDataKeyProvider;
 import org.vatplanner.dataformats.vatsimpublic.parser.NetworkInformation;
-import org.vatplanner.dataformats.vatsimpublic.parser.OnlineTransceiversFile;
 import org.vatplanner.dataformats.vatsimpublic.parser.Parser;
 
 import com.github.cliftonlabs.json_simple.JsonArray;
