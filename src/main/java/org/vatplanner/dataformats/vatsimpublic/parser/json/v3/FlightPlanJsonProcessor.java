@@ -17,6 +17,7 @@ public class FlightPlanJsonProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlightPlanJsonProcessor.class);
 
     private static enum Key implements JsonKey {
+        REVISION("revision_id"),
         FLIGHT_PLAN_TYPE("flight_rules"),
         AIRCRAFT_TYPE("aircraft"),
         AIRCRAFT_TYPE_FAA("aircraft_faa"),
@@ -50,6 +51,14 @@ public class FlightPlanJsonProcessor {
     }
 
     public void deserializeSingle(JsonObject object, Client target, String sectionName, ParserLogEntryCollector logCollector) {
+        JsonHelpers.processOptional( //
+            object::getInteger, //
+            Key.REVISION, //
+            sectionName, //
+            logCollector, //
+            target::setFlightPlanRevision //
+        );
+
         JsonHelpers.processMandatory( //
             object::getString, //
             Key.FLIGHT_PLAN_TYPE, //

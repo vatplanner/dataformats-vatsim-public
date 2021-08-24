@@ -803,21 +803,20 @@ public class Client {
     }
 
     /**
-     * Returns the flight plan revision number if data has been read from legacy
-     * format. JSON formats no longer publish the VATSIM-internal revision number
-     * and will always return a negative number instead.
+     * Returns the flight plan revision number.
      * <p>
-     * Every time a flight plan got updated, the revision number was increased by 1.
-     * First revision started counting at 0.
+     * Every time a flight plan is updated, the revision number is increased by 1.
+     * First revision starts counting at 0.
      * </p>
      * <p>
-     * The revision number was mandatory for prefiled flight plans on legacy format,
-     * otherwise it was optional. If revision number is undefined, a negative value
-     * will be returned.
+     * On legacy format the revision number was mandatory for prefiled flight plans,
+     * otherwise it was optional. The revision number was unavailable in early JSON
+     * v3 sub-formats used before April 2021. A negative value will be returned if
+     * this field is missing.
      * </p>
      *
      * @return revision of currently listed flight plan, counting starts at 0;
-     *         negative if unavailable (always unavailable since JSON v3)
+     *         negative if unavailable (not available in early JSON v3 files)
      */
     public int getFlightPlanRevision() {
         return flightPlanRevision;
