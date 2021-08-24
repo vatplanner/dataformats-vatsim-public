@@ -162,7 +162,7 @@ public class NetworkInformationParser {
                             break;
 
                         case PARAMETER_KEY_URL_DATA_FILE_LEGACY:
-                            info.addAsDataFileUrl(DataFileFormat.LEGACY.getJsonNetworkInformationKey(), value);
+                            info.addAsDataUrl(DataFileFormat.LEGACY.getNetworkInformationDataKey(), value);
                             break;
 
                         case PARAMETER_KEY_URL_DATA_FILE_JSON_1:
@@ -171,7 +171,7 @@ public class NetworkInformationParser {
                             break;
 
                         case PARAMETER_KEY_URL_DATA_FILE_JSON_3:
-                            info.addAsDataFileUrl(DataFileFormat.JSON3.getJsonNetworkInformationKey(), value);
+                            info.addAsDataUrl(DataFileFormat.JSON3.getNetworkInformationDataKey(), value);
                             break;
 
                         default:

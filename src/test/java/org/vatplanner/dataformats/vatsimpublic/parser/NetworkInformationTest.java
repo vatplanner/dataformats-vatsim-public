@@ -149,12 +149,12 @@ public class NetworkInformationTest {
     }
 
     @Test
-    public void testAddAsDataFileUrl_malformedUrl_logsWarning() {
+    public void testAddAsDataUrl_malformedUrl_logsWarning() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
         // Act
-        info.addAsDataFileUrl("test", "this-is-not-a-url");
+        info.addAsDataUrl("test", "this-is-not-a-url");
 
         // Assert
         // it seems we can not easily compare events which wrap a Throwable :(
@@ -171,24 +171,24 @@ public class NetworkInformationTest {
     }
 
     @Test
-    public void testAddAsDataFileUrl_malformedUrl_returnsFalse() {
+    public void testAddAsDataUrl_malformedUrl_returnsFalse() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
         // Act
-        boolean success = info.addAsDataFileUrl("test", "this-is-not-a-url");
+        boolean success = info.addAsDataUrl("test", "this-is-not-a-url");
 
         // Assert
         assertThat(success, is(false));
     }
 
     @Test
-    public void testAddAsDataFileUrl_validUniqueUrl_doesNotLog() {
+    public void testAddAsDataUrl_validUniqueUrl_doesNotLog() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
         // Act
-        info.addAsDataFileUrl("test", "http://www.test.com/test?test=123&test");
+        info.addAsDataUrl("test", "http://www.test.com/test?test=123&test");
 
         // Assert
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
@@ -196,43 +196,43 @@ public class NetworkInformationTest {
     }
 
     @Test
-    public void testAddAsDataFileUrl_validUniqueUrl_returnsTrue() {
+    public void testAddAsDataUrl_validUniqueUrl_returnsTrue() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
         // Act
-        boolean success = info.addAsDataFileUrl("test", "http://www.test.com/test?test=123&test");
+        boolean success = info.addAsDataUrl("test", "http://www.test.com/test?test=123&test");
 
         // Assert
         assertThat(success, is(true));
     }
 
     @Test
-    public void testGetUrlsByKey_undefinedKey_returnsEmptyList() {
+    public void testGetParameterUrls_undefinedKey_returnsEmptyList() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
         // Act
-        List<URL> res = info.getUrlsByKey("surely-undefined");
+        List<URL> res = info.getParameterUrls("surely-undefined");
 
         // Assert
         assertThat(res, is(empty()));
     }
 
     @Test
-    public void testGetUrlsByKey_knownKeyWithoutData_returnsEmptyList() {
+    public void testGetParameterUrls_knownKeyWithoutData_returnsEmptyList() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
         // Act
-        List<URL> res = info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
+        List<URL> res = info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
 
         // Assert
         assertThat(res, is(empty()));
     }
 
     @Test
-    public void testGetUrlsByKey_knownKeyWithData_returnsSameDataInOrder() throws MalformedURLException {
+    public void testGetParameterUrls_knownKeyWithData_returnsSameDataInOrder() throws MalformedURLException {
         // Arrange
         NetworkInformation info = new NetworkInformation();
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, "http://a.com/");
@@ -240,7 +240,7 @@ public class NetworkInformationTest {
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, "http://c.com/");
 
         // Act
-        List<URL> res = info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
+        List<URL> res = info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
 
         // Assert
         assertThat(res.size(), is(3));
@@ -250,12 +250,12 @@ public class NetworkInformationTest {
     }
 
     @Test
-    public void testGetUrlsByKey_undefinedKey_listIsUnmodifiable() throws MalformedURLException {
+    public void testGetParameterUrls_undefinedKey_listIsUnmodifiable() throws MalformedURLException {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
         // Act
-        List<URL> res = info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
+        List<URL> res = info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
 
         // Assert
         thrown.expect(UnsupportedOperationException.class);
@@ -264,13 +264,13 @@ public class NetworkInformationTest {
     }
 
     @Test
-    public void testGetUrlsByKey_knownKeyWithData_listIsUnmodifiable() throws MalformedURLException {
+    public void testGetParameterUrls_knownKeyWithData_listIsUnmodifiable() throws MalformedURLException {
         // Arrange
         NetworkInformation info = new NetworkInformation();
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, "http://a.com/");
 
         // Act
-        List<URL> res = info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
+        List<URL> res = info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
 
         // Assert
         thrown.expect(UnsupportedOperationException.class);
@@ -279,7 +279,7 @@ public class NetworkInformationTest {
     }
 
     @Test
-    public void testGetUrlsByKey_mixedKeys_listContainsOnlyAssignedDataInOrder() throws MalformedURLException {
+    public void testGetParameterUrls_mixedKeys_listContainsOnlyAssignedDataInOrder() throws MalformedURLException {
         // Arrange
         NetworkInformation info = new NetworkInformation();
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, "http://b.com/");
@@ -287,7 +287,7 @@ public class NetworkInformationTest {
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, "http://d.com/");
 
         // Act
-        List<URL> res = info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
+        List<URL> res = info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
 
         // Assert
         assertThat(res.size(), is(2));
@@ -296,14 +296,14 @@ public class NetworkInformationTest {
     }
 
     @Test
-    public void testGetUrlsByKey_duplicateURLs_areRetained() throws MalformedURLException {
+    public void testGetParameterUrls_duplicateURLs_areRetained() throws MalformedURLException {
         // Arrange
         NetworkInformation info = new NetworkInformation();
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, "http://1.com/");
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, "http://1.com/");
 
         // Act
-        List<URL> res = info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
+        List<URL> res = info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
 
         // Assert
         assertThat(res.size(), is(2));
@@ -312,11 +312,11 @@ public class NetworkInformationTest {
     }
 
     @Test
-    public void testGetAtisUrls_always_proxiesGetURLsByKey() {
+    public void testGetAtisUrls_always_proxiesGetParameterUrls() {
         // Arrange
         List<URL> expectedList = new ArrayList<>();
         NetworkInformation info = spy(new NetworkInformation());
-        when(info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_ATIS)).thenReturn(expectedList);
+        when(info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_ATIS)).thenReturn(expectedList);
 
         // Act
         List<URL> res = info.getAtisUrls();
@@ -326,11 +326,11 @@ public class NetworkInformationTest {
     }
 
     @Test
-    public void testGetDataFileUrls_withoutParameter_proxiesGetDataFileUrlsForLegacyFormat() {
+    public void testGetDataUrls_withoutParameter_proxiesGetDataFileUrlsForLegacyFormat() {
         // Arrange
         List<URL> expectedList = new ArrayList<>();
         NetworkInformation info = spy(new NetworkInformation());
-        doReturn(expectedList).when(info).getDataFileUrls(eq(DataFileFormat.LEGACY));
+        doReturn(expectedList).when(info).getDataUrls(eq(DataFileFormat.LEGACY));
 
         // Act
         List<URL> res = info.getDataFileUrls();
@@ -340,11 +340,11 @@ public class NetworkInformationTest {
     }
 
     @Test
-    public void testGetMetarUrls_always_proxiesGetURLsByKey() {
+    public void testGetMetarUrls_always_proxiesGetParameterUrls() {
         // Arrange
         List<URL> expectedList = new ArrayList<>();
         NetworkInformation info = spy(new NetworkInformation());
-        when(info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_METAR)).thenReturn(expectedList);
+        when(info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_METAR)).thenReturn(expectedList);
 
         // Act
         List<URL> res = info.getMetarUrls();
@@ -354,11 +354,11 @@ public class NetworkInformationTest {
     }
 
     @Test
-    public void testGetMovedToUrls_always_proxiesGetURLsByKey() {
+    public void testGetMovedToUrls_always_proxiesGetParameterUrls() {
         // Arrange
         List<URL> expectedList = new ArrayList<>();
         NetworkInformation info = spy(new NetworkInformation());
-        when(info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_MOVED)).thenReturn(expectedList);
+        when(info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_MOVED)).thenReturn(expectedList);
 
         // Act
         List<URL> res = info.getMovedToUrls();
@@ -368,11 +368,11 @@ public class NetworkInformationTest {
     }
 
     @Test
-    public void testGetServersFileUrls_always_proxiesGetURLsByKey() {
+    public void testGetServersFileUrls_always_proxiesGetParameterUrls() {
         // Arrange
         List<URL> expectedList = new ArrayList<>();
         NetworkInformation info = spy(new NetworkInformation());
-        when(info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE)).thenReturn(expectedList);
+        when(info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE)).thenReturn(expectedList);
 
         // Act
         List<URL> res = info.getServersFileUrls();
@@ -382,11 +382,11 @@ public class NetworkInformationTest {
     }
 
     @Test
-    public void testGetUserStatisticsUrls_always_proxiesGetURLsByKey() {
+    public void testGetUserStatisticsUrls_always_proxiesGetParameterUrls() {
         // Arrange
         List<URL> expectedList = new ArrayList<>();
         NetworkInformation info = spy(new NetworkInformation());
-        when(info.getUrlsByKey(NetworkInformation.PARAMETER_KEY_URL_USER_STATISTICS)).thenReturn(expectedList);
+        when(info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_USER_STATISTICS)).thenReturn(expectedList);
 
         // Act
         List<URL> res = info.getUserStatisticsUrls();
@@ -410,24 +410,24 @@ public class NetworkInformationTest {
 
     @Test
     @UseDataProvider("dataProviderDataFileFormats")
-    public void testGetDataFileUrls_initially_returnsEmpty(DataFileFormat format) {
+    public void testGetDataUrls_initially_returnsEmpty(DataFileFormat format) {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
         // Act
-        List<URL> result = info.getDataFileUrls(format);
+        List<URL> result = info.getDataUrls(format);
 
         // Assert
         assertThat(result, is(empty()));
     }
 
     @Test
-    public void testGetDataFileUrls_initially_listIsUnmodifiable() throws Exception {
+    public void testGetDataUrls_initially_listIsUnmodifiable() throws Exception {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
         // Act
-        List<URL> result = info.getDataFileUrls(DataFileFormat.JSON3);
+        List<URL> result = info.getDataUrls(DataFileFormat.JSON3);
 
         // Assert
         thrown.expect(UnsupportedOperationException.class);
@@ -452,39 +452,39 @@ public class NetworkInformationTest {
 
     @Test
     @UseDataProvider("dataProviderDataFileFormatsAndUrlStrings")
-    public void testGetDataFileUrls_addedUrlsForMatchingJsonKey_returnsExpectedUrls(DataFileFormat format, String[] expectedUrlStrings) {
+    public void testGetDataUrls_addedUrlsForMatchingJsonKey_returnsExpectedUrls(DataFileFormat format, String[] expectedUrlStrings) {
         // Arrange
         NetworkInformation info = new NetworkInformation();
         for (String urlString : expectedUrlStrings) {
-            info.addAsDataFileUrl(format.getJsonNetworkInformationKey(), urlString);
+            info.addAsDataUrl(format.getNetworkInformationDataKey(), urlString);
         }
 
         // Act
-        List<URL> result = info.getDataFileUrls(format);
+        List<URL> result = info.getDataUrls(format);
 
         // Assert
         assertThat(asStrings(result), contains(expectedUrlStrings));
     }
 
     @Test
-    public void testGetDataFileUrls_addedUrlsForMultipleJsonKeys_returnsOnlyExpectedUrls() {
+    public void testGetDataUrls_addedUrlsForMultipleJsonKeys_returnsOnlyExpectedUrls() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
         String expectedLegacyUrlString1 = "http://legacy/1";
         String expectedLegacyUrlString2 = "http://legacy/2";
         String expectedJson3UrlString1 = "http://json3/1";
         String expectedJson3UrlString2 = "http://json3/2";
-        info.addAsDataFileUrl(DataFileFormat.LEGACY.getJsonNetworkInformationKey(), expectedLegacyUrlString1);
-        info.addAsDataFileUrl(DataFileFormat.JSON3.getJsonNetworkInformationKey(), expectedJson3UrlString1);
-        info.addAsDataFileUrl("something_totally_different", "http://this/is/unexpected");
-        info.addAsDataFileUrl(DataFileFormat.JSON3.getJsonNetworkInformationKey() + "_nope",
+        info.addAsDataUrl(DataFileFormat.LEGACY.getNetworkInformationDataKey(), expectedLegacyUrlString1);
+        info.addAsDataUrl(DataFileFormat.JSON3.getNetworkInformationDataKey(), expectedJson3UrlString1);
+        info.addAsDataUrl("something_totally_different", "http://this/is/unexpected");
+        info.addAsDataUrl(DataFileFormat.JSON3.getNetworkInformationDataKey() + "_nope",
             "http://this/is/also/unexpected");
-        info.addAsDataFileUrl(DataFileFormat.LEGACY.getJsonNetworkInformationKey(), expectedLegacyUrlString2);
-        info.addAsDataFileUrl(DataFileFormat.JSON3.getJsonNetworkInformationKey(), expectedJson3UrlString2);
+        info.addAsDataUrl(DataFileFormat.LEGACY.getNetworkInformationDataKey(), expectedLegacyUrlString2);
+        info.addAsDataUrl(DataFileFormat.JSON3.getNetworkInformationDataKey(), expectedJson3UrlString2);
 
         // Act
-        List<URL> resultLegacy = info.getDataFileUrls(DataFileFormat.LEGACY);
-        List<URL> resultJson3 = info.getDataFileUrls(DataFileFormat.JSON3);
+        List<URL> resultLegacy = info.getDataUrls(DataFileFormat.LEGACY);
+        List<URL> resultJson3 = info.getDataUrls(DataFileFormat.JSON3);
 
         // Assert
         assertThat(asStrings(resultLegacy), contains(expectedLegacyUrlString1, expectedLegacyUrlString2));
@@ -492,13 +492,13 @@ public class NetworkInformationTest {
     }
 
     @Test
-    public void testGetDataFileUrls_addedUrlsForMatchingJsonKey_listIsUnmodifiable() throws Exception {
+    public void testGetDataUrls_addedUrlsForMatchingJsonKey_listIsUnmodifiable() throws Exception {
         // Arrange
         NetworkInformation info = new NetworkInformation();
-        info.addAsDataFileUrl(DataFileFormat.JSON3.getJsonNetworkInformationKey(), "http://some/url");
+        info.addAsDataUrl(DataFileFormat.JSON3.getNetworkInformationDataKey(), "http://some/url");
 
         // Act
-        List<URL> result = info.getDataFileUrls(DataFileFormat.JSON3);
+        List<URL> result = info.getDataUrls(DataFileFormat.JSON3);
 
         // Assert
         thrown.expect(UnsupportedOperationException.class);
@@ -506,25 +506,24 @@ public class NetworkInformationTest {
     }
 
     @Test
-    @UseDataProvider("dataProviderDataFileFormats")
-    public void testGetAllDataFileUrls_initially_returnsEmpty(DataFileFormat format) {
+    public void testGetAllUrlsByDataKey_initially_returnsEmpty() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
         // Act
-        Map<String, List<URL>> result = info.getAllDataFileUrls();
+        Map<String, List<URL>> result = info.getAllUrlsByDataKey();
 
         // Assert
         assertThat(result.entrySet(), is(empty()));
     }
 
     @Test
-    public void testGetAllDataFileUrls_initially_mapIsUnmodifiable() throws Exception {
+    public void testGetAllUrlsByDataKey_initially_mapIsUnmodifiable() throws Exception {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
         // Act
-        Map<String, List<URL>> result = info.getAllDataFileUrls();
+        Map<String, List<URL>> result = info.getAllUrlsByDataKey();
 
         // Assert
         thrown.expect(UnsupportedOperationException.class);
@@ -532,7 +531,7 @@ public class NetworkInformationTest {
     }
 
     @Test
-    public void testGetAllDataFileUrls_addedUrls_returnsAllUrlsIndexedByKey() {
+    public void testGetAllUrlsByDataKey_addedUrls_returnsAllUrlsIndexedByKey() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
         String expectedLegacyUrlString1 = "http://legacy/1";
@@ -540,27 +539,27 @@ public class NetworkInformationTest {
         String expectedJson3UrlString1 = "http://json3/1";
         String expectedJson3UrlString2 = "http://json3/2";
         String someExtraKey1 = "something_totally_different";
-        String someExtraKey2 = "this.is.not." + DataFileFormat.JSON3.getJsonNetworkInformationKey();
+        String someExtraKey2 = "this.is.not." + DataFileFormat.JSON3.getNetworkInformationDataKey();
         String expectedExtraValue1 = "http://extra/value1";
         String expectedExtraValue2 = "http://extra/value2";
-        info.addAsDataFileUrl(DataFileFormat.LEGACY.getJsonNetworkInformationKey(), expectedLegacyUrlString1);
-        info.addAsDataFileUrl(DataFileFormat.JSON3.getJsonNetworkInformationKey(), expectedJson3UrlString1);
-        info.addAsDataFileUrl(someExtraKey1, expectedExtraValue1);
-        info.addAsDataFileUrl(someExtraKey2, expectedExtraValue2);
-        info.addAsDataFileUrl(DataFileFormat.LEGACY.getJsonNetworkInformationKey(), expectedLegacyUrlString2);
-        info.addAsDataFileUrl(DataFileFormat.JSON3.getJsonNetworkInformationKey(), expectedJson3UrlString2);
+        info.addAsDataUrl(DataFileFormat.LEGACY.getNetworkInformationDataKey(), expectedLegacyUrlString1);
+        info.addAsDataUrl(DataFileFormat.JSON3.getNetworkInformationDataKey(), expectedJson3UrlString1);
+        info.addAsDataUrl(someExtraKey1, expectedExtraValue1);
+        info.addAsDataUrl(someExtraKey2, expectedExtraValue2);
+        info.addAsDataUrl(DataFileFormat.LEGACY.getNetworkInformationDataKey(), expectedLegacyUrlString2);
+        info.addAsDataUrl(DataFileFormat.JSON3.getNetworkInformationDataKey(), expectedJson3UrlString2);
 
         // Act
-        Map<String, List<URL>> result = info.getAllDataFileUrls();
+        Map<String, List<URL>> result = info.getAllUrlsByDataKey();
 
         // Assert
         assertThat(result.size(), is(equalTo(4)));
         assertThat(
-            asStrings(result.get(DataFileFormat.LEGACY.getJsonNetworkInformationKey())),
+            asStrings(result.get(DataFileFormat.LEGACY.getNetworkInformationDataKey())),
             contains(expectedLegacyUrlString1, expectedLegacyUrlString2) //
         );
         assertThat(
-            asStrings(result.get(DataFileFormat.JSON3.getJsonNetworkInformationKey())),
+            asStrings(result.get(DataFileFormat.JSON3.getNetworkInformationDataKey())),
             contains(expectedJson3UrlString1, expectedJson3UrlString2) //
         );
         assertThat(
@@ -574,13 +573,13 @@ public class NetworkInformationTest {
     }
 
     @Test
-    public void testGetAllDataFileUrls_addedUrls_listIsUnmodifiable() throws Exception {
+    public void testGetAllUrlsByDataKey_addedUrls_listIsUnmodifiable() throws Exception {
         // Arrange
         NetworkInformation info = new NetworkInformation();
-        info.addAsDataFileUrl(DataFileFormat.JSON3.getJsonNetworkInformationKey(), "http://some/url");
+        info.addAsDataUrl(DataFileFormat.JSON3.getNetworkInformationDataKey(), "http://some/url");
 
         // Act
-        Map<String, List<URL>> result = info.getAllDataFileUrls();
+        Map<String, List<URL>> result = info.getAllUrlsByDataKey();
 
         // Assert
         thrown.expect(UnsupportedOperationException.class);
@@ -588,7 +587,7 @@ public class NetworkInformationTest {
     }
 
     @Test
-    public void testGetAllDataFileUrls_afterAddAll_returnsDeduplicatedCombinationOfBothInstances() {
+    public void testGetAllUrlsByDataKey_afterAddAll_returnsDeduplicatedCombinationOfBothInstances() {
         // Arrange
         String bothInstancesKey1 = "both1";
         String bothInstancesKey2 = "both2";
@@ -604,25 +603,25 @@ public class NetworkInformationTest {
         String expectedValueOtherInstanceOnly2 = "http://other.only/2";
 
         NetworkInformation testedInstance = new NetworkInformation();
-        testedInstance.addAsDataFileUrl(bothInstancesKey1, expectedValueBoth1_1);
-        testedInstance.addAsDataFileUrl(bothInstancesKey1, expectedValueBoth1_2);
-        testedInstance.addAsDataFileUrl(bothInstancesKey2, expectedValueBoth2_1);
-        testedInstance.addAsDataFileUrl(bothInstancesKey1, expectedValueTestInstanceOnly1);
-        testedInstance.addAsDataFileUrl(bothInstancesKey2, expectedValueTestInstanceOnly2);
-        testedInstance.addAsDataFileUrl(onlyTestInstanceKey, expectedValueTestInstanceOnly1);
+        testedInstance.addAsDataUrl(bothInstancesKey1, expectedValueBoth1_1);
+        testedInstance.addAsDataUrl(bothInstancesKey1, expectedValueBoth1_2);
+        testedInstance.addAsDataUrl(bothInstancesKey2, expectedValueBoth2_1);
+        testedInstance.addAsDataUrl(bothInstancesKey1, expectedValueTestInstanceOnly1);
+        testedInstance.addAsDataUrl(bothInstancesKey2, expectedValueTestInstanceOnly2);
+        testedInstance.addAsDataUrl(onlyTestInstanceKey, expectedValueTestInstanceOnly1);
 
         NetworkInformation otherInstance = new NetworkInformation();
-        otherInstance.addAsDataFileUrl(bothInstancesKey1, expectedValueBoth1_1);
-        otherInstance.addAsDataFileUrl(bothInstancesKey1, expectedValueBoth1_2);
-        otherInstance.addAsDataFileUrl(bothInstancesKey2, expectedValueBoth2_1);
-        otherInstance.addAsDataFileUrl(bothInstancesKey1, expectedValueOtherInstanceOnly1);
-        otherInstance.addAsDataFileUrl(bothInstancesKey2, expectedValueOtherInstanceOnly2);
-        otherInstance.addAsDataFileUrl(onlyOtherInstanceKey, expectedValueOtherInstanceOnly1);
+        otherInstance.addAsDataUrl(bothInstancesKey1, expectedValueBoth1_1);
+        otherInstance.addAsDataUrl(bothInstancesKey1, expectedValueBoth1_2);
+        otherInstance.addAsDataUrl(bothInstancesKey2, expectedValueBoth2_1);
+        otherInstance.addAsDataUrl(bothInstancesKey1, expectedValueOtherInstanceOnly1);
+        otherInstance.addAsDataUrl(bothInstancesKey2, expectedValueOtherInstanceOnly2);
+        otherInstance.addAsDataUrl(onlyOtherInstanceKey, expectedValueOtherInstanceOnly1);
 
         testedInstance.addAll(otherInstance);
 
         // Act
-        Map<String, List<URL>> result = testedInstance.getAllDataFileUrls();
+        Map<String, List<URL>> result = testedInstance.getAllUrlsByDataKey();
 
         // Assert
         assertThat(result.size(), is(equalTo(4)));

@@ -24,6 +24,20 @@ import org.slf4j.LoggerFactory;
  * sources can be combined using {@link #addAll(NetworkInformation)}.
  * 
  * <p>
+ * Note that there is a difference between <code>data</code> and parameter URLs:
+ * Historically, information was only keyed on root-level which this
+ * implementation internally calls "parameters" (e.g. <code>url0</code> or
+ * <code>metar0</code>) which can be accessed through dedicated getters. With
+ * the introduction of JSON-based formats a root-level "parameter" key
+ * <code>data</code> was added which first only held {@link DataFile} URLs
+ * indexed by a format identifier. However, its usage got expanded to also cover
+ * the {@link OnlineTransceiversFile} which is not a {@link DataFile}. The
+ * result is that whatever is sub-keyed on the <code>data</code> root-level
+ * field is now tracked as "data" by this class to make sense of that
+ * restructuring.
+ * </p>
+ * 
+ * <p>
  * The original policy stated on the file itself was to fetch that information
  * only once "on application start" to reduce server load. For current policy
  * check the original files regularly.
@@ -41,8 +55,8 @@ public class NetworkInformation {
 
     private String whazzUpString = null;
     private final List<String> startupMessages = new ArrayList<>();
-    private final Map<String, List<URL>> urlsByParameter = new HashMap<>();
-    private final Map<String, List<URL>> dataFileUrlsByJsonFormatKey = new HashMap<>();
+    private final Map<String, List<URL>> urlsByParameterKey = new HashMap<>();
+    private final Map<String, List<URL>> urlsByDataKey = new HashMap<>();
 
     public static final String PARAMETER_KEY_MESSAGE_STARTUP = "msg0";
     public static final String PARAMETER_KEY_URL_SERVERS_FILE = "url1";
@@ -52,14 +66,14 @@ public class NetworkInformation {
     public static final String PARAMETER_KEY_URL_USER_STATISTICS = "user0";
 
     /**
-     * Returns a list of all URLs for the given key. URLs will be returned in order
-     * of their insertion.
+     * Returns a list of all URLs for the given parameter key. URLs will be returned
+     * in order of their insertion.
      *
      * @param key key to retrieve URLs for
      * @return URLs in order
      */
-    List<URL> getUrlsByKey(final String key) {
-        List<URL> urls = urlsByParameter.get(key);
+    List<URL> getParameterUrls(final String key) {
+        List<URL> urls = urlsByParameterKey.get(key);
 
         if (urls == null) {
             urls = new ArrayList<>();
@@ -69,15 +83,15 @@ public class NetworkInformation {
     }
 
     /**
-     * Parses and remembers the given URL string for the given key. URLs will retain
-     * their order of insertion.
+     * Parses and remembers the given URL string for the given parameter key. URLs
+     * will retain their order of insertion.
      *
      * @param key key to identify list of URLs by
      * @param value URL string to parse
      * @return Could the URL be parsed and has it been registered to the given key?
      */
     public boolean addAsUrl(String key, String value) {
-        return addAsUrl(urlsByParameter, key, value);
+        return addAsUrl(urlsByParameterKey, key, value);
     }
 
     private boolean addAsUrl(Map<String, List<URL>> target, String key, String value) {
@@ -104,23 +118,25 @@ public class NetworkInformation {
     }
 
     /**
-     * Parses and remembers the given data file URL string for the given key. The
-     * key should be exactly the one used in JSON {@link NetworkInformation} files.
-     * URLs will retain their order of insertion.
+     * Parses and remembers the given URL string for the given key. The key should
+     * be exactly the one used on <code>data</code> field of JSON
+     * {@link NetworkInformation} files for JSON information. URLs will retain their
+     * order of insertion.
      * 
      * <p>
-     * When parsing legacy files
-     * {@link DataFileFormat#getJsonNetworkInformationKey()} should be used.
+     * {@link NetworkInformationDataKeyProvider#getNetworkInformationDataKey()}
+     * should be used to retrieve the matching key constants. The pseudo-key
+     * returned by {@link DataFileFormat#LEGACY} is the only allowed key not present
+     * on actual JSON {@link NetworkInformation} files.
      * </p>
      * 
-     * @param jsonDataFileKey key used to indicate the referenced data file format
-     *        in JSON-based {@link NetworkInformation} files
+     * @param jsonKey key used to indicate the referenced file/format in JSON-based
+     *        {@link NetworkInformation} files
      * @param value URL string to parse
-     * @return Could the URL be parsed and has it been registered to the given
-     *         {@link DataFileFormat}?
+     * @return Could the URL be parsed and has it been registered to the given key?
      */
-    public boolean addAsDataFileUrl(String jsonDataFileKey, String value) {
-        return addAsUrl(dataFileUrlsByJsonFormatKey, jsonDataFileKey, value);
+    public boolean addAsDataUrl(String jsonKey, String value) {
+        return addAsUrl(urlsByDataKey, jsonKey, value);
     }
 
     /**
@@ -176,7 +192,7 @@ public class NetworkInformation {
      *             from data file instead
      */
     public List<URL> getAtisUrls() {
-        return getUrlsByKey(PARAMETER_KEY_URL_ATIS);
+        return getParameterUrls(PARAMETER_KEY_URL_ATIS);
     }
 
     /**
@@ -189,37 +205,38 @@ public class NetworkInformation {
      * </p>
      *
      * @return URLs to retrieve a copy of the current data file from
-     * @deprecated use {@link #getDataFileUrls(DataFileFormat)} or
-     *             {@link #getAllDataFileUrls()} instead
+     * @deprecated use {@link #getDataUrls(DataFileFormat)} or
+     *             {@link #getAllUrlsByDataKey()} instead
      */
     @Deprecated
     public List<URL> getDataFileUrls() {
-        return getDataFileUrls(DataFileFormat.LEGACY);
+        return getDataUrls(DataFileFormat.LEGACY);
     }
 
     /**
-     * Returns all data file URLs for the given format. The data file contains
-     * information about online stations, pilots and pre-filings.
+     * Returns all <code>data</code> URLs matching the given key provider. Other
+     * data may be available through dedicated getters.
      * <p>
-     * Depending on the source of {@link NetworkInformation} not all formats may be
-     * available.
+     * Depending on the source of {@link NetworkInformation} not all possible data
+     * may be available.
      * </p>
      *
-     * @param format wanted data file format
-     * @return URLs to retrieve a copy of the current data file from
+     * @param keyProvider returns the key of wanted data
+     * @return URLs to retrieve a copy of the current data resource from
      */
-    public List<URL> getDataFileUrls(DataFileFormat format) {
+    public List<URL> getDataUrls(NetworkInformationDataKeyProvider keyProvider) {
         return unmodifiableList(
-            dataFileUrlsByJsonFormatKey.getOrDefault(
-                format.getJsonNetworkInformationKey(),
+            urlsByDataKey.getOrDefault(
+                keyProvider.getNetworkInformationDataKey(),
                 emptyList() //
             ) //
         );
     }
 
     /**
-     * Returns all data file URLs indexed by the key by which they are referenced in
-     * JSON-based {@link NetworkInformation} files.
+     * Returns all data URLs (i.e. URLs from the <code>data</code> field) indexed by
+     * the key by which they are referenced in JSON-based {@link NetworkInformation}
+     * files.
      * 
      * <p>
      * Legacy data files are not referenced in JSON-based {@link NetworkInformation}
@@ -227,11 +244,11 @@ public class NetworkInformation {
      * instead.
      * </p>
      * 
-     * @return all data file URLs indexed by the key used in JSON-based
+     * @return all data URLs indexed by the key used in JSON-based
      *         {@link NetworkInformation} files
      */
-    public Map<String, List<URL>> getAllDataFileUrls() {
-        return unmodifiableMap(dataFileUrlsByJsonFormatKey);
+    public Map<String, List<URL>> getAllUrlsByDataKey() {
+        return unmodifiableMap(urlsByDataKey);
     }
 
     /**
@@ -245,7 +262,7 @@ public class NetworkInformation {
      *         <code>?id=...</code>
      */
     public List<URL> getMetarUrls() {
-        return getUrlsByKey(PARAMETER_KEY_URL_METAR);
+        return getParameterUrls(PARAMETER_KEY_URL_METAR);
     }
 
     /**
@@ -258,7 +275,7 @@ public class NetworkInformation {
      * @return URLs to follow for a more recent version of this information
      */
     public List<URL> getMovedToUrls() {
-        return getUrlsByKey(PARAMETER_KEY_URL_MOVED);
+        return getParameterUrls(PARAMETER_KEY_URL_MOVED);
     }
 
     /**
@@ -268,7 +285,7 @@ public class NetworkInformation {
      * @return URLS to retrieve a copy of the current server file from
      */
     public List<URL> getServersFileUrls() {
-        return getUrlsByKey(PARAMETER_KEY_URL_SERVERS_FILE);
+        return getParameterUrls(PARAMETER_KEY_URL_SERVERS_FILE);
     }
 
     /**
@@ -280,7 +297,7 @@ public class NetworkInformation {
      * @return URLs to retrieve official user statistics from
      */
     public List<URL> getUserStatisticsUrls() {
-        return getUrlsByKey(PARAMETER_KEY_URL_USER_STATISTICS);
+        return getParameterUrls(PARAMETER_KEY_URL_USER_STATISTICS);
     }
 
     /**
@@ -297,8 +314,8 @@ public class NetworkInformation {
      * @return this instance for method-chaining
      */
     public NetworkInformation addAll(NetworkInformation other) {
-        merge(this.dataFileUrlsByJsonFormatKey, other.dataFileUrlsByJsonFormatKey);
-        merge(this.urlsByParameter, other.urlsByParameter);
+        merge(this.urlsByDataKey, other.urlsByDataKey);
+        merge(this.urlsByParameterKey, other.urlsByParameterKey);
         merge(this.startupMessages, other.startupMessages);
 
         if (this.whazzUpString == null) {

@@ -70,8 +70,8 @@ public class LegacyNetworkInformationWriter implements Writer<NetworkInformation
             bw.append(LINE_END);
 
             encodeAll("msg0", content.getStartupMessages(), bw);
-            encodeAllUrls("url0", content.getDataFileUrls(DataFileFormat.LEGACY), bw);
-            encodeAllUrls("json3", content.getDataFileUrls(DataFileFormat.JSON3), bw);
+            encodeAllUrls("url0", content.getDataUrls(DataFileFormat.LEGACY), bw);
+            encodeAllUrls("json3", content.getDataUrls(DataFileFormat.JSON3), bw);
             encodeAllUrls("url1", content.getServersFileUrls(), bw);
             encodeAllUrls("moveto0", content.getMovedToUrls(), bw);
             encodeAllUrls("metar0", content.getMetarUrls(), bw);

@@ -3,7 +3,7 @@ package org.vatplanner.dataformats.vatsimpublic.parser;
 /**
  * High-level identification of data file formats.
  */
-public enum DataFileFormat implements JsonNetworkInformationKeyProvider {
+public enum DataFileFormat implements NetworkInformationDataKeyProvider {
     /**
      * Legacy format consisting of multiple header-separated sections holding
      * colon-separated values. Latest indicated version number
@@ -38,7 +38,7 @@ public enum DataFileFormat implements JsonNetworkInformationKeyProvider {
     }
 
     @Override
-    public String getJsonNetworkInformationKey() {
+    public String getNetworkInformationDataKey() {
         return jsonNetworkInformationKey;
     }
 }

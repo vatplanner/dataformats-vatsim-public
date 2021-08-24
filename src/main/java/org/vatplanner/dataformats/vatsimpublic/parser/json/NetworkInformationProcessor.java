@@ -9,7 +9,10 @@ import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
+import org.vatplanner.dataformats.vatsimpublic.parser.NetworkInformationDataKeyProvider;
 import org.vatplanner.dataformats.vatsimpublic.parser.NetworkInformation;
+import org.vatplanner.dataformats.vatsimpublic.parser.OnlineTransceiversFile;
 import org.vatplanner.dataformats.vatsimpublic.parser.Parser;
 
 import com.github.cliftonlabs.json_simple.JsonArray;
@@ -26,7 +29,13 @@ public class NetworkInformationProcessor implements Parser<NetworkInformation> {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkInformationProcessor.class);
 
     private static enum RootLevelKey implements JsonKey {
-        DATA_FILES("data"),
+        /**
+         * <code>data</code> files are not actually {@link DataFile}s but can be any
+         * other information as well, such as {@link OnlineTransceivers}. Keys should be
+         * made available by enumerations implementing
+         * {@link JsonNetworkInformationKeyProvider}.
+         */
+        DATA("data"),
         METAR("metar"),
         USER_STATISTICS("user");
 
@@ -65,10 +74,10 @@ public class NetworkInformationProcessor implements Parser<NetworkInformation> {
 
             JsonHelpers.processMandatoryUnsafe( //
                 root::getMap, //
-                RootLevelKey.DATA_FILES, //
+                RootLevelKey.DATA, // not necessarily DataFiles, see JavaDoc
                 (Consumer<Map<String, JsonArray>>) x -> addAllAsStringsToMapping(
                     x,
-                    out::addAsDataFileUrl //
+                    out::addAsDataUrl //
                 ) //
             );
 

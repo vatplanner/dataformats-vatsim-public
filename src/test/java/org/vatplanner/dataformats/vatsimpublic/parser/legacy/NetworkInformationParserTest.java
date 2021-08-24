@@ -342,7 +342,7 @@ public class NetworkInformationParserTest {
         NetworkInformation res = NetworkInformationParser.parse(br);
 
         // Assert
-        List<URL> dataFileUrls = res.getDataFileUrls(DataFileFormat.LEGACY);
+        List<URL> dataFileUrls = res.getDataUrls(DataFileFormat.LEGACY);
 
         assertThat(dataFileUrls.size(), is(3));
         assertThat(dataFileUrls.get(0), is(equalTo(new URL("http://where-ever.com/fetchme.txt"))));
@@ -359,7 +359,7 @@ public class NetworkInformationParserTest {
         NetworkInformation res = NetworkInformationParser.parse(br);
 
         // Assert
-        List<URL> dataFileUrls = res.getDataFileUrls(DataFileFormat.JSON3);
+        List<URL> dataFileUrls = res.getDataUrls(DataFileFormat.JSON3);
 
         assertThat(dataFileUrls.size(), is(3));
         assertThat(dataFileUrls.get(0), is(equalTo(new URL("http://where-ever.com/fetchme.json"))));
