@@ -3,18 +3,19 @@ package org.vatplanner.dataformats.vatsimpublic.parser;
 /**
  * High-level identification of data file formats.
  */
-public enum DataFileFormat {
+public enum DataFileFormat implements JsonNetworkInformationKeyProvider {
     /**
      * Legacy format consisting of multiple header-separated sections holding
      * colon-separated values. Latest indicated version number
      * {@link DataFileMetaData#getVersionFormat()} was 9, rolled back to indicate 8
      * (data still was version 9) after client compatibility issues. Deprecated
-     * since November 2020, pending service termination in 2021.
+     * since November 2020, terminated after 6 April 2021 23:12:05 UTC.
      */
     LEGACY(Constants.LEGACY_JSON_KEY),
 
     /**
-     * JSON format with structure version 3. Introduced in November 2020.
+     * JSON format with structure version 3. Introduced in November 2020. The format
+     * may be extended at any time without its version number increasing.
      */
     JSON3("v3");
 
@@ -36,13 +37,7 @@ public enum DataFileFormat {
         this.jsonNetworkInformationKey = jsonNetworkInformationKey;
     }
 
-    /**
-     * Returns the key used to identify the {@link DataFileFormat} on JSON-based
-     * {@link NetworkInformation} files.
-     * 
-     * @return key used to identify the {@link DataFileFormat} on JSON-based
-     *         {@link NetworkInformation} files
-     */
+    @Override
     public String getJsonNetworkInformationKey() {
         return jsonNetworkInformationKey;
     }
