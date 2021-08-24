@@ -19,6 +19,7 @@ Implemented:
     - `NetworkInformation` holds basic meta data such as URLs concerning data feed and other VATSIM services and is provided through initial `status.txt` or `status.json` files
     - `DataFile`s (the so called "data feed") contain all ATC stations & pilots currently online as well as pre-filed flight plans and can be parsed from publicly accessible JSON data feed file. Legacy `vatsim-data.txt` files are also still supported.
     - legacy version 8/9 and JSON v3 formats are supported
+  - VATSIM online transceivers
   - [VAT-Spy data](https://github.com/vatsimnetwork/vatspy-data-project):
     - `VatSpyFileParser` parses the `VATSpy.dat` file holding information about countries, airports, FIRs/UIRs and the international date line
     - `FIRBoundaryFileParser` parses the `FIRBoundaries.dat` file holding more detailed sector information and outlines
@@ -31,7 +32,6 @@ Implemented:
 
 Planned:
 
-- parsing of online transceiver list (due to be implemented very soon)
 - parsing of EuroScope sector files (defining VATSIM air spaces and airport ground layouts)
 - encoding of `NetworkInformation` and `DataFile` to JSON formats
 - privacy filter to help removing personal information from data files
