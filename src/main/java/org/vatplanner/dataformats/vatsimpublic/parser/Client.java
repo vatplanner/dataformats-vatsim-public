@@ -7,6 +7,7 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.BarometricPressur
 import org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.PilotRating;
+import org.vatplanner.dataformats.vatsimpublic.extraction.AircraftTypeExtractor;
 
 /**
  * Combines information about VATSIM online pilots, prefiled flight plans and
@@ -123,7 +124,9 @@ public class Client {
     private int groundSpeed = -1;
 
     // filing
-    private String aircraftType = ""; // B738/M, H/A332/X, B737
+    private String aircraftType = ""; // mixed format like A332, H/A332/X, A332/H-SDE3GHIJ2J3J5M1RVWXY/LB2D1
+    private String aircraftTypeFaa = ""; // legacy format like B738/M, H/A332/X, B737
+    private String aircraftTypeShort = ""; // only ICAO aircraft type like B738, A332, B737
     private int filedTrueAirSpeed = 0;
     private String filedDepartureAirportCode = "";
     private String rawFiledAltitude = ""; // 30000, FL300, F300, maybe even worse raw user input (don't pilot clients
@@ -458,15 +461,36 @@ public class Client {
      * sure).
      * </p>
      * <p>
-     * While ICAO aircraft type codes are supposed to be used with equipment code as
-     * suffix and optional wake category as prefix (separated by forward slashes)
-     * the actual format and value of this field is not reliable as it is an
-     * informal free-text field and sometimes contains alternate/IATA codes or
-     * common mistakes (such as B77W for a Boeing 777 which is neither a valid ICAO
-     * nor IATA code).
+     * Different forms/applications create a wild variation of formats in this
+     * user-controlled field. For example, the official 2020 prefiling form (when
+     * used properly or prefilled by flight planning tools) posts machine-readable
+     * equipment detail information such as
+     * <code>A332/H-SDE3GHIJ2J3J5M1RVWXY/LB2D1</code>. When entered manually in
+     * pilot clients or the old prefiling form, pilots may enter just the basic ICAO
+     * code like <code>A332</code> or use the legacy format combining an optional
+     * wake category as prefix and a simpler FAA-like equipment code as suffix which
+     * results in a format like <code>H/A332/X</code>.
      * </p>
      * <p>
-     * <strong>Example values:</strong> B738/M, H/A332/X, B737
+     * All aircraft type codes are more or less unreliable and may contain all kinds
+     * of errors: Detailed equipment codes may be generic and not correspond to the
+     * actual capabilities of the simulated environment. As prefiling forms usually
+     * contain free-text fields the aircraft type sometimes may contain
+     * alternate/IATA codes or other common mistakes as well (such as B77W for a
+     * Boeing 777 which is neither a valid ICAO nor IATA code). User-supplied wake
+     * categories may also be wrong and sometimes the field will even hold just
+     * plain text instead of codes altogether.
+     * </p>
+     * <p>
+     * <strong>Example values:</strong> <code>B738/M</code>, <code>H/A332/X</code>,
+     * <code>B737</code>, <code>A332/H-SDE3GHIJ2J3J5M1RVWXY/LB2D1</code>
+     * </p>
+     * <p>
+     * {@link AircraftTypeExtractor} can be used to parse this information.
+     * Alternatively, since 2021 JSON v3 format provides additional fields
+     * containing official extractions of just the ICAO type code (such as
+     * <code>B737</code>) and a translation to the legacy FAA-style code (like
+     * <code>B738/M</code> or <code>H/A332/X</code>).
      * </p>
      * <p>
      * While it does not make any sense for ATC to file flight plans, such data can
@@ -476,6 +500,9 @@ public class Client {
      *
      * @return aircraft type; may deviate from wake/ICAO-type/equipment syntax and
      *         value; empty if unavailable
+     * @see AircraftTypeExtractor
+     * @see #getAircraftTypeFaa()
+     * @see #getAircraftTypeShort()
      */
     public String getAircraftType() {
         return aircraftType;
@@ -483,6 +510,67 @@ public class Client {
 
     public void setAircraftType(String aircraftType) {
         this.aircraftType = aircraftType;
+    }
+
+    /**
+     * Returns the aircraft type in a uniform FAA-style format.
+     * <p>
+     * {@link #getAircraftType()} provides the original input which may use various
+     * formats while this field contains a conversion to the old FAA-style format of
+     * wake category prefix, ICAO type and FAA-style equipment code suffix. See the
+     * JavaDoc on {@link #getAircraftType()} for a detailed description.
+     * </p>
+     * <p>
+     * <strong>Example values:</strong> <code>B738/M</code>, <code>H/A332/X</code>,
+     * <code>H/A332</code>
+     * </p>
+     * <p>
+     * It is not known if this field is being sanitized by VATSIM. If in doubt,
+     * expect the information to be equally unreliable as the original input.
+     * </p>
+     * <p>
+     * The field can be split using {@link AircraftTypeExtractor}.
+     * </p>
+     *
+     * @return FAA-style aircraft type; empty if unavailable
+     * @see AircraftTypeExtractor
+     * @see #getAircraftType()
+     * @see #getAircraftTypeShort()
+     */
+    public String getAircraftTypeFaa() {
+        return aircraftTypeFaa;
+    }
+
+    public void setAircraftTypeFaa(String aircraftTypeFaa) {
+        this.aircraftTypeFaa = aircraftTypeFaa;
+    }
+
+    /**
+     * Returns only the actual ICAO aircraft type without wake category or any
+     * equipment codes.
+     * <p>
+     * {@link #getAircraftType()} provides the original input which may use various
+     * formats while this field contains only the extracted ICAO type code. See the
+     * JavaDoc on {@link #getAircraftType()} for a detailed description.
+     * </p>
+     * <p>
+     * <strong>Example values:</strong> <code>B738</code>, <code>A332</code>
+     * </p>
+     * <p>
+     * It is not known if this field is being sanitized by VATSIM. If in doubt,
+     * expect the information to be equally unreliable as the original input.
+     * </p>
+     *
+     * @return ICAO aircraft type code; empty if unavailable
+     * @see #getAircraftType()
+     * @see #getAircraftTypeFaa()
+     */
+    public String getAircraftTypeShort() {
+        return aircraftTypeShort;
+    }
+
+    public void setAircraftTypeShort(String aircraftTypeShort) {
+        this.aircraftTypeShort = aircraftTypeShort;
     }
 
     /**

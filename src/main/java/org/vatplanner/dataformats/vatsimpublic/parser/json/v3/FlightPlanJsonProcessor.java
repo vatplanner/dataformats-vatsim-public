@@ -19,6 +19,8 @@ public class FlightPlanJsonProcessor {
     private static enum Key implements JsonKey {
         FLIGHT_PLAN_TYPE("flight_rules"),
         AIRCRAFT_TYPE("aircraft"),
+        AIRCRAFT_TYPE_FAA("aircraft_faa"),
+        AIRCRAFT_TYPE_SHORT("aircraft_short"),
         DEPARTURE_AIRPORT_CODE("departure"),
         DESTINATION_AIRPORT_CODE("arrival"),
         ALTERNATE_AIRPORT_CODE("alternate"),
@@ -62,6 +64,22 @@ public class FlightPlanJsonProcessor {
             sectionName, //
             logCollector, //
             target::setAircraftType //
+        );
+
+        JsonHelpers.processOptional( //
+            object::getString, //
+            Key.AIRCRAFT_TYPE_FAA, //
+            sectionName, //
+            logCollector, //
+            target::setAircraftTypeFaa //
+        );
+
+        JsonHelpers.processOptional( //
+            object::getString, //
+            Key.AIRCRAFT_TYPE_SHORT, //
+            sectionName, //
+            logCollector, //
+            target::setAircraftTypeShort //
         );
 
         JsonHelpers.processMandatory( //

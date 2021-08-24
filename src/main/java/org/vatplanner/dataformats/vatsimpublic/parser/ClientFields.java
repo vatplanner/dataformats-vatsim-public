@@ -28,6 +28,8 @@ public class ClientFields {
         CALLSIGN(Client::getCallsign), //
         REAL_NAME(Client::getRealName), //
         AIRCRAFT_TYPE(Client::getAircraftType), //
+        AIRCRAFT_TYPE_FAA(Client::getAircraftTypeFaa), //
+        AIRCRAFT_TYPE_SHORT(Client::getAircraftTypeShort), //
         FILED_DEPARTURE_AIRPORT_CODE(Client::getFiledDepartureAirportCode), //
         RAW_FILED_ALTITUDE(Client::getRawFiledAltitude), //
         FILED_DESTINATION_AIRPORT_CODE(Client::getFiledDestinationAirportCode), //
