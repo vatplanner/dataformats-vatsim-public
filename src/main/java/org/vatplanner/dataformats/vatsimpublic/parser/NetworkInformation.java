@@ -205,7 +205,7 @@ public class NetworkInformation {
      * </p>
      *
      * @return URLs to retrieve a copy of the current data file from
-     * @deprecated use {@link #getDataUrls(DataFileFormat)} or
+     * @deprecated use {@link #getDataUrls(NetworkInformationDataKeyProvider)} or
      *             {@link #getAllUrlsByDataKey()} instead
      */
     @Deprecated
