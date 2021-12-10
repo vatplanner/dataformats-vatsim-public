@@ -24,9 +24,11 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 
-		<slf4j.version>1.7.21</slf4j.version>
-		<jsonSimple.version>3.1.1</jsonSimple.version>
+		<!-- runtime dependencies -->
+		<slf4j.version>[1.7.21,1.7.999]</slf4j.version>
+		<jsonSimple.version>[3.1.1,4.0.999]</jsonSimple.version>
 
+		<!-- test dependencies -->
 		<junit.version>5.7.1</junit.version>
 		<assertj.version>3.19.0</assertj.version>
 		<junitDataprovider.version>1.11.0</junitDataprovider.version>
@@ -34,6 +36,7 @@
 		<mockito.version>2.17.0</mockito.version>
 		<slf4jTest.version>1.2.0</slf4jTest.version>
 
+		<!-- build dependencies -->
 		<maven.compiler.version>3.8.1</maven.compiler.version>
 		<maven.source.version>3.2.0</maven.source.version>
 		<maven.javadoc.version>3.2.0</maven.javadoc.version>
