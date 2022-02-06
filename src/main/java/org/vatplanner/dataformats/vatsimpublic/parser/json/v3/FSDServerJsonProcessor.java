@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vatplanner.dataformats.vatsimpublic.parser.FSDServer;
+import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntryCollector;
 import org.vatplanner.dataformats.vatsimpublic.parser.json.JsonHelpers;
 
@@ -18,7 +19,8 @@ public class FSDServerJsonProcessor {
     static final String SECTION_NAME = "servers";
 
     private static enum Key implements JsonKey {
-        CLIENT_CONNECTION_ALLOWED("clients_connection_allowed"),
+        CLIENT_CONNECTION_ALLOWED_INTEGER("clients_connection_allowed"), // legacy field holding an unknown integer
+        CLIENT_CONNECTION_ALLOWED_BOOLEAN("client_connections_allowed"), // new field holding an actual boolean
         SWEATBOX("is_sweatbox"),
         ADDRESS("hostname_or_ip"),
         ID("ident"),
@@ -97,16 +99,38 @@ public class FSDServerJsonProcessor {
 
         JsonHelpers.processMandatory( //
             object::getInteger, //
-            Key.CLIENT_CONNECTION_ALLOWED, //
+            Key.CLIENT_CONNECTION_ALLOWED_INTEGER, //
             SECTION_NAME, //
             logCollector, //
-            this::parseClientConnectionAllowed //
+            this::parseClientConnectionAllowedInteger //
         ).ifPresent(out::setClientConnectionAllowed);
+
+        JsonHelpers.getOptional( //
+            object::getBoolean, //
+            Key.CLIENT_CONNECTION_ALLOWED_BOOLEAN, //
+            SECTION_NAME, //
+            logCollector //
+        ).ifPresent(booleanAllowed -> {
+            // Extra check: This field duplicates the legacy one for which we could only
+            // guess what the integer meant. Report any ambiguity but always trust the
+            // boolean if present.
+            if (booleanAllowed != out.isClientConnectionAllowed()) {
+                logCollector.addParserLogEntry(new ParserLogEntry(
+                    SECTION_NAME, //
+                    "content at " + Key.CLIENT_CONNECTION_ALLOWED_BOOLEAN.key, //
+                    false, //
+                    "server \"" + out.getId()
+                        + "\" has a different boolean indication for allowed client connections than legacy integer value suggests; trusting the boolean", //
+                    null //
+                ));
+            }
+            out.setClientConnectionAllowed(booleanAllowed);
+        });
 
         return out;
     }
 
-    private boolean parseClientConnectionAllowed(int clientConnectionAllowed) {
+    private boolean parseClientConnectionAllowedInteger(int clientConnectionAllowed) {
         /*
          * Only value 1 has been seen so far and on legacy format we assumed this to be
          * a boolean flag although it could also be a minimum permission level, quota or
@@ -127,7 +151,7 @@ public class FSDServerJsonProcessor {
                 LOGGER.warn( //
                     "Unknown value {} for {}, assuming connections are allowed.", //
                     clientConnectionAllowed, //
-                    Key.CLIENT_CONNECTION_ALLOWED.getKey() //
+                    Key.CLIENT_CONNECTION_ALLOWED_INTEGER.getKey() //
                 );
                 return true;
         }
