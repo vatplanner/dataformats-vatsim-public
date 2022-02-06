@@ -144,6 +144,7 @@ public class ClientParser {
      * @return all parsed data in a {@link Client} object
      * @throws IllegalArgumentException if parsing for given line fails
      */
+    @SuppressWarnings("deprecation")
     public Client parse(String line) throws IllegalArgumentException {
         Matcher matcher = PATTERN_LINE.matcher(line);
         if (!matcher.matches()) {
