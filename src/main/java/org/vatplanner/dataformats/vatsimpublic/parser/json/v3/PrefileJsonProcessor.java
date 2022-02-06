@@ -1,6 +1,5 @@
 package org.vatplanner.dataformats.vatsimpublic.parser.json.v3;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -8,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vatplanner.dataformats.vatsimpublic.parser.Client;
 import org.vatplanner.dataformats.vatsimpublic.parser.ClientType;
+import org.vatplanner.dataformats.vatsimpublic.parser.ParserHelpers;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntryCollector;
 import org.vatplanner.dataformats.vatsimpublic.parser.json.JsonHelpers;
 
@@ -97,7 +97,7 @@ public class PrefileJsonProcessor {
             Key.LAST_UPDATED, //
             location, //
             logCollector, //
-            Instant::parse //
+            ParserHelpers::parseToInstantUtc //
         ).ifPresent(out::setLastUpdated);
 
         JsonHelpers.processMandatory( //

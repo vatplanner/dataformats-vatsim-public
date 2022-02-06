@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.util.Optional;
 
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
+import org.vatplanner.dataformats.vatsimpublic.parser.ParserHelpers;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntryCollector;
 import org.vatplanner.dataformats.vatsimpublic.parser.json.JsonHelpers;
@@ -105,7 +106,7 @@ public class GeneralSectionJsonProcessor {
         Optional<Instant> customTimestamp = JsonHelpers.processMandatory(generalRoot::getString, Key.UPDATE,
             SECTION_NAME, logCollector, this::parseCustomTimestamp);
         Optional<Instant> isoTimestamp = JsonHelpers.processMandatory(generalRoot::getString, Key.UPDATE_TIMESTAMP,
-            SECTION_NAME, logCollector, Instant::parse);
+            SECTION_NAME, logCollector, ParserHelpers::parseToInstantUtc);
 
         if (!customTimestamp.isPresent() && isoTimestamp.isPresent()) {
             logCollector.addParserLogEntry(new ParserLogEntry( //

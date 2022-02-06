@@ -1,6 +1,10 @@
 package org.vatplanner.dataformats.vatsimpublic.parser;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeParseException;
 
 /**
  * Provides commonly used VATSIM-specific parsing helper methods.
@@ -103,4 +107,28 @@ public class ParserHelpers {
 
         return parseDuration(hoursString, minutesString, isMandatory);
     }
+
+    /**
+     * Tries to parse the given string via {@link Instant#parse(CharSequence)} and
+     * retries with {@link LocalDateTime#parse(CharSequence)} if first attempt
+     * failed. The {@link LocalDateTime} is assumed to be UTC and returned as an
+     * {@link Instant}.
+     * <p>
+     * This has become necessary after VATSIM rolled out the "Velocity" update at
+     * end of January 2022 and some clients (new protocols in effect requiring
+     * updates to all clients) started showing up in data files omitting the time
+     * zone information.
+     * </p>
+     * 
+     * @param s string to be parsed
+     * @return parsed {@link Instant}, assuming UTC for {@link LocalDateTime}s
+     */
+    public static Instant parseToInstantUtc(CharSequence s) {
+        try {
+            return Instant.parse(s);
+        } catch (DateTimeParseException ex) {
+            return LocalDateTime.parse(s).toInstant(ZoneOffset.UTC);
+        }
+    }
+
 }

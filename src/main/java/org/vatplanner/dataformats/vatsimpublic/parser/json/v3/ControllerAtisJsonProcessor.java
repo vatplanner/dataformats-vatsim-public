@@ -2,7 +2,6 @@ package org.vatplanner.dataformats.vatsimpublic.parser.json.v3;
 
 import static java.lang.Integer.parseUnsignedInt;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +13,7 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
 import org.vatplanner.dataformats.vatsimpublic.parser.Client;
 import org.vatplanner.dataformats.vatsimpublic.parser.ClientType;
+import org.vatplanner.dataformats.vatsimpublic.parser.ParserHelpers;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntryCollector;
 import org.vatplanner.dataformats.vatsimpublic.parser.json.JsonHelpers;
 
@@ -192,7 +192,7 @@ public class ControllerAtisJsonProcessor {
             Key.LAST_UPDATED, //
             sectionName, //
             logCollector, //
-            Instant::parse //
+            ParserHelpers::parseToInstantUtc //
         ).ifPresent(out::setLastUpdated);
 
         JsonHelpers.processMandatory( //
@@ -200,7 +200,7 @@ public class ControllerAtisJsonProcessor {
             Key.LOGON_TIME, //
             sectionName, //
             logCollector, //
-            Instant::parse //
+            ParserHelpers::parseToInstantUtc //
         ).ifPresent(out::setLogonTime);
 
         if (clientType == ClientType.ATIS) {
