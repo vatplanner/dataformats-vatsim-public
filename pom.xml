@@ -7,7 +7,7 @@
 	<artifactId>dataformats-vatsim-public</artifactId>
 	<name>VATSIM Public Data Formats</name>
 	<description>library for parsing and processing publicly accessible VATSIM data formats</description>
-	<version>0.1-pre220206</version>
+	<version>0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<url>https://github.com/vatplanner/dataformats-vatsim-public</url>
