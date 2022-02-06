@@ -19,6 +19,7 @@ public class FSDServerJsonProcessor {
 
     private static enum Key implements JsonKey {
         CLIENT_CONNECTION_ALLOWED("clients_connection_allowed"),
+        SWEATBOX("is_sweatbox"),
         ADDRESS("hostname_or_ip"),
         ID("ident"),
         LOCATION("location"),
@@ -84,6 +85,14 @@ public class FSDServerJsonProcessor {
             SECTION_NAME, //
             logCollector, //
             out::setLocation //
+        );
+
+        JsonHelpers.processOptional( //
+            object::getBoolean, //
+            Key.SWEATBOX, //
+            SECTION_NAME, //
+            logCollector, //
+            out::setSweatbox //
         );
 
         JsonHelpers.processMandatory( //

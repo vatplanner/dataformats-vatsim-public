@@ -17,6 +17,7 @@ public class FSDServer {
     private String location;
     private String name;
     private boolean clientConnectionAllowed;
+    private boolean isSweatbox = false;
 
     /**
      * Returns the identification ("system name") of the described server.
@@ -90,6 +91,25 @@ public class FSDServer {
     public FSDServer setClientConnectionAllowed(boolean clientConnectionAllowed) {
         this.clientConnectionAllowed = clientConnectionAllowed;
         return this;
+    }
+
+    /**
+     * Indicates if this server is a sweatbox (ATC training environment running
+     * simulated scenarios, not used for live traffic).
+     * <p>
+     * This field was only introduced at end of 2021 in JSON v3 format. Previously,
+     * sweatbox servers were not announced publicly at all in data files, so the
+     * default if the field is not available is to indicate false.
+     * </p>
+     * 
+     * @return true if this is a sweatbox server, false if not
+     */
+    public boolean isSweatbox() {
+        return isSweatbox;
+    }
+
+    public void setSweatbox(boolean isSweatbox) {
+        this.isSweatbox = isSweatbox;
     }
 
     @Override
