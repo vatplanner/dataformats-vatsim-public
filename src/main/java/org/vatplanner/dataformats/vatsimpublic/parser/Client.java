@@ -153,6 +153,7 @@ public class Client {
     private String filedAlternateAirportCode = "";
     private String flightPlanRemarks = "";
     private String filedRoute = "";
+    private int assignedTransponderCodeDecimal = -1;
 
     @Deprecated
     private double departureAirportLatitude = Double.NaN; // seems unused, always 0
@@ -753,12 +754,19 @@ public class Client {
      * by ATC. Connected pilots without a transponder code can be encountered.
      * </p>
      * <p>
-     * Prefiled flight plans and ATC are never setting transponder codes.
+     * Prefiled flight plans never set transponder codes. However, transponder codes
+     * assigned by ATC appear in the flight plan after it has been processed by ATC,
+     * see {@link #getAssignedTransponderCodeDecimal()}. That indication was first
+     * noticed at end of 2021 in JSON v3 format and should not be misinterpreted as
+     * the actual code. Legacy format did not have such knowledge so only the actual
+     * active transponder code should be used there.
      * </p>
      *
-     * @return decimal numeric transponder code, needs left-padding to 4 digits to
-     *         reconstruct spoken code; negative if unavailable; may exceed 4 digits
-     *         (code is supposedly invalid)
+     * @return decimal numeric transponder code as currently assigned to an aircraft
+     *         by its pilot, needs left-padding to 4 digits to reconstruct spoken
+     *         code; negative if unavailable; may exceed 4 digits (code is
+     *         supposedly invalid)
+     * @see #getAssignedTransponderCodeDecimal()
      */
     public int getTransponderCodeDecimal() {
         return transponderCodeDecimal;
@@ -1281,5 +1289,37 @@ public class Client {
 
     public void setPilotRating(PilotRating pilotRating) {
         this.pilotRating = pilotRating;
+    }
+
+    /**
+     * Returns the transponder code in numeric decimal representation last assigned
+     * by ATC.
+     * <p>
+     * See {@link #getTransponderCodeDecimal()} for a full explanation of
+     * transponder codes, basically the same rules apply here as well. -1 indicates
+     * no information but 0 can be indicated while no code has been assigned yet.
+     * </p>
+     * <p>
+     * The difference to {@link #getTransponderCodeDecimal()} is that the assigned
+     * codes in flight plans are what ATC instructs a pilot to set while the
+     * actually active transponder code is still controlled by the pilot.
+     * </p>
+     * <p>
+     * This field was first noticed at end of 2021 in JSON v3 format. This
+     * information has never been transported before and thus should not be
+     * transferred to legacy formats.
+     * </p>
+     * 
+     * @return decimal numeric transponder code assigned (wanted) by ATC, needs
+     *         left-padding to 4 digits to reconstruct spoken code; negative if
+     *         unavailable, zero if not set
+     * @see #getTransponderCodeDecimal()
+     */
+    public int getAssignedTransponderCodeDecimal() {
+        return assignedTransponderCodeDecimal;
+    }
+
+    public void setAssignedTransponderCodeDecimal(int assignedTransponderCodeDecimal) {
+        this.assignedTransponderCodeDecimal = assignedTransponderCodeDecimal;
     }
 }

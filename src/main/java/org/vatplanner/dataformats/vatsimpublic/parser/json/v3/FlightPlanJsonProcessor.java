@@ -31,7 +31,8 @@ public class FlightPlanJsonProcessor {
         TIME_ENROUTE("enroute_time"),
         TIME_FUEL("fuel_time"),
         REMARKS("remarks"),
-        ROUTE("route");
+        ROUTE("route"),
+        ASSIGNED_TRANSPONDER("assigned_transponder");
 
         private final String key;
 
@@ -170,6 +171,15 @@ public class FlightPlanJsonProcessor {
             logCollector, //
             target::setFiledRoute //
         );
+
+        JsonHelpers.processOptional( //
+            object::getString, //
+            Key.ASSIGNED_TRANSPONDER, //
+            String.class, //
+            sectionName, //
+            logCollector, //
+            (Function<String, Integer>) Integer::parseUnsignedInt //
+        ).ifPresent(target::setAssignedTransponderCodeDecimal);
     }
 
     // TODO: unit tests
