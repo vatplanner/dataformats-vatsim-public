@@ -43,6 +43,10 @@
 		<maven.gpg.version>1.6</maven.gpg.version>
 		<maven.nexusStaging.version>1.6.7</maven.nexusStaging.version>
 		<maven.surefire.version>3.0.0-M5</maven.surefire.version>
+
+		<!-- QA -->
+		<sonar.organization>vatplanner</sonar.organization>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	</properties>
 
 	<scm>
