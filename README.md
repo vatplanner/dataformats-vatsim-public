@@ -1,6 +1,5 @@
 # Data Format Parsers & Entities for Publicly Available VATSIM Information
 
-[![Build Status](https://travis-ci.com/vatplanner/dataformats-vatsim-public.svg?branch=master)](https://travis-ci.com/vatplanner/dataformats-vatsim-public)
 [![Coverage Status](https://coveralls.io/repos/github/vatplanner/dataformats-vatsim-public/badge.svg?branch=master)](https://coveralls.io/github/vatplanner/dataformats-vatsim-public?branch=master)
 [![Maven Central](https://img.shields.io/maven-central/v/org.vatplanner/dataformats-vatsim-public.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22org.vatplanner%22%20AND%20a:%22dataformats-vatsim-public%22)
 [![JavaDoc](https://javadoc.io/badge2/org.vatplanner/dataformats-vatsim-public/javadoc.svg)](https://javadoc.io/doc/org.vatplanner/dataformats-vatsim-public)
