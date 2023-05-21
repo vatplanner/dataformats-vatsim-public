@@ -196,6 +196,7 @@
 				<artifactId>coveralls-maven-plugin</artifactId>
 				<version>4.3.0</version>
 				<configuration>
+					<branch>${env.coveralls_branch}</branch>
 					<repoToken>${env.coveralls_token}</repoToken>
 				</configuration>
 			</plugin>
