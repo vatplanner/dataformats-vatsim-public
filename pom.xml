@@ -45,6 +45,7 @@
 		<maven.surefire.version>3.0.0-M5</maven.surefire.version>
 
 		<!-- QA -->
+		<jacoco.version>0.8.0</jacoco.version>
 		<sonar.organization>vatplanner</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	</properties>
@@ -198,24 +199,34 @@
 					<repoToken>${env.coveralls_token}</repoToken>
 				</configuration>
 			</plugin>
-
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.0</version>
-				<executions>
-					<execution>
-						<id>prepare-agent</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 
 	<profiles>
+		<profile>
+			<id>jacoco</id>
+			<activation>
+				<!-- use -P !jacoco to disable -->
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>${jacoco.version}</version>
+						<executions>
+							<execution>
+								<id>prepare-agent</id>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 		<profile>
 			<id>release</id>
 			<build>
