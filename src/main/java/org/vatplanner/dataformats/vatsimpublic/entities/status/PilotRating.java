@@ -78,7 +78,25 @@ public enum PilotRating {
      * the standard (and legal requirement) in scheduled airline operations. Builds
      * upon {@link #CMEL}.
      */
-    ATPL("ATPL");
+    ATPL("ATPL"),
+
+    /**
+     * VATSIM equivalent to a "Flight Instructor". This rating allows holders to
+     * provide official training for the VATSIM Pilot Training Department (PTD),
+     * similar to an real-world "Certified Flight Instructor" (CFI). VATSIM-specific
+     * details are described in documents PTD 1001, PTD 1600 and PTD 4001, which can
+     * be retrieved after login to my.vatsim.net.
+     */
+    FI("FI"),
+
+    /**
+     * VATSIM equivalent to a "Flight Examiner". As in the real-world, holders of
+     * this rating are allowed to conduct skill tests to certify pilots, i.e. issue
+     * ratings to pilots. VATSIM-specific details are described in documents PTD
+     * 1001, PTD 1100 and PTD 4001, which can be retrieved after login to
+     * my.vatsim.net.
+     */
+    FE("FE");
 
     private final String shortName;
 
