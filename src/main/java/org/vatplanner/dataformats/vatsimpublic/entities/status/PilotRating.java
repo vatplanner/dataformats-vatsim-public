@@ -20,7 +20,7 @@ import java.util.Map;
  * optional and pilots on VATSIM are still able to fly by simply uncertified
  * self-education.
  * </p>
- * 
+ *
  * <p>
  * While VATSIM pilot ratings still can be mapped to a bit mask of levels from
  * P0 to P4 (see forum posts linked below) the newly introduced naming scheme
@@ -29,18 +29,26 @@ import java.util.Map;
  * level P5 has been removed in the 2020 relaunch. Enums provided by this class
  * thus refer to the pseudo-license level names instead.
  * </p>
- * 
+ *
  * <p>
- * It appears that no publicly accessible policy has been published that would
- * describe the new ratings. For more information on pilot ratings as of 2020
- * see the following announcements and forum posts:
+ * For more information on pilot ratings as of 2020 see the following announcements
+ * and forum posts:
  * </p>
  * 
  * <ul>
- * <li><a href="https://www.vatsim.net/news/restructuring-pilot-rating-system">https://www.vatsim.net/news/restructuring-pilot-rating-system</a></li>
+ * <li><a href="https://web.archive.org/web/20220528234319/https://www.vatsim.net/news/restructuring-pilot-rating-system">VATSIM News "Restructuring of the Pilot Rating System"</a> from 17 March 2020 on archive.org (28 May 2022)</li>
  * <li><a href="https://forums.vatsim.net/topic/28712-new-vatsim-rating/?do=findComment&amp;comment=166767">https://forums.vatsim.net/topic/28712-new-vatsim-rating/?do=findComment&amp;comment=166767</a></li>
  * <li><a href="https://forums.vatsim.net/topic/28695-vatsim-webmasters-and-pilot-ratings/?do=findComment&amp;comment=166638">https://forums.vatsim.net/topic/28695-vatsim-webmasters-and-pilot-ratings/?do=findComment&amp;comment=166638</a></li>
  * </ul>
+ *
+ * <p>
+ * {@link #FI} and {@link #FE} were added in <a href="https://tech.vatsim.net/blog/vatsim_services/new_pilot_ratings">May 2023</a>
+ * but may only start to be seen used in 2024 as policy documents indicate certification has not started.
+ * </p>
+ *
+ * <p>
+ * Policy documents are available from <a href="https://my.vatsim.net/">my.vatsim.net</a> after login.
+ * </p>
  */
 //@formatter:on
 public enum PilotRating {
