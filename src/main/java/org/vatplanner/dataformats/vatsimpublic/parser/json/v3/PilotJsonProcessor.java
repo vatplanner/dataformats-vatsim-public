@@ -7,6 +7,7 @@ import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.MilitaryRating;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.PilotRating;
 import org.vatplanner.dataformats.vatsimpublic.parser.Client;
 import org.vatplanner.dataformats.vatsimpublic.parser.ClientType;
@@ -25,11 +26,13 @@ public class PilotJsonProcessor {
 
     private final FlightPlanJsonProcessor flightPlanProcessor;
     private final Map<Integer, PilotRating> pilotRatingByJsonId;
+    private final Map<Integer, MilitaryRating> militaryRatingByJsonId;
 
     private static enum Key implements JsonKey {
         VATSIM_ID("cid"),
         REAL_NAME("name"),
         PILOT_RATING("pilot_rating"),
+        MILITARY_RATING("military_rating"),
         CALLSIGN("callsign"),
         SERVER_ID("server"),
         LATITUDE("latitude"),
@@ -61,9 +64,11 @@ public class PilotJsonProcessor {
         }
     }
 
-    public PilotJsonProcessor(FlightPlanJsonProcessor flightPlanProcessor, Map<Integer, PilotRating> pilotRatingByJsonId) {
+    public PilotJsonProcessor(FlightPlanJsonProcessor flightPlanProcessor, Map<Integer, PilotRating> pilotRatingByJsonId,
+                              Map<Integer, MilitaryRating> militaryRatingByJsonId) {
         this.flightPlanProcessor = flightPlanProcessor;
         this.pilotRatingByJsonId = pilotRatingByJsonId;
+        this.militaryRatingByJsonId = militaryRatingByJsonId;
     }
 
     public List<Client> deserializeMultiple(JsonArray array, ParserLogEntryCollector logCollector) {
@@ -115,6 +120,14 @@ public class PilotJsonProcessor {
             logCollector, //
             pilotRatingByJsonId::get //
         ).ifPresent(out::setPilotRating);
+
+        JsonHelpers.processMandatory( //
+            object::getInteger, //
+            Key.MILITARY_RATING, //
+            location, //
+            logCollector, //
+            militaryRatingByJsonId::get //
+        ).ifPresent(out::setMilitaryRating);
 
         JsonHelpers.processMandatory( //
             object::getString, //

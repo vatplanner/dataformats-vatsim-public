@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.MilitaryRating;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.PilotRating;
 import org.vatplanner.dataformats.vatsimpublic.parser.Client;
 import org.vatplanner.dataformats.vatsimpublic.parser.ClientType;
@@ -35,6 +36,7 @@ public class DataFileProcessor implements Parser<DataFile> {
         SERVERS("servers"),
         RATINGS("ratings"),
         PILOT_RATINGS("pilot_ratings"),
+        MILITARY_RATINGS("military_ratings"),
         FACILITIES("facilities"),
         ATIS("atis"),
         CONTROLLERS("controllers"),
@@ -144,12 +146,28 @@ public class DataFileProcessor implements Parser<DataFile> {
                     ) //
             ).orElse(new HashMap<Integer, PilotRating>());
 
+            Map<Integer, MilitaryRating> militaryRatingByJsonId = JsonHelpers.processMandatory( //
+                root::getCollection, //
+                RootLevelKey.MILITARY_RATINGS, //
+                JsonArray.class, //
+                RootLevelKey.MILITARY_RATINGS.getKey(), //
+                out, //
+                (Function<JsonArray, Map<Integer, MilitaryRating>>) x -> longKeyIdNameMappingProcessor
+                    .deserializeMappingFromJsonId( //
+                        x, //
+                        MilitaryRating::resolveShortName, //
+                        MilitaryRating.values(), //
+                        RootLevelKey.MILITARY_RATINGS.getKey(), //
+                        out //
+                    ) //
+            ).orElse(new HashMap<Integer, MilitaryRating>());
+
             ArrayList<Client> clients = new ArrayList<Client>();
             ControllerAtisJsonProcessor atisProcessor = new ControllerAtisJsonProcessor(ClientType.ATIS,
                 facilityTypeByJsonId, controllerRatingByJsonId);
             ControllerAtisJsonProcessor controllerProcessor = new ControllerAtisJsonProcessor(ClientType.ATC_CONNECTED,
                 facilityTypeByJsonId, controllerRatingByJsonId);
-            PilotJsonProcessor pilotProcessor = new PilotJsonProcessor(flightPlanProcessor, pilotRatingByJsonId);
+            PilotJsonProcessor pilotProcessor = new PilotJsonProcessor(flightPlanProcessor, pilotRatingByJsonId, militaryRatingByJsonId);
 
             JsonHelpers.processMandatory( //
                 root::getCollection, //

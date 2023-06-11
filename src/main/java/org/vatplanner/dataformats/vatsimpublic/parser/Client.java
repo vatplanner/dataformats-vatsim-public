@@ -6,6 +6,7 @@ import java.time.Instant;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.BarometricPressure;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.FacilityType;
+import org.vatplanner.dataformats.vatsimpublic.entities.status.MilitaryRating;
 import org.vatplanner.dataformats.vatsimpublic.entities.status.PilotRating;
 import org.vatplanner.dataformats.vatsimpublic.extraction.AircraftTypeExtractor;
 
@@ -183,6 +184,7 @@ public class Client {
     private double qnhInchMercury = Double.NaN;
     private int qnhHectopascal = -1;
     private PilotRating pilotRating;
+    private MilitaryRating militaryRating;
 
     /**
      * Returns the call sign the client is being identified by. The call sign is
@@ -1289,6 +1291,25 @@ public class Client {
 
     public void setPilotRating(PilotRating pilotRating) {
         this.pilotRating = pilotRating;
+    }
+
+    /**
+     * Returns the pilot's military rating at time of session. Military ratings are only
+     * available starting from May 2023.
+     *
+     * <p>
+     * See {@link MilitaryRating} for a detailed explanation.
+     * </p>
+     *
+     * @return pilot's military rating at time of session; null if unavailable (only
+     * available since May 2023)
+     */
+    public MilitaryRating getMilitaryRating() {
+        return militaryRating;
+    }
+
+    public void setMilitaryRating(MilitaryRating militaryRating) {
+        this.militaryRating = militaryRating;
     }
 
     /**
