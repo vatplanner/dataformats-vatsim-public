@@ -6,6 +6,10 @@ import java.util.Optional;
  * Helper methods to work with {@link Optional}s.
  */
 public class Optionals {
+    private Optionals() {
+        // utility class, hide constructor
+    }
+
     /**
      * Tests if all given {@link Optional}s are present.
      * Returns false if no {@link Optional}s are provided or at least one is not present.
