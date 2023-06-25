@@ -12,7 +12,9 @@ public class GeoPoint2D {
     // TODO: add static method to create normalized point by modulo
 
     public GeoPoint2D(double latitude, double longitude) {
-        // TODO: reject out of range values
+        OutOfRange.throwIfNotWithinIncluding("latitude", latitude, -90.0, 90.0);
+        OutOfRange.throwIfNotWithinIncluding("longitude", longitude, -180.0, 180.0);
+
         // TODO: unify full longitude deflection? (-180 equals 180 for same latitude)
         this.latitude = latitude;
         this.longitude = longitude;

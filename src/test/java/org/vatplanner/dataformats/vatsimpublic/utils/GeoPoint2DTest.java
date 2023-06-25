@@ -1,15 +1,68 @@
 package org.vatplanner.dataformats.vatsimpublic.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.stream.Stream;
 
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class GeoPoint2DTest {
+    @ParameterizedTest
+    @ValueSource(doubles = {91.0, 90.0001, -90.0001, -91.0})
+    void testConstructor_latitudeOutOfRange_throwsOutOfRange(double latitude) {
+        // Arrange (nothing to do)
+
+        // Act
+        ThrowingCallable action = () -> new GeoPoint2D(latitude, 0.0);
+
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(OutOfRange.class);
+    }
+
+    @ParameterizedTest
+    @ValueSource(doubles = {90.0000, 0.0, -90.0000})
+    void testConstructor_validLatitude_retainsValue(double expectedLatitude) {
+        // Arrange (nothing to do)
+
+        // Act
+        GeoPoint2D result = new GeoPoint2D(expectedLatitude, 0.0);
+
+        // Assert
+        assertThat(result).extracting(GeoPoint2D::getLatitude)
+                          .isEqualTo(expectedLatitude);
+    }
+
+    @ParameterizedTest
+    @ValueSource(doubles = {181.0, 180.0001, -180.0001, -181.0})
+    void testConstructor_longitudeOutOfRange_throwsOutOfRange(double longitude) {
+        // Arrange (nothing to do)
+
+        // Act
+        ThrowingCallable action = () -> new GeoPoint2D(0.0, longitude);
+
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(OutOfRange.class);
+    }
+
+    @ParameterizedTest
+    @ValueSource(doubles = {180.0000, 0.0, -180.0000})
+    void testConstructor_validLongitude_retainsValue(double expecteLongitude) {
+        // Arrange (nothing to do)
+
+        // Act
+        GeoPoint2D result = new GeoPoint2D(0.0, expecteLongitude);
+
+        // Assert
+        assertThat(result).extracting(GeoPoint2D::getLongitude)
+                          .isEqualTo(expecteLongitude);
+    }
+
     @Test
     void testEquals_null_returnsFalse() {
         // Arrange

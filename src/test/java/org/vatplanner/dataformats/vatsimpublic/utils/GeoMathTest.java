@@ -1,7 +1,6 @@
 package org.vatplanner.dataformats.vatsimpublic.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Arrays;
@@ -9,13 +8,10 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.vatplanner.dataformats.vatsimpublic.utils.GeoMath.OutOfRange;
 
 class GeoMathTest {
 
@@ -65,22 +61,6 @@ class GeoMathTest {
 
         // Assert
         assertCloseTo(result, expectedResult, acceptedError);
-    }
-
-    @ParameterizedTest
-    @ValueSource(doubles = {90.001, -90.001, 180.0, 359.9, 360.1})
-    void testAverage_excessiveLatitude_throwsOutOfRange(double excessiveLatitude) {
-        // Arrange
-        Collection<GeoPoint2D> points = Arrays.asList(
-            new GeoPoint2D(excessiveLatitude, 0.0),
-            new GeoPoint2D(0.0, 0.0) //
-        );
-
-        // Act
-        ThrowingCallable action = () -> GeoMath.average(points);
-
-        // Assert
-        assertThatThrownBy(action).isInstanceOf(OutOfRange.class);
     }
 
     private void assertCloseTo(GeoPoint2D actual, GeoPoint2D expected, Offset<Double> acceptedError) {

@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.vatplanner.dataformats.vatsimpublic.parser.Parser;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
 import org.vatplanner.dataformats.vatsimpublic.utils.GeoPoint2D;
+import org.vatplanner.dataformats.vatsimpublic.utils.OutOfRange;
 
 /**
  * Parser for the <code>FIRBoundaries.dat</code> file of VAT-Spy.
@@ -122,24 +123,36 @@ public class FIRBoundaryFileParser implements Parser<FIRBoundaryFile> {
                         continue;
                     }
 
-                    boundary = new FIRBoundary(
-                        matcher.group(ID),
-                        matcher.group(OCEANIC).equals("1"),
-                        matcher.group(EXTENSION).equals("1"),
-                        new GeoPoint2D(
-                            Double.parseDouble(matcher.group(BOUNDS_LATITUDE_MIN)),
-                            Double.parseDouble(matcher.group(BOUNDS_LONGITUDE_MIN)) //
-                        ),
-                        new GeoPoint2D(
-                            Double.parseDouble(matcher.group(BOUNDS_LATITUDE_MAX)),
-                            Double.parseDouble(matcher.group(BOUNDS_LONGITUDE_MAX)) //
-                        ),
-                        new GeoPoint2D(
-                            Double.parseDouble(matcher.group(CENTER_LATITUDE)),
-                            Double.parseDouble(matcher.group(CENTER_LONGITUDE)) //
-                        ),
-                        points //
-                    );
+                    try {
+                        boundary = new FIRBoundary(
+                            matcher.group(ID),
+                            matcher.group(OCEANIC).equals("1"),
+                            matcher.group(EXTENSION).equals("1"),
+                            new GeoPoint2D(
+                                Double.parseDouble(matcher.group(BOUNDS_LATITUDE_MIN)),
+                                Double.parseDouble(matcher.group(BOUNDS_LONGITUDE_MIN)) //
+                            ),
+                            new GeoPoint2D(
+                                Double.parseDouble(matcher.group(BOUNDS_LATITUDE_MAX)),
+                                Double.parseDouble(matcher.group(BOUNDS_LONGITUDE_MAX)) //
+                            ),
+                            new GeoPoint2D(
+                                Double.parseDouble(matcher.group(CENTER_LATITUDE)),
+                                Double.parseDouble(matcher.group(CENTER_LONGITUDE)) //
+                            ),
+                            points //
+                        );
+                    } catch (OutOfRange ex) {
+                        out.addParserLogEntry(new ParserLogEntry(
+                            null,
+                            line,
+                            true,
+                            "Out of range data in FIR " + matcher.group(ID),
+                            ex
+                        ));
+                        continue;
+                    }
+
                     remainingPoints = Integer.parseUnsignedInt(matcher.group(POINTS));
                     out.add(boundary);
                 }
@@ -167,5 +180,4 @@ public class FIRBoundaryFileParser implements Parser<FIRBoundaryFile> {
 
         return out;
     }
-
 }
