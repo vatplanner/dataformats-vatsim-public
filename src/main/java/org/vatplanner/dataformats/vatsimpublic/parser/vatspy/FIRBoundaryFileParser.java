@@ -10,6 +10,9 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,6 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.vatplanner.dataformats.vatsimpublic.parser.Parser;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
 import org.vatplanner.dataformats.vatsimpublic.utils.GeoPoint2D;
+import org.vatplanner.dataformats.vatsimpublic.utils.GeoPoint2DMode;
+import org.vatplanner.dataformats.vatsimpublic.utils.Optionals;
 import org.vatplanner.dataformats.vatsimpublic.utils.OutOfRange;
 
 /**
@@ -68,7 +73,7 @@ public class FIRBoundaryFileParser implements Parser<FIRBoundaryFile> {
         int remainingPoints = 0;
 
         FIRBoundaryFile out = new FIRBoundaryFile();
-        GeoPoint2DParser pointParser = new GeoPoint2DParser();
+        GeoPoint2DParser pointParser = new GeoPoint2DParser(GeoPoint2DMode.NORMALIZE);
 
         try {
             String line;
@@ -123,35 +128,51 @@ public class FIRBoundaryFileParser implements Parser<FIRBoundaryFile> {
                         continue;
                     }
 
-                    try {
-                        boundary = new FIRBoundary(
-                            matcher.group(ID),
-                            matcher.group(OCEANIC).equals("1"),
-                            matcher.group(EXTENSION).equals("1"),
-                            new GeoPoint2D(
-                                Double.parseDouble(matcher.group(BOUNDS_LATITUDE_MIN)),
-                                Double.parseDouble(matcher.group(BOUNDS_LONGITUDE_MIN)) //
-                            ),
-                            new GeoPoint2D(
-                                Double.parseDouble(matcher.group(BOUNDS_LATITUDE_MAX)),
-                                Double.parseDouble(matcher.group(BOUNDS_LONGITUDE_MAX)) //
-                            ),
-                            new GeoPoint2D(
-                                Double.parseDouble(matcher.group(CENTER_LATITUDE)),
-                                Double.parseDouble(matcher.group(CENTER_LONGITUDE)) //
-                            ),
-                            points //
-                        );
-                    } catch (OutOfRange ex) {
+                    Optional<GeoPoint2D> boundsMinimum = createPoint(
+                        matcher.group(BOUNDS_LATITUDE_MIN), matcher.group(BOUNDS_LONGITUDE_MIN),
+                        out::addParserLogEntry,
+                        () -> "FIRBoundary header " + matcher.group(ID) + " bounds min",
+                        GeoPoint2DMode.STRICT,
+                        GeoPoint2DMode.NORMALIZE
+                    );
+
+                    Optional<GeoPoint2D> boundsMaximum = createPoint(
+                        matcher.group(BOUNDS_LATITUDE_MAX), matcher.group(BOUNDS_LONGITUDE_MAX),
+                        out::addParserLogEntry,
+                        () -> "FIRBoundary header " + matcher.group(ID) + " bounds max",
+                        GeoPoint2DMode.STRICT,
+                        GeoPoint2DMode.NORMALIZE
+                    );
+
+                    Optional<GeoPoint2D> center = createPoint(
+                        matcher.group(CENTER_LATITUDE), matcher.group(CENTER_LONGITUDE),
+                        out::addParserLogEntry,
+                        () -> "FIRBoundaries header " + matcher.group(ID) + " center",
+                        GeoPoint2DMode.STRICT,
+                        GeoPoint2DMode.NORMALIZE,
+                        GeoPoint2DMode.WRAP
+                    );
+
+                    if (!Optionals.allPresent(boundsMinimum, boundsMaximum, center)) {
                         out.addParserLogEntry(new ParserLogEntry(
-                            null,
+                            "FIRBoundaries header " + matcher.group(ID),
                             line,
                             true,
-                            "Out of range data in FIR " + matcher.group(ID),
-                            ex
+                            "at least one header coordinate for FIR " + matcher.group(ID) + " is missing, boundary will not be loaded",
+                            null
                         ));
                         continue;
                     }
+
+                    boundary = new FIRBoundary(
+                        matcher.group(ID),
+                        matcher.group(OCEANIC).equals("1"),
+                        matcher.group(EXTENSION).equals("1"),
+                        boundsMinimum.get(),
+                        boundsMaximum.get(),
+                        center.get(),
+                        points //
+                    );
 
                     remainingPoints = Integer.parseUnsignedInt(matcher.group(POINTS));
                     out.add(boundary);
@@ -179,5 +200,47 @@ public class FIRBoundaryFileParser implements Parser<FIRBoundaryFile> {
         }
 
         return out;
+    }
+
+    /**
+     * Tries to create a {@link GeoPoint2D} from given coordinates using all {@link GeoPoint2DMode}s in order.
+     * The first mode is expected to be the normal case. All further modes are fallbacks and will cause log messages
+     * even if the line can finally be accepted. If all attempts at creating a {@link GeoPoint2D} fail, the line will be
+     * logged as rejected and an empty {@link Optional} will be returned.
+     *
+     * @param latitude     latitude to be processed
+     * @param longitude    longitude to be processed
+     * @param logCollector receives a {@link ParserLogEntry} in case of a processing warning or error
+     * @param logSection   must provide the section name to be used to identify the {@link ParserLogEntry}
+     * @param modes        allowed modes, in descending order of preference; first mode is expected normal case
+     * @return point if any of the modes succeeded; empty if not
+     */
+    private Optional<GeoPoint2D> createPoint(String latitude, String longitude, Consumer<ParserLogEntry> logCollector, Supplier<String> logSection, GeoPoint2DMode... modes) {
+        ParserLogEntry logEntry = null;
+        GeoPoint2D point = null;
+
+        for (int i = 0; i < modes.length; i++) {
+            GeoPoint2DMode mode = modes[i];
+            boolean isLastAttempt = (i >= modes.length - 1);
+
+            try {
+                point = mode.createPoint(latitude, longitude);
+                break;
+            } catch (OutOfRange ex) {
+                logEntry = new ParserLogEntry(
+                    logSection.get(),
+                    null,
+                    isLastAttempt,
+                    ex.getMessage(),
+                    ex
+                );
+            }
+        }
+
+        if (logEntry != null) {
+            logCollector.accept(logEntry);
+        }
+
+        return Optional.ofNullable(point);
     }
 }

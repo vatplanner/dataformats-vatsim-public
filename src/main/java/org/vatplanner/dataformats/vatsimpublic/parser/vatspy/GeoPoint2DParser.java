@@ -8,14 +8,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.vatplanner.dataformats.vatsimpublic.utils.GeoPoint2D;
+import org.vatplanner.dataformats.vatsimpublic.utils.GeoPoint2DMode;
 
 public class GeoPoint2DParser implements Function<String, GeoPoint2D> {
+    private final GeoPoint2DMode mode;
+
     private static final Pattern PATTERN = Pattern.compile(
         "(" + SUBPATTERN_FLOATING_POINT + ")\\|(" + SUBPATTERN_FLOATING_POINT + ")" //
             + SUBPATTERN_OPTIONAL_INLINE_COMMENT //
     );
     private static final int LATITUDE = 1;
     private static final int LONGITUDE = 2;
+
+    public GeoPoint2DParser(GeoPoint2DMode mode) {
+        this.mode = mode;
+    }
 
     @Override
     public GeoPoint2D apply(String t) {
@@ -24,10 +31,9 @@ public class GeoPoint2DParser implements Function<String, GeoPoint2D> {
             throw new IllegalArgumentException("Data does not match pattern: \"" + t + "\"");
         }
 
-        return new GeoPoint2D(
-            Double.parseDouble(matcher.group(LATITUDE)),
-            Double.parseDouble(matcher.group(LONGITUDE)) //
-        );
-    }
+        double latitude = Double.parseDouble(matcher.group(LATITUDE));
+        double longitude = Double.parseDouble(matcher.group(LONGITUDE));
 
+        return mode.createPoint(latitude, longitude);
+    }
 }
