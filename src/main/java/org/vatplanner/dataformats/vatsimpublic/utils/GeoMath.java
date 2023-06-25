@@ -14,13 +14,13 @@ public class GeoMath {
     }
 
     /**
-     * Calculates the average center of given points. Implemented using the formula
-     * described on <a href=
-     * "https://carto.com/blog/center-of-points/">https://carto.com/blog/center-of-points/</a>.
+     * Calculates the average center of given points. Implemented using the formula described on
+     * <a href="https://web.archive.org/web/20221205184246/https://carto.com/blog/center-of-points/">
+     * https://carto.com/blog/center-of-points/ [archive.org, retrieved 5 Dec 2022]
+     * </a>.
      *
      * @param points points to calculate average center for, must not be empty
      * @return center point calculated by average
-     * @throws OutOfRange if latitude is not within bounds of &plusmn; 90&deg;
      */
     public static GeoPoint2D average(Collection<GeoPoint2D> points) {
         int numPoints = points.size();
