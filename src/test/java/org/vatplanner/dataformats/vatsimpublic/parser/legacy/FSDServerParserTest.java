@@ -1,47 +1,40 @@
 package org.vatplanner.dataformats.vatsimpublic.parser.legacy;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.vatplanner.dataformats.vatsimpublic.parser.FSDServer;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-
-@RunWith(DataProviderRunner.class)
-public class FSDServerParserTest {
+class FSDServerParserTest {
 
     private FSDServerParser parser;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         parser = new FSDServerParser();
     }
 
-    @Test
-    @DataProvider({ "", "ident:hostname:location:name:1", "ident:hostname:location:name:1:1:" })
-    public void testParse_genericFormatViolation_throwsIllegalArgumentException(String erroneousLine) {
-        // Arrange
-        thrown.expect(IllegalArgumentException.class);
+    @ParameterizedTest
+    @ValueSource(strings = {"", "ident:hostname:location:name:1", "ident:hostname:location:name:1:1:"})
+    void testParse_genericFormatViolation_throwsIllegalArgumentException(String erroneousLine) {
+        // Arrange (nothing to do)
 
         // Act
-        parser.parse(erroneousLine);
+        ThrowingCallable action = () -> parser.parse(erroneousLine);
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
-    @DataProvider({ "id1", "another ID" })
-    public void testParse_validIdent_returnsObjectWithExpectedId(String expectedId) {
+    @ParameterizedTest
+    @ValueSource(strings = {"id1", "another ID"})
+    void testParse_validIdent_returnsObjectWithExpectedId(String expectedId) {
         // Arrange
         String line = String.format("%s:hostname:location:name:1:", expectedId);
 
@@ -49,24 +42,25 @@ public class FSDServerParserTest {
         FSDServer result = parser.parse(line);
 
         // Assert
-        assertThat(result.getId(), is(equalTo(expectedId)));
+        assertThat(result).extracting(FSDServer::getId)
+                          .isEqualTo(expectedId);
     }
 
     @Test
-    public void testParse_withoutIdent_throwsIllegalArgumentException() {
+    void testParse_withoutIdent_throwsIllegalArgumentException() {
         // Arrange
         String erroneousLine = ":hostname:location:name:1:";
-        thrown.expect(IllegalArgumentException.class);
 
         // Act
-        parser.parse(erroneousLine);
+        ThrowingCallable action = () -> parser.parse(erroneousLine);
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
-    @DataProvider({ "hostname", "some.other.host.name", "123.45.67.89" })
-    public void testParse_validHostnameOrIp_returnsObjectWithExpectedAddress(String expectedAddress) {
+    @ParameterizedTest
+    @ValueSource(strings = {"hostname", "some.other.host.name", "123.45.67.89"})
+    void testParse_validHostnameOrIp_returnsObjectWithExpectedAddress(String expectedAddress) {
         // Arrange
         String line = String.format("someId:%s:location:name:1:", expectedAddress);
 
@@ -74,24 +68,25 @@ public class FSDServerParserTest {
         FSDServer result = parser.parse(line);
 
         // Assert
-        assertThat(result.getAddress(), is(equalTo(expectedAddress)));
+        assertThat(result).extracting(FSDServer::getAddress)
+                          .isEqualTo(expectedAddress);
     }
 
     @Test
-    public void testParse_withoutHostnameOrIp_throwsIllegalArgumentException() {
+    void testParse_withoutHostnameOrIp_throwsIllegalArgumentException() {
         // Arrange
         String erroneousLine = "someId::location:name:1:";
-        thrown.expect(IllegalArgumentException.class);
 
         // Act
-        parser.parse(erroneousLine);
+        ThrowingCallable action = () -> parser.parse(erroneousLine);
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
-    @DataProvider({ "Location", "My Location", "My Location, Somewhere" })
-    public void testParse_validLocation_returnsObjectWithExpectedLocation(String expectedLocation) {
+    @ParameterizedTest
+    @ValueSource(strings = {"Location", "My Location", "My Location, Somewhere"})
+    void testParse_validLocation_returnsObjectWithExpectedLocation(String expectedLocation) {
         // Arrange
         String line = String.format("someId:hostname:%s:name:1:", expectedLocation);
 
@@ -99,24 +94,25 @@ public class FSDServerParserTest {
         FSDServer result = parser.parse(line);
 
         // Assert
-        assertThat(result.getLocation(), is(equalTo(expectedLocation)));
+        assertThat(result).extracting(FSDServer::getLocation)
+                          .isEqualTo(expectedLocation);
     }
 
     @Test
-    public void testParse_withoutLocation_throwsIllegalArgumentException() {
+    void testParse_withoutLocation_throwsIllegalArgumentException() {
         // Arrange
         String erroneousLine = "someId:hostname::name:1:";
-        thrown.expect(IllegalArgumentException.class);
 
         // Act
-        parser.parse(erroneousLine);
+        ThrowingCallable action = () -> parser.parse(erroneousLine);
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
-    @DataProvider({ "Simple Name", "special chars -.,%$!\" and numbers 0123456789 are ok too" })
-    public void testParse_validName_returnsObjectWithExpectedName(String expectedName) {
+    @ParameterizedTest
+    @ValueSource(strings = {"Simple Name", "special chars -.,%$!\" and numbers 0123456789 are ok too"})
+    void testParse_validName_returnsObjectWithExpectedName(String expectedName) {
         // Arrange
         String line = String.format("someId:hostname:location:%s:1:", expectedName);
 
@@ -124,24 +120,28 @@ public class FSDServerParserTest {
         FSDServer result = parser.parse(line);
 
         // Assert
-        assertThat(result.getName(), is(equalTo(expectedName)));
+        assertThat(result).extracting(FSDServer::getName)
+                          .isEqualTo(expectedName);
     }
 
     @Test
-    public void testParse_withoutName_throwsIllegalArgumentException() {
+    void testParse_withoutName_throwsIllegalArgumentException() {
         // Arrange
         String erroneousLine = "someId:hostname:location::1:";
-        thrown.expect(IllegalArgumentException.class);
 
         // Act
-        parser.parse(erroneousLine);
+        ThrowingCallable action = () -> parser.parse(erroneousLine);
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
-    @DataProvider({ "0, false", "1, true" })
-    public void testParse_validFlagForClientsConnectionAllowed_returnsObjectWithExpectedConnectionFlag(String inputFlag, boolean expectedOutputFlag) {
+    @ParameterizedTest
+    @CsvSource({
+        "0, false",
+        "1, true"
+    })
+    void testParse_validFlagForClientsConnectionAllowed_returnsObjectWithExpectedConnectionFlag(String inputFlag, boolean expectedOutputFlag) {
         // Arrange
         String line = String.format("someId:hostname:location:name:%s:", inputFlag);
 
@@ -149,19 +149,20 @@ public class FSDServerParserTest {
         FSDServer result = parser.parse(line);
 
         // Assert
-        assertThat(result.isClientConnectionAllowed(), is(equalTo(expectedOutputFlag)));
+        assertThat(result).extracting(FSDServer::isClientConnectionAllowed)
+                          .isEqualTo(expectedOutputFlag);
     }
 
-    @Test
-    @DataProvider({ "", "-1", "2", "a", "10", "01" })
-    public void testParse_invalidFlagsForClientsConnectionAllowed_throwsIllegalArgumentException(String invalidFlag) {
+    @ParameterizedTest
+    @ValueSource(strings = {"", "-1", "2", "a", "10", "01"})
+    void testParse_invalidFlagsForClientsConnectionAllowed_throwsIllegalArgumentException(String invalidFlag) {
         // Arrange
         String erroneousLine = String.format("someId:hostname:location:name:%s:", invalidFlag);
-        thrown.expect(IllegalArgumentException.class);
 
         // Act
-        parser.parse(erroneousLine);
+        ThrowingCallable action = () -> parser.parse(erroneousLine);
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(IllegalArgumentException.class);
     }
 }

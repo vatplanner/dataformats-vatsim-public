@@ -1,52 +1,43 @@
 package org.vatplanner.dataformats.vatsimpublic.privacyfilter;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.vatplanner.dataformats.vatsimpublic.testutils.DataProviderHelpers.allEnumValuesExcept;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.vatplanner.dataformats.vatsimpublic.parser.ClientFields;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
-
-@RunWith(DataProviderRunner.class)
-public class SubstituteObserverPrefixFilterTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class SubstituteObserverPrefixFilterTest {
 
     private SubstituteObserverPrefixFilter filter;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         filter = new SubstituteObserverPrefixFilter();
     }
 
     @Test
-    public void testGetAffectedFields_always_returnsOnlyCallsign() {
+    void testGetAffectedFields_always_returnsOnlyCallsign() {
         // Arrange (nothing to do)
 
         // Act
         Set<ClientFields.FieldAccess<String>> result = filter.getAffectedFields();
 
         // Assert
-        assertThat(result, contains(ClientFields.StringFields.CALLSIGN));
+        assertThat(result).containsExactly(ClientFields.StringFields.CALLSIGN);
     }
 
-    @Test
-    @DataProvider({
+    @ParameterizedTest
+    @CsvSource({
         // no _OBS suffix and unmodified => OK
-        ", , true",
+        "'', '', true",
         "ABC123, ABC123, true",
         "OBS0815, OBS0815, true",
         "A_OBSI, A_OBSI, true", //
@@ -69,35 +60,34 @@ public class SubstituteObserverPrefixFilterTest {
         "ABC123, XX_OBS, false", //
         "A_OBSI, XX_OBS, false"
     })
-    public void testVerify_handledField_returnsExpectedResult(String original, String filtered, boolean expectedResult) {
+    void testVerify_handledField_returnsExpectedResult(String original, String filtered, boolean expectedResult) {
         // Arrange (nothing to do)
 
         // Act
         boolean result = filter.verifyAffectedField(ClientFields.StringFields.CALLSIGN, original, filtered);
 
         // Assert
-        assertThat(result, is(expectedResult));
+        assertThat(result).isEqualTo(expectedResult);
     }
 
-    @DataProvider
-    public static Object[][] dataProviderUnhandledClientStringFields() {
-        return allEnumValuesExcept(ClientFields.StringFields.class, ClientFields.StringFields.CALLSIGN);
-    }
-
-    @Test
-    @UseDataProvider("dataProviderUnhandledClientStringFields")
-    public void testVerifyAffectedField_unhandledField_throwsException(ClientFields.FieldAccess<String> fieldAccess) {
-        // Arrange
-        thrown.expect(Exception.class);
+    @ParameterizedTest
+    @EnumSource(
+        value = ClientFields.StringFields.class,
+        mode = EnumSource.Mode.EXCLUDE,
+        names = {"CALLSIGN"}
+    )
+    void testVerifyAffectedField_unhandledField_throwsException(ClientFields.FieldAccess<String> fieldAccess) {
+        // Arrange (nothing to do)
 
         // Act
-        filter.verifyAffectedField(fieldAccess, "AB_OBS", "XX_OBS");
+        ThrowingCallable action = () -> filter.verifyAffectedField(fieldAccess, "AB_OBS", "XX_OBS");
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(Exception.class);
     }
 
-    @Test
-    @DataProvider({
+    @ParameterizedTest
+    @CsvSource({
         // full online examples (pilots)
         // - no suffix => remain unmodified
         "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:SOME COMMENT /v/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:, UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:SOME COMMENT /v/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
@@ -126,29 +116,29 @@ public class SubstituteObserverPrefixFilterTest {
         "ABC:123:JD_OBS:, ABC:123:JD_OBS:",
         "JD_OBS:123:JD_OBS:, XX_OBS:123:JD_OBS:"
     })
-    public void testApply_handledFormat_substitutesCallsignOnExpectedSuffix(String input, String expectedOutput) {
+    void testApply_handledFormat_substitutesCallsignOnExpectedSuffix(String input, String expectedOutput) {
         // Arrange (nothing to do)
 
         // Act
         String output = filter.apply(input);
 
         // Assert
-        assertThat(output, is(equalTo(expectedOutput)));
+        assertThat(output).isEqualTo(expectedOutput);
     }
 
-    @Test
-    @DataProvider({
+    @ParameterizedTest
+    @ValueSource(strings = {
         "",
         "ABC",
         "JD_OBS" // without a field separator this is expected not to be processed
     })
-    public void testApply_unhandledFormat_returnsInputUnmodified(String input) {
+    void testApply_unhandledFormat_returnsInputUnmodified(String input) {
         // Arrange (nothing to do)
 
         // Act
         String output = filter.apply(input);
 
         // Assert
-        assertThat(output, is(equalTo(input)));
+        assertThat(output).isEqualTo(input);
     }
 }

@@ -1,69 +1,64 @@
 package org.vatplanner.dataformats.vatsimpublic.utils;
 
 import static java.util.Arrays.asList;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.vatplanner.dataformats.vatsimpublic.testutils.OptionalMatchers.emptyOptional;
-import static org.vatplanner.dataformats.vatsimpublic.testutils.OptionalMatchers.optionalOf;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
-
-@RunWith(DataProviderRunner.class)
-public class CollectionHelpersTest {
+class CollectionHelpersTest {
 
     @Test
-    public void testFindPrevious_emptyCollection_returnsEmpty() {
+    void testFindPrevious_emptyCollection_returnsEmpty() {
         // Arrange
-        List<Integer> empty = asList();
+        List<Integer> empty = Collections.emptyList();
 
         // Act
         Optional<Integer> result = CollectionHelpers.findPrevious(empty, 0);
 
         // Assert
-        assertThat(result, is(emptyOptional()));
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void testFindPrevious_noPreviousItem_returnsEmpty() {
+    void testFindPrevious_noPreviousItem_returnsEmpty() {
         // Arrange
         Integer needle = 0;
-        List<Integer> empty = asList(needle);
+        List<Integer> empty = Collections.singletonList(needle);
 
         // Act
         Optional<Integer> result = CollectionHelpers.findPrevious(empty, needle);
 
         // Assert
-        assertThat(result, is(emptyOptional()));
+        assertThat(result).isEmpty();
     }
 
-    @DataProvider
-    public static Object[][] dataProviderFindPrevious() {
-        return new Object[][] {
-            { asList(0, 1), 1, 0 },
-            { asList(0, 1, 2), 2, 1 },
-            { asList(5, 23, 42, 73), 23, 5 },
-            { asList(5, 23, 42, 73), 42, 23 },
-            { asList(5, 23, 42, 73), 73, 42 }
-        };
+    static Stream<Arguments> dataProviderFindPrevious() {
+        return Stream.of(
+            Arguments.of(asList(0, 1), 1, 0),
+            Arguments.of(asList(0, 1, 2), 2, 1),
+            Arguments.of(asList(5, 23, 42, 73), 23, 5),
+            Arguments.of(asList(5, 23, 42, 73), 42, 23),
+            Arguments.of(asList(5, 23, 42, 73), 73, 42)
+        );
     }
 
-    @Test
-    @UseDataProvider("dataProviderFindPrevious")
-    public void testFindPrevious_inCollection_returnsExpectedElement(List<Integer> haystack, Integer needle, Integer expectedResult) {
+    @ParameterizedTest
+    @MethodSource("dataProviderFindPrevious")
+    void testFindPrevious_inCollection_returnsExpectedElement(List<Integer> haystack, Integer needle, Integer expectedResult) {
         // Arrange (nothing to do)
 
         // Act
         Optional<Integer> result = CollectionHelpers.findPrevious(haystack, needle);
 
         // Assert
-        assertThat(result, is(optionalOf(expectedResult)));
+        assertThat(result).contains(expectedResult);
     }
 }

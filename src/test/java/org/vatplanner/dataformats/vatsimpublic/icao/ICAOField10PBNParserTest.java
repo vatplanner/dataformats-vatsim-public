@@ -1,23 +1,17 @@
 package org.vatplanner.dataformats.vatsimpublic.icao;
 
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-
-@RunWith(DataProviderRunner.class)
-public class ICAOField10PBNParserTest {
+class ICAOField10PBNParserTest {
 
     @Test
-    public void testGetCommunicationCapabilities_null_returnsEmpty() {
+    void testGetCommunicationCapabilities_null_returnsEmpty() {
         // Arrange
         ICAOField10PBNParser parser = new ICAOField10PBNParser(null);
 
@@ -25,11 +19,11 @@ public class ICAOField10PBNParserTest {
         Set<CommunicationCapability> result = parser.getCommunicationCapabilities();
 
         // Assert
-        assertThat(result, is(empty()));
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void testGetNavigationApproachCapabilities_null_returnsEmpty() {
+    void testGetNavigationApproachCapabilities_null_returnsEmpty() {
         // Arrange
         ICAOField10PBNParser parser = new ICAOField10PBNParser(null);
 
@@ -37,11 +31,11 @@ public class ICAOField10PBNParserTest {
         Set<NavigationApproachCapability> result = parser.getNavigationApproachCapabilities();
 
         // Assert
-        assertThat(result, is(empty()));
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void testHasTransponder_null_returnsTrue() {
+    void testHasTransponder_null_returnsTrue() {
         // Arrange
         ICAOField10PBNParser parser = new ICAOField10PBNParser(null);
 
@@ -49,11 +43,11 @@ public class ICAOField10PBNParserTest {
         boolean result = parser.hasTransponder();
 
         // Assert
-        assertThat(result, is(true));
+        assertThat(result).isTrue();
     }
 
     @Test
-    public void testGetCommunicationCapabilities_empty_returnsEmpty() {
+    void testGetCommunicationCapabilities_empty_returnsEmpty() {
         // Arrange
         ICAOField10PBNParser parser = new ICAOField10PBNParser("");
 
@@ -61,11 +55,11 @@ public class ICAOField10PBNParserTest {
         Set<CommunicationCapability> result = parser.getCommunicationCapabilities();
 
         // Assert
-        assertThat(result, is(empty()));
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void testGetNavigationApproachCapabilities_empty_returnsEmpty() {
+    void testGetNavigationApproachCapabilities_empty_returnsEmpty() {
         // Arrange
         ICAOField10PBNParser parser = new ICAOField10PBNParser("");
 
@@ -73,11 +67,11 @@ public class ICAOField10PBNParserTest {
         Set<NavigationApproachCapability> result = parser.getNavigationApproachCapabilities();
 
         // Assert
-        assertThat(result, is(empty()));
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void testHasTransponder_empty_returnsTrue() {
+    void testHasTransponder_empty_returnsTrue() {
         // Arrange
         ICAOField10PBNParser parser = new ICAOField10PBNParser("");
 
@@ -85,11 +79,11 @@ public class ICAOField10PBNParserTest {
         boolean result = parser.hasTransponder();
 
         // Assert
-        assertThat(result, is(true));
+        assertThat(result).isTrue();
     }
 
     @Test
-    public void testGetCommunicationCapabilities_empty10a_returnsEmpty() {
+    void testGetCommunicationCapabilities_empty10a_returnsEmpty() {
         // Arrange
         ICAOField10PBNParser parser = new ICAOField10PBNParser("/S");
 
@@ -97,11 +91,11 @@ public class ICAOField10PBNParserTest {
         Set<CommunicationCapability> result = parser.getCommunicationCapabilities();
 
         // Assert
-        assertThat(result, is(empty()));
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void testGetNavigationApproachCapabilities_empty10a_returnsEmpty() {
+    void testGetNavigationApproachCapabilities_empty10a_returnsEmpty() {
         // Arrange
         ICAOField10PBNParser parser = new ICAOField10PBNParser("/S");
 
@@ -109,11 +103,11 @@ public class ICAOField10PBNParserTest {
         Set<NavigationApproachCapability> result = parser.getNavigationApproachCapabilities();
 
         // Assert
-        assertThat(result, is(empty()));
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void testHasTransponder_empty10a_returnsTrue() {
+    void testHasTransponder_empty10a_returnsTrue() {
         // Arrange
         ICAOField10PBNParser parser = new ICAOField10PBNParser("/S");
 
@@ -121,11 +115,11 @@ public class ICAOField10PBNParserTest {
         boolean result = parser.hasTransponder();
 
         // Assert
-        assertThat(result, is(true));
+        assertThat(result).isTrue();
     }
 
     @Test
-    public void testGetCommunicationCapabilities_missing10b_returnsNonEmpty() {
+    void testGetCommunicationCapabilities_missing10b_returnsNonEmpty() {
         // Arrange
         ICAOField10PBNParser parser = new ICAOField10PBNParser("S");
 
@@ -133,11 +127,11 @@ public class ICAOField10PBNParserTest {
         Set<CommunicationCapability> result = parser.getCommunicationCapabilities();
 
         // Assert
-        assertThat(result, is(not(empty())));
+        assertThat(result).isNotEmpty();
     }
 
     @Test
-    public void testGetNavigationApproachCapabilities_missing10b_returnsNonEmpty() {
+    void testGetNavigationApproachCapabilities_missing10b_returnsNonEmpty() {
         // Arrange
         ICAOField10PBNParser parser = new ICAOField10PBNParser("S");
 
@@ -145,11 +139,11 @@ public class ICAOField10PBNParserTest {
         Set<NavigationApproachCapability> result = parser.getNavigationApproachCapabilities();
 
         // Assert
-        assertThat(result, is(not(empty())));
+        assertThat(result).isNotEmpty();
     }
 
     @Test
-    public void testHasTransponder_missing10b_returnsTrue() {
+    void testHasTransponder_missing10b_returnsTrue() {
         // Arrange
         ICAOField10PBNParser parser = new ICAOField10PBNParser("S");
 
@@ -157,11 +151,11 @@ public class ICAOField10PBNParserTest {
         boolean result = parser.hasTransponder();
 
         // Assert
-        assertThat(result, is(true));
+        assertThat(result).isTrue();
     }
 
     @Test
-    public void testGetCommunicationCapabilities_empty10b_returnsNonEmpty() {
+    void testGetCommunicationCapabilities_empty10b_returnsNonEmpty() {
         // Arrange
         ICAOField10PBNParser parser = new ICAOField10PBNParser("S/");
 
@@ -169,11 +163,11 @@ public class ICAOField10PBNParserTest {
         Set<CommunicationCapability> result = parser.getCommunicationCapabilities();
 
         // Assert
-        assertThat(result, is(not(empty())));
+        assertThat(result).isNotEmpty();
     }
 
     @Test
-    public void testGetNavigationApproachCapabilities_empty10b_returnsNonEmpty() {
+    void testGetNavigationApproachCapabilities_empty10b_returnsNonEmpty() {
         // Arrange
         ICAOField10PBNParser parser = new ICAOField10PBNParser("S/");
 
@@ -181,11 +175,11 @@ public class ICAOField10PBNParserTest {
         Set<NavigationApproachCapability> result = parser.getNavigationApproachCapabilities();
 
         // Assert
-        assertThat(result, is(not(empty())));
+        assertThat(result).isNotEmpty();
     }
 
     @Test
-    public void testHasTransponder_empty10b_returnsTrue() {
+    void testHasTransponder_empty10b_returnsTrue() {
         // Arrange
         ICAOField10PBNParser parser = new ICAOField10PBNParser("S/");
 
@@ -193,11 +187,11 @@ public class ICAOField10PBNParserTest {
         boolean result = parser.hasTransponder();
 
         // Assert
-        assertThat(result, is(true));
+        assertThat(result).isTrue();
     }
 
-    @Test
-    @DataProvider({
+    @ParameterizedTest
+    @CsvSource({
         "/N, false", // N = nil / no capability for surveillance
         "/n, false", // lower-case should work too
         "/S, true", // S = Mode S
@@ -212,7 +206,7 @@ public class ICAOField10PBNParserTest {
         "/NC, true", //
         "/CN, true", //
     })
-    public void testHasTransponder_validData_returnsExpectedResult(String combinedField10, boolean expectedResult) {
+    void testHasTransponder_validData_returnsExpectedResult(String combinedField10, boolean expectedResult) {
         // Arrange
         ICAOField10PBNParser parser = new ICAOField10PBNParser(combinedField10);
 
@@ -220,7 +214,7 @@ public class ICAOField10PBNParserTest {
         boolean result = parser.hasTransponder();
 
         // Assert
-        assertThat(result, is(expectedResult));
+        assertThat(result).isEqualTo(expectedResult);
     }
 
     /**

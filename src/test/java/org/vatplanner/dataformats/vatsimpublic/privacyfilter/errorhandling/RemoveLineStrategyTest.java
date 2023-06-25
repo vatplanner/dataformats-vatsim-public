@@ -1,33 +1,28 @@
 package org.vatplanner.dataformats.vatsimpublic.privacyfilter.errorhandling;
 
-import static java.util.Arrays.asList;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.Collections;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
-@RunWith(DataProviderRunner.class)
-public class RemoveLineStrategyTest {
+class RemoveLineStrategyTest {
 
-    @Test
-    @DataProvider({ //
-        "unwanted, ", //
+    @ParameterizedTest
+    @CsvSource({ //
+        "unwanted, ''", //
         "abc:def, de:abc:f", //
         "original, Z", //
     })
-    public void testHandleError_always_returnsNull(String rawLine, String filteredLine) {
+    void testHandleError_always_returnsNull(String rawLine, String filteredLine) {
         // Arrange
         RemoveLineStrategy strategy = new RemoveLineStrategy();
 
         // Act
-        String output = strategy.handleError(rawLine, filteredLine, asList());
+        String output = strategy.handleError(rawLine, filteredLine, Collections.emptyList());
 
         // Assert
-        assertThat(output, is(nullValue()));
+        assertThat(output).isNull();
     }
 }

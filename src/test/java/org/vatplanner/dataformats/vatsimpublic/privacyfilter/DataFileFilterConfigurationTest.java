@@ -1,40 +1,33 @@
 package org.vatplanner.dataformats.vatsimpublic.privacyfilter;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.junit.jupiter.api.Test;
 import org.vatplanner.dataformats.vatsimpublic.privacyfilter.errorhandling.ErrorHandlingStrategy;
 import org.vatplanner.dataformats.vatsimpublic.privacyfilter.errorhandling.ThrowExceptionStrategy;
 
-public class DataFileFilterConfigurationTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class DataFileFilterConfigurationTest {
 
     @Test
-    public void testSetFlightPlanRemarksRemoveAllIfContaining_null_throwsIllegalArgumentException() {
+    void testSetFlightPlanRemarksRemoveAllIfContaining_null_throwsIllegalArgumentException() {
         // Arrange
         DataFileFilterConfiguration configuration = new DataFileFilterConfiguration();
 
-        thrown.expect(IllegalArgumentException.class);
-
         // Act
-        configuration.setFlightPlanRemarksRemoveAllIfContaining(null);
+        ThrowingCallable action = () -> configuration.setFlightPlanRemarksRemoveAllIfContaining(null);
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    public void testGetFlightPlanRemarksRemoveAllIfContaining_setNull_returnsNotNull() {
+    void testGetFlightPlanRemarksRemoveAllIfContaining_setNull_returnsNotNull() {
         // Arrange
         DataFileFilterConfiguration configuration = new DataFileFilterConfiguration();
 
@@ -48,23 +41,24 @@ public class DataFileFilterConfigurationTest {
         Collection<String> result = configuration.getFlightPlanRemarksRemoveAllIfContaining();
 
         // Assert
-        assertThat(result, is(not(nullValue())));
+        assertThat(result).isNotNull();
     }
 
     @Test
-    public void testSetFlightPlanRemarksRemoveAllIfContaining_emptyList_doesNotThrowAnyException() {
+    void testSetFlightPlanRemarksRemoveAllIfContaining_emptyList_doesNotThrowAnyException() {
         // Arrange
         DataFileFilterConfiguration configuration = new DataFileFilterConfiguration();
         ArrayList<String> emptyList = new ArrayList<>();
 
         // Act
-        configuration.setFlightPlanRemarksRemoveAllIfContaining(emptyList);
+        ThrowingCallable action = () -> configuration.setFlightPlanRemarksRemoveAllIfContaining(emptyList);
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatCode(action).doesNotThrowAnyException();
     }
 
     @Test
-    public void testGetUnwantedModificationErrorHandlingStrategy_unconfigured_returnsThrowExceptionStrategy() {
+    void testGetUnwantedModificationErrorHandlingStrategy_unconfigured_returnsThrowExceptionStrategy() {
         // Arrange
         DataFileFilterConfiguration configuration = new DataFileFilterConfiguration();
 
@@ -72,11 +66,11 @@ public class DataFileFilterConfigurationTest {
         ErrorHandlingStrategy strategy = configuration.getUnwantedModificationErrorHandlingStrategy();
 
         // Assert
-        assertThat(strategy, is(instanceOf(ThrowExceptionStrategy.class)));
+        assertThat(strategy).isInstanceOf(ThrowExceptionStrategy.class);
     }
 
     @Test
-    public void testGetIncompleteFilteringErrorHandlingStrategy_unconfigured_returnsThrowExceptionStrategy() {
+    void testGetIncompleteFilteringErrorHandlingStrategy_unconfigured_returnsThrowExceptionStrategy() {
         // Arrange
         DataFileFilterConfiguration configuration = new DataFileFilterConfiguration();
 
@@ -84,11 +78,11 @@ public class DataFileFilterConfigurationTest {
         ErrorHandlingStrategy strategy = configuration.getIncompleteFilteringErrorHandlingStrategy();
 
         // Assert
-        assertThat(strategy, is(instanceOf(ThrowExceptionStrategy.class)));
+        assertThat(strategy).isInstanceOf(ThrowExceptionStrategy.class);
     }
 
     @Test
-    public void testGetUnstableResultErrorHandlingStrategy_unconfigured_returnsThrowExceptionStrategy() {
+    void testGetUnstableResultErrorHandlingStrategy_unconfigured_returnsThrowExceptionStrategy() {
         // Arrange
         DataFileFilterConfiguration configuration = new DataFileFilterConfiguration();
 
@@ -96,6 +90,6 @@ public class DataFileFilterConfigurationTest {
         ErrorHandlingStrategy strategy = configuration.getUnstableResultErrorHandlingStrategy();
 
         // Assert
-        assertThat(strategy, is(instanceOf(ThrowExceptionStrategy.class)));
+        assertThat(strategy).isInstanceOf(ThrowExceptionStrategy.class);
     }
 }

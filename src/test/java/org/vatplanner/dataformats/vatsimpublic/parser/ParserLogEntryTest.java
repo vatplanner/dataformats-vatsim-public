@@ -1,59 +1,54 @@
 package org.vatplanner.dataformats.vatsimpublic.parser;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
-/**
- * Unit tests for {@link ParserLogEntry}.
- */
-@RunWith(DataProviderRunner.class)
-public class ParserLogEntryTest {
+class ParserLogEntryTest {
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @DataProvider
-    public static Object[][] dataProviderThrowablesAndExpectedClassNames() {
-        return new Object[][] {
-            { new Throwable(), "java.lang.Throwable" },
-            { new IllegalArgumentException(), "java.lang.IllegalArgumentException" }
-        };
+    static Stream<Arguments> dataProviderThrowablesAndExpectedClassNames() {
+        return Stream.of(
+            Arguments.of(new Throwable(), "java.lang.Throwable"),
+            Arguments.of(new IllegalArgumentException(), "java.lang.IllegalArgumentException")
+        );
     }
 
     @Test
-    public void testConstructor_nullMessage_throwsIllegalArgumentException() {
-        // Arrange
-        thrown.expect(IllegalArgumentException.class);
-
-        // Act
-        new ParserLogEntry("abc", "xyz", false, null, null);
-
-        // Assert (nothing to do)
-    }
-
-    @Test
-    @DataProvider({ "", "abc" })
-    public void testConstructor_nonNullMessage_doesNotFail(String message) {
+    void testConstructor_nullMessage_throwsIllegalArgumentException() {
         // Arrange (nothing to do)
 
         // Act
-        new ParserLogEntry("abc", "xyz", false, message, null);
+        ThrowingCallable action = () -> new ParserLogEntry("abc", "xyz", false, null, null);
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
-    @DataProvider({ "SOME_SECTION", "somethingElse" })
-    public void testToString_nonNullSection_listsSection(String expectedSection) {
+    @ParameterizedTest
+    @ValueSource(strings = {"", "abc"})
+    void testConstructor_nonNullMessage_doesNotFail(String message) {
+        // Arrange (nothing to do)
+
+        // Act
+        ThrowingCallable action = () -> new ParserLogEntry("abc", "xyz", false, message, null);
+
+        // Assert
+        assertThatCode(action).doesNotThrowAnyException();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"SOME_SECTION", "somethingElse"})
+    void testToString_nonNullSection_listsSection(String expectedSection) {
         // Arrange
         ParserLogEntry entry = new ParserLogEntry(expectedSection, "xyz", false, "some message", null);
 
@@ -61,11 +56,11 @@ public class ParserLogEntryTest {
         String result = entry.toString();
 
         // Assert
-        assertThat(result, containsString("section: " + expectedSection));
+        assertThat(result).contains("section: " + expectedSection);
     }
 
     @Test
-    public void testToString_nullSection_listsNullAsSection() {
+    void testToString_nullSection_listsNullAsSection() {
         // Arrange
         ParserLogEntry entry = new ParserLogEntry(null, "xyz", false, "some message", null);
 
@@ -73,12 +68,12 @@ public class ParserLogEntryTest {
         String result = entry.toString();
 
         // Assert
-        assertThat(result, containsString("section: null"));
+        assertThat(result).contains("section: null");
     }
 
-    @Test
-    @DataProvider({ "This is some line content.", "1:2:3:4:some:more content" })
-    public void testToString_nonNullLineContent_listsLineContent(String expectedLineContent) {
+    @ParameterizedTest
+    @ValueSource(strings = {"This is some line content.", "1:2:3:4:some:more content"})
+    void testToString_nonNullLineContent_listsLineContent(String expectedLineContent) {
         // Arrange
         ParserLogEntry entry = new ParserLogEntry("abc", expectedLineContent, false, "some message", null);
 
@@ -86,11 +81,11 @@ public class ParserLogEntryTest {
         String result = entry.toString();
 
         // Assert
-        assertThat(result, containsString("line: \"" + expectedLineContent + "\""));
+        assertThat(result).contains("line: \"" + expectedLineContent + "\"");
     }
 
     @Test
-    public void testToString_nullLineContent_listsNullAsLineContent() {
+    void testToString_nullLineContent_listsNullAsLineContent() {
         // Arrange
         ParserLogEntry entry = new ParserLogEntry("abc", null, false, "some message", null);
 
@@ -98,12 +93,15 @@ public class ParserLogEntryTest {
         String result = entry.toString();
 
         // Assert
-        assertThat(result, containsString("line: null"));
+        assertThat(result).contains("line: null");
     }
 
-    @Test
-    @DataProvider({ "true,true", "false,false" })
-    public void testToString_anyLineContent_listsLineRejection(boolean isLineRejected, String expectedRejectionOutput) {
+    @ParameterizedTest
+    @CsvSource({
+        "true, true",
+        "false,false"
+    })
+    void testToString_anyLineContent_listsLineRejection(boolean isLineRejected, String expectedRejectionOutput) {
         // Arrange
         ParserLogEntry entry = new ParserLogEntry("abc", "xyz", isLineRejected, "some message", null);
 
@@ -111,12 +109,12 @@ public class ParserLogEntryTest {
         String result = entry.toString();
 
         // Assert
-        assertThat(result, containsString("rejected: " + expectedRejectionOutput));
+        assertThat(result).contains("rejected: " + expectedRejectionOutput);
     }
 
-    @Test
-    @DataProvider({ "Expected message #1", "This is another message to be expected." })
-    public void testToString_anyMessage_containsMessage(String expectedMessage) {
+    @ParameterizedTest
+    @ValueSource(strings = {"Expected message #1", "This is another message to be expected."})
+    void testToString_anyMessage_containsMessage(String expectedMessage) {
         // Arrange
         ParserLogEntry entry = new ParserLogEntry("abc", "xyz", false, expectedMessage, null);
 
@@ -124,12 +122,12 @@ public class ParserLogEntryTest {
         String result = entry.toString();
 
         // Assert
-        assertThat(result, containsString(expectedMessage));
+        assertThat(result).contains(expectedMessage);
     }
 
-    @Test
-    @UseDataProvider("dataProviderThrowablesAndExpectedClassNames")
-    public void testToString_nonNullThrowable_containsThrowableClassName(Throwable throwable, String expectedClassName) {
+    @ParameterizedTest
+    @MethodSource("dataProviderThrowablesAndExpectedClassNames")
+    void testToString_nonNullThrowable_containsThrowableClassName(Throwable throwable, String expectedClassName) {
         // Arrange
         ParserLogEntry entry = new ParserLogEntry("abc", "xyz", false, "some message", throwable);
 
@@ -137,25 +135,26 @@ public class ParserLogEntryTest {
         String result = entry.toString();
 
         // Assert
-        assertThat(result, containsString(expectedClassName));
+        assertThat(result).contains(expectedClassName);
     }
 
-    @Test
-    @DataProvider({ "Message of Throwable", "Another exception detail." })
-    public void testToString_nonNullThrowable_containsThrowableMessage(String expectedThrowableMessage) {
+    @ParameterizedTest
+    @ValueSource(strings = {"Message of Throwable", "Another exception detail."})
+    void testToString_nonNullThrowable_containsThrowableMessage(String expectedThrowableMessage) {
         // Arrange
         ParserLogEntry entry = new ParserLogEntry("abc", "xyz", false, "some message",
-            new Throwable(expectedThrowableMessage));
+                                                  new Throwable(expectedThrowableMessage)
+        );
 
         // Act
         String result = entry.toString();
 
         // Assert
-        assertThat(result, containsString(expectedThrowableMessage));
+        assertThat(result).contains(expectedThrowableMessage);
     }
 
     @Test
-    public void testToString_nullThrowable_listsNoneAsException() {
+    void testToString_nullThrowable_listsNoneAsException() {
         // Arrange
         ParserLogEntry entry = new ParserLogEntry("abc", "xyz", false, "some message", null);
 
@@ -163,6 +162,6 @@ public class ParserLogEntryTest {
         String result = entry.toString();
 
         // Assert
-        assertThat(result, containsString("exception: none"));
+        assertThat(result).contains("exception: none");
     }
 }

@@ -1,33 +1,28 @@
 package org.vatplanner.dataformats.vatsimpublic.privacyfilter.errorhandling;
 
-import static java.util.Arrays.asList;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.Collections;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
-@RunWith(DataProviderRunner.class)
-public class IgnoreErrorStrategyTest {
+class IgnoreErrorStrategyTest {
 
-    @Test
-    @DataProvider({ //
-        "unwanted, ", //
-        "abc:def, de:abc:f", //
-        "original, Z", //
+    @ParameterizedTest
+    @CsvSource({
+        "unwanted, ''",
+        "abc:def, de:abc:f",
+        "original, Z",
     })
-    public void testHandleError_always_returnsFilteredLine(String rawLine, String expectedOutput) {
+    void testHandleError_always_returnsFilteredLine(String rawLine, String expectedOutput) {
         // Arrange
         IgnoreErrorStrategy strategy = new IgnoreErrorStrategy();
 
         // Act
-        String output = strategy.handleError(rawLine, expectedOutput, asList());
+        String output = strategy.handleError(rawLine, expectedOutput, Collections.emptyList());
 
         // Assert
-        assertThat(output, is(equalTo(expectedOutput)));
+        assertThat(output).isEqualTo(expectedOutput);
     }
 }

@@ -9,9 +9,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class GeoPoint2DTest {
+class GeoPoint2DTest {
     @Test
-    public void testEquals_null_returnsFalse() {
+    void testEquals_null_returnsFalse() {
         // Arrange
         GeoPoint2D point = new GeoPoint2D(0.0, 0.0);
 
@@ -23,7 +23,7 @@ public class GeoPoint2DTest {
     }
 
     @Test
-    public void testEquals_differentClass_returnsFalse() {
+    void testEquals_differentClass_returnsFalse() {
         // Arrange
         GeoPoint2D point = new GeoPoint2D(0.0, 0.0);
 
@@ -35,7 +35,7 @@ public class GeoPoint2DTest {
     }
 
     @Test
-    public void testEquals_sameInstance_returnsTrue() {
+    void testEquals_sameInstance_returnsTrue() {
         // Arrange
         GeoPoint2D point = new GeoPoint2D(12.3, 123.4);
 
@@ -46,7 +46,7 @@ public class GeoPoint2DTest {
         assertThat(result).isTrue();
     }
 
-    public static Stream<Arguments> dataProviderEqualCoordinates() {
+    static Stream<Arguments> dataProviderEqualCoordinates() {
         return Stream.of(
             Arguments.of(new GeoPoint2D(-90.0, -180.0), new GeoPoint2D(-90.0, -180.0)),
             Arguments.of(new GeoPoint2D(90.0, 180.0), new GeoPoint2D(90.0, 180.0)),
@@ -56,7 +56,7 @@ public class GeoPoint2DTest {
 
     @ParameterizedTest
     @MethodSource("dataProviderEqualCoordinates")
-    public void testEquals_equalCoordinates_returnsTrue(GeoPoint2D pointA, GeoPoint2D pointB) {
+    void testEquals_equalCoordinates_returnsTrue(GeoPoint2D pointA, GeoPoint2D pointB) {
         // Arrange (nothing to do)
 
         // Act
@@ -68,7 +68,7 @@ public class GeoPoint2DTest {
 
     @ParameterizedTest
     @MethodSource("dataProviderEqualCoordinates")
-    public void testHashCode_equalCoordinates_equalHashCode(GeoPoint2D pointA, GeoPoint2D pointB) {
+    void testHashCode_equalCoordinates_equalHashCode(GeoPoint2D pointA, GeoPoint2D pointB) {
         // Arrange (nothing to do)
 
         // Act (nothing to do)
@@ -77,7 +77,7 @@ public class GeoPoint2DTest {
         assertThat(pointA).hasSameHashCodeAs(pointB);
     }
 
-    public static Stream<Arguments> dataProviderDifferentCoordinates() {
+    static Stream<Arguments> dataProviderDifferentCoordinates() {
         return Stream.of(
             // full deflection
             Arguments.of(new GeoPoint2D(-90.0, -180.0), new GeoPoint2D(90.0, 180.0)),
@@ -93,7 +93,7 @@ public class GeoPoint2DTest {
 
     @ParameterizedTest
     @MethodSource("dataProviderDifferentCoordinates")
-    public void testEquals_differentCoordinatesCheckingAEqualsB_returnsFalse(GeoPoint2D pointA, GeoPoint2D pointB) {
+    void testEquals_differentCoordinatesCheckingAEqualsB_returnsFalse(GeoPoint2D pointA, GeoPoint2D pointB) {
         // Arrange (nothing to do)
 
         // Act
@@ -105,7 +105,7 @@ public class GeoPoint2DTest {
 
     @ParameterizedTest
     @MethodSource("dataProviderDifferentCoordinates")
-    public void testEquals_differentCoordinatesCheckingBEqualsA_returnsFalse(GeoPoint2D pointA, GeoPoint2D pointB) {
+    void testEquals_differentCoordinatesCheckingBEqualsA_returnsFalse(GeoPoint2D pointA, GeoPoint2D pointB) {
         // Arrange (nothing to do)
 
         // Act

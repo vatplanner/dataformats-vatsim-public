@@ -1,127 +1,120 @@
 package org.vatplanner.dataformats.vatsimpublic.extraction;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThan;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(DataProviderRunner.class)
-public class AltitudeParserTest {
+class AltitudeParserTest {
 
-    @DataProvider
-    public static Object[][] dataProviderValidInput() {
-        return new Object[][] {
+    static Stream<Arguments> dataProviderValidInput() {
+        return Stream.of(
             // minimum threshold = 200ft
-            new Object[] { "200ft", 200, true, 200 }, //
-            new Object[] { "1000", 1000, true, 1000 }, //
+            Arguments.of("200ft", 200, true, 200),
+            Arguments.of("1000", 1000, true, 1000),
 
             // different representations for 4000 ft
-            new Object[] { "A040", 4000, true, 4000 }, // ICAO format
-            new Object[] { "F040", 4000, true, 4000 }, // ICAO format
-            new Object[] { "4000", 4000, true, 4000 }, //
-            new Object[] { "4000ft", 4000, true, 4000 }, //
-            new Object[] { "FL040", 4000, true, 4000 }, //
-            new Object[] { "4000F", 4000, true, 4000 }, //
-            new Object[] { "4000T", 4000, true, 4000 }, //
-            new Object[] { "040", 4000, true, 4000 }, //
-            new Object[] { "040F", 4000, true, 4000 }, //
-            new Object[] { "A4000", 4000, true, 4000 }, //
-            new Object[] { " 4,000. ", 4000, true, 4000 }, //
-            new Object[] { "04000", 4000, true, 4000 }, //
+            Arguments.of("A040", 4000, true, 4000), // ICAO format
+            Arguments.of("F040", 4000, true, 4000), // ICAO format
+            Arguments.of("4000", 4000, true, 4000),
+            Arguments.of("4000ft", 4000, true, 4000),
+            Arguments.of("FL040", 4000, true, 4000),
+            Arguments.of("4000F", 4000, true, 4000),
+            Arguments.of("4000T", 4000, true, 4000),
+            Arguments.of("040", 4000, true, 4000),
+            Arguments.of("040F", 4000, true, 4000),
+            Arguments.of("A4000", 4000, true, 4000),
+            Arguments.of(" 4,000. ", 4000, true, 4000),
+            Arguments.of("04000", 4000, true, 4000),
 
             // different representations for 25000 ft
-            new Object[] { "A250", 25000, true, 25000 }, // ICAO format
-            new Object[] { "F250", 25000, true, 25000 }, // ICAO format
-            new Object[] { "25000", 25000, true, 25000 }, //
-            new Object[] { "25000ft", 25000, true, 25000 }, //
-            new Object[] { "FL250", 25000, true, 25000 }, //
-            new Object[] { "25000F", 25000, true, 25000 }, //
-            new Object[] { "25000T", 25000, true, 25000 }, //
-            new Object[] { "250", 25000, true, 25000 }, //
-            new Object[] { "250F", 25000, true, 25000 }, //
-            new Object[] { "A25000", 25000, true, 25000 }, //
-            new Object[] { " 25,000. ", 25000, true, 25000 }, //
-            new Object[] { "025000", 25000, true, 25000 }, //
+            Arguments.of("A250", 25000, true, 25000), // ICAO format
+            Arguments.of("F250", 25000, true, 25000), // ICAO format
+            Arguments.of("25000", 25000, true, 25000),
+            Arguments.of("25000ft", 25000, true, 25000),
+            Arguments.of("FL250", 25000, true, 25000),
+            Arguments.of("25000F", 25000, true, 25000),
+            Arguments.of("25000T", 25000, true, 25000),
+            Arguments.of("250", 25000, true, 25000),
+            Arguments.of("250F", 25000, true, 25000),
+            Arguments.of("A25000", 25000, true, 25000),
+            Arguments.of(" 25,000. ", 25000, true, 25000),
+            Arguments.of("025000", 25000, true, 25000),
 
             // different representations for 36500 ft
-            new Object[] { "A365", 36500, true, 36500 }, // ICAO format
-            new Object[] { "F365", 36500, true, 36500 }, // ICAO format
-            new Object[] { "36500", 36500, true, 36500 }, //
-            new Object[] { "36500ft", 36500, true, 36500 }, //
-            new Object[] { "FL365", 36500, true, 36500 }, //
-            new Object[] { "36500F", 36500, true, 36500 }, //
-            new Object[] { "36500T", 36500, true, 36500 }, //
-            new Object[] { "365", 36500, true, 36500 }, //
-            new Object[] { "365F", 36500, true, 36500 }, //
-            new Object[] { "A36500", 36500, true, 36500 }, //
-            new Object[] { " 36,500. ", 36500, true, 36500 }, //
-            new Object[] { "036500", 36500, true, 36500 }, //
+            Arguments.of("A365", 36500, true, 36500), // ICAO format
+            Arguments.of("F365", 36500, true, 36500), // ICAO format
+            Arguments.of("36500", 36500, true, 36500),
+            Arguments.of("36500ft", 36500, true, 36500),
+            Arguments.of("FL365", 36500, true, 36500),
+            Arguments.of("36500F", 36500, true, 36500),
+            Arguments.of("36500T", 36500, true, 36500),
+            Arguments.of("365", 36500, true, 36500),
+            Arguments.of("365F", 36500, true, 36500),
+            Arguments.of("A36500", 36500, true, 36500),
+            Arguments.of(" 36,500. ", 36500, true, 36500),
+            Arguments.of("036500", 36500, true, 36500),
 
             // general clean up of input errors
-            new Object[] { "<120", 12000, true, 12000 }, //
-            new Object[] { "<1200", 1200, true, 1200 }, //
-            new Object[] { "1234\\", 1234, true, 1234 }, //
-            new Object[] { "-100", 10000, true, 10000 }, //
-            new Object[] { "-1000", 1000, true, 1000 }, //
-            new Object[] { "5000,", 5000, true, 5000 }, //
-            new Object[] { " - 050,0 0. ", 5000, true, 5000 }, //
-            new Object[] { "FL300-320", 30000, true, 30000 }, //
-            new Object[] { "300-320", 30000, true, 30000 }, //
-            new Object[] { " 250", 25000, true, 25000 }, //
+            Arguments.of("<120", 12000, true, 12000),
+            Arguments.of("<1200", 1200, true, 1200),
+            Arguments.of("1234\\", 1234, true, 1234),
+            Arguments.of("-100", 10000, true, 10000),
+            Arguments.of("-1000", 1000, true, 1000),
+            Arguments.of("5000,", 5000, true, 5000),
+            Arguments.of(" - 050,0 0. ", 5000, true, 5000),
+            Arguments.of("FL300-320", 30000, true, 30000),
+            Arguments.of("300-320", 30000, true, 30000),
+            Arguments.of(" 250", 25000, true, 25000),
 
             // metric altitudes
-            new Object[] { "S0150", 1500, false, 4921 }, // ICAO format
-            new Object[] { "M0150", 1500, false, 4921 }, // ICAO format
-            new Object[] { "S0610", 6100, false, 20013 }, // ICAO format
-            new Object[] { "M0610", 6100, false, 20013 }, // ICAO format
-            new Object[] { "61m", 61, false, 200 }, // minimum threshold
-            new Object[] { " - 30.0, 0 M", 3000, false, 9843 }, //
-        };
+            Arguments.of("S0150", 1500, false, 4921), // ICAO format
+            Arguments.of("M0150", 1500, false, 4921), // ICAO format
+            Arguments.of("S0610", 6100, false, 20013), // ICAO format
+            Arguments.of("M0610", 6100, false, 20013), // ICAO format
+            Arguments.of("61m", 61, false, 200), // minimum threshold
+            Arguments.of(" - 30.0, 0 M", 3000, false, 9843) //
+        );
     }
 
-    @DataProvider
-    public static Object[][] dataProviderInvalidInput() {
-        return new Object[][] {
+    static Stream<Arguments> dataProviderInvalidInput() {
+        return Stream.of(
             // below threshold (200ft ~ 60.96m)
-            new Object[] { "0" }, //
-            new Object[] { "199ft" }, //
-            new Object[] { "F001" }, //
-            new Object[] { "FL001" }, //
-            new Object[] { "A0001" }, //
-            new Object[] { "A0199" }, //
-            new Object[] { "60m" }, // metric
-            new Object[] { "M0006" }, // metric
-            new Object[] { "S0006" }, // metric
+            "0",
+            "199ft",
+            "F001",
+            "FL001",
+            "A0001",
+            "A0199",
+            "60m", // metric
+            "M0006", // metric
+            "S0006", // metric
 
             // above threshold (70000ft ~ 21336m)
-            new Object[] { "70001" }, //
-            new Object[] { "F701" }, //
-            new Object[] { "A70001" }, //
-            new Object[] { "A0199" }, //
-            new Object[] { "21337m" }, //
+            "70001",
+            "F701",
+            "A70001",
+            "A0199",
+            "21337m",
 
             // general non-sense
-            new Object[] { "2147483648" }, // exceeding unsigned Java integer
-            new Object[] { "9223372036854775809" }, // exceeding unsigned Java long
-            new Object[] { "" }, //
-            new Object[] { "nonsense" }, //
-            new Object[] { "F" }, //
-            new Object[] { "A" }, //
-            new Object[] { "M" }, //
-            new Object[] { "S" }, //
-        };
+            "2147483648", // exceeding unsigned Java integer
+            "9223372036854775809", // exceeding unsigned Java long
+            "",
+            "nonsense",
+            "F",
+            "A",
+            "M",
+            "S"
+        ).map(Arguments::of);
     }
 
-    @Test
-    @UseDataProvider("dataProviderValidInput")
-    public void testGetValue_validInput_returnsExpectedOutput(String input, int expectedValue, boolean unusedIsUnitFeet, int unusedFeet) {
+    @ParameterizedTest
+    @MethodSource("dataProviderValidInput")
+    void testGetValue_validInput_returnsExpectedOutput(String input, int expectedValue, boolean unusedIsUnitFeet, int unusedFeet) {
         // Arrange
         AltitudeParser parser = new AltitudeParser(input);
 
@@ -129,12 +122,12 @@ public class AltitudeParserTest {
         int result = parser.getValue();
 
         // Assert
-        assertThat(result, is(equalTo(expectedValue)));
+        assertThat(result).isEqualTo(expectedValue);
     }
 
-    @Test
-    @UseDataProvider("dataProviderValidInput")
-    public void testIsUnitFeet_validInput_returnsExpectedOutput(String input, int unusedValue, boolean expectedIsUnitFeet, int unusedFeet) {
+    @ParameterizedTest
+    @MethodSource("dataProviderValidInput")
+    void testIsUnitFeet_validInput_returnsExpectedOutput(String input, int unusedValue, boolean expectedIsUnitFeet, int unusedFeet) {
         // Arrange
         AltitudeParser parser = new AltitudeParser(input);
 
@@ -142,12 +135,12 @@ public class AltitudeParserTest {
         boolean result = parser.isUnitFeet();
 
         // Assert
-        assertThat(result, is(expectedIsUnitFeet));
+        assertThat(result).isEqualTo(expectedIsUnitFeet);
     }
 
-    @Test
-    @UseDataProvider("dataProviderValidInput")
-    public void testGetFeet_validInput_returnsExpectedOutput(String input, int unusedValue, boolean unusedIsUnitFeet, int expectedFeet) {
+    @ParameterizedTest
+    @MethodSource("dataProviderValidInput")
+    void testGetFeet_validInput_returnsExpectedOutput(String input, int unusedValue, boolean unusedIsUnitFeet, int expectedFeet) {
         // Arrange
         AltitudeParser parser = new AltitudeParser(input);
 
@@ -155,12 +148,12 @@ public class AltitudeParserTest {
         int result = parser.getFeet();
 
         // Assert
-        assertThat(result, is(equalTo(expectedFeet)));
+        assertThat(result).isEqualTo(expectedFeet);
     }
 
-    @Test
-    @UseDataProvider("dataProviderInvalidInput")
-    public void testGetValue_invalidInput_returnsNegativeOutput(String input) {
+    @ParameterizedTest
+    @MethodSource("dataProviderInvalidInput")
+    void testGetValue_invalidInput_returnsNegativeOutput(String input) {
         // Arrange
         AltitudeParser parser = new AltitudeParser(input);
 
@@ -168,12 +161,12 @@ public class AltitudeParserTest {
         int result = parser.getValue();
 
         // Assert
-        assertThat(result, is(lessThan(0)));
+        assertThat(result).isNegative();
     }
 
-    @Test
-    @UseDataProvider("dataProviderInvalidInput")
-    public void testGetFeet_invalidInput_returnsNegativeOutput(String input) {
+    @ParameterizedTest
+    @MethodSource("dataProviderInvalidInput")
+    void testGetFeet_invalidInput_returnsNegativeOutput(String input) {
         // Arrange
         AltitudeParser parser = new AltitudeParser(input);
 
@@ -181,6 +174,6 @@ public class AltitudeParserTest {
         int result = parser.getFeet();
 
         // Assert
-        assertThat(result, is(lessThan(0)));
+        assertThat(result).isNegative();
     }
 }

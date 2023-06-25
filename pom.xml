@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.vatplanner</groupId>
 	<artifactId>dataformats-vatsim-public</artifactId>
@@ -29,11 +29,9 @@
 		<jsonSimple.version>[3.1.1,4.0.999]</jsonSimple.version>
 
 		<!-- test dependencies -->
-		<junit.version>5.7.1</junit.version>
-		<assertj.version>3.19.0</assertj.version>
-		<junitDataprovider.version>1.11.0</junitDataprovider.version>
-		<hamcrest.version>2.0.0.0</hamcrest.version>
-		<mockito.version>2.17.0</mockito.version>
+		<junit.version>5.9.3</junit.version>
+		<assertj.version>3.24.2</assertj.version>
+		<mockito.version>4.11.0</mockito.version> <!-- Mockito 5 requires Java 11 -->
 		<slf4jTest.version>1.2.0</slf4jTest.version>
 
 		<!-- build dependencies -->
@@ -104,12 +102,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.junit.vintage</groupId>
-			<artifactId>junit-vintage-engine</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
 			<version>${assertj.version}</version>
@@ -117,23 +109,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-junit</artifactId>
-			<version>${hamcrest.version}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>uk.org.lidalia</groupId>
 			<artifactId>slf4j-test</artifactId>
 			<version>${slf4jTest.version}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.tngtech.java</groupId>
-			<artifactId>junit-dataprovider</artifactId>
-			<version>${junitDataprovider.version}</version>
 			<scope>test</scope>
 		</dependency>
 

@@ -1,13 +1,8 @@
 package org.vatplanner.dataformats.vatsimpublic.privacyfilter;
 
 import static java.util.Arrays.asList;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.same;
@@ -18,46 +13,41 @@ import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.vatplanner.dataformats.vatsimpublic.UnconfiguredException;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
-
-@RunWith(DataProviderRunner.class)
-public class VerifiableClientFilterFactoryTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class VerifiableClientFilterFactoryTest {
 
     private VerifiableClientFilterFactory spyFactory;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         VerifiableClientFilterFactory templateFactory = new VerifiableClientFilterFactory();
         spyFactory = spy(templateFactory);
     }
 
     @Test
-    public void testBuildFromConfiguration_null_throwsIllegalArgumentException() {
-        // Arrange
-        thrown.expect(IllegalArgumentException.class);
+    void testBuildFromConfiguration_null_throwsIllegalArgumentException() {
+        // Arrange (nothing to do)
 
         // Act
-        spyFactory.buildFromConfiguration(null);
+        ThrowingCallable action = () -> spyFactory.buildFromConfiguration(null);
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    public void testBuildFromConfiguration_noFiltersConfigured_throwsUnconfiguredException() {
+    void testBuildFromConfiguration_noFiltersConfigured_throwsUnconfiguredException() {
         // Arrange
         DataFileFilterConfiguration configuration = new DataFileFilterConfiguration()
             .setFlightPlanRemarksRemoveAll(false)
@@ -66,124 +56,121 @@ public class VerifiableClientFilterFactoryTest {
             .setRemoveStreamingChannels(false)
             .setSubstituteObserverPrefix(false);
 
-        thrown.expect(UnconfiguredException.class);
-
         // Act
-        spyFactory.buildFromConfiguration(configuration);
+        ThrowingCallable action = () -> spyFactory.buildFromConfiguration(configuration);
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(UnconfiguredException.class);
     }
 
     @Test
-    public void testBuildFromConfiguration_removeStreamingChannels_throwsUnsupportedOperationException() {
+    void testBuildFromConfiguration_removeStreamingChannels_throwsUnsupportedOperationException() {
         // TODO: remove when implemented
 
         // Arrange
         DataFileFilterConfiguration configuration = new DataFileFilterConfiguration()
             .setRemoveStreamingChannels(true);
 
-        thrown.expect(UnsupportedOperationException.class);
-
         // Act
-        spyFactory.buildFromConfiguration(configuration);
+        ThrowingCallable action = () -> spyFactory.buildFromConfiguration(configuration);
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(UnsupportedOperationException.class);
     }
 
-    @DataProvider
-    public static Object[][] dataProviderConfigurationWithExpectedClasses() {
-        Collection<String> EMPTY = asList();
+    static Stream<Arguments> dataProviderConfigurationWithExpectedClasses() {
+        Collection<String> EMPTY = Collections.emptyList();
 
-        return new Object[][] {
+        return Stream.of(
             // TODO: add removal of external account data when implemented
 
             // single
-            { true, EMPTY, false, false, false, asList(FlightPlanRemarksRemoveAllFilter.class) }, //
-            { false, asList("abc"), false, false, false, asList(FlightPlanRemarksRemoveAllFilter.class) }, //
-            { true, asList("abc"), false, false, false, asList(FlightPlanRemarksRemoveAllFilter.class) }, //
-            { false, EMPTY, true, false, false, asList(RemoveRealNameAndHomebaseFilter.class) }, //
-            { false, EMPTY, false, false, true, asList(SubstituteObserverPrefixFilter.class) }, //
+            Arguments.of(true, EMPTY, false, false, false, asList(FlightPlanRemarksRemoveAllFilter.class)),
+            Arguments.of(false, asList("abc"), false, false, false, asList(FlightPlanRemarksRemoveAllFilter.class)),
+            Arguments.of(true, asList("abc"), false, false, false, asList(FlightPlanRemarksRemoveAllFilter.class)),
+            Arguments.of(false, EMPTY, true, false, false, asList(RemoveRealNameAndHomebaseFilter.class)),
+            Arguments.of(false, EMPTY, false, false, true, asList(SubstituteObserverPrefixFilter.class)),
 
             // combined 2
-            { true, EMPTY, true, false, false,
-                asList(
-                    FlightPlanRemarksRemoveAllFilter.class,
-                    RemoveRealNameAndHomebaseFilter.class //
-                ) //
-            }, //
+            Arguments.of(true, EMPTY, true, false, false,
+                         asList(
+                             FlightPlanRemarksRemoveAllFilter.class,
+                             RemoveRealNameAndHomebaseFilter.class
+                         )
+            ),
 
-            { true, EMPTY, false, false, true,
-                asList(
-                    FlightPlanRemarksRemoveAllFilter.class,
-                    SubstituteObserverPrefixFilter.class //
-                ) //
-            }, //
+            Arguments.of(true, EMPTY, false, false, true,
+                         asList(
+                             FlightPlanRemarksRemoveAllFilter.class,
+                             SubstituteObserverPrefixFilter.class
+                         )
+            ),
 
-            { false, asList("abc"), true, false, false,
-                asList(
-                    FlightPlanRemarksRemoveAllFilter.class,
-                    RemoveRealNameAndHomebaseFilter.class //
-                ) //
-            }, //
+            Arguments.of(false, asList("abc"), true, false, false,
+                         asList(
+                             FlightPlanRemarksRemoveAllFilter.class,
+                             RemoveRealNameAndHomebaseFilter.class
+                         )
+            ),
 
-            { false, asList("abc"), false, false, true,
-                asList(
-                    FlightPlanRemarksRemoveAllFilter.class,
-                    SubstituteObserverPrefixFilter.class //
-                ) //
-            }, //
+            Arguments.of(false, asList("abc"), false, false, true,
+                         asList(
+                             FlightPlanRemarksRemoveAllFilter.class,
+                             SubstituteObserverPrefixFilter.class //
+                         )
+            ),
 
-            { true, asList("abc"), true, false, false,
-                asList(
-                    FlightPlanRemarksRemoveAllFilter.class,
-                    RemoveRealNameAndHomebaseFilter.class //
-                ) //
-            }, //
+            Arguments.of(true, asList("abc"), true, false, false,
+                         asList(
+                             FlightPlanRemarksRemoveAllFilter.class,
+                             RemoveRealNameAndHomebaseFilter.class //
+                         )
+            ),
 
-            { true, asList("abc"), false, false, true,
-                asList(
-                    FlightPlanRemarksRemoveAllFilter.class,
-                    SubstituteObserverPrefixFilter.class //
-                ) //
-            }, //
+            Arguments.of(true, asList("abc"), false, false, true,
+                         asList(
+                             FlightPlanRemarksRemoveAllFilter.class,
+                             SubstituteObserverPrefixFilter.class //
+                         )
+            ),
 
-            { false, EMPTY, true, false, true,
-                asList(
-                    RemoveRealNameAndHomebaseFilter.class,
-                    SubstituteObserverPrefixFilter.class //
-                ) //
-            }, //
+            Arguments.of(false, EMPTY, true, false, true,
+                         asList(
+                             RemoveRealNameAndHomebaseFilter.class,
+                             SubstituteObserverPrefixFilter.class //
+                         )
+            ),
 
             // combined 3
-            { true, EMPTY, true, false, true,
-                asList(
-                    FlightPlanRemarksRemoveAllFilter.class,
-                    RemoveRealNameAndHomebaseFilter.class,
-                    SubstituteObserverPrefixFilter.class //
-                ) //
-            }, //
+            Arguments.of(true, EMPTY, true, false, true,
+                         asList(
+                             FlightPlanRemarksRemoveAllFilter.class,
+                             RemoveRealNameAndHomebaseFilter.class,
+                             SubstituteObserverPrefixFilter.class //
+                         )
+            ),
 
-            { false, asList("abc"), true, false, true,
-                asList(
-                    FlightPlanRemarksRemoveAllFilter.class,
-                    RemoveRealNameAndHomebaseFilter.class,
-                    SubstituteObserverPrefixFilter.class //
-                ) //
-            }, //
+            Arguments.of(false, asList("abc"), true, false, true,
+                         asList(
+                             FlightPlanRemarksRemoveAllFilter.class,
+                             RemoveRealNameAndHomebaseFilter.class,
+                             SubstituteObserverPrefixFilter.class //
+                         )
+            ),
 
-            { true, asList("abc"), true, false, true,
-                asList(
-                    FlightPlanRemarksRemoveAllFilter.class,
-                    RemoveRealNameAndHomebaseFilter.class,
-                    SubstituteObserverPrefixFilter.class //
-                ) //
-            }, //
-        };
+            Arguments.of(true, asList("abc"), true, false, true,
+                         asList(
+                             FlightPlanRemarksRemoveAllFilter.class,
+                             RemoveRealNameAndHomebaseFilter.class,
+                             SubstituteObserverPrefixFilter.class //
+                         )
+            )
+        );
     }
 
-    @Test
-    @UseDataProvider("dataProviderConfigurationWithExpectedClasses")
-    public void testBuildFromConfiguration_filtersConfigured_returnsExpectedInstances(boolean flightPlanRemarksRemoveAll, Collection<String> flightPlanRemarksRemoveAllIfContaining, boolean removeRealNameAndHomebase, boolean removeStreamingChannels, boolean substituteObserverPrefix, Collection<Class<VerifiableClientFilter>> expectedFilters) {
+    @ParameterizedTest
+    @MethodSource("dataProviderConfigurationWithExpectedClasses")
+    void testBuildFromConfiguration_filtersConfigured_returnsExpectedInstances(boolean flightPlanRemarksRemoveAll, Collection<String> flightPlanRemarksRemoveAllIfContaining, boolean removeRealNameAndHomebase, boolean removeStreamingChannels, boolean substituteObserverPrefix, Collection<Class<VerifiableClientFilter>> expectedFilters) {
         // Arrange
         DataFileFilterConfiguration configuration = new DataFileFilterConfiguration()
             .setFlightPlanRemarksRemoveAll(flightPlanRemarksRemoveAll)
@@ -196,18 +183,15 @@ public class VerifiableClientFilterFactoryTest {
         List<VerifiableClientFilter<?>> result = spyFactory.buildFromConfiguration(configuration);
 
         // Assert
-        assertThat("at least one filter has to be expected", expectedFilters, is(not(empty())));
-
-        for (Class<VerifiableClientFilter> expectedFilter : expectedFilters) {
-            assertTrue(
-                "instance of " + expectedFilter.getSimpleName() + " is expected to be returned",
-                result.stream().anyMatch(expectedFilter::isInstance));
-        }
+        assertThat(expectedFilters).isNotEmpty()
+                                   .allSatisfy(
+                                       expectedFilter -> assertThat(result).anySatisfy(expectedFilter::isInstance)
+                                   );
     }
 
-    @Test
-    @UseDataProvider("dataProviderConfigurationWithExpectedClasses")
-    public void testBuildFromConfiguration_filtersConfigured_returnsNoAdditionalInstances(boolean flightPlanRemarksRemoveAll, Collection<String> flightPlanRemarksRemoveAllIfContaining, boolean removeRealNameAndHomebase, boolean removeStreamingChannels, boolean substituteObserverPrefix, Collection<Class<VerifiableClientFilter>> expectedFilters) {
+    @ParameterizedTest
+    @MethodSource("dataProviderConfigurationWithExpectedClasses")
+    void testBuildFromConfiguration_filtersConfigured_returnsNoAdditionalInstances(boolean flightPlanRemarksRemoveAll, Collection<String> flightPlanRemarksRemoveAllIfContaining, boolean removeRealNameAndHomebase, boolean removeStreamingChannels, boolean substituteObserverPrefix, Collection<Class<VerifiableClientFilter>> expectedFilters) {
         // Arrange
         DataFileFilterConfiguration configuration = new DataFileFilterConfiguration()
             .setFlightPlanRemarksRemoveAll(flightPlanRemarksRemoveAll)
@@ -220,24 +204,21 @@ public class VerifiableClientFilterFactoryTest {
         List<VerifiableClientFilter<?>> result = spyFactory.buildFromConfiguration(configuration);
 
         // Assert
-        assertThat("at least one filter has to be expected", expectedFilters, is(not(empty())));
-
-        assertThat(result, hasSize(expectedFilters.size()));
+        assertThat(result).hasSameSizeAs(expectedFilters);
     }
 
-    @DataProvider
-    public static Object[][] dataProviderFlightPlanRemarksRemoveAll() {
-        List<Object> EMPTY = asList();
+    static Stream<Arguments> dataProviderFlightPlanRemarksRemoveAll() {
+        List<Object> EMPTY = Collections.emptyList();
 
-        return new Object[][] {
-            { true, EMPTY }, //
-            { false, asList("abc") }, //
-        };
+        return Stream.of(
+            Arguments.of(true, EMPTY),
+            Arguments.of(false, asList("abc"))
+        );
     }
 
-    @Test
-    @UseDataProvider("dataProviderFlightPlanRemarksRemoveAll")
-    public void testBuildFromConfiguration_removeFlightPlanRemarks_returnsInstanceCreatedThroughProxyMethod(boolean flightPlanRemarksRemoveAll, Collection<String> flightPlanRemarksRemoveAllIfContaining) {
+    @ParameterizedTest
+    @MethodSource("dataProviderFlightPlanRemarksRemoveAll")
+    void testBuildFromConfiguration_removeFlightPlanRemarks_returnsInstanceCreatedThroughProxyMethod(boolean flightPlanRemarksRemoveAll, Collection<String> flightPlanRemarksRemoveAllIfContaining) {
         // Arrange
         DataFileFilterConfiguration configuration = new DataFileFilterConfiguration()
             .setFlightPlanRemarksRemoveAll(flightPlanRemarksRemoveAll)
@@ -250,11 +231,11 @@ public class VerifiableClientFilterFactoryTest {
         List<VerifiableClientFilter<?>> result = spyFactory.buildFromConfiguration(configuration);
 
         // Assert
-        assertThat(result, contains(expectedMockFilter));
+        assertThat(result).containsExactly(expectedMockFilter);
     }
 
     @Test
-    public void testBuildFromConfiguration_removeFlightPlanRemarksUnconditional_createsInstanceWithNullTriggers() {
+    void testBuildFromConfiguration_removeFlightPlanRemarksUnconditional_createsInstanceWithNullTriggers() {
         // Arrange
         DataFileFilterConfiguration configuration = new DataFileFilterConfiguration()
             .setFlightPlanRemarksRemoveAll(true);
@@ -267,7 +248,7 @@ public class VerifiableClientFilterFactoryTest {
     }
 
     @Test
-    public void testBuildFromConfiguration_removeFlightPlanRemarksUsingTriggers_createsInstanceWithSameTriggers() {
+    void testBuildFromConfiguration_removeFlightPlanRemarksUsingTriggers_createsInstanceWithSameTriggers() {
         // Arrange
         List<String> expectedTriggers = asList("a");
 
@@ -281,5 +262,4 @@ public class VerifiableClientFilterFactoryTest {
         // Assert
         verify(spyFactory).createFlightPlanRemarksRemoveAllFilter(same(expectedTriggers));
     }
-
 }

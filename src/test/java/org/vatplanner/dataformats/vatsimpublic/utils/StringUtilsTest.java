@@ -10,9 +10,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class StringUtilsTest {
+class StringUtilsTest {
     @Test
-    public void testPrefixLines_emptyContent_returnsEmpty() {
+    void testPrefixLines_emptyContent_returnsEmpty() {
         // Arrange (nothing to do)
 
         // Act
@@ -30,7 +30,7 @@ public class StringUtilsTest {
         "this\nis\na\ntest", //
         "trailing line end\n" //
     })
-    public void testPrefixLines_emptyPrefix_returnsOriginalContent(String expectedContent) {
+    void testPrefixLines_emptyPrefix_returnsOriginalContent(String expectedContent) {
         // Arrange (nothing to do)
 
         // Act
@@ -40,111 +40,111 @@ public class StringUtilsTest {
         assertThat(result).isEqualTo(expectedContent);
     }
 
-    public static Stream<Arguments> dataProviderPrefixAndContentWithExpectedResult() {
+    static Stream<Arguments> dataProviderPrefixAndContentWithExpectedResult() {
         return Stream.of( //
-            Arguments.of(
-                "; ",
-                "This is\n"
-                    + "a simple\n"
-                    + "test",
-                "; This is\n"
-                    + "; a simple\n"
-                    + "; test" //
-            ), //
+                          Arguments.of(
+                              "; ",
+                              "This is\n"
+                                  + "a simple\n"
+                                  + "test",
+                              "; This is\n"
+                                  + "; a simple\n"
+                                  + "; test" //
+                          ), //
 
-            // trailing whitespace
-            Arguments.of(
-                "; ",
-                "trailing space \n"
-                    + "trailing line end\n",
-                "; trailing space \n"
-                    + "; trailing line end\n" //
-            ), //
+                          // trailing whitespace
+                          Arguments.of(
+                              "; ",
+                              "trailing space \n"
+                                  + "trailing line end\n",
+                              "; trailing space \n"
+                                  + "; trailing line end\n" //
+                          ), //
 
-            // maintain all whitespace
-            Arguments.of(
-                "  ",
-                "\n"
-                    + " \n"
-                    + "  ",
-                "  \n"
-                    + "   \n"
-                    + "    " //
-            ), //
+                          // maintain all whitespace
+                          Arguments.of(
+                              "  ",
+                              "\n"
+                                  + " \n"
+                                  + "  ",
+                              "  \n"
+                                  + "   \n"
+                                  + "    " //
+                          ), //
 
-            // process and maintain different line end sequences
-            Arguments.of(
-                "-",
-                "CRLF\r\n"
-                    + "LF\n"
-                    + "CR\r"
-                    + "none",
-                "-CRLF\r\n"
-                    + "-LF\n"
-                    + "-CR\r"
-                    + "-none"//
-            ), //
+                          // process and maintain different line end sequences
+                          Arguments.of(
+                              "-",
+                              "CRLF\r\n"
+                                  + "LF\n"
+                                  + "CR\r"
+                                  + "none",
+                              "-CRLF\r\n"
+                                  + "-LF\n"
+                                  + "-CR\r"
+                                  + "-none"//
+                          ), //
 
-            // consecutive whitespace
-            Arguments.of(
-                "-",
-                "\r\n"
-                    + "\n",
-                "-\r\n"
-                    + "-\n" //
-            ),
-            Arguments.of(
-                "-",
-                "\n"
-                    + "\r\n",
-                "-\n"
-                    + "-\r\n" //
-            ),
-            Arguments.of(
-                "-",
-                "\r"
-                    + "\r\n",
-                "-\r"
-                    + "-\r\n" //
-            ),
-            Arguments.of(
-                "-",
-                "\r\n"
-                    + "\r",
-                "-\r\n"
-                    + "-\r" //
-            ),
-            Arguments.of(
-                "-",
-                "\n"
-                    + "\n"
-                    + "\n"
-                    + "\r"
-                    + "\r"
-                    + "\r"
-                    + "\r\n"
-                    + "\r\n"
-                    + "\r\n"
-                    + "\n"
-                    + "\n", //
-                "-\n"
-                    + "-\n"
-                    + "-\n"
-                    + "-\r"
-                    + "-\r"
-                    + "-\r"
-                    + "-\r\n"
-                    + "-\r\n"
-                    + "-\r\n"
-                    + "-\n"
-                    + "-\n"//
-            ) //
+                          // consecutive whitespace
+                          Arguments.of(
+                              "-",
+                              "\r\n"
+                                  + "\n",
+                              "-\r\n"
+                                  + "-\n" //
+                          ),
+                          Arguments.of(
+                              "-",
+                              "\n"
+                                  + "\r\n",
+                              "-\n"
+                                  + "-\r\n" //
+                          ),
+                          Arguments.of(
+                              "-",
+                              "\r"
+                                  + "\r\n",
+                              "-\r"
+                                  + "-\r\n" //
+                          ),
+                          Arguments.of(
+                              "-",
+                              "\r\n"
+                                  + "\r",
+                              "-\r\n"
+                                  + "-\r" //
+                          ),
+                          Arguments.of(
+                              "-",
+                              "\n"
+                                  + "\n"
+                                  + "\n"
+                                  + "\r"
+                                  + "\r"
+                                  + "\r"
+                                  + "\r\n"
+                                  + "\r\n"
+                                  + "\r\n"
+                                  + "\n"
+                                  + "\n", //
+                              "-\n"
+                                  + "-\n"
+                                  + "-\n"
+                                  + "-\r"
+                                  + "-\r"
+                                  + "-\r"
+                                  + "-\r\n"
+                                  + "-\r\n"
+                                  + "-\r\n"
+                                  + "-\n"
+                                  + "-\n"//
+                          ) //
         );
     }
 
     @ParameterizedTest
     @MethodSource("dataProviderPrefixAndContentWithExpectedResult")
-    public void testPrefixLines_always_returnsExpectedResult(String prefix, String content, String expectedResult) {
+    void testPrefixLines_always_returnsExpectedResult(String prefix, String content, String expectedResult) {
         // Arrange (nothing to do)
 
         // Act
@@ -154,7 +154,7 @@ public class StringUtilsTest {
         assertThat(result).inHexadecimal().isEqualTo(expectedResult);
     }
 
-    public static Stream<Arguments> dataProviderLineEndAndContentWithExpectedResult() {
+    static Stream<Arguments> dataProviderLineEndAndContentWithExpectedResult() {
         return Stream.of(
             // empty
             Arguments.of(
@@ -246,7 +246,7 @@ public class StringUtilsTest {
 
     @ParameterizedTest
     @MethodSource("dataProviderLineEndAndContentWithExpectedResult")
-    public void testUnifyLineEnds_always_returnsExpectedResult(String lineEnd, String content, String expectedResult) {
+    void testUnifyLineEnds_always_returnsExpectedResult(String lineEnd, String content, String expectedResult) {
         // Arrange (nothing to do)
 
         // Act
@@ -264,7 +264,7 @@ public class StringUtilsTest {
         "Something in front\n", //
         "Multiple\nLines\n" //
     })
-    public void testEndsWithLineBreak_endingWithLineBreak_returnsTrue(String s) {
+    void testEndsWithLineBreak_endingWithLineBreak_returnsTrue(String s) {
         // Arrange (nothing to do)
 
         // Act
@@ -284,7 +284,7 @@ public class StringUtilsTest {
         "Something in front\n ", //
         "Multiple\nLines\n " //
     })
-    public void testEndsWithLineBreak_endingWithoutLineBreak_returnsFalse(String s) {
+    void testEndsWithLineBreak_endingWithoutLineBreak_returnsFalse(String s) {
         // Arrange (nothing to do)
 
         // Act

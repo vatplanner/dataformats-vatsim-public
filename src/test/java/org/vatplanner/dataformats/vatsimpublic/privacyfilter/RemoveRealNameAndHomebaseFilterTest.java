@@ -1,39 +1,30 @@
 package org.vatplanner.dataformats.vatsimpublic.privacyfilter;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.vatplanner.dataformats.vatsimpublic.testutils.DataProviderHelpers.allEnumValuesExcept;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.assertj.core.api.ThrowableAssert;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.vatplanner.dataformats.vatsimpublic.parser.ClientFields;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
-
-@RunWith(DataProviderRunner.class)
-public class RemoveRealNameAndHomebaseFilterTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class RemoveRealNameAndHomebaseFilterTest {
 
     private RemoveRealNameAndHomebaseFilter filter;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         filter = new RemoveRealNameAndHomebaseFilter();
     }
 
-    @Test
-    @DataProvider({
+    @ParameterizedTest
+    @CsvSource({
         // full online example
         "UNK123:123456:John Doe ABCD:PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:SOME COMMENT /v/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:, UNK123:123456::PILOT::52.12345:13.54321:12000:520:B738/L:420:EDDT:24000:EDDF:MYSERVER:100:1:2000:::2:I:845:0:0:50:2:30:EDDK:SOME COMMENT /v/:THE ROUTE:0:0:0:0:::20190101080000:90:29.772:1008:",
 
@@ -59,78 +50,77 @@ public class RemoveRealNameAndHomebaseFilterTest {
         "::John:, :::",
         "A:1:John:, A:1::"
     })
-    public void testApply_handledFormat_clearsThirdField(String input, String expectedOutput) {
+    void testApply_handledFormat_clearsThirdField(String input, String expectedOutput) {
         // Arrange (nothing to do)
 
         // Act
         String output = filter.apply(input);
 
         // Assert
-        assertThat(output, is(equalTo(expectedOutput)));
+        assertThat(output).isEqualTo(expectedOutput);
     }
 
-    @Test
-    @DataProvider({
+    @ParameterizedTest
+    @ValueSource(strings = {
         "",
         ":",
         "A:1:",
         "A:2:C"
     })
-    public void testApply_unhandledFormat_returnsInputUnmodified(String input) {
+    void testApply_unhandledFormat_returnsInputUnmodified(String input) {
         // Arrange (nothing to do)
 
         // Act
         String output = filter.apply(input);
 
         // Assert
-        assertThat(output, is(equalTo(input)));
+        assertThat(output).isEqualTo(input);
     }
 
     @Test
-    public void testGetAffectedFields_always_returnsOnlyRealName() {
+    void testGetAffectedFields_always_returnsOnlyRealName() {
         // Arrange (nothing to do)
 
         // Act
         Set<ClientFields.FieldAccess<String>> result = filter.getAffectedFields();
 
         // Assert
-        assertThat(result, contains(ClientFields.StringFields.REAL_NAME));
+        assertThat(result).containsExactly(ClientFields.StringFields.REAL_NAME);
     }
 
-    @DataProvider
-    public static Object[][] dataProviderUnhandledClientStringFields() {
-        return allEnumValuesExcept(ClientFields.StringFields.class, ClientFields.StringFields.REAL_NAME);
-    }
-
-    @Test
-    @UseDataProvider("dataProviderUnhandledClientStringFields")
-    public void testVerifyAffectedField_unhandledField_throwsException(ClientFields.FieldAccess<String> fieldAccess) {
-        // Arrange
-        thrown.expect(Exception.class);
+    @ParameterizedTest
+    @EnumSource(
+        value = ClientFields.StringFields.class,
+        mode = EnumSource.Mode.EXCLUDE,
+        names = {"REAL_NAME"}
+    )
+    void testVerifyAffectedField_unhandledField_throwsException(ClientFields.FieldAccess<String> fieldAccess) {
+        // Arrange (nothing to do)
 
         // Act
-        filter.verifyAffectedField(fieldAccess, "", "");
+        ThrowableAssert.ThrowingCallable action = () -> filter.verifyAffectedField(fieldAccess, "", "");
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(Exception.class);
     }
 
-    @Test
-    @DataProvider({
-        ", , true",
-        "abc, , true",
+    @ParameterizedTest
+    @CsvSource({
+        "'', '', true",
+        "abc, '', true",
         "abc, abc, false",
         "abc, a, false",
         "abc, c, false",
         "abc, 1, false",
-        ", a, false"
+        "'', a, false"
     })
-    public void testVerifyAffectedField_handledField_returnsExpectedResult(String original, String filtered, boolean expectedResult) {
+    void testVerifyAffectedField_handledField_returnsExpectedResult(String original, String filtered, boolean expectedResult) {
         // Arrange (nothing to do)
 
         // Act
         boolean result = filter.verifyAffectedField(ClientFields.StringFields.REAL_NAME, original, filtered);
 
         // Assert
-        assertThat(result, is(expectedResult));
+        assertThat(result).isEqualTo(expectedResult);
     }
 }

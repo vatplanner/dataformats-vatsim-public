@@ -1,38 +1,30 @@
 package org.vatplanner.dataformats.vatsimpublic.privacyfilter.errorhandling;
 
-import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import java.util.Collections;
+
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.vatplanner.dataformats.vatsimpublic.privacyfilter.errorhandling.ErrorHandlingStrategy.FailWithException;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+class ThrowExceptionStrategyTest {
 
-@RunWith(DataProviderRunner.class)
-public class ThrowExceptionStrategyTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @Test
-    @DataProvider({ //
-        "unwanted, ", //
-        "abc:def, de:abc:f", //
-        "original, Z", //
+    @ParameterizedTest
+    @CsvSource({
+        "unwanted, ''",
+        "abc:def, de:abc:f",
+        "original, Z",
     })
-    public void testHandleError_always_throwsFailWithException(String rawLine, String filteredLine) {
+    void testHandleError_always_throwsFailWithException(String rawLine, String filteredLine) {
         // Arrange
         ThrowExceptionStrategy strategy = new ThrowExceptionStrategy();
 
-        thrown.expect(FailWithException.class);
-
         // Act
-        strategy.handleError(rawLine, filteredLine, asList());
+        ThrowingCallable action = () -> strategy.handleError(rawLine, filteredLine, Collections.emptyList());
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(FailWithException.class);
     }
-
 }

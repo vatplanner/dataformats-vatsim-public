@@ -17,9 +17,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.vatplanner.dataformats.vatsimpublic.utils.GeoMath.OutOfRange;
 
-public class GeoMathTest {
+class GeoMathTest {
 
-    public static Stream<Arguments> dataProviderAverage() {
+    static Stream<Arguments> dataProviderAverage() {
         return Stream.of(
             // Tonga & Tuvalu example from
             // https://carto.com/blog/center-of-points/
@@ -57,7 +57,7 @@ public class GeoMathTest {
 
     @ParameterizedTest
     @MethodSource("dataProviderAverage")
-    public void testAverage_always_returnsExpectedValue(GeoPoint2D expectedResult, Collection<GeoPoint2D> points, Offset<Double> acceptedError) {
+    void testAverage_always_returnsExpectedValue(GeoPoint2D expectedResult, Collection<GeoPoint2D> points, Offset<Double> acceptedError) {
         // Arrange (nothing to do)
 
         // Act
@@ -68,8 +68,8 @@ public class GeoMathTest {
     }
 
     @ParameterizedTest
-    @ValueSource(doubles = { 90.001, -90.001, 180.0, 359.9, 360.1 })
-    public void testAverage_excessiveLatitude_throwsOutOfRange(double excessiveLatitude) {
+    @ValueSource(doubles = {90.001, -90.001, 180.0, 359.9, 360.1})
+    void testAverage_excessiveLatitude_throwsOutOfRange(double excessiveLatitude) {
         // Arrange
         Collection<GeoPoint2D> points = Arrays.asList(
             new GeoPoint2D(excessiveLatitude, 0.0),
@@ -85,17 +85,15 @@ public class GeoMathTest {
 
     private void assertCloseTo(GeoPoint2D actual, GeoPoint2D expected, Offset<Double> acceptedError) {
         assertAll(
-            () -> assertThat(actual) //
-                .extracting(GeoPoint2D::getLatitude) //
-                .describedAs("latitude")
-                .asInstanceOf(InstanceOfAssertFactories.DOUBLE) //
-                .isCloseTo(expected.getLatitude(), acceptedError), //
+            () -> assertThat(actual).extracting(GeoPoint2D::getLatitude) //
+                                    .describedAs("latitude")
+                                    .asInstanceOf(InstanceOfAssertFactories.DOUBLE) //
+                                    .isCloseTo(expected.getLatitude(), acceptedError), //
 
-            () -> assertThat(actual) //
-                .extracting(GeoPoint2D::getLongitude) //
-                .describedAs("longitude") //
-                .asInstanceOf(InstanceOfAssertFactories.DOUBLE) //
-                .isCloseTo(expected.getLongitude(), acceptedError) //
+            () -> assertThat(actual).extracting(GeoPoint2D::getLongitude) //
+                                    .describedAs("longitude") //
+                                    .asInstanceOf(InstanceOfAssertFactories.DOUBLE) //
+                                    .isCloseTo(expected.getLongitude(), acceptedError) //
         );
     }
 }

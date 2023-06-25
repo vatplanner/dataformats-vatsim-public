@@ -1,18 +1,13 @@
 package org.vatplanner.dataformats.vatsimpublic.parser.legacy;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.assertj.core.api.Assertions.as;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.COLLECTION;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
@@ -21,7 +16,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.vatplanner.dataformats.vatsimpublic.testutils.ParserLogEntryMatcher.matchesParserLogEntry;
+import static org.vatplanner.dataformats.vatsimpublic.testutils.ParserLogEntryAssert.assertThatParserLogEntry;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,10 +25,15 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.vatplanner.dataformats.vatsimpublic.parser.Client;
@@ -45,16 +45,11 @@ import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntryCollector;
 import org.vatplanner.dataformats.vatsimpublic.parser.VoiceServer;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
-
 import uk.org.lidalia.slf4jtest.LoggingEvent;
 import uk.org.lidalia.slf4jtest.TestLogger;
 import uk.org.lidalia.slf4jtest.TestLoggerFactory;
 
-@RunWith(DataProviderRunner.class)
-public class DataFileParserTest {
+class DataFileParserTest {
 
     private DataFileParser spyParser;
     private GeneralSectionParser mockGeneralSectionParser;
@@ -67,8 +62,8 @@ public class DataFileParserTest {
 
     private static final int HIGHEST_SUPPORTED_FORMAT_VERSION = 9;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         testLogger.clearAll();
 
         spyParser = spy(DataFileParser.class);
@@ -96,7 +91,7 @@ public class DataFileParserTest {
     }
 
     @Test
-    public void testCreateClientParser_secondCall_returnsNewInstance() {
+    void testCreateClientParser_secondCall_returnsNewInstance() {
         // Arrange
         doCallRealMethod().when(spyParser).createClientParser();
 
@@ -106,11 +101,11 @@ public class DataFileParserTest {
         ClientParser secondResult = spyParser.createClientParser();
 
         // Assert
-        assertThat(secondResult, is(not(sameInstance(firstResult))));
+        assertThat(secondResult).isNotSameAs(firstResult);
     }
 
     @Test
-    public void testGetGeneralSectionParser_always_doesNotReturnNull() {
+    void testGetGeneralSectionParser_always_doesNotReturnNull() {
         // Arrange
         doCallRealMethod().when(spyParser).getGeneralSectionParser();
 
@@ -118,11 +113,11 @@ public class DataFileParserTest {
         GeneralSectionParser result = spyParser.getGeneralSectionParser();
 
         // Assert
-        assertThat(result, is(not(nullValue())));
+        assertThat(result).isNotNull();
     }
 
     @Test
-    public void testGetFSDServerParser_always_doesNotReturnNull() {
+    void testGetFSDServerParser_always_doesNotReturnNull() {
         // Arrange
         doCallRealMethod().when(spyParser).getFSDServerParser();
 
@@ -130,11 +125,11 @@ public class DataFileParserTest {
         FSDServerParser result = spyParser.getFSDServerParser();
 
         // Assert
-        assertThat(result, is(not(nullValue())));
+        assertThat(result).isNotNull();
     }
 
     @Test
-    public void testGetVoiceServerParser_always_doesNotReturnNull() {
+    void testGetVoiceServerParser_always_doesNotReturnNull() {
         // Arrange
         doCallRealMethod().when(spyParser).getVoiceServerParser();
 
@@ -142,14 +137,14 @@ public class DataFileParserTest {
         VoiceServerParser result = spyParser.getVoiceServerParser();
 
         // Assert
-        assertThat(result, is(not(nullValue())));
+        assertThat(result).isNotNull();
     }
 
-    @Test
-    @DataProvider({ "", "  ab \r cd  \r\n ef \n g " })
-    public void testDeserialize_CharSequence_forwardsInputWrappedInBufferedReader(String s) throws IOException {
+    @ParameterizedTest
+    @ValueSource(strings = {"", "  ab \r cd  \r\n ef \n g "})
+    void testDeserialize_CharSequence_forwardsInputWrappedInBufferedReader(String s) {
         // Arrange
-        AtomicReference<String> capturedString = new AtomicReference<String>();
+        AtomicReference<String> capturedString = new AtomicReference<>();
         doAnswer(invocation -> {
             BufferedReader br = invocation.getArgument(0);
             capturedString.set(readBuffer(br, s.length() + 1));
@@ -157,44 +152,49 @@ public class DataFileParserTest {
         }).when(spyParser).deserialize(any(Reader.class));
 
         // Act
-        spyParser.deserialize((CharSequence) s);
+        spyParser.deserialize(s);
 
         // Assert
-        assertThat(capturedString.get(), is(equalTo(s)));
+        assertThat(capturedString).hasValue(s);
     }
 
     @Test
-    public void testDeserialize_CharSequence_returnsResultFromBufferedReaderParser() {
+    void testDeserialize_CharSequence_returnsResultFromBufferedReaderParser() {
         // Arrange
         DataFile expectedObject = new DataFile();
         doReturn(expectedObject).when(spyParser).deserialize(any(BufferedReader.class));
 
         // Act
-        DataFile result = spyParser.deserialize((CharSequence) "");
+        DataFile result = spyParser.deserialize("");
 
         // Assert
-        assertThat(result, is(sameInstance(expectedObject)));
+        assertThat(result).isSameAs(expectedObject);
     }
 
     @Test
-    public void testDeserialize_always_returnsDataFileWithFormatIndicatedAsLegacy() {
+    void testDeserialize_always_returnsDataFileWithFormatIndicatedAsLegacy() {
         // Arrange
         String lines = buildDataFileForSection("GENERAL");
 
-        doReturn(null).when(mockGeneralSectionParser).parse(any(Collection.class), any(ParserLogEntryCollector.class),
-            anyString());
+        doReturn(null).when(mockGeneralSectionParser).parse(anyCollection(), any(ParserLogEntryCollector.class),
+                                                            anyString()
+        );
 
         // Act
         DataFile dataFile = spyParser.deserialize(lines);
 
         // Assert
-        assertThat(dataFile.getFormat(), is(equalTo(DataFileFormat.LEGACY)));
+        assertThat(dataFile).extracting(DataFile::getFormat)
+                            .isSameAs(DataFileFormat.LEGACY);
     }
 
     @Test
-    public void testDeserialize_generalSection_forwardsCleanedSectionRelevantLinesToGeneralSectionParserExactlyOnce() {
+    void testDeserialize_generalSection_forwardsCleanedSectionRelevantLinesToGeneralSectionParserExactlyOnce() {
         // Arrange
-        String lines = buildDataFileForSection("GENERAL", "123", "456");
+        String lines = buildDataFileForSection("GENERAL",
+                                               "123",
+                                               "456"
+        );
 
         // Act
         spyParser.deserialize(lines);
@@ -202,19 +202,22 @@ public class DataFileParserTest {
         // Assert
         ArgumentCaptor<Collection<String>> captor = ArgumentCaptor.forClass(Collection.class);
         verify(mockGeneralSectionParser, times(1)).parse( //
-            captor.capture(), //
-            any(ParserLogEntryCollector.class),
-            anyString() //
+                                                          captor.capture(),
+                                                          any(ParserLogEntryCollector.class),
+                                                          anyString() //
         );
         Collection<String> capturedCollection = captor.getValue();
 
-        assertThat(capturedCollection, containsInAnyOrder("123", "456"));
+        assertThat(capturedCollection).containsExactlyInAnyOrder("123", "456");
     }
 
     @Test
-    public void testDeserialize_generalSection_forwardsDataFileAsLogCollectorToGeneralSectionParserExactlyOnce() {
+    void testDeserialize_generalSection_forwardsDataFileAsLogCollectorToGeneralSectionParserExactlyOnce() {
         // Arrange
-        String lines = buildDataFileForSection("GENERAL", "123", "456");
+        String lines = buildDataFileForSection("GENERAL",
+                                               "123",
+                                               "456"
+        );
 
         DataFile mockDataFile = mock(DataFile.class);
         doReturn(mockDataFile).when(spyParser).createDataFile();
@@ -224,16 +227,19 @@ public class DataFileParserTest {
 
         // Assert
         verify(mockGeneralSectionParser, times(1)).parse( //
-            any(Collection.class), //
-            Mockito.same(mockDataFile), //
-            anyString() //
+                                                          anyCollection(),
+                                                          Mockito.same(mockDataFile),
+                                                          anyString()
         );
     }
 
     @Test
-    public void testDeserialize_generalSection_forwardsSectionNameToGeneralSectionParserExactlyOnce() {
+    void testDeserialize_generalSection_forwardsSectionNameToGeneralSectionParserExactlyOnce() {
         // Arrange
-        String lines = buildDataFileForSection("GENERAL", "123", "456");
+        String lines = buildDataFileForSection("GENERAL",
+                                               "123",
+                                               "456"
+        );
 
         DataFile mockDataFile = mock(DataFile.class);
         doReturn(mockDataFile).when(spyParser).createDataFile();
@@ -243,16 +249,19 @@ public class DataFileParserTest {
 
         // Assert
         verify(mockGeneralSectionParser, times(1)).parse( //
-            any(Collection.class), //
-            any(ParserLogEntryCollector.class), //
-            Mockito.eq("GENERAL") //
+                                                          anyCollection(),
+                                                          any(ParserLogEntryCollector.class),
+                                                          eq("GENERAL")
         );
     }
 
     @Test
-    public void testDeserialize_generalSection_returnsExpectedDataFile() {
+    void testDeserialize_generalSection_returnsExpectedDataFile() {
         // Arrange
-        String lines = buildDataFileForSection("GENERAL", "123", "456");
+        String lines = buildDataFileForSection("GENERAL",
+                                               "123",
+                                               "456"
+        );
 
         DataFile mockDataFile = mock(DataFile.class);
         doReturn(mockDataFile).when(spyParser).createDataFile();
@@ -261,13 +270,16 @@ public class DataFileParserTest {
         DataFile result = spyParser.deserialize(lines);
 
         // Assert
-        assertThat(result, is(sameInstance(mockDataFile)));
+        assertThat(result).isSameAs(mockDataFile);
     }
 
     @Test
-    public void testDeserialize_generalSection_createsExactlyOneDataFile() {
+    void testDeserialize_generalSection_createsExactlyOneDataFile() {
         // Arrange
-        String lines = buildDataFileForSection("GENERAL", "123", "456");
+        String lines = buildDataFileForSection("GENERAL",
+                                               "123",
+                                               "456"
+        );
 
         // Act
         spyParser.deserialize(lines);
@@ -277,31 +289,35 @@ public class DataFileParserTest {
     }
 
     @Test
-    public void testDeserialize_generalSection_returnsDataFileWithResultFromGeneralSectionParserAsMetaData() {
+    void testDeserialize_generalSection_returnsDataFileWithResultFromGeneralSectionParserAsMetaData() {
         // Arrange
         String lines = buildDataFileForSection("GENERAL");
 
         DataFileMetaData expectedMetaData = new DataFileMetaData();
         doReturn(expectedMetaData).when(mockGeneralSectionParser).parse( //
-            any(Collection.class), //
-            any(ParserLogEntryCollector.class), //
-            anyString() //
+                                                                         anyCollection(),
+                                                                         any(ParserLogEntryCollector.class),
+                                                                         anyString()
         );
 
         // Act
         DataFile dataFile = spyParser.deserialize(lines);
 
         // Assert
-        assertThat(dataFile.getMetaData(), is(sameInstance(expectedMetaData)));
+        assertThat(dataFile).extracting(DataFile::getMetaData)
+                            .isSameAs(expectedMetaData);
     }
 
     @Test
-    public void testDeserialize_generalSectionMissingMetaData_logsWarningToSLF4J() {
+    void testDeserialize_generalSectionMissingMetaData_logsWarningToSLF4J() {
         // Arrange
         String lines = buildDataFileForSection("GENERAL");
 
-        doReturn(null).when(mockGeneralSectionParser).parse(any(Collection.class), any(ParserLogEntryCollector.class),
-            anyString());
+        doReturn(null).when(mockGeneralSectionParser).parse( //
+                                                             anyCollection(),
+                                                             any(ParserLogEntryCollector.class),
+                                                             anyString()
+        );
 
         // Act
         spyParser.deserialize(lines);
@@ -309,53 +325,51 @@ public class DataFileParserTest {
         // Assert
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
         LoggingEvent expectedEvent = LoggingEvent.warn( //
-            "unable to verify data format version, metadata is unavailable (null)" //
+                                                        "unable to verify data format version, metadata is unavailable (null)" //
         );
-        assertThat(loggingEvents, hasItem(expectedEvent));
+        assertThat(loggingEvents).contains(expectedEvent);
     }
 
     @Test
-    public void testDeserialize_generalSectionMissingMetaData_logsToDataFile() {
+    void testDeserialize_generalSectionMissingMetaData_logsToDataFile() {
         // Arrange
         String lines = buildDataFileForSection("GENERAL");
 
-        doReturn(null).when(mockGeneralSectionParser).parse(any(Collection.class), any(ParserLogEntryCollector.class),
-            anyString());
+        doReturn(null).when(mockGeneralSectionParser).parse( //
+                                                             anyCollection(),
+                                                             any(ParserLogEntryCollector.class),
+                                                             anyString()
+        );
 
         // Act
         DataFile dataFile = spyParser.deserialize(lines);
 
         // Assert
         Collection<ParserLogEntry> entries = dataFile.getParserLogEntries();
-        assertThat( //
-            entries, //
-            hasItem(
-                matchesParserLogEntry(
-                    equalTo("GENERAL"), //
-                    nullValue(String.class), //
-                    equalTo(false), //
-                    equalTo("unable to verify data format version, metadata is unavailable (null)"), //
-                    nullValue(Throwable.class) //
-                ) //
-            ) //
+        assertThat(entries).anySatisfy(
+            entry -> assertThatParserLogEntry(entry).hasSection("GENERAL")
+                                                    .doesNotHaveLineContent()
+                                                    .indicatesAcceptedLine()
+                                                    .hasMessage("unable to verify data format version, metadata is unavailable (null)")
+                                                    .doesNotHaveThrowable()
         );
     }
 
-    @Test
-    @DataProvider({
+    @ParameterizedTest
+    @CsvSource({
         "-1, metadata reports unsupported format version -1 (supported: 8..9)",
         "7, metadata reports unsupported format version 7 (supported: 8..9)",
         "10, metadata reports unsupported format version 10 (supported: 8..9)"
     })
-    public void testDeserialize_generalSectionListsUnsupportedFormatVersion_logsWarningToSLF4J(int unsupportedFormatVersion, String expectedMessage) {
+    void testDeserialize_generalSectionListsUnsupportedFormatVersion_logsWarningToSLF4J(int unsupportedFormatVersion, String expectedMessage) {
         // Arrange
         String lines = buildDataFileForSection("GENERAL");
 
         DataFileMetaData mockMetaData = mockMetaDataWithFormatVersion(unsupportedFormatVersion);
         doReturn(mockMetaData).when(mockGeneralSectionParser).parse( //
-            any(Collection.class), //
-            any(ParserLogEntryCollector.class), //
-            anyString() //
+                                                                     anyCollection(),
+                                                                     any(ParserLogEntryCollector.class),
+                                                                     anyString()
         );
 
         // Act
@@ -364,24 +378,24 @@ public class DataFileParserTest {
         // Assert
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
         LoggingEvent expectedEvent = LoggingEvent.warn(expectedMessage);
-        assertThat(loggingEvents, hasItem(expectedEvent));
+        assertThat(loggingEvents).contains(expectedEvent);
     }
 
-    @Test
-    @DataProvider({
+    @ParameterizedTest
+    @CsvSource({
         "-1, metadata reports unsupported format version -1 (supported: 8..9)",
         "7, metadata reports unsupported format version 7 (supported: 8..9)",
         "10, metadata reports unsupported format version 10 (supported: 8..9)"
     })
-    public void testDeserialize_generalSectionListsUnsupportedFormatVersion_logsToDataFile(int unsupportedFormatVersion, String expectedMessage) {
+    void testDeserialize_generalSectionListsUnsupportedFormatVersion_logsToDataFile(int unsupportedFormatVersion, String expectedMessage) {
         // Arrange
         String lines = buildDataFileForSection("GENERAL");
 
         DataFileMetaData mockMetaData = mockMetaDataWithFormatVersion(unsupportedFormatVersion);
         doReturn(mockMetaData).when(mockGeneralSectionParser).parse( //
-            any(Collection.class), //
-            any(ParserLogEntryCollector.class), //
-            anyString() //
+                                                                     anyCollection(),
+                                                                     any(ParserLogEntryCollector.class),
+                                                                     anyString()
         );
 
         // Act
@@ -389,36 +403,31 @@ public class DataFileParserTest {
 
         // Assert
         Collection<ParserLogEntry> entries = dataFile.getParserLogEntries();
-        assertThat( //
-            entries, //
-            hasItem( //
-                matchesParserLogEntry( //
-                    equalTo("GENERAL"), //
-                    nullValue(String.class), //
-                    equalTo(false), //
-                    equalTo(expectedMessage), //
-                    nullValue(Throwable.class) //
-                ) //
-            ) //
+        assertThat(entries).anySatisfy(
+            entry -> assertThatParserLogEntry(entry).hasSection("GENERAL")
+                                                    .doesNotHaveLineContent()
+                                                    .indicatesAcceptedLine()
+                                                    .hasMessage(expectedMessage)
+                                                    .doesNotHaveThrowable()
         );
     }
 
-    @DataProvider
-    public static Object[][] dataProviderSupportedFormatVersions() {
-        return new Object[][] { { 8 }, { 9 } };
+    static Stream<Arguments> dataProviderSupportedFormatVersions() {
+        return Stream.of(8, 9)
+                     .map(Arguments::of);
     }
 
-    @Test
-    @UseDataProvider("dataProviderSupportedFormatVersions")
-    public void testDeserialize_generalSectionListsSupportedFormatVersion_doesNotLogsWarningToSLF4J(int supportedFormatVersion) {
+    @ParameterizedTest
+    @MethodSource("dataProviderSupportedFormatVersions")
+    void testDeserialize_generalSectionListsSupportedFormatVersion_doesNotLogsWarningToSLF4J(int supportedFormatVersion) {
         // Arrange
         String lines = buildDataFileForSection("GENERAL");
 
         DataFileMetaData mockMetaData = mockMetaDataWithFormatVersion(supportedFormatVersion);
         doReturn(mockMetaData).when(mockGeneralSectionParser).parse( //
-            any(Collection.class), //
-            any(ParserLogEntryCollector.class), //
-            anyString() //
+                                                                     anyCollection(),
+                                                                     any(ParserLogEntryCollector.class),
+                                                                     anyString()
         );
 
         // Act
@@ -426,20 +435,20 @@ public class DataFileParserTest {
 
         // Assert
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
-        assertThat(loggingEvents, is(empty()));
+        assertThat(loggingEvents).isEmpty();
     }
 
-    @Test
-    @UseDataProvider("dataProviderSupportedFormatVersions")
-    public void testDeserialize_generalSectionListsSupportedFormatVersion_doesNotLogToDataFile(int supportedFormatVersion) {
+    @ParameterizedTest
+    @MethodSource("dataProviderSupportedFormatVersions")
+    void testDeserialize_generalSectionListsSupportedFormatVersion_doesNotLogToDataFile(int supportedFormatVersion) {
         // Arrange
         String lines = buildDataFileForSection("GENERAL");
 
         DataFileMetaData mockMetaData = mockMetaDataWithFormatVersion(supportedFormatVersion);
-        doReturn(mockMetaData).when(mockGeneralSectionParser).parse(//
-            any(Collection.class), //
-            any(ParserLogEntryCollector.class), //
-            anyString() //
+        doReturn(mockMetaData).when(mockGeneralSectionParser).parse( //
+                                                                     anyCollection(),
+                                                                     any(ParserLogEntryCollector.class),
+                                                                     anyString()
         );
 
         // Act
@@ -447,11 +456,11 @@ public class DataFileParserTest {
 
         // Assert
         Collection<ParserLogEntry> entries = dataFile.getParserLogEntries();
-        assertThat(entries, is(empty()));
+        assertThat(entries).isEmpty();
     }
 
     @Test
-    public void testGetOnlineClientParser_always_parserIsSetToNotPrefileSection() {
+    void testGetOnlineClientParser_always_parserIsSetToNotPrefileSection() {
         // Arrange
         doCallRealMethod().when(spyParser).getOnlineClientParser();
 
@@ -459,11 +468,11 @@ public class DataFileParserTest {
         ClientParser mockResult = spyParser.getOnlineClientParser();
 
         // Assert
-        verify(mockResult).setIsParsingPrefileSection(Mockito.eq(false));
+        verify(mockResult).setIsParsingPrefileSection(false);
     }
 
     @Test
-    public void testGetPrefileClientParser_always_parserIsSetToPrefileSection() {
+    void testGetPrefileClientParser_always_parserIsSetToPrefileSection() {
         // Arrange
         doCallRealMethod().when(spyParser).getPrefileClientParser();
 
@@ -471,93 +480,96 @@ public class DataFileParserTest {
         ClientParser mockResult = spyParser.getPrefileClientParser();
 
         // Assert
-        verify(mockResult).setIsParsingPrefileSection(Mockito.eq(true));
+        verify(mockResult).setIsParsingPrefileSection(true);
     }
 
     @Test
-    public void testDeserialize_clientsSectionThrowsIllegalArgumentException_returnsDataFileWithNonExceptionalResultsFromOnlineClientParser() {
+    void testDeserialize_clientsSectionThrowsIllegalArgumentException_returnsDataFileWithNonExceptionalResultsFromOnlineClientParser() {
         // Arrange
-        String lines = buildDataFileForSection("CLIENTS", ":expected line:1:", "trigger error 1", ":expected line:2:",
-            "trigger error 2");
+        String lines = buildDataFileForSection("CLIENTS",
+                                               ":expected line:1:",
+                                               "trigger error 1",
+                                               ":expected line:2:",
+                                               "trigger error 2"
+        );
 
         Client mockExpected1 = mock(Client.class);
-        doReturn(mockExpected1).when(mockOnlineClientParser).parse(Mockito.eq(":expected line:1:"));
+        doReturn(mockExpected1).when(mockOnlineClientParser).parse(":expected line:1:");
 
         Client mockExpected2 = mock(Client.class);
-        doReturn(mockExpected2).when(mockOnlineClientParser).parse(Mockito.eq(":expected line:2:"));
+        doReturn(mockExpected2).when(mockOnlineClientParser).parse(":expected line:2:");
 
         doThrow(new IllegalArgumentException("some error")) //
-            .when(mockOnlineClientParser)
-            .parse(Mockito.startsWith("trigger error"));
+                                                            .when(mockOnlineClientParser)
+                                                            .parse(Mockito.startsWith("trigger error"));
 
         // Act
         DataFile dataFile = spyParser.deserialize(lines);
 
         // Assert
-        assertThat(dataFile.getClients(), containsInAnyOrder(mockExpected1, mockExpected2));
+        assertThat(dataFile).extracting(DataFile::getClients, as(COLLECTION))
+                            .containsExactlyInAnyOrder(mockExpected1, mockExpected2);
     }
 
     @Test
-    public void testDeserialize_clientsSectionThrowsIllegalArgumentExceptions_returnsDataFileWithExceptionalResultsLoggedCorrectly() {
+    void testDeserialize_clientsSectionThrowsIllegalArgumentExceptions_returnsDataFileWithExceptionalResultsLoggedCorrectly() {
         // Arrange
         String section = "CLIENTS";
         String triggerLine1 = "trigger error 1";
         String triggerLine2 = "trigger error 2";
-        String lines = buildDataFileForSection(section, ":expected line:1:", triggerLine1, ":expected line:2:",
-            triggerLine2);
+        String lines = buildDataFileForSection(section,
+                                               ":expected line:1:",
+                                               triggerLine1,
+                                               ":expected line:2:",
+                                               triggerLine2
+        );
 
         doReturn(mockMetaDataWithFormatVersion(HIGHEST_SUPPORTED_FORMAT_VERSION))
             .when(mockGeneralSectionParser)
-            .parse(Mockito.any(), Mockito.any(), Mockito.anyString());
-        doReturn(mock(Client.class)).when(mockOnlineClientParser).parse(Mockito.anyString());
+            .parse(any(), any(), anyString());
+        doReturn(mock(Client.class)).when(mockOnlineClientParser).parse(anyString());
 
         IllegalArgumentException exception1 = new IllegalArgumentException("some error");
-        doThrow(exception1).when(mockOnlineClientParser).parse(Mockito.eq(triggerLine1));
+        doThrow(exception1).when(mockOnlineClientParser).parse(triggerLine1);
 
         IllegalArgumentException exception2 = new IllegalArgumentException("another error");
-        doThrow(exception2).when(mockOnlineClientParser).parse(Mockito.eq(triggerLine2));
+        doThrow(exception2).when(mockOnlineClientParser).parse(triggerLine2);
 
         // Act
         DataFile dataFile = spyParser.deserialize(lines);
 
         // Assert
         Collection<ParserLogEntry> entries = dataFile.getParserLogEntries();
-        assertThat(//
-            entries, //
-            containsInAnyOrder(
-                matchesParserLogEntry(
-                    equalTo(section),
-                    equalTo(triggerLine1),
-                    equalTo(true),
-                    containsString(exception1.getMessage()),
-                    sameInstance(exception1)),
-                matchesParserLogEntry(
-                    equalTo(section),
-                    equalTo(triggerLine2),
-                    equalTo(true),
-                    containsString(exception2.getMessage()),
-                    sameInstance(exception2) //
-                ) //
-            ) //
+        assertThat(entries).satisfiesExactlyInAnyOrder(
+            entry -> assertThatParserLogEntry(entry).hasSection(section)
+                                                    .hasLineContent(triggerLine1)
+                                                    .indicatesRejectedLine()
+                                                    .hasMessageContaining(exception1.getMessage())
+                                                    .hasThrowable(exception1),
+
+            entry -> assertThatParserLogEntry(entry).hasSection(section)
+                                                    .hasLineContent(triggerLine2)
+                                                    .indicatesRejectedLine()
+                                                    .hasMessageContaining(exception2.getMessage())
+                                                    .hasThrowable(exception2)
         );
     }
 
     @Test
-    public void testDeserialize_prefileSectionThrowsIllegalArgumentExceptions_returnsDataFileWithNonExceptionResultsFromPrefileClientParser() {
+    void testDeserialize_prefileSectionThrowsIllegalArgumentExceptions_returnsDataFileWithNonExceptionResultsFromPrefileClientParser() {
         // Arrange
-        String lines = buildDataFileForSection( //
-            "PREFILE", //
-            ":expected line:1:", //
-            "trigger error 1", //
-            ":expected line:2:", //
-            "trigger error 2" //
+        String lines = buildDataFileForSection("PREFILE",
+                                               ":expected line:1:",
+                                               "trigger error 1",
+                                               ":expected line:2:",
+                                               "trigger error 2"
         );
 
         Client mockExpected1 = mock(Client.class);
-        doReturn(mockExpected1).when(mockPrefileClientParser).parse(Mockito.eq(":expected line:1:"));
+        doReturn(mockExpected1).when(mockPrefileClientParser).parse(":expected line:1:");
 
         Client mockExpected2 = mock(Client.class);
-        doReturn(mockExpected2).when(mockPrefileClientParser).parse(Mockito.eq(":expected line:2:"));
+        doReturn(mockExpected2).when(mockPrefileClientParser).parse(":expected line:2:");
 
         doThrow(new IllegalArgumentException("some error"))
             .when(mockPrefileClientParser)
@@ -567,75 +579,70 @@ public class DataFileParserTest {
         DataFile dataFile = spyParser.deserialize(lines);
 
         // Assert
-        assertThat(dataFile.getClients(), containsInAnyOrder(mockExpected1, mockExpected2));
+        assertThat(dataFile).extracting(DataFile::getClients, as(COLLECTION))
+                            .containsExactlyInAnyOrder(mockExpected1, mockExpected2);
     }
 
     @Test
-    public void testDeserialize_prefileSectionThrowsIllegalArgumentExceptions_returnsDataFileWithExceptionalResultsLoggedCorrectly() {
+    void testDeserialize_prefileSectionThrowsIllegalArgumentExceptions_returnsDataFileWithExceptionalResultsLoggedCorrectly() {
         // Arrange
         String section = "PREFILE";
         String triggerLine1 = "trigger error 1";
         String triggerLine2 = "trigger error 2";
         String lines = buildDataFileForSection( //
-            section, //
-            ":expected line:1:", //
-            triggerLine1, //
-            ":expected line:2:", //
-            triggerLine2 //
+                                                section, //
+                                                ":expected line:1:", //
+                                                triggerLine1, //
+                                                ":expected line:2:", //
+                                                triggerLine2 //
         );
 
         doReturn(mockMetaDataWithFormatVersion(HIGHEST_SUPPORTED_FORMAT_VERSION))
             .when(mockGeneralSectionParser)
-            .parse(Mockito.any(), Mockito.any(), Mockito.anyString());
-        doReturn(mock(Client.class)).when(mockPrefileClientParser).parse(Mockito.anyString());
+            .parse(any(), any(), anyString());
+        doReturn(mock(Client.class)).when(mockPrefileClientParser).parse(anyString());
 
         IllegalArgumentException exception1 = new IllegalArgumentException("some error");
-        doThrow(exception1).when(mockPrefileClientParser).parse(Mockito.eq(triggerLine1));
+        doThrow(exception1).when(mockPrefileClientParser).parse(triggerLine1);
 
         IllegalArgumentException exception2 = new IllegalArgumentException("another error");
-        doThrow(exception2).when(mockPrefileClientParser).parse(Mockito.eq(triggerLine2));
+        doThrow(exception2).when(mockPrefileClientParser).parse(triggerLine2);
 
         // Act
         DataFile dataFile = spyParser.deserialize(lines);
 
         // Assert
         Collection<ParserLogEntry> entries = dataFile.getParserLogEntries();
-        assertThat(
-            entries,
-            containsInAnyOrder(
-                matchesParserLogEntry(
-                    equalTo(section),
-                    equalTo(triggerLine1),
-                    equalTo(true),
-                    containsString(exception1.getMessage()),
-                    sameInstance(exception1)),
-                matchesParserLogEntry(
-                    equalTo(section),
-                    equalTo(triggerLine2),
-                    equalTo(true),
-                    containsString(exception2.getMessage()),
-                    sameInstance(exception2) //
-                ) //
-            ) //
+        assertThat(entries).satisfiesExactlyInAnyOrder(
+            entry -> assertThatParserLogEntry(entry).hasSection(section)
+                                                    .hasLineContent(triggerLine1)
+                                                    .indicatesRejectedLine()
+                                                    .hasMessageContaining(exception1.getMessage())
+                                                    .hasThrowable(exception1),
+
+            entry -> assertThatParserLogEntry(entry).hasSection(section)
+                                                    .hasLineContent(triggerLine2)
+                                                    .indicatesRejectedLine()
+                                                    .hasMessageContaining(exception2.getMessage())
+                                                    .hasThrowable(exception2)
         );
     }
 
     @Test
-    public void testDeserialize_serversSectionThrowsIllegalArgumentException_returnsDataFileWithNonExceptionalResultsFromFSDServerParser() {
+    void testDeserialize_serversSectionThrowsIllegalArgumentException_returnsDataFileWithNonExceptionalResultsFromFSDServerParser() {
         // Arrange
-        String lines = buildDataFileForSection(
-            "SERVERS",
-            ":expected line:1:",
-            "trigger error 1",
-            ":expected line:2:",
-            "trigger error 2" //
+        String lines = buildDataFileForSection("SERVERS",
+                                               ":expected line:1:",
+                                               "trigger error 1",
+                                               ":expected line:2:",
+                                               "trigger error 2"
         );
 
         FSDServer mockExpected1 = mock(FSDServer.class);
-        doReturn(mockExpected1).when(mockFSDServerParser).parse(Mockito.eq(":expected line:1:"));
+        doReturn(mockExpected1).when(mockFSDServerParser).parse(":expected line:1:");
 
         FSDServer mockExpected2 = mock(FSDServer.class);
-        doReturn(mockExpected2).when(mockFSDServerParser).parse(Mockito.eq(":expected line:2:"));
+        doReturn(mockExpected2).when(mockFSDServerParser).parse(":expected line:2:");
 
         doThrow(new IllegalArgumentException("some error"))
             .when(mockFSDServerParser)
@@ -645,70 +652,69 @@ public class DataFileParserTest {
         DataFile dataFile = spyParser.deserialize(lines);
 
         // Assert
-        assertThat(dataFile.getFsdServers(), containsInAnyOrder(mockExpected1, mockExpected2));
+        assertThat(dataFile).extracting(DataFile::getFsdServers, as(COLLECTION))
+                            .containsExactlyInAnyOrder(mockExpected1, mockExpected2);
     }
 
     @Test
-    public void testDeserialize_serversSectionThrowsIllegalArgumentException_returnsDataFileWithExceptionalResultsLoggedCorrectly() {
+    void testDeserialize_serversSectionThrowsIllegalArgumentException_returnsDataFileWithExceptionalResultsLoggedCorrectly() {
         // Arrange
         String section = "SERVERS";
         String triggerLine1 = "trigger error 1";
         String triggerLine2 = "trigger error 2";
-        String lines = buildDataFileForSection("SERVERS", ":expected line:1:", triggerLine1, ":expected line:2:",
-            triggerLine2);
+        String lines = buildDataFileForSection("SERVERS",
+                                               ":expected line:1:",
+                                               triggerLine1,
+                                               ":expected line:2:",
+                                               triggerLine2
+        );
 
         doReturn(mockMetaDataWithFormatVersion(HIGHEST_SUPPORTED_FORMAT_VERSION))
             .when(mockGeneralSectionParser)
-            .parse(Mockito.any(), Mockito.any(), Mockito.anyString());
-        doReturn(mock(FSDServer.class)).when(mockFSDServerParser).parse(Mockito.anyString());
+            .parse(any(), any(), anyString());
+        doReturn(mock(FSDServer.class)).when(mockFSDServerParser).parse(anyString());
 
         IllegalArgumentException exception1 = new IllegalArgumentException("some error");
-        doThrow(exception1).when(mockFSDServerParser).parse(Mockito.eq(triggerLine1));
+        doThrow(exception1).when(mockFSDServerParser).parse(triggerLine1);
 
         IllegalArgumentException exception2 = new IllegalArgumentException("another error");
-        doThrow(exception2).when(mockFSDServerParser).parse(Mockito.eq(triggerLine2));
+        doThrow(exception2).when(mockFSDServerParser).parse(triggerLine2);
 
         // Act
         DataFile dataFile = spyParser.deserialize(lines);
 
         // Assert
         Collection<ParserLogEntry> entries = dataFile.getParserLogEntries();
-        assertThat(
-            entries,
-            containsInAnyOrder(
-                matchesParserLogEntry(
-                    equalTo(section),
-                    equalTo(triggerLine1),
-                    equalTo(true),
-                    containsString(exception1.getMessage()),
-                    sameInstance(exception1)),
-                matchesParserLogEntry(
-                    equalTo(section),
-                    equalTo(triggerLine2),
-                    equalTo(true),
-                    containsString(exception2.getMessage()),
-                    sameInstance(exception2) //
-                ) //
-            ) //
+        assertThat(entries).satisfiesExactlyInAnyOrder(
+            entry -> assertThatParserLogEntry(entry).hasSection(section)
+                                                    .hasLineContent(triggerLine1)
+                                                    .indicatesRejectedLine()
+                                                    .hasMessageContaining(exception1.getMessage())
+                                                    .hasThrowable(exception1),
+
+            entry -> assertThatParserLogEntry(entry).hasSection(section)
+                                                    .hasLineContent(triggerLine2)
+                                                    .indicatesRejectedLine()
+                                                    .hasMessageContaining(exception2.getMessage())
+                                                    .hasThrowable(exception2)
         );
     }
 
     @Test
-    public void testDeserialize_voiceServersSectionThrowsIllegalArgumentException_returnsDataFileWithNonExceptionalResultsFromVoiceServerParser() {
+    void testDeserialize_voiceServersSectionThrowsIllegalArgumentException_returnsDataFileWithNonExceptionalResultsFromVoiceServerParser() {
         // Arrange
-        String lines = buildDataFileForSection(
-            "VOICE SERVERS",
-            ":expected line:1:",
-            "trigger error 1",
-            ":expected line:2:",
-            "trigger error 2" //
+        String lines = buildDataFileForSection("VOICE SERVERS",
+                                               ":expected line:1:",
+                                               "trigger error 1",
+                                               ":expected line:2:",
+                                               "trigger error 2" //
         );
 
         VoiceServer mockExpected1 = mock(VoiceServer.class);
-        doReturn(mockExpected1).when(mockVoiceServerParser).parse(Mockito.eq(":expected line:1:"));
+        doReturn(mockExpected1).when(mockVoiceServerParser).parse(":expected line:1:");
 
         VoiceServer mockExpected2 = mock(VoiceServer.class);
-        doReturn(mockExpected2).when(mockVoiceServerParser).parse(Mockito.eq(":expected line:2:"));
+        doReturn(mockExpected2).when(mockVoiceServerParser).parse(":expected line:2:");
 
         doThrow(new IllegalArgumentException("some error"))
             .when(mockVoiceServerParser)
@@ -718,55 +724,50 @@ public class DataFileParserTest {
         DataFile dataFile = spyParser.deserialize(lines);
 
         // Assert
-        assertThat(dataFile.getVoiceServers(), containsInAnyOrder(mockExpected1, mockExpected2));
+        assertThat(dataFile).extracting(DataFile::getVoiceServers, as(COLLECTION))
+                            .containsExactlyInAnyOrder(mockExpected1, mockExpected2);
     }
 
     @Test
-    public void testDeserialize_voiceServersSectionThrowsIllegalArgumentException_returnsDataFileWithExceptionalResultsLoggedCorrectly() {
+    void testDeserialize_voiceServersSectionThrowsIllegalArgumentException_returnsDataFileWithExceptionalResultsLoggedCorrectly() {
         // Arrange
         String section = "VOICE SERVERS";
         String triggerLine1 = "trigger error 1";
         String triggerLine2 = "trigger error 2";
-        String lines = buildDataFileForSection(
-            "VOICE SERVERS",
-            ":expected line:1:",
-            "trigger error 1",
-            ":expected line:2:",
-            "trigger error 2" //
+        String lines = buildDataFileForSection("VOICE SERVERS",
+                                               ":expected line:1:",
+                                               "trigger error 1",
+                                               ":expected line:2:",
+                                               "trigger error 2"
         );
 
         doReturn(mockMetaDataWithFormatVersion(HIGHEST_SUPPORTED_FORMAT_VERSION)).when(mockGeneralSectionParser)
-            .parse(Mockito.any(), Mockito.any(), Mockito.anyString());
-        doReturn(mock(VoiceServer.class)).when(mockVoiceServerParser).parse(Mockito.anyString());
+                                                                                 .parse(any(), any(), anyString());
+        doReturn(mock(VoiceServer.class)).when(mockVoiceServerParser).parse(anyString());
 
         IllegalArgumentException exception1 = new IllegalArgumentException("some error");
-        doThrow(exception1).when(mockVoiceServerParser).parse(Mockito.eq(triggerLine1));
+        doThrow(exception1).when(mockVoiceServerParser).parse(triggerLine1);
 
         IllegalArgumentException exception2 = new IllegalArgumentException("another error");
-        doThrow(exception2).when(mockVoiceServerParser).parse(Mockito.eq(triggerLine2));
+        doThrow(exception2).when(mockVoiceServerParser).parse(triggerLine2);
 
         // Act
         DataFile dataFile = spyParser.deserialize(lines);
 
         // Assert
         Collection<ParserLogEntry> entries = dataFile.getParserLogEntries();
-        assertThat(
-            entries,
-            containsInAnyOrder(
-                matchesParserLogEntry(
-                    equalTo(section),
-                    equalTo(triggerLine1),
-                    equalTo(true),
-                    containsString(exception1.getMessage()),
-                    sameInstance(exception1)),
-                matchesParserLogEntry(
-                    equalTo(section),
-                    equalTo(triggerLine2),
-                    equalTo(true),
-                    containsString(exception2.getMessage()),
-                    sameInstance(exception2) //
-                ) //
-            ) //
+        assertThat(entries).satisfiesExactlyInAnyOrder(
+            entry -> assertThatParserLogEntry(entry).hasSection(section)
+                                                    .hasLineContent(triggerLine1)
+                                                    .indicatesRejectedLine()
+                                                    .hasMessageContaining(exception1.getMessage())
+                                                    .hasThrowable(exception1),
+
+            entry -> assertThatParserLogEntry(entry).hasSection(section)
+                                                    .hasLineContent(triggerLine2)
+                                                    .indicatesRejectedLine()
+                                                    .hasMessageContaining(exception2.getMessage())
+                                                    .hasThrowable(exception2)
         );
     }
 
@@ -776,7 +777,7 @@ public class DataFileParserTest {
 
     private String buildDataFileForSection(String sectionName, List<String> sectionRelevantLines) {
         // Arrange
-        String lines = "something before\r\n"
+        return "something before\r\n"
             + ";!" + sectionName + ":\r\n"
             + "decoy before\r\n"
             + "!" + sectionName + ":\r\n"
@@ -787,19 +788,17 @@ public class DataFileParserTest {
             + ";comment\r\n"
             + ";!COMMENT:\r\n"
             + ((sectionRelevantLines.size() < 2) ? ""
-                : String.join("\r\n", sectionRelevantLines.subList(1, sectionRelevantLines.size())))
+            : String.join("\r\n", sectionRelevantLines.subList(1, sectionRelevantLines.size())))
             + "\r\n"
             + ";!" + sectionName + ":\r\n"
             + "!SOMETHINGELSE:\r\n"
             + "something after\r\n";
-        return lines;
     }
 
     private String readBuffer(BufferedReader br, int maxLength) throws IOException {
         char[] buffer = new char[maxLength];
         int read = br.read(buffer);
-        String brContent = read < 1 ? "" : new String(Arrays.copyOfRange(buffer, 0, read));
-        return brContent;
+        return read < 1 ? "" : new String(Arrays.copyOfRange(buffer, 0, read));
     }
 
     private DataFileMetaData mockMetaDataWithFormatVersion(int version) {

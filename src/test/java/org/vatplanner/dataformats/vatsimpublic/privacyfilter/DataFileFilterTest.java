@@ -1,39 +1,32 @@
 package org.vatplanner.dataformats.vatsimpublic.privacyfilter;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileMetaData;
-import org.vatplanner.dataformats.vatsimpublic.testutils.Holder;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-
-@RunWith(DataProviderRunner.class)
-public class DataFileFilterTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class DataFileFilterTest {
 
     @Test
-    public void testConstructor_nullConfiguration_throwsIllegalArgumentException() {
-        // Arrange
-        thrown.expect(IllegalArgumentException.class);
+    void testConstructor_nullConfiguration_throwsIllegalArgumentException() {
+        // Arrange (nothing to do)
 
         // Act
-        new DataFileFilter(null);
+        ThrowingCallable action = () -> new DataFileFilter(null);
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    public void testConstructor_enabledRemoveStreamingChannels_throwsUnsupportedOperationException() {
+    void testConstructor_enabledRemoveStreamingChannels_throwsUnsupportedOperationException() {
         // FIXME: temporarily, remove when feature is implemented
 
         // Arrange
@@ -41,17 +34,16 @@ public class DataFileFilterTest {
             new DataFileFilterConfiguration()
                 .setRemoveStreamingChannels(true);
 
-        thrown.expect(UnsupportedOperationException.class);
-
         // Act
-        new DataFileFilter(configuration);
+        ThrowingCallable action = () -> new DataFileFilter(configuration);
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(UnsupportedOperationException.class);
     }
 
-    @Test
-    @DataProvider({ "-1", "0", "1", "7", "9", "10" })
-    public void testIsFormatVersionSupported_unsupported_returnsFalse(int formatVersion) {
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 0, 1, 7, 9, 10})
+    void testIsFormatVersionSupported_unsupported_returnsFalse(int formatVersion) {
         // Arrange
         DataFileFilter filter = createAnyFilterForIndependentMethods();
 
@@ -59,11 +51,11 @@ public class DataFileFilterTest {
         boolean result = filter.isFormatVersionSupported(formatVersion);
 
         // Assert
-        assertThat(result, is(false));
+        assertThat(result).isFalse();
     }
 
     @Test
-    public void testIsFormatVersionSupported_supported_returnsTrue() {
+    void testIsFormatVersionSupported_supported_returnsTrue() {
         // Arrange
         DataFileFilter filter = createAnyFilterForIndependentMethods();
 
@@ -71,11 +63,11 @@ public class DataFileFilterTest {
         boolean result = filter.isFormatVersionSupported(8);
 
         // Assert
-        assertThat(result, is(true));
+        assertThat(result).isTrue();
     }
 
     @Test
-    public void testCheckEqualMetadata_nullBoth_returnsTrue() {
+    void testCheckEqualMetadata_nullBoth_returnsTrue() {
         // Arrange
         DataFileFilter filter = createAnyFilterForIndependentMethods();
 
@@ -83,11 +75,11 @@ public class DataFileFilterTest {
         boolean result = filter.checkEqualMetadata(null, null);
 
         // Assert
-        assertThat(result, is(true));
+        assertThat(result).isTrue();
     }
 
     @Test
-    public void testCheckEqualMetadata_nullA_returnsFalse() {
+    void testCheckEqualMetadata_nullA_returnsFalse() {
         // Arrange
         DataFileMetaData mockMetaData = mock(DataFileMetaData.class);
 
@@ -97,11 +89,11 @@ public class DataFileFilterTest {
         boolean result = filter.checkEqualMetadata(null, mockMetaData);
 
         // Assert
-        assertThat(result, is(false));
+        assertThat(result).isFalse();
     }
 
     @Test
-    public void testCheckEqualMetadata_nullB_returnsFalse() {
+    void testCheckEqualMetadata_nullB_returnsFalse() {
         // Arrange
         DataFileMetaData mockMetaData = mock(DataFileMetaData.class);
 
@@ -111,20 +103,21 @@ public class DataFileFilterTest {
         boolean result = filter.checkEqualMetadata(mockMetaData, null);
 
         // Assert
-        assertThat(result, is(false));
+        assertThat(result).isFalse();
     }
 
-    @Test
-    @DataProvider({ "true", "false" })
-    public void testCheckEqualMetadata_notNull_returnsObjectEquality(boolean expectedResult) {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testCheckEqualMetadata_notNull_returnsObjectEquality(boolean expectedResult) {
         // Arrange
-        Holder<DataFileMetaData> holderA = new Holder<>();
-        Holder<DataFileMetaData> holderB = new Holder<>();
+        AtomicReference<DataFileMetaData> holderA = new AtomicReference<>();
+        AtomicReference<DataFileMetaData> holderB = new AtomicReference<>();
 
         DataFileMetaData a = new DataFileMetaData() {
             @Override
             public boolean equals(Object o) {
-                assertThat("object B must be provided to object A equals", o, is(sameInstance(holderB.value)));
+                assertThat(o).describedAs("object B must be provided to object A equals")
+                             .isSameAs(holderB.get());
                 return expectedResult;
             }
         };
@@ -132,13 +125,14 @@ public class DataFileFilterTest {
         DataFileMetaData b = new DataFileMetaData() {
             @Override
             public boolean equals(Object o) {
-                assertThat("object A must be provided to object B equals", o, is(sameInstance(holderA.value)));
+                assertThat(o).describedAs("object A must be provided to object B equals")
+                             .isSameAs(holderA.get());
                 return expectedResult;
             }
         };
 
-        holderA.value = a;
-        holderB.value = b;
+        holderA.set(a);
+        holderB.set(b);
 
         DataFileFilter filter = createAnyFilterForIndependentMethods();
 
@@ -146,14 +140,13 @@ public class DataFileFilterTest {
         boolean result = filter.checkEqualMetadata(a, b);
 
         // Assert
-        assertThat(result, is(expectedResult));
+        assertThat(result).isEqualTo(expectedResult);
     }
 
     private DataFileFilter createAnyFilterForIndependentMethods() {
-        DataFileFilterConfiguration configuration = //
-            new DataFileFilterConfiguration() //
-                .setRemoveRealNameAndHomebase(true);
+        DataFileFilterConfiguration configuration = new DataFileFilterConfiguration()
+            .setRemoveRealNameAndHomebase(true);
+
         return new DataFileFilter(configuration);
     }
-
 }

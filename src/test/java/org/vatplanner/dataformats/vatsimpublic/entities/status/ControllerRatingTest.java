@@ -1,9 +1,7 @@
 package org.vatplanner.dataformats.vatsimpublic.entities.status;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating.ADM;
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating.C1;
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating.C2;
@@ -19,106 +17,99 @@ import static org.vatplanner.dataformats.vatsimpublic.entities.status.Controller
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating.SUP;
 import static org.vatplanner.dataformats.vatsimpublic.entities.status.ControllerRating.SUS;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
-@RunWith(DataProviderRunner.class)
 public class ControllerRatingTest {
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @DataProvider
-    public static Object[][] dataProviderIdAndEnum() {
-        return new Object[][] {
-            new Object[] { -1, INAC },
-            new Object[] { 0, SUS },
-            new Object[] { 1, OBS },
-            new Object[] { 2, S1 },
-            new Object[] { 3, S2 },
-            new Object[] { 4, S3 },
-            new Object[] { 5, C1 },
-            new Object[] { 6, C2 },
-            new Object[] { 7, C3 },
-            new Object[] { 8, I },
-            new Object[] { 9, I2 },
-            new Object[] { 10, I3 },
-            new Object[] { 11, SUP },
-            new Object[] { 12, ADM },
-        };
+    public static Stream<Arguments> dataProviderIdAndEnum() {
+        return Stream.of(
+            Arguments.of(-1, INAC),
+            Arguments.of(0, SUS),
+            Arguments.of(1, OBS),
+            Arguments.of(2, S1),
+            Arguments.of(3, S2),
+            Arguments.of(4, S3),
+            Arguments.of(5, C1),
+            Arguments.of(6, C2),
+            Arguments.of(7, C3),
+            Arguments.of(8, I),
+            Arguments.of(9, I2),
+            Arguments.of(10, I3),
+            Arguments.of(11, SUP),
+            Arguments.of(12, ADM)
+        );
     }
 
-    @Test
-    @UseDataProvider("dataProviderIdAndEnum")
-    public void testResolveStatusFileId_knownId_expectedEnum(int id, ControllerRating expectedRating) {
+    @ParameterizedTest
+    @MethodSource("dataProviderIdAndEnum")
+    void testResolveStatusFileId_knownId_expectedEnum(int id, ControllerRating expectedRating) {
         // Arrange (nothing to do)
 
         // Act
         ControllerRating result = ControllerRating.resolveStatusFileId(id);
 
         // Assert
-        assertThat(result, is(equalTo(expectedRating)));
+        assertThat(result).isEqualTo(expectedRating);
     }
 
-    @Test
-    @DataProvider({ "-2", "13", "100" })
-    public void testResolveStatusFileId_unknownId_throwsIllegalArgumentException(int unknownId) {
-        // Arrange
-        thrown.expect(IllegalArgumentException.class);
+    @ParameterizedTest
+    @ValueSource(ints = {-2, 13, 100})
+    void testResolveStatusFileId_unknownId_throwsIllegalArgumentException(int unknownId) {
+        // Arrange (nothing to do)
 
         // Act
-        ControllerRating.resolveStatusFileId(unknownId);
+        ThrowingCallable action = () -> ControllerRating.resolveStatusFileId(unknownId);
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(IllegalArgumentException.class);
     }
 
-    @DataProvider
-    public static Object[][] dataProviderShortNameAndEnum() {
-        return new Object[][] {
-            new Object[] { "INAC", INAC },
-            new Object[] { "SUS", SUS },
-            new Object[] { "OBS", OBS },
-            new Object[] { "S1", S1 },
-            new Object[] { "S2", S2 },
-            new Object[] { "S3", S3 },
-            new Object[] { "C1", C1 },
-            new Object[] { "C2", C2 },
-            new Object[] { "C3", C3 },
-            new Object[] { "I1", I },
-            new Object[] { "I2", I2 },
-            new Object[] { "I3", I3 },
-            new Object[] { "SUP", SUP },
-            new Object[] { "ADM", ADM },
-        };
+    static Stream<Arguments> dataProviderShortNameAndEnum() {
+        return Stream.of(
+            Arguments.of("INAC", INAC),
+            Arguments.of("SUS", SUS),
+            Arguments.of("OBS", OBS),
+            Arguments.of("S1", S1),
+            Arguments.of("S2", S2),
+            Arguments.of("S3", S3),
+            Arguments.of("C1", C1),
+            Arguments.of("C2", C2),
+            Arguments.of("C3", C3),
+            Arguments.of("I1", I),
+            Arguments.of("I2", I2),
+            Arguments.of("I3", I3),
+            Arguments.of("SUP", SUP),
+            Arguments.of("ADM", ADM)
+        );
     }
 
-    @Test
-    @UseDataProvider("dataProviderShortNameAndEnum")
-    public void testResolveShortName_knownShortName_expectedEnum(String shortName, ControllerRating expectedRating) {
+    @ParameterizedTest
+    @MethodSource("dataProviderShortNameAndEnum")
+    void testResolveShortName_knownShortName_expectedEnum(String shortName, ControllerRating expectedRating) {
         // Arrange (nothing to do)
 
         // Act
         ControllerRating result = ControllerRating.resolveShortName(shortName);
 
         // Assert
-        assertThat(result, is(equalTo(expectedRating)));
+        assertThat(result).isSameAs(expectedRating);
     }
 
-    @Test
-    @DataProvider({ "", "INA", "I" })
-    public void testResolveShortName_unknownShortName_throwsIllegalArgumentException(String unknownShortName) {
+    @ParameterizedTest
+    @ValueSource(strings = {"", "INA", "I"})
+    void testResolveShortName_unknownShortName_throwsIllegalArgumentException(String unknownShortName) {
         // Arrange (nothing to do)
 
         // Act
         ControllerRating result = ControllerRating.resolveShortName(unknownShortName);
 
         // Assert
-        assertThat(result, is(nullValue()));
+        assertThat(result).isNull();
     }
 }

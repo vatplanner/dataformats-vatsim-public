@@ -1,23 +1,18 @@
 package org.vatplanner.dataformats.vatsimpublic.utils;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import java.util.function.Function;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-
-@RunWith(DataProviderRunner.class)
-public class ComparisonsTest {
+class ComparisonsTest {
 
     private final Object a = new Object();
     private final Object b = new Object();
@@ -27,7 +22,7 @@ public class ComparisonsTest {
 
     private Function<Object, Object> mockGetter;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         attributeA = mock(Object.class);
         attributeB = mock(Object.class);
@@ -39,7 +34,7 @@ public class ComparisonsTest {
     }
 
     @Test
-    public void testEqualsNullSafe_bothGettersNull_returnsTrue() {
+    void testEqualsNullSafe_bothGettersNull_returnsTrue() {
         // Arrange
         defineGetter(a, null);
         defineGetter(b, null);
@@ -48,11 +43,11 @@ public class ComparisonsTest {
         boolean result = Comparisons.equalsNullSafe(a, b, mockGetter);
 
         // Assert
-        assertThat(result, is(true));
+        assertThat(result).isTrue();
     }
 
     @Test
-    public void testEqualsNullSafe_onlyGetterANull_returnsFalse() {
+    void testEqualsNullSafe_onlyGetterANull_returnsFalse() {
         // Arrange
         defineGetter(a, null);
 
@@ -60,11 +55,11 @@ public class ComparisonsTest {
         boolean result = Comparisons.equalsNullSafe(a, b, mockGetter);
 
         // Assert
-        assertThat(result, is(false));
+        assertThat(result).isFalse();
     }
 
     @Test
-    public void testEqualsNullSafe_onlyGetterBNull_returnsFalse() {
+    void testEqualsNullSafe_onlyGetterBNull_returnsFalse() {
         // Arrange
         defineGetter(b, null);
 
@@ -72,25 +67,29 @@ public class ComparisonsTest {
         boolean result = Comparisons.equalsNullSafe(a, b, mockGetter);
 
         // Assert
-        assertThat(result, is(false));
+        assertThat(result).isFalse();
     }
 
-    @Test
-    @DataProvider({ "true", "false" })
-    public void testEqualsNullSafe_notNull_returnsObjectEquality(boolean expectedResult) {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testEqualsNullSafe_notNull_returnsObjectEquality(boolean expectedResult) {
         // Arrange
         defineGetter(a, attributeA = new Object() {
+            @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
             @Override
             public boolean equals(Object o) {
-                assertThat("attributeB must be provided to attributeA.equals", o, is(sameInstance(attributeB)));
+                assertThat(o).describedAs("attributeB must be provided to attributeA.equals")
+                             .isSameAs(attributeB);
                 return expectedResult;
             }
         });
 
         defineGetter(b, attributeB = new Object() {
+            @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
             @Override
             public boolean equals(Object o) {
-                assertThat("attributeA must be provided to attributeB.equals", o, is(sameInstance(attributeA)));
+                assertThat(o).describedAs("attributeA must be provided to attributeB.equals")
+                             .isSameAs(attributeA);
                 return expectedResult;
             }
         });
@@ -99,7 +98,7 @@ public class ComparisonsTest {
         boolean result = Comparisons.equalsNullSafe(a, b, mockGetter);
 
         // Assert
-        assertThat(result, is(expectedResult));
+        assertThat(result).isEqualTo(expectedResult);
     }
 
     private void defineGetter(Object object, Object attribute) {

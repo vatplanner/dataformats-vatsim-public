@@ -1,68 +1,62 @@
 package org.vatplanner.dataformats.vatsimpublic.utils;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
+import java.util.stream.Stream;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
+class TimeHelpersTest {
 
-@RunWith(DataProviderRunner.class)
-public class TimeHelpersTest {
+    static Stream<Arguments> dataProviderIsLessOrEqualThan() {
+        return Stream.of(
+            Arguments.of(Duration.ofSeconds(1), Duration.ofSeconds(2), true),
+            Arguments.of(Duration.ofSeconds(2), Duration.ofSeconds(2), true),
+            Arguments.of(Duration.ofSeconds(3), Duration.ofSeconds(2), false),
 
-    @DataProvider
-    public static Object[][] dataProviderIsLessOrEqualThan() {
-        return new Object[][] { //
-            new Object[] { Duration.ofSeconds(1), Duration.ofSeconds(2), true }, //
-            new Object[] { Duration.ofSeconds(2), Duration.ofSeconds(2), true }, //
-            new Object[] { Duration.ofSeconds(3), Duration.ofSeconds(2), false }, //
-
-            new Object[] { Duration.ofSeconds(3), Duration.ofMinutes(2), true }, //
-            new Object[] { Duration.ofMinutes(3), Duration.ofMinutes(2), false }, //
-        };
+            Arguments.of(Duration.ofSeconds(3), Duration.ofMinutes(2), true),
+            Arguments.of(Duration.ofMinutes(3), Duration.ofMinutes(2), false)
+        );
     }
 
-    @Test
-    @UseDataProvider("dataProviderIsLessOrEqualThan")
-    public void testIsLessOrEqualThan_validInput_returnsExpectedResult(Duration a, Duration b, boolean expectedResult) {
+    @ParameterizedTest
+    @MethodSource("dataProviderIsLessOrEqualThan")
+    void testIsLessOrEqualThan_validInput_returnsExpectedResult(Duration a, Duration b, boolean expectedResult) {
         // Arrange (nothing to do)
 
         // Act
         boolean result = TimeHelpers.isLessOrEqualThan(a, b);
 
         // Assert
-        assertThat(result, is(expectedResult));
+        assertThat(result).isEqualTo(expectedResult);
     }
 
-    @DataProvider
-    public static Object[][] dataProviderIsLessThan() {
-        return new Object[][] { //
-            new Object[] { Duration.ofSeconds(1), Duration.ofSeconds(2), true }, //
-            new Object[] { Duration.ofSeconds(2), Duration.ofSeconds(2), false }, //
-            new Object[] { Duration.ofSeconds(3), Duration.ofSeconds(2), false }, //
+    static Stream<Arguments> dataProviderIsLessThan() {
+        return Stream.of(
+            Arguments.of(Duration.ofSeconds(1), Duration.ofSeconds(2), true),
+            Arguments.of(Duration.ofSeconds(2), Duration.ofSeconds(2), false),
+            Arguments.of(Duration.ofSeconds(3), Duration.ofSeconds(2), false),
 
-            new Object[] { Duration.ofSeconds(2), Duration.ofMinutes(2), true }, //
-            new Object[] { Duration.ofMinutes(2), Duration.ofMinutes(2), false }, //
+            Arguments.of(Duration.ofSeconds(2), Duration.ofMinutes(2), true),
+            Arguments.of(Duration.ofMinutes(2), Duration.ofMinutes(2), false),
 
-            new Object[] { Duration.ofSeconds(3), Duration.ofMinutes(2), true }, //
-            new Object[] { Duration.ofMinutes(3), Duration.ofMinutes(2), false }, //
-        };
+            Arguments.of(Duration.ofSeconds(3), Duration.ofMinutes(2), true),
+            Arguments.of(Duration.ofMinutes(3), Duration.ofMinutes(2), false)
+        );
     }
 
-    @Test
-    @UseDataProvider("dataProviderIsLessThan")
-    public void testIsLessThan_validInput_returnsExpectedResult(Duration a, Duration b, boolean expectedResult) {
+    @ParameterizedTest
+    @MethodSource("dataProviderIsLessThan")
+    void testIsLessThan_validInput_returnsExpectedResult(Duration a, Duration b, boolean expectedResult) {
         // Arrange (nothing to do)
 
         // Act
         boolean result = TimeHelpers.isLessThan(a, b);
 
         // Assert
-        assertThat(result, is(expectedResult));
+        assertThat(result).isEqualTo(expectedResult);
     }
 }

@@ -1,48 +1,40 @@
 package org.vatplanner.dataformats.vatsimpublic.parser.legacy;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.vatplanner.dataformats.vatsimpublic.parser.VoiceServer;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-
-@RunWith(DataProviderRunner.class)
-public class VoiceServerParserTest {
+class VoiceServerParserTest {
 
     private VoiceServerParser parser;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @Before
+    @BeforeEach
     public void setUp() {
         parser = new VoiceServerParser();
     }
 
-    @Test
-    @DataProvider({ "", "hostname:location:name:1:Abc123", "hostname:location:name:1:Abc123:1:" })
-    public void testParse_genericFormatViolation_throwsIllegalArgumentException(String erroneousLine) {
-        // Arrange
-        thrown.expect(IllegalArgumentException.class);
+    @ParameterizedTest
+    @ValueSource(strings = {"", "hostname:location:name:1:Abc123", "hostname:location:name:1:Abc123:1:"})
+    void testParse_genericFormatViolation_throwsIllegalArgumentException(String erroneousLine) {
+        // Arrange (nothing to do)
 
         // Act
-        parser.parse(erroneousLine);
+        ThrowingCallable action = () -> parser.parse(erroneousLine);
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
-    @DataProvider({ "hostname", "some.other.host.name", "123.45.67.89" })
-    public void testParse_validHostnameOrIp_returnsObjectWithExpectedAddress(String expectedAddress) {
+    @ParameterizedTest
+    @ValueSource(strings = {"hostname", "some.other.host.name", "123.45.67.89"})
+    void testParse_validHostnameOrIp_returnsObjectWithExpectedAddress(String expectedAddress) {
         // Arrange
         String line = String.format("%s:location:name:1:Abc123:", expectedAddress);
 
@@ -50,24 +42,25 @@ public class VoiceServerParserTest {
         VoiceServer result = parser.parse(line);
 
         // Assert
-        assertThat(result.getAddress(), is(equalTo(expectedAddress)));
+        assertThat(result).extracting(VoiceServer::getAddress)
+                          .isEqualTo(expectedAddress);
     }
 
     @Test
-    public void testParse_withoutHostnameOrIp_throwsIllegalArgumentException() {
+    void testParse_withoutHostnameOrIp_throwsIllegalArgumentException() {
         // Arrange
         String erroneousLine = ":location:name:1:Abc123:";
-        thrown.expect(IllegalArgumentException.class);
 
         // Act
-        parser.parse(erroneousLine);
+        ThrowingCallable action = () -> parser.parse(erroneousLine);
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
-    @DataProvider({ "Location", "My Location", "My Location, Somewhere" })
-    public void testParse_validLocation_returnsObjectWithExpectedLocation(String expectedLocation) {
+    @ParameterizedTest
+    @ValueSource(strings = {"Location", "My Location", "My Location, Somewhere"})
+    void testParse_validLocation_returnsObjectWithExpectedLocation(String expectedLocation) {
         // Arrange
         String line = String.format("hostname:%s:name:1:Abc123:", expectedLocation);
 
@@ -75,24 +68,25 @@ public class VoiceServerParserTest {
         VoiceServer result = parser.parse(line);
 
         // Assert
-        assertThat(result.getLocation(), is(equalTo(expectedLocation)));
+        assertThat(result).extracting(VoiceServer::getLocation)
+                          .isEqualTo(expectedLocation);
     }
 
     @Test
-    public void testParse_withoutLocation_throwsIllegalArgumentException() {
+    void testParse_withoutLocation_throwsIllegalArgumentException() {
         // Arrange
         String erroneousLine = "hostname::name:1:Abc123:";
-        thrown.expect(IllegalArgumentException.class);
 
         // Act
-        parser.parse(erroneousLine);
+        ThrowingCallable action = () -> parser.parse(erroneousLine);
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
-    @DataProvider({ "Simple Name", "special chars -.,%$!\" and numbers 0123456789 are ok too" })
-    public void testParse_validName_returnsObjectWithExpectedName(String expectedName) {
+    @ParameterizedTest
+    @ValueSource(strings = {"Simple Name", "special chars -.,%$!\" and numbers 0123456789 are ok too"})
+    void testParse_validName_returnsObjectWithExpectedName(String expectedName) {
         // Arrange
         String line = String.format("hostname:location:%s:1:Abc123:", expectedName);
 
@@ -100,24 +94,28 @@ public class VoiceServerParserTest {
         VoiceServer result = parser.parse(line);
 
         // Assert
-        assertThat(result.getName(), is(equalTo(expectedName)));
+        assertThat(result).extracting(VoiceServer::getName)
+                          .isEqualTo(expectedName);
     }
 
     @Test
-    public void testParse_withoutName_throwsIllegalArgumentException() {
+    void testParse_withoutName_throwsIllegalArgumentException() {
         // Arrange
         String erroneousLine = "hostname:location::1:Abc123:";
-        thrown.expect(IllegalArgumentException.class);
 
         // Act
-        parser.parse(erroneousLine);
+        ThrowingCallable action = () -> parser.parse(erroneousLine);
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
-    @DataProvider({ "0, false", "1, true" })
-    public void testParse_validFlagForClientsConnectionAllowed_returnsObjectWithExpectedConnectionFlag(String inputFlag, boolean expectedOutputFlag) {
+    @ParameterizedTest
+    @CsvSource({
+        "0, false",
+        "1, true"
+    })
+    void testParse_validFlagForClientsConnectionAllowed_returnsObjectWithExpectedConnectionFlag(String inputFlag, boolean expectedOutputFlag) {
         // Arrange
         String line = String.format("hostname:location:name:%s:Abc123:", inputFlag);
 
@@ -125,25 +123,26 @@ public class VoiceServerParserTest {
         VoiceServer result = parser.parse(line);
 
         // Assert
-        assertThat(result.isClientConnectionAllowed(), is(equalTo(expectedOutputFlag)));
+        assertThat(result).extracting(VoiceServer::isClientConnectionAllowed)
+                          .isEqualTo(expectedOutputFlag);
     }
 
-    @Test
-    @DataProvider({ "", "-1", "2", "a", "10", "01" })
-    public void testParse_invalidFlagsForClientsConnectionAllowed_throwsIllegalArgumentException(String invalidFlag) {
+    @ParameterizedTest
+    @ValueSource(strings = {"", "-1", "2", "a", "10", "01"})
+    void testParse_invalidFlagsForClientsConnectionAllowed_throwsIllegalArgumentException(String invalidFlag) {
         // Arrange
         String erroneousLine = String.format("hostname:location:name:%s:Abc123:", invalidFlag);
-        thrown.expect(IllegalArgumentException.class);
 
         // Act
-        parser.parse(erroneousLine);
+        ThrowingCallable action = () -> parser.parse(erroneousLine);
 
-        // Assert (nothing to do)
+        // Assert
+        assertThatThrownBy(action).isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
-    @DataProvider({ "", "A", "1", "abc123", "-.,#!\"§$%&" })
-    public void testParse_withTypeOfVoiceServer_returnsObjectWithExpectedRawType(String rawType) {
+    @ParameterizedTest
+    @ValueSource(strings = {"", "A", "1", "abc123", "-.,#!\"§$%&"})
+    void testParse_withTypeOfVoiceServer_returnsObjectWithExpectedRawType(String rawType) {
         // Arrange
         String line = String.format("hostname:location:name:1:%s:", rawType);
 
@@ -151,11 +150,12 @@ public class VoiceServerParserTest {
         VoiceServer result = parser.parse(line);
 
         // Assert
-        assertThat(result.getRawServerType(), is(equalTo(rawType)));
+        assertThat(result).extracting(VoiceServer::getRawServerType)
+                          .isEqualTo(rawType);
     }
 
     @Test
-    public void testParse_withoutTypeOfVoiceServer_returnsObjectWithNullForRawType() {
+    void testParse_withoutTypeOfVoiceServer_returnsObjectWithNullForRawType() {
         // Arrange
         String line = "hostname:location:name:1:";
 
@@ -163,7 +163,7 @@ public class VoiceServerParserTest {
         VoiceServer result = parser.parse(line);
 
         // Assert
-        assertThat(result.getRawServerType(), is(nullValue()));
+        assertThat(result).extracting(VoiceServer::getRawServerType)
+                          .isNull();
     }
-
 }

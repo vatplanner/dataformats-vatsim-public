@@ -1,12 +1,8 @@
 package org.vatplanner.dataformats.vatsimpublic.parser.legacy;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.as;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -15,59 +11,55 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.vatplanner.dataformats.vatsimpublic.parser.DataFileFormat;
 import org.vatplanner.dataformats.vatsimpublic.parser.NetworkInformation;
-
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
 
 import uk.org.lidalia.slf4jtest.LoggingEvent;
 import uk.org.lidalia.slf4jtest.TestLogger;
 import uk.org.lidalia.slf4jtest.TestLoggerFactory;
 
-@RunWith(DataProviderRunner.class)
-public class NetworkInformationParserTest {
+class NetworkInformationParserTest {
 
     private final TestLogger testLogger = TestLoggerFactory.getTestLogger(NetworkInformationParser.class);
 
-    @DataProvider
-    public static String[] dataProviderExpectedDefinitionComments() {
-        return new String[] {
+    static Stream<Arguments> dataProviderExpectedDefinitionComments() {
+        return Stream.of(
             "; msg0         - message to be displayed at application startup"
-        };
+        ).map(Arguments::of);
     }
 
-    @DataProvider
-    public static Object[][] dataProviderNonMatchingDefinitionComment() {
-        return new Object[][] {
-            { "; msg0         - something unexpected", "msg0", "something unexpected" }
-        };
+    static Stream<Arguments> dataProviderNonMatchingDefinitionComment() {
+        return Stream.of(
+            Arguments.of("; msg0         - something unexpected", "msg0", "something unexpected")
+        );
     }
 
-    @Before
-    public void clearLog() {
+    @BeforeEach
+    void clearLog() {
         testLogger.clearAll();
     }
 
     private BufferedReader getBufferedReaderForTestResource(String resourceName) {
         String filePath = getClass().getResource("/NetworkInformation/" + resourceName).getFile();
         try {
-            return new BufferedReader(new InputStreamReader(new FileInputStream(filePath), Charset.forName("UTF-8")));
+            return new BufferedReader(new InputStreamReader(new FileInputStream(filePath), StandardCharsets.UTF_8));
         } catch (FileNotFoundException ex) {
             throw new RuntimeException("failed to initialize a BufferedReader for resource " + resourceName, ex);
         }
     }
 
     @Test
-    public void testParse_bufferedReader_returnsNotNull() {
+    void testParse_bufferedReader_returnsNotNull() {
         // Arrange
         String s = "";
         BufferedReader br = new BufferedReader(new StringReader(s));
@@ -76,11 +68,11 @@ public class NetworkInformationParserTest {
         NetworkInformation res = NetworkInformationParser.parse(br);
 
         // Assert
-        assertThat(res, is(notNullValue()));
+        assertThat(res).isNotNull();
     }
 
     @Test
-    public void testParse_unrecognizedKey_logsWarning() {
+    void testParse_unrecognizedKey_logsWarning() {
         // Arrange (nothing to do)
 
         // Act
@@ -93,15 +85,15 @@ public class NetworkInformationParserTest {
             "unknownTestKey",
             "This is the value" //
         );
-        assertThat(loggingEvents, contains(expectedEvent));
+        assertThat(loggingEvents).containsExactly(expectedEvent);
     }
 
-    @Test
-    @DataProvider({ //
-        "servers.live=someServer", //
-        "voice0=someValue", //
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "servers.live=someServer",
+        "voice0=someValue",
     })
-    public void testParse_ignoredKey_doesNotLogWarning(String line) {
+    void testParse_ignoredKey_doesNotLogWarning(String line) {
         // Arrange (nothing to do)
 
         // Act
@@ -109,11 +101,11 @@ public class NetworkInformationParserTest {
 
         // Assert
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
-        assertThat(loggingEvents, is(empty()));
+        assertThat(loggingEvents).isEmpty();
     }
 
     @Test
-    public void testParse_regularComment_doesNotLogWarning() {
+    void testParse_regularComment_doesNotLogWarning() {
         // Arrange (nothing to do)
 
         // Act
@@ -121,12 +113,12 @@ public class NetworkInformationParserTest {
 
         // Assert
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
-        assertThat(loggingEvents, is(empty()));
+        assertThat(loggingEvents).isEmpty();
     }
 
-    @Test
-    @UseDataProvider("dataProviderExpectedDefinitionComments")
-    public void testParse_expectedDefinitionComment_doesNotLogWarning(String input) {
+    @ParameterizedTest
+    @MethodSource("dataProviderExpectedDefinitionComments")
+    void testParse_expectedDefinitionComment_doesNotLogWarning(String input) {
         // Arrange (nothing to do)
 
         // Act
@@ -134,12 +126,12 @@ public class NetworkInformationParserTest {
 
         // Assert
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
-        assertThat(loggingEvents, is(empty()));
+        assertThat(loggingEvents).isEmpty();
     }
 
-    @Test
-    @UseDataProvider("dataProviderNonMatchingDefinitionComment")
-    public void testParse_nonMatchingDefinitionComment_logsWarning(String input, String key, String definition) {
+    @ParameterizedTest
+    @MethodSource("dataProviderNonMatchingDefinitionComment")
+    void testParse_nonMatchingDefinitionComment_logsWarning(String input, String key, String definition) {
         // Arrange (nothing to do)
 
         // Act
@@ -152,11 +144,11 @@ public class NetworkInformationParserTest {
             key,
             definition //
         );
-        assertThat(loggingEvents, contains(expectedEvent));
+        assertThat(loggingEvents).containsExactly(expectedEvent);
     }
 
     @Test
-    public void testParse_unknownDefinitionComment_logsWarning() {
+    void testParse_unknownDefinitionComment_logsWarning() {
         // Arrange (nothing to do)
 
         // Act
@@ -169,11 +161,11 @@ public class NetworkInformationParserTest {
             "somethingNew",
             "we should inform user about the change" //
         );
-        assertThat(loggingEvents, contains(expectedEvent));
+        assertThat(loggingEvents).containsExactly(expectedEvent);
     }
 
     @Test
-    public void testParse_unparsedComment_doesNotGetLogged() {
+    void testParse_unparsedComment_doesNotGetLogged() {
         // Arrange (nothing to do)
 
         // Act
@@ -181,11 +173,11 @@ public class NetworkInformationParserTest {
 
         // Assert
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
-        assertThat(loggingEvents, is(empty()));
+        assertThat(loggingEvents).isEmpty();
     }
 
     @Test
-    public void testParse_emptyLine_doesNotGetLogged() {
+    void testParse_emptyLine_doesNotGetLogged() {
         // Arrange (nothing to do)
 
         // Act
@@ -193,11 +185,11 @@ public class NetworkInformationParserTest {
 
         // Assert
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
-        assertThat(loggingEvents, is(empty()));
+        assertThat(loggingEvents).isEmpty();
     }
 
     @Test
-    public void testParse_whiteSpace_doesNotGetLogged() {
+    void testParse_whiteSpace_doesNotGetLogged() {
         // Arrange (nothing to do)
 
         // Act
@@ -205,11 +197,11 @@ public class NetworkInformationParserTest {
 
         // Assert
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
-        assertThat(loggingEvents, is(empty()));
+        assertThat(loggingEvents).isEmpty();
     }
 
     @Test
-    public void testParse_unmatchedLine_logsWarning() {
+    void testParse_unmatchedLine_logsWarning() {
         // Arrange (nothing to do)
 
         // Act
@@ -221,11 +213,11 @@ public class NetworkInformationParserTest {
             "Uninterpretable line in network file: \"{}\"",
             "some unexpected line" //
         );
-        assertThat(loggingEvents, contains(expectedEvent));
+        assertThat(loggingEvents).containsExactly(expectedEvent);
     }
 
     @Test
-    public void testParse_whazzUpString_doesNotLog() {
+    void testParse_whazzUpString_doesNotLog() {
         // Arrange (nothing to do)
 
         // Act
@@ -233,11 +225,11 @@ public class NetworkInformationParserTest {
 
         // Assert
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
-        assertThat(loggingEvents, is(empty()));
+        assertThat(loggingEvents).isEmpty();
     }
 
     @Test
-    public void testParse_unexpectedWhazzUpFormatDefinition_logsWarning() {
+    void testParse_unexpectedWhazzUpFormatDefinition_logsWarning() {
         // Arrange (nothing to do)
 
         // Act
@@ -249,11 +241,11 @@ public class NetworkInformationParserTest {
             "WhazzUp format may have changed, header definition: \"{}\"",
             "ABC.:12-34:.." //
         );
-        assertThat(loggingEvents, contains(expectedEvent));
+        assertThat(loggingEvents).containsExactly(expectedEvent);
     }
 
     @Test
-    public void testParse_multipleWhazzUpLines_logWarning() {
+    void testParse_multipleWhazzUpLines_logWarning() {
         // Arrange (nothing to do)
 
         // Act
@@ -262,11 +254,11 @@ public class NetworkInformationParserTest {
         // Assert
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
         LoggingEvent expectedEvent = LoggingEvent.warn("Uninterpretable line in network file: \"{}\"", "12345:TEST2");
-        assertThat(loggingEvents, contains(expectedEvent));
+        assertThat(loggingEvents).containsExactly(expectedEvent);
     }
 
     @Test
-    public void testParse_whazzUpLineNotFirst_logsWarning() {
+    void testParse_whazzUpLineNotFirst_logsWarning() {
         // Arrange (nothing to do)
 
         // Act
@@ -275,24 +267,24 @@ public class NetworkInformationParserTest {
         // Assert
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
         LoggingEvent expectedEvent = LoggingEvent.warn("Uninterpretable line in network file: \"{}\"", "9876:TEST");
-        assertThat(loggingEvents, contains(expectedEvent));
+        assertThat(loggingEvents).containsExactly(expectedEvent);
     }
 
     @Test
-    public void testParse_fullExample1_doesNotLog() {
+    void testParse_fullExample1_doesNotLog() {
         // Arrange
         BufferedReader br = getBufferedReaderForTestResource("fullexample1.txt");
 
         // Act
-        NetworkInformation res = NetworkInformationParser.parse(br);
+        NetworkInformationParser.parse(br);
 
         // Assert
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
-        assertThat(loggingEvents, is(empty()));
+        assertThat(loggingEvents).isEmpty();
     }
 
     @Test
-    public void testParse_fullExample1_resultContainsExpectedWhazzUpString() {
+    void testParse_fullExample1_resultContainsExpectedWhazzUpString() {
         // Arrange
         BufferedReader br = getBufferedReaderForTestResource("fullexample1.txt");
 
@@ -300,12 +292,12 @@ public class NetworkInformationParserTest {
         NetworkInformation res = NetworkInformationParser.parse(br);
 
         // Assert
-        String whazzUpString = res.getWhazzUpString();
-        assertThat(whazzUpString, is("1234:TEST"));
+        assertThat(res).extracting(NetworkInformation::getWhazzUpString)
+                       .isEqualTo("1234:TEST");
     }
 
     @Test
-    public void testParse_fullExample1_resultContainsExpectedStartupMessages() {
+    void testParse_fullExample1_resultContainsExpectedStartupMessages() {
         // Arrange
         BufferedReader br = getBufferedReaderForTestResource("fullexample1.txt");
 
@@ -313,13 +305,16 @@ public class NetworkInformationParserTest {
         NetworkInformation res = NetworkInformationParser.parse(br);
 
         // Assert
-        List<String> messagesStartup = res.getStartupMessages();
-        List<String> expected = Arrays.asList("This is line 1.\nAnd here we got message line 2.".split("\n"));
-        assertThat(messagesStartup, is(expected));
+        assertThat(res).extracting(NetworkInformation::getStartupMessages, as(LIST))
+                       .containsExactly(
+                           "This is line 1.",
+                           "And here we got message line 2."
+                       );
     }
 
+    @SuppressWarnings("deprecation")
     @Test
-    public void testParse_fullExample1_resultContainsExpectedAtisURLs() throws MalformedURLException {
+    void testParse_fullExample1_resultContainsExpectedAtisURLs() throws MalformedURLException {
         // Arrange
         BufferedReader br = getBufferedReaderForTestResource("fullexample1.txt");
 
@@ -327,14 +322,12 @@ public class NetworkInformationParserTest {
         NetworkInformation res = NetworkInformationParser.parse(br);
 
         // Assert
-        List<URL> atisUrls = res.getAtisUrls();
-
-        assertThat(atisUrls.size(), is(1));
-        assertThat(atisUrls.get(0), is(equalTo(new URL("http://www.could-be-anywhere.local/test.html"))));
+        assertThat(res).extracting(NetworkInformation::getAtisUrls, as(LIST))
+                       .containsExactly(new URL("http://www.could-be-anywhere.local/test.html"));
     }
 
     @Test
-    public void testParse_fullExample1_resultContainsExpectedLegacyDataFileURLs() throws MalformedURLException {
+    void testParse_fullExample1_resultContainsExpectedLegacyDataFileURLs() throws MalformedURLException {
         // Arrange
         BufferedReader br = getBufferedReaderForTestResource("fullexample1.txt");
 
@@ -343,15 +336,15 @@ public class NetworkInformationParserTest {
 
         // Assert
         List<URL> dataFileUrls = res.getDataUrls(DataFileFormat.LEGACY);
-
-        assertThat(dataFileUrls.size(), is(3));
-        assertThat(dataFileUrls.get(0), is(equalTo(new URL("http://where-ever.com/fetchme.txt"))));
-        assertThat(dataFileUrls.get(1), is(equalTo(new URL("http://some.where.else/fetchme2.txt"))));
-        assertThat(dataFileUrls.get(2), is(equalTo(new URL("http://checking-misplaced.out.of.group/"))));
+        assertThat(dataFileUrls).containsExactly(
+            new URL("http://where-ever.com/fetchme.txt"),
+            new URL("http://some.where.else/fetchme2.txt"),
+            new URL("http://checking-misplaced.out.of.group/")
+        );
     }
 
     @Test
-    public void testParse_fullExample1_resultContainsExpectedJsonDataFileURLs() throws MalformedURLException {
+    void testParse_fullExample1_resultContainsExpectedJsonDataFileURLs() throws MalformedURLException {
         // Arrange
         BufferedReader br = getBufferedReaderForTestResource("fullexample1.txt");
 
@@ -360,15 +353,15 @@ public class NetworkInformationParserTest {
 
         // Assert
         List<URL> dataFileUrls = res.getDataUrls(DataFileFormat.JSON3);
-
-        assertThat(dataFileUrls.size(), is(3));
-        assertThat(dataFileUrls.get(0), is(equalTo(new URL("http://where-ever.com/fetchme.json"))));
-        assertThat(dataFileUrls.get(1), is(equalTo(new URL("http://some.where.else/fetchme2.json"))));
-        assertThat(dataFileUrls.get(2), is(equalTo(new URL("http://checking-json-misplaced.out.of.group/"))));
+        assertThat(dataFileUrls).containsExactly(
+            new URL("http://where-ever.com/fetchme.json"),
+            new URL("http://some.where.else/fetchme2.json"),
+            new URL("http://checking-json-misplaced.out.of.group/")
+        );
     }
 
     @Test
-    public void testParse_fullExample1_resultContainsExpectedMetarURLs() throws MalformedURLException {
+    void testParse_fullExample1_resultContainsExpectedMetarURLs() throws MalformedURLException {
         // Arrange
         BufferedReader br = getBufferedReaderForTestResource("fullexample1.txt");
 
@@ -376,14 +369,14 @@ public class NetworkInformationParserTest {
         NetworkInformation res = NetworkInformationParser.parse(br);
 
         // Assert
-        List<URL> metarUrls = res.getMetarUrls();
-
-        assertThat(metarUrls.size(), is(1));
-        assertThat(metarUrls.get(0), is(equalTo(new URL("http://someurl.com/test"))));
+        assertThat(res).extracting(NetworkInformation::getMetarUrls, as(LIST))
+                       .containsExactly(
+                           new URL("http://someurl.com/test")
+                       );
     }
 
     @Test
-    public void testParse_fullExample1_resultContainsExpectedMovedToURLs() throws MalformedURLException {
+    void testParse_fullExample1_resultContainsExpectedMovedToURLs() throws MalformedURLException {
         // Arrange
         BufferedReader br = getBufferedReaderForTestResource("fullexample1.txt");
 
@@ -391,14 +384,14 @@ public class NetworkInformationParserTest {
         NetworkInformation res = NetworkInformationParser.parse(br);
 
         // Assert
-        List<URL> movedToUrls = res.getMovedToUrls();
-
-        assertThat(movedToUrls.size(), is(1));
-        assertThat(movedToUrls.get(0), is(equalTo(new URL("http://go-and-ask.there/"))));
+        assertThat(res).extracting(NetworkInformation::getMovedToUrls, as(LIST))
+                       .containsExactly(
+                           new URL("http://go-and-ask.there/")
+                       );
     }
 
     @Test
-    public void testParse_fullExample1_resultContainsExpectedServerFileURLs() throws MalformedURLException {
+    void testParse_fullExample1_resultContainsExpectedServerFileURLs() throws MalformedURLException {
         // Arrange
         BufferedReader br = getBufferedReaderForTestResource("fullexample1.txt");
 
@@ -406,16 +399,16 @@ public class NetworkInformationParserTest {
         NetworkInformation res = NetworkInformationParser.parse(br);
 
         // Assert
-        List<URL> serverFileUrls = res.getServersFileUrls();
-
-        assertThat(serverFileUrls.size(), is(3));
-        assertThat(serverFileUrls.get(0), is(equalTo(new URL("https://theres-more.com/another-file.txt"))));
-        assertThat(serverFileUrls.get(1), is(equalTo(new URL("http://and-again.de/check-this.dat"))));
-        assertThat(serverFileUrls.get(2), is(equalTo(new URL("http://after-a-blank-line.de/we-continue.txt"))));
+        assertThat(res).extracting(NetworkInformation::getServersFileUrls, as(LIST))
+                       .containsExactly(
+                           new URL("https://theres-more.com/another-file.txt"),
+                           new URL("http://and-again.de/check-this.dat"),
+                           new URL("http://after-a-blank-line.de/we-continue.txt")
+                       );
     }
 
     @Test
-    public void testParse_fullExample1_resultContainsExpectedUserStatisticsURLs() throws MalformedURLException {
+    void testParse_fullExample1_resultContainsExpectedUserStatisticsURLs() throws MalformedURLException {
         // Arrange
         BufferedReader br = getBufferedReaderForTestResource("fullexample1.txt");
 
@@ -423,26 +416,26 @@ public class NetworkInformationParserTest {
         NetworkInformation res = NetworkInformationParser.parse(br);
 
         // Assert
-        List<URL> userStatsUrls = res.getUserStatisticsUrls();
-
-        assertThat(userStatsUrls.size(), is(1));
-        assertThat(userStatsUrls.get(0), is(equalTo(new URL("https://stats-here.and.now/getStats.php"))));
+        assertThat(res).extracting(NetworkInformation::getUserStatisticsUrls, as(LIST))
+                       .containsExactly(
+                           new URL("https://stats-here.and.now/getStats.php")
+                       );
     }
 
     @Test
-    public void testParse_startupMessagesNotDefined_resultHasNoStartupMessages() {
+    void testParse_startupMessagesNotDefined_resultHasNoStartupMessages() {
         // Arrange (nothing to do)
 
         // Act
         NetworkInformation res = NetworkInformationParser.parse("");
 
         // Assert
-        List<String> messagesStartup = res.getStartupMessages();
-        assertThat(messagesStartup, is(empty()));
+        assertThat(res).extracting(NetworkInformation::getStartupMessages, as(LIST))
+                       .isEmpty();
     }
 
     @Test
-    public void testParse_expectedWhazzUpFormatWithPriorDefinition_resultContainsExpectedValue() {
+    void testParse_expectedWhazzUpFormatWithPriorDefinition_resultContainsExpectedValue() {
         // Arrange
         String definition = "1234:EXAMPLE";
         String expected = "54321:WHATSTHAT";
@@ -453,65 +446,67 @@ public class NetworkInformationParserTest {
         );
 
         // Assert
-        String actual = res.getWhazzUpString();
-        assertThat(actual, is(expected));
+        assertThat(res).extracting(NetworkInformation::getWhazzUpString)
+                       .isEqualTo(expected);
     }
 
     @Test
-    public void testParse_expectedWhazzUpFormatWithPriorDefinitionButNeverUsed_resultReturnsNull() {
+    void testParse_expectedWhazzUpFormatWithPriorDefinitionButNeverUsed_resultReturnsNull() {
         // Arrange (nothing to do)
 
         // Act
         NetworkInformation res = NetworkInformationParser.parse("; 13245:WONTSHOW - used by WhazzUp only");
 
         // Assert
-        String actual = res.getWhazzUpString();
-        assertThat(actual, is(nullValue()));
+        assertThat(res).extracting(NetworkInformation::getWhazzUpString)
+                       .isNull();
     }
 
     @Test
-    public void testParse_unexpectedWhazzUpFormat_returnsNull() {
+    void testParse_unexpectedWhazzUpFormat_returnsNull() {
         // Arrange (nothing to do)
 
         // Act
         NetworkInformation res = NetworkInformationParser.parse("; ABC.:12-34:.. - used by WhazzUp only");
 
         // Assert
-        String actual = res.getWhazzUpString();
-        assertThat(actual, is(nullValue()));
+        assertThat(res).extracting(NetworkInformation::getWhazzUpString)
+                       .isNull();
     }
 
     @Test
-    public void testParse_whazzUpLineFirstAfterWhitespace_resultContainsExpectedValue() {
+    void testParse_whazzUpLineFirstAfterWhitespace_resultContainsExpectedValue() {
         // Arrange (nothing to do)
 
         // Act
         NetworkInformation res = NetworkInformationParser.parse("\n  \n9876:TEST");
 
         // Assert
-        assertThat(res.getWhazzUpString(), is("9876:TEST"));
+        assertThat(res).extracting(NetworkInformation::getWhazzUpString)
+                       .isEqualTo("9876:TEST");
     }
 
     @Test
-    public void testParse_whazzUpLineNotFirst_resultReturnsNull() {
+    void testParse_whazzUpLineNotFirst_resultReturnsNull() {
         // Arrange (nothing to do)
 
         // Act
         NetworkInformation res = NetworkInformationParser.parse("url0=http://test.com/1234\n9876:TEST");
 
         // Assert
-        assertThat(res.getWhazzUpString(), is(nullValue()));
+        assertThat(res).extracting(NetworkInformation::getWhazzUpString)
+                       .isNull();
     }
 
     @Test
-    public void testParse_multipleWhazzUpLines_resultReturnsFirstValue() {
+    void testParse_multipleWhazzUpLines_resultReturnsFirstValue() {
         // Arrange (nothing to do)
 
         // Act
         NetworkInformation res = NetworkInformationParser.parse("9876:TEST\n12345:TEST2");
 
         // Assert
-        String whazzUpString = res.getWhazzUpString();
-        assertThat(whazzUpString, is("9876:TEST"));
+        assertThat(res).extracting(NetworkInformation::getWhazzUpString)
+                       .isEqualTo("9876:TEST");
     }
 }

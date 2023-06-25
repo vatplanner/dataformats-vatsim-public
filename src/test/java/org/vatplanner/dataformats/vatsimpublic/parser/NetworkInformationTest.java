@@ -1,17 +1,9 @@
 package org.vatplanner.dataformats.vatsimpublic.parser;
 
-import static com.tngtech.java.junit.dataprovider.DataProviders.crossProduct;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.emptyIterable;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.assertj.core.api.Assertions.as;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -19,78 +11,53 @@ import static org.mockito.Mockito.when;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import org.hamcrest.junit.ExpectedException;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import com.google.common.collect.ImmutableList;
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import uk.org.lidalia.slf4jtest.LoggingEvent;
 import uk.org.lidalia.slf4jtest.TestLogger;
 import uk.org.lidalia.slf4jtest.TestLoggerFactory;
 
-@RunWith(DataProviderRunner.class)
-public class NetworkInformationTest {
+class NetworkInformationTest {
 
     private final TestLogger testLogger = TestLoggerFactory.getTestLogger(NetworkInformation.class);
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @Before
-    public void clearLog() {
+    @BeforeEach
+    void clearLog() {
         testLogger.clearAll();
     }
 
     @Test
-    public void testGetMessagesStartup_initially_listIsUnmodifiable() {
+    void testGetMessagesStartup_initially_listIsUnmodifiable() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
         // Act
-        List<String> startupMessages = info.getStartupMessages();
+        List<String> result = info.getStartupMessages();
 
         // Assert
-        thrown.expect(UnsupportedOperationException.class);
-        startupMessages.add("test");
+        assertThat(result).isUnmodifiable();
     }
 
     @Test
-    public void testGetMessagesStartup_initially_returnsEmptyCollection() {
+    void testGetMessagesStartup_initially_returnsEmptyCollection() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
         // Act
-        List<String> startupMessages = info.getStartupMessages();
+        List<String> result = info.getStartupMessages();
 
         // Assert
-        assertThat(startupMessages, is(empty()));
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void testGetMessagesStartup_initially_returnsList() {
-        // Arrange
-        NetworkInformation info = new NetworkInformation();
-
-        // Act
-        List<String> startupMessages = info.getStartupMessages();
-
-        // Assert
-        assertThat(startupMessages, is(instanceOf(List.class)));
-    }
-
-    @Test
-    public void testAddAsUrl_malformedUrl_logsWarning() {
+    void testAddAsUrl_malformedUrl_logsWarning() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
@@ -98,33 +65,37 @@ public class NetworkInformationTest {
         info.addAsUrl("test", "this-is-not-a-url");
 
         // Assert
-        // it seems we can not easily compare events which wrap a Throwable :(
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
-        assertThat(loggingEvents.size(), is(1));
-        LoggingEvent actualEvent = loggingEvents.iterator().next();
-        assertThat(actualEvent.getMessage(), is("URL for \"{}\" is malformed: \"{}\""));
-        ImmutableList<Object> arguments = actualEvent.getArguments();
-        assertThat(arguments.size(), is(1));
-        Object[] actualArguments = (Object[]) arguments.get(0);
-        assertThat(actualArguments.length, is(2));
-        assertThat(actualArguments[0], is("test"));
-        assertThat(actualArguments[1], is("this-is-not-a-url"));
+        assertThat(loggingEvents).satisfiesExactly(
+            event -> assertAll(
+                () -> assertThat(event).extracting(LoggingEvent::getMessage)
+                                       .isEqualTo("URL for \"{}\" is malformed: \"{}\""),
+
+                () -> assertThat(event).extracting(LoggingEvent::getArguments, as(LIST))
+                                       .satisfiesExactly(
+                                           args -> assertThat((Object[]) args).containsExactly(
+                                               "test",
+                                               "this-is-not-a-url"
+                                           )
+                                       )
+            )
+        );
     }
 
     @Test
-    public void testAddAsUrl_malformedUrl_returnsFalse() {
+    void testAddAsUrl_malformedUrl_returnsFalse() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
         // Act
-        boolean success = info.addAsUrl("test", "this-is-not-a-url");
+        boolean result = info.addAsUrl("test", "this-is-not-a-url");
 
         // Assert
-        assertThat(success, is(false));
+        assertThat(result).isFalse();
     }
 
     @Test
-    public void testAddAsUrl_validUniqueUrl_doesNotLog() {
+    void testAddAsUrl_validUniqueUrl_doesNotLog() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
@@ -133,23 +104,23 @@ public class NetworkInformationTest {
 
         // Assert
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
-        assertThat(loggingEvents, is(emptyIterable()));
+        assertThat(loggingEvents).isEmpty();
     }
 
     @Test
-    public void testAddAsUrl_validUniqueUrl_returnsTrue() {
+    void testAddAsUrl_validUniqueUrl_returnsTrue() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
         // Act
-        boolean success = info.addAsUrl("test", "http://www.test.com/test?test=123&test");
+        boolean result = info.addAsUrl("test", "http://www.test.com/test?test=123&test");
 
         // Assert
-        assertThat(success, is(true));
+        assertThat(result).isTrue();
     }
 
     @Test
-    public void testAddAsDataUrl_malformedUrl_logsWarning() {
+    void testAddAsDataUrl_malformedUrl_logsWarning() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
@@ -159,19 +130,24 @@ public class NetworkInformationTest {
         // Assert
         // it seems we can not easily compare events which wrap a Throwable :(
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
-        assertThat(loggingEvents.size(), is(1));
-        LoggingEvent actualEvent = loggingEvents.iterator().next();
-        assertThat(actualEvent.getMessage(), is("URL for \"{}\" is malformed: \"{}\""));
-        ImmutableList<Object> arguments = actualEvent.getArguments();
-        assertThat(arguments.size(), is(1));
-        Object[] actualArguments = (Object[]) arguments.get(0);
-        assertThat(actualArguments.length, is(2));
-        assertThat(actualArguments[0], is("test"));
-        assertThat(actualArguments[1], is("this-is-not-a-url"));
+        assertThat(loggingEvents).satisfiesExactly(
+            event -> assertAll(
+                () -> assertThat(event).extracting(LoggingEvent::getMessage)
+                                       .isEqualTo("URL for \"{}\" is malformed: \"{}\""),
+
+                () -> assertThat(event).extracting(LoggingEvent::getArguments, as(LIST))
+                                       .satisfiesExactly(
+                                           args -> assertThat((Object[]) args).containsExactly(
+                                               "test",
+                                               "this-is-not-a-url"
+                                           )
+                                       )
+            )
+        );
     }
 
     @Test
-    public void testAddAsDataUrl_malformedUrl_returnsFalse() {
+    void testAddAsDataUrl_malformedUrl_returnsFalse() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
@@ -179,11 +155,11 @@ public class NetworkInformationTest {
         boolean success = info.addAsDataUrl("test", "this-is-not-a-url");
 
         // Assert
-        assertThat(success, is(false));
+        assertThat(success).isFalse();
     }
 
     @Test
-    public void testAddAsDataUrl_validUniqueUrl_doesNotLog() {
+    void testAddAsDataUrl_validUniqueUrl_doesNotLog() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
@@ -192,47 +168,47 @@ public class NetworkInformationTest {
 
         // Assert
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
-        assertThat(loggingEvents, is(emptyIterable()));
+        assertThat(loggingEvents).isEmpty();
     }
 
     @Test
-    public void testAddAsDataUrl_validUniqueUrl_returnsTrue() {
+    void testAddAsDataUrl_validUniqueUrl_returnsTrue() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
         // Act
-        boolean success = info.addAsDataUrl("test", "http://www.test.com/test?test=123&test");
+        boolean result = info.addAsDataUrl("test", "http://www.test.com/test?test=123&test");
 
         // Assert
-        assertThat(success, is(true));
+        assertThat(result).isTrue();
     }
 
     @Test
-    public void testGetParameterUrls_undefinedKey_returnsEmptyList() {
+    void testGetParameterUrls_undefinedKey_returnsEmptyList() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
         // Act
-        List<URL> res = info.getParameterUrls("surely-undefined");
+        List<URL> result = info.getParameterUrls("surely-undefined");
 
         // Assert
-        assertThat(res, is(empty()));
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void testGetParameterUrls_knownKeyWithoutData_returnsEmptyList() {
+    void testGetParameterUrls_knownKeyWithoutData_returnsEmptyList() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
         // Act
-        List<URL> res = info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
+        List<URL> result = info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
 
         // Assert
-        assertThat(res, is(empty()));
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void testGetParameterUrls_knownKeyWithData_returnsSameDataInOrder() throws MalformedURLException {
+    void testGetParameterUrls_knownKeyWithData_returnsSameDataInOrder() throws MalformedURLException {
         // Arrange
         NetworkInformation info = new NetworkInformation();
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, "http://a.com/");
@@ -240,46 +216,43 @@ public class NetworkInformationTest {
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, "http://c.com/");
 
         // Act
-        List<URL> res = info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
+        List<URL> result = info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
 
         // Assert
-        assertThat(res.size(), is(3));
-        assertThat(res.get(0), is(equalTo(new URL("http://a.com/"))));
-        assertThat(res.get(1), is(equalTo(new URL("http://b.com/"))));
-        assertThat(res.get(2), is(equalTo(new URL("http://c.com/"))));
+        assertThat(result).containsExactly(
+            new URL("http://a.com/"),
+            new URL("http://b.com/"),
+            new URL("http://c.com/")
+        );
     }
 
     @Test
-    public void testGetParameterUrls_undefinedKey_listIsUnmodifiable() throws MalformedURLException {
+    void testGetParameterUrls_undefinedKey_listIsUnmodifiable() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
         // Act
-        List<URL> res = info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
+        List<URL> result = info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
 
         // Assert
-        thrown.expect(UnsupportedOperationException.class);
-
-        res.add(new URL("http://test.de/"));
+        assertThat(result).isUnmodifiable();
     }
 
     @Test
-    public void testGetParameterUrls_knownKeyWithData_listIsUnmodifiable() throws MalformedURLException {
+    void testGetParameterUrls_knownKeyWithData_listIsUnmodifiable() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, "http://a.com/");
 
         // Act
-        List<URL> res = info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
+        List<URL> result = info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
 
         // Assert
-        thrown.expect(UnsupportedOperationException.class);
-
-        res.add(new URL("http://test.de/"));
+        assertThat(result).isUnmodifiable();
     }
 
     @Test
-    public void testGetParameterUrls_mixedKeys_listContainsOnlyAssignedDataInOrder() throws MalformedURLException {
+    void testGetParameterUrls_mixedKeys_listContainsOnlyAssignedDataInOrder() throws MalformedURLException {
         // Arrange
         NetworkInformation info = new NetworkInformation();
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, "http://b.com/");
@@ -287,130 +260,121 @@ public class NetworkInformationTest {
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, "http://d.com/");
 
         // Act
-        List<URL> res = info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
+        List<URL> result = info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
 
         // Assert
-        assertThat(res.size(), is(2));
-        assertThat(res.get(0), is(equalTo(new URL("http://b.com/"))));
-        assertThat(res.get(1), is(equalTo(new URL("http://d.com/"))));
+        assertThat(result).containsExactly(
+            new URL("http://b.com/"),
+            new URL("http://d.com/")
+        );
     }
 
     @Test
-    public void testGetParameterUrls_duplicateURLs_areRetained() throws MalformedURLException {
+    void testGetParameterUrls_duplicateURLs_areRetained() throws MalformedURLException {
         // Arrange
         NetworkInformation info = new NetworkInformation();
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, "http://1.com/");
         info.addAsUrl(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, "http://1.com/");
 
         // Act
-        List<URL> res = info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
+        List<URL> result = info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE);
 
         // Assert
-        assertThat(res.size(), is(2));
-        assertThat(res.get(0), is(equalTo(new URL("http://1.com/"))));
-        assertThat(res.get(1), is(equalTo(new URL("http://1.com/"))));
+        assertThat(result).containsExactly(
+            new URL("http://1.com/"),
+            new URL("http://1.com/")
+        );
     }
 
+    @SuppressWarnings("deprecation")
     @Test
-    public void testGetAtisUrls_always_proxiesGetParameterUrls() {
+    void testGetAtisUrls_always_proxiesGetParameterUrls() {
         // Arrange
         List<URL> expectedList = new ArrayList<>();
         NetworkInformation info = spy(new NetworkInformation());
         when(info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_ATIS)).thenReturn(expectedList);
 
         // Act
-        List<URL> res = info.getAtisUrls();
+        List<URL> result = info.getAtisUrls();
 
         // Assert
-        assertThat(res, is(sameInstance(expectedList)));
+        assertThat(result).isSameAs(expectedList);
     }
 
+    @SuppressWarnings("deprecation")
     @Test
-    public void testGetDataUrls_withoutParameter_proxiesGetDataFileUrlsForLegacyFormat() {
+    void testGetDataUrls_withoutParameter_proxiesGetDataFileUrlsForLegacyFormat() {
         // Arrange
         List<URL> expectedList = new ArrayList<>();
         NetworkInformation info = spy(new NetworkInformation());
-        doReturn(expectedList).when(info).getDataUrls(eq(DataFileFormat.LEGACY));
+        doReturn(expectedList).when(info).getDataUrls(DataFileFormat.LEGACY);
 
         // Act
-        List<URL> res = info.getDataFileUrls();
+        List<URL> result = info.getDataFileUrls();
 
         // Assert
-        assertThat(res, is(sameInstance(expectedList)));
+        assertThat(result).isSameAs(expectedList);
     }
 
     @Test
-    public void testGetMetarUrls_always_proxiesGetParameterUrls() {
+    void testGetMetarUrls_always_proxiesGetParameterUrls() {
         // Arrange
         List<URL> expectedList = new ArrayList<>();
         NetworkInformation info = spy(new NetworkInformation());
         when(info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_METAR)).thenReturn(expectedList);
 
         // Act
-        List<URL> res = info.getMetarUrls();
+        List<URL> result = info.getMetarUrls();
 
         // Assert
-        assertThat(res, is(sameInstance(expectedList)));
+        assertThat(result).isSameAs(expectedList);
     }
 
     @Test
-    public void testGetMovedToUrls_always_proxiesGetParameterUrls() {
+    void testGetMovedToUrls_always_proxiesGetParameterUrls() {
         // Arrange
         List<URL> expectedList = new ArrayList<>();
         NetworkInformation info = spy(new NetworkInformation());
         when(info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_MOVED)).thenReturn(expectedList);
 
         // Act
-        List<URL> res = info.getMovedToUrls();
+        List<URL> result = info.getMovedToUrls();
 
         // Assert
-        assertThat(res, is(sameInstance(expectedList)));
+        assertThat(result).isSameAs(expectedList);
     }
 
     @Test
-    public void testGetServersFileUrls_always_proxiesGetParameterUrls() {
+    void testGetServersFileUrls_always_proxiesGetParameterUrls() {
         // Arrange
         List<URL> expectedList = new ArrayList<>();
         NetworkInformation info = spy(new NetworkInformation());
         when(info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE)).thenReturn(expectedList);
 
         // Act
-        List<URL> res = info.getServersFileUrls();
+        List<URL> result = info.getServersFileUrls();
 
         // Assert
-        assertThat(res, is(sameInstance(expectedList)));
+        assertThat(result).isSameAs(expectedList);
     }
 
     @Test
-    public void testGetUserStatisticsUrls_always_proxiesGetParameterUrls() {
+    void testGetUserStatisticsUrls_always_proxiesGetParameterUrls() {
         // Arrange
         List<URL> expectedList = new ArrayList<>();
         NetworkInformation info = spy(new NetworkInformation());
         when(info.getParameterUrls(NetworkInformation.PARAMETER_KEY_URL_USER_STATISTICS)).thenReturn(expectedList);
 
         // Act
-        List<URL> res = info.getUserStatisticsUrls();
+        List<URL> result = info.getUserStatisticsUrls();
 
         // Assert
-        assertThat(res, is(sameInstance(expectedList)));
+        assertThat(result).isSameAs(expectedList);
     }
 
-    @DataProvider
-    public static Object[][] dataProviderDataFileFormats() {
-        DataFileFormat[] formats = DataFileFormat.values();
-        Object[][] out = new Object[formats.length][1];
-
-        int i = 0;
-        for (DataFileFormat format : formats) {
-            out[i++][0] = format;
-        }
-
-        return out;
-    }
-
-    @Test
-    @UseDataProvider("dataProviderDataFileFormats")
-    public void testGetDataUrls_initially_returnsEmpty(DataFileFormat format) {
+    @ParameterizedTest
+    @EnumSource(DataFileFormat.class)
+    void testGetDataUrls_initially_returnsEmpty(DataFileFormat format) {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
@@ -418,11 +382,11 @@ public class NetworkInformationTest {
         List<URL> result = info.getDataUrls(format);
 
         // Assert
-        assertThat(result, is(empty()));
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void testGetDataUrls_initially_listIsUnmodifiable() throws Exception {
+    void testGetDataUrls_initially_listIsUnmodifiable() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
@@ -430,31 +394,20 @@ public class NetworkInformationTest {
         List<URL> result = info.getDataUrls(DataFileFormat.JSON3);
 
         // Assert
-        thrown.expect(UnsupportedOperationException.class);
-        result.add(new URL("http://new/"));
+        assertThat(result).isUnmodifiable();
     }
 
-    @DataProvider
-    public static Object[][] dataProviderDataFileFormatsAndUrlStrings() {
-        return crossProduct( //
-            dataProviderDataFileFormats(), //
-            new Object[][] { //
-                { //
-                    new String[] { //
-                        "http://a.com/somewhere.txt", //
-                        "https://www.wherever.net/", //
-                        "https://data.some-place.de/here/as/well" //
-                    } //
-                } //
-            } //
-        );
-    }
-
-    @Test
-    @UseDataProvider("dataProviderDataFileFormatsAndUrlStrings")
-    public void testGetDataUrls_addedUrlsForMatchingJsonKey_returnsExpectedUrls(DataFileFormat format, String[] expectedUrlStrings) {
+    @ParameterizedTest
+    @EnumSource(DataFileFormat.class)
+    void testGetDataUrls_addedUrlsForMatchingJsonKey_returnsExpectedUrls(DataFileFormat format) {
         // Arrange
         NetworkInformation info = new NetworkInformation();
+        String[] expectedUrlStrings = new String[]{
+            "http://a.com/somewhere.txt",
+            "https://www.wherever.net/",
+            "https://data.some-place.de/here/as/well"
+        };
+
         for (String urlString : expectedUrlStrings) {
             info.addAsDataUrl(format.getNetworkInformationDataKey(), urlString);
         }
@@ -463,11 +416,12 @@ public class NetworkInformationTest {
         List<URL> result = info.getDataUrls(format);
 
         // Assert
-        assertThat(asStrings(result), contains(expectedUrlStrings));
+        assertThat(result).extracting(URL::toString)
+                          .containsExactly(expectedUrlStrings);
     }
 
     @Test
-    public void testGetDataUrls_addedUrlsForMultipleJsonKeys_returnsOnlyExpectedUrls() {
+    void testGetDataUrls_addedUrlsForMultipleJsonKeys_returnsOnlyExpectedUrls() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
         String expectedLegacyUrlString1 = "http://legacy/1";
@@ -478,7 +432,8 @@ public class NetworkInformationTest {
         info.addAsDataUrl(DataFileFormat.JSON3.getNetworkInformationDataKey(), expectedJson3UrlString1);
         info.addAsDataUrl("something_totally_different", "http://this/is/unexpected");
         info.addAsDataUrl(DataFileFormat.JSON3.getNetworkInformationDataKey() + "_nope",
-            "http://this/is/also/unexpected");
+                          "http://this/is/also/unexpected"
+        );
         info.addAsDataUrl(DataFileFormat.LEGACY.getNetworkInformationDataKey(), expectedLegacyUrlString2);
         info.addAsDataUrl(DataFileFormat.JSON3.getNetworkInformationDataKey(), expectedJson3UrlString2);
 
@@ -487,12 +442,17 @@ public class NetworkInformationTest {
         List<URL> resultJson3 = info.getDataUrls(DataFileFormat.JSON3);
 
         // Assert
-        assertThat(asStrings(resultLegacy), contains(expectedLegacyUrlString1, expectedLegacyUrlString2));
-        assertThat(asStrings(resultJson3), contains(expectedJson3UrlString1, expectedJson3UrlString2));
+        assertAll(
+            () -> assertThat(resultLegacy).extracting(URL::toString)
+                                          .containsExactly(expectedLegacyUrlString1, expectedLegacyUrlString2),
+
+            () -> assertThat(resultJson3).extracting(URL::toString)
+                                         .containsExactly(expectedJson3UrlString1, expectedJson3UrlString2)
+        );
     }
 
     @Test
-    public void testGetDataUrls_addedUrlsForMatchingJsonKey_listIsUnmodifiable() throws Exception {
+    void testGetDataUrls_addedUrlsForMatchingJsonKey_listIsUnmodifiable() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
         info.addAsDataUrl(DataFileFormat.JSON3.getNetworkInformationDataKey(), "http://some/url");
@@ -501,12 +461,11 @@ public class NetworkInformationTest {
         List<URL> result = info.getDataUrls(DataFileFormat.JSON3);
 
         // Assert
-        thrown.expect(UnsupportedOperationException.class);
-        result.add(new URL("http://new/"));
+        assertThat(result).isUnmodifiable();
     }
 
     @Test
-    public void testGetAllUrlsByDataKey_initially_returnsEmpty() {
+    void testGetAllUrlsByDataKey_initially_returnsEmpty() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
@@ -514,11 +473,11 @@ public class NetworkInformationTest {
         Map<String, List<URL>> result = info.getAllUrlsByDataKey();
 
         // Assert
-        assertThat(result.entrySet(), is(empty()));
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void testGetAllUrlsByDataKey_initially_mapIsUnmodifiable() throws Exception {
+    void testGetAllUrlsByDataKey_initially_mapIsUnmodifiable() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
 
@@ -526,12 +485,11 @@ public class NetworkInformationTest {
         Map<String, List<URL>> result = info.getAllUrlsByDataKey();
 
         // Assert
-        thrown.expect(UnsupportedOperationException.class);
-        result.put("some_key", new ArrayList<>());
+        assertThat(result).isUnmodifiable();
     }
 
     @Test
-    public void testGetAllUrlsByDataKey_addedUrls_returnsAllUrlsIndexedByKey() {
+    void testGetAllUrlsByDataKey_addedUrls_returnsAllUrlsIndexedByKey() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
         String expectedLegacyUrlString1 = "http://legacy/1";
@@ -553,27 +511,35 @@ public class NetworkInformationTest {
         Map<String, List<URL>> result = info.getAllUrlsByDataKey();
 
         // Assert
-        assertThat(result.size(), is(equalTo(4)));
-        assertThat(
-            asStrings(result.get(DataFileFormat.LEGACY.getNetworkInformationDataKey())),
-            contains(expectedLegacyUrlString1, expectedLegacyUrlString2) //
-        );
-        assertThat(
-            asStrings(result.get(DataFileFormat.JSON3.getNetworkInformationDataKey())),
-            contains(expectedJson3UrlString1, expectedJson3UrlString2) //
-        );
-        assertThat(
-            asStrings(result.get(someExtraKey1)),
-            contains(expectedExtraValue1) //
-        );
-        assertThat(
-            asStrings(result.get(someExtraKey2)),
-            contains(expectedExtraValue2) //
+        assertAll(
+            () -> assertThat(result).hasSize(4),
+
+            () -> assertThat(result.get(DataFileFormat.LEGACY.getNetworkInformationDataKey())).extracting(URL::toString)
+                                                                                              .containsExactly(
+                                                                                                  expectedLegacyUrlString1,
+                                                                                                  expectedLegacyUrlString2
+                                                                                              ),
+
+            () -> assertThat(result.get(DataFileFormat.JSON3.getNetworkInformationDataKey())).extracting(URL::toString)
+                                                                                             .containsExactly(
+                                                                                                 expectedJson3UrlString1,
+                                                                                                 expectedJson3UrlString2
+                                                                                             ),
+
+            () -> assertThat(result.get(someExtraKey1)).extracting(URL::toString)
+                                                       .containsExactly(
+                                                           expectedExtraValue1
+                                                       ),
+
+            () -> assertThat(result.get(someExtraKey2)).extracting(URL::toString)
+                                                       .containsExactly(
+                                                           expectedExtraValue2
+                                                       )
         );
     }
 
     @Test
-    public void testGetAllUrlsByDataKey_addedUrls_listIsUnmodifiable() throws Exception {
+    void testGetAllUrlsByDataKey_addedUrls_listIsUnmodifiable() {
         // Arrange
         NetworkInformation info = new NetworkInformation();
         info.addAsDataUrl(DataFileFormat.JSON3.getNetworkInformationDataKey(), "http://some/url");
@@ -582,12 +548,11 @@ public class NetworkInformationTest {
         Map<String, List<URL>> result = info.getAllUrlsByDataKey();
 
         // Assert
-        thrown.expect(UnsupportedOperationException.class);
-        result.put("some_key", new ArrayList<>());
+        assertThat(result).isUnmodifiable();
     }
 
     @Test
-    public void testGetAllUrlsByDataKey_afterAddAll_returnsDeduplicatedCombinationOfBothInstances() {
+    void testGetAllUrlsByDataKey_afterAddAll_returnsDeduplicatedCombinationOfBothInstances() {
         // Arrange
         String bothInstancesKey1 = "both1";
         String bothInstancesKey2 = "both2";
@@ -624,40 +589,38 @@ public class NetworkInformationTest {
         Map<String, List<URL>> result = testedInstance.getAllUrlsByDataKey();
 
         // Assert
-        assertThat(result.size(), is(equalTo(4)));
-        assertThat(
-            asStrings(result.get(bothInstancesKey1)),
-            containsInAnyOrder(
-                expectedValueBoth1_1,
-                expectedValueBoth1_2,
-                expectedValueTestInstanceOnly1,
-                expectedValueOtherInstanceOnly1 //
-            ) //
-        );
-        assertThat(
-            asStrings(result.get(bothInstancesKey2)),
-            containsInAnyOrder(
-                expectedValueBoth2_1,
-                expectedValueTestInstanceOnly2,
-                expectedValueOtherInstanceOnly2 //
-            ) //
-        );
-        assertThat(
-            asStrings(result.get(onlyTestInstanceKey)),
-            containsInAnyOrder(
-                expectedValueTestInstanceOnly1 //
-            ) //
-        );
-        assertThat(
-            asStrings(result.get(onlyOtherInstanceKey)),
-            containsInAnyOrder(
-                expectedValueOtherInstanceOnly1 //
-            ) //
+        assertAll(
+            () -> assertThat(result).hasSize(4),
+
+            () -> assertThat(result.get(bothInstancesKey1)).extracting(URL::toString)
+                                                           .containsExactlyInAnyOrder(
+                                                               expectedValueBoth1_1,
+                                                               expectedValueBoth1_2,
+                                                               expectedValueTestInstanceOnly1,
+                                                               expectedValueOtherInstanceOnly1
+                                                           ),
+
+            () -> assertThat(result.get(bothInstancesKey2)).extracting(URL::toString)
+                                                           .containsExactlyInAnyOrder(
+                                                               expectedValueBoth2_1,
+                                                               expectedValueTestInstanceOnly2,
+                                                               expectedValueOtherInstanceOnly2
+                                                           ),
+
+            () -> assertThat(result.get(onlyTestInstanceKey)).extracting(URL::toString)
+                                                             .containsExactlyInAnyOrder(
+                                                                 expectedValueTestInstanceOnly1
+                                                             ),
+
+            () -> assertThat(result.get(onlyOtherInstanceKey)).extracting(URL::toString)
+                                                              .containsExactlyInAnyOrder(
+                                                                  expectedValueOtherInstanceOnly1
+                                                              )
         );
     }
 
     @Test
-    public void testGetMetarUrls_afterAddAll_returnsDeduplicatedCombinationOfBothInstances() {
+    void testGetMetarUrls_afterAddAll_returnsDeduplicatedCombinationOfBothInstances() {
         // Arrange
         String expectedValueBoth1 = "http://expected/1";
         String expectedValueBoth2 = "http://expected/2";
@@ -680,20 +643,17 @@ public class NetworkInformationTest {
         List<URL> result = testedInstance.getMetarUrls();
 
         // Assert
-        assertThat(result.size(), is(equalTo(4)));
-        assertThat(
-            asStrings(result),
-            containsInAnyOrder(
-                expectedValueBoth1,
-                expectedValueBoth2,
-                expectedValueTestInstanceOnly,
-                expectedValueOtherInstanceOnly //
-            ) //
-        );
+        assertThat(result).extracting(URL::toString)
+                          .containsExactlyInAnyOrder(
+                              expectedValueBoth1,
+                              expectedValueBoth2,
+                              expectedValueTestInstanceOnly,
+                              expectedValueOtherInstanceOnly
+                          );
     }
 
     @Test
-    public void testGetMovedToUrls_afterAddAll_returnsDeduplicatedCombinationOfBothInstances() {
+    void testGetMovedToUrls_afterAddAll_returnsDeduplicatedCombinationOfBothInstances() {
         // Arrange
         String expectedValueBoth1 = "http://expected/1";
         String expectedValueBoth2 = "http://expected/2";
@@ -716,20 +676,17 @@ public class NetworkInformationTest {
         List<URL> result = testedInstance.getMovedToUrls();
 
         // Assert
-        assertThat(result.size(), is(equalTo(4)));
-        assertThat(
-            asStrings(result),
-            containsInAnyOrder(
-                expectedValueBoth1,
-                expectedValueBoth2,
-                expectedValueTestInstanceOnly,
-                expectedValueOtherInstanceOnly //
-            ) //
-        );
+        assertThat(result).extracting(URL::toString)
+                          .containsExactlyInAnyOrder(
+                              expectedValueBoth1,
+                              expectedValueBoth2,
+                              expectedValueTestInstanceOnly,
+                              expectedValueOtherInstanceOnly
+                          );
     }
 
     @Test
-    public void testGetServersFileUrls_afterAddAll_returnsDeduplicatedCombinationOfBothInstances() {
+    void testGetServersFileUrls_afterAddAll_returnsDeduplicatedCombinationOfBothInstances() {
         // Arrange
         String expectedValueBoth1 = "http://expected/1";
         String expectedValueBoth2 = "http://expected/2";
@@ -752,20 +709,17 @@ public class NetworkInformationTest {
         List<URL> result = testedInstance.getServersFileUrls();
 
         // Assert
-        assertThat(result.size(), is(equalTo(4)));
-        assertThat(
-            asStrings(result),
-            containsInAnyOrder(
-                expectedValueBoth1,
-                expectedValueBoth2,
-                expectedValueTestInstanceOnly,
-                expectedValueOtherInstanceOnly //
-            ) //
-        );
+        assertThat(result).extracting(URL::toString)
+                          .containsExactlyInAnyOrder(
+                              expectedValueBoth1,
+                              expectedValueBoth2,
+                              expectedValueTestInstanceOnly,
+                              expectedValueOtherInstanceOnly
+                          );
     }
 
     @Test
-    public void testGetStartupMessages_afterAddAll_returnsDeduplicatedCombinationOfBothInstances() {
+    void testGetStartupMessages_afterAddAll_returnsDeduplicatedCombinationOfBothInstances() {
         // Arrange
         String expectedValueBoth1 = "first message common to both instances";
         String expectedValueBoth2 = "second message common to both instances";
@@ -788,20 +742,16 @@ public class NetworkInformationTest {
         List<String> result = testedInstance.getStartupMessages();
 
         // Assert
-        assertThat(result.size(), is(equalTo(4)));
-        assertThat(
-            result,
-            containsInAnyOrder(
-                expectedValueBoth1,
-                expectedValueBoth2,
-                expectedValueTestInstanceOnly,
-                expectedValueOtherInstanceOnly //
-            ) //
+        assertThat(result).containsExactlyInAnyOrder(
+            expectedValueBoth1,
+            expectedValueBoth2,
+            expectedValueTestInstanceOnly,
+            expectedValueOtherInstanceOnly
         );
     }
 
     @Test
-    public void testGetUserStatisticsUrls_afterAddAll_returnsDeduplicatedCombinationOfBothInstances() {
+    void testGetUserStatisticsUrls_afterAddAll_returnsDeduplicatedCombinationOfBothInstances() {
         // Arrange
         String expectedValueBoth1 = "http://expected/1";
         String expectedValueBoth2 = "http://expected/2";
@@ -824,20 +774,17 @@ public class NetworkInformationTest {
         List<URL> result = testedInstance.getUserStatisticsUrls();
 
         // Assert
-        assertThat(result.size(), is(equalTo(4)));
-        assertThat(
-            asStrings(result),
-            containsInAnyOrder(
-                expectedValueBoth1,
-                expectedValueBoth2,
-                expectedValueTestInstanceOnly,
-                expectedValueOtherInstanceOnly //
-            ) //
-        );
+        assertThat(result).extracting(URL::toString)
+                          .containsExactlyInAnyOrder(
+                              expectedValueBoth1,
+                              expectedValueBoth2,
+                              expectedValueTestInstanceOnly,
+                              expectedValueOtherInstanceOnly
+                          );
     }
 
     @Test
-    public void testGetWhazzUpString_afterAddAllAndNotSetPreviously_returnsOtherInstanceWhazzup() {
+    void testGetWhazzUpString_afterAddAllAndNotSetPreviously_returnsOtherInstanceWhazzup() {
         // Arrange
         String expectedValue = "5432:whazzup";
 
@@ -852,11 +799,11 @@ public class NetworkInformationTest {
         String result = testedInstance.getWhazzUpString();
 
         // Assert
-        assertThat(result, is(equalTo(expectedValue)));
+        assertThat(result).isEqualTo(expectedValue);
     }
 
     @Test
-    public void testGetWhazzUpString_afterAddAllAndSetPreviously_returnsTestedInstanceWhazzup() {
+    void testGetWhazzUpString_afterAddAllAndSetPreviously_returnsTestedInstanceWhazzup() {
         // Arrange
         String expectedValue = "5432:whazzup";
 
@@ -872,11 +819,11 @@ public class NetworkInformationTest {
         String result = testedInstance.getWhazzUpString();
 
         // Assert
-        assertThat(result, is(equalTo(expectedValue)));
+        assertThat(result).isEqualTo(expectedValue);
     }
 
     @Test
-    public void testGetWhazzUpString_afterAddAllAndSetOnlyOnTestedInstance_returnsTestedInstanceWhazzup() {
+    void testGetWhazzUpString_afterAddAllAndSetOnlyOnTestedInstance_returnsTestedInstanceWhazzup() {
         // Arrange
         String expectedValue = "5432:whazzup";
 
@@ -891,11 +838,11 @@ public class NetworkInformationTest {
         String result = testedInstance.getWhazzUpString();
 
         // Assert
-        assertThat(result, is(equalTo(expectedValue)));
+        assertThat(result).isEqualTo(expectedValue);
     }
 
     @Test
-    public void testGetWhazzUpString_afterAddAllAndNeverSet_returnsNull() {
+    void testGetWhazzUpString_afterAddAllAndNeverSet_returnsNull() {
         // Arrange
         NetworkInformation testedInstance = new NetworkInformation();
         NetworkInformation otherInstance = new NetworkInformation();
@@ -905,13 +852,6 @@ public class NetworkInformationTest {
         String result = testedInstance.getWhazzUpString();
 
         // Assert
-        assertThat(result, is(nullValue()));
-    }
-
-    private List<String> asStrings(Collection<?> items) {
-        return items //
-            .stream() //
-            .map(Object::toString) //
-            .collect(Collectors.toList());
+        assertThat(result).isNull();
     }
 }
