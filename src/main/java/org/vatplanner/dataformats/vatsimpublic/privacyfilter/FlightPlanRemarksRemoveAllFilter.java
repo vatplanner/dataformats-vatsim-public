@@ -21,7 +21,7 @@ public class FlightPlanRemarksRemoveAllFilter implements VerifiableClientFilter<
     // TODO: check and maintain other prefiling system markers such as SimBrief
 
     private static final Set<ClientFields.FieldAccess<String>> AFFECTED_FIELDS = asUnmodifiableSet(
-        ClientFields.StringFields.FLIGHT_PLAN_REMARKS //
+        ClientFields.StringFields.FLIGHT_PLAN_REMARKS
     );
 
     private final Pattern patternFieldContentTrigger;
@@ -32,16 +32,16 @@ public class FlightPlanRemarksRemoveAllFilter implements VerifiableClientFilter<
     private static final String COMMUNICATION_FLAG_TEXT = "/T/";
 
     private static final Pattern PATTERN_APPLICATION = Pattern.compile(
-        "^([^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:)([^:]*)(:.*|)$", //
-        Pattern.CASE_INSENSITIVE //
+        "^([^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:)([^:]*)(:.*|)$",
+        Pattern.CASE_INSENSITIVE
     );
     private static final int PATTERN_APPLICATION_FIELDS_BEFORE = 1;
     private static final int PATTERN_APPLICATION_FIELD_CONTENT = 2;
     private static final int PATTERN_APPLICATION_FIELDS_AFTER = 3;
 
-    private static final Pattern PATTERN_VERIFICATION_FILTERED = Pattern.compile( //
-        "^(\\+VFPS\\+|)(/[VRT]/|)$", //
-        Pattern.CASE_INSENSITIVE //
+    private static final Pattern PATTERN_VERIFICATION_FILTERED = Pattern.compile(
+        "^(\\+VFPS\\+|)(/[VRT]/|)$",
+        Pattern.CASE_INSENSITIVE
     );
     private static final int PATTERN_VERIFICATION_FILTERED_VFPS = 1;
     private static final int PATTERN_VERIFICATION_FILTERED_COMMUNICATION_FLAG = 2;
@@ -61,7 +61,7 @@ public class FlightPlanRemarksRemoveAllFilter implements VerifiableClientFilter<
      * </p>
      *
      * @param triggers search strings to trigger removal; filter will be
-     *        unconditional if left null or empty
+     *                 unconditional if left null or empty
      */
     public FlightPlanRemarksRemoveAllFilter(Collection<String> triggers) {
         if ((triggers == null) || triggers.isEmpty()) {
@@ -77,10 +77,10 @@ public class FlightPlanRemarksRemoveAllFilter implements VerifiableClientFilter<
         StringBuilder sb = new StringBuilder();
         sb.append(".*(");
         sb.append(
-            triggers //
-                .stream()//
-                .map(Pattern::quote) //
-                .collect(Collectors.joining("|")) //
+            triggers
+                .stream()
+                .map(Pattern::quote)
+                .collect(Collectors.joining("|"))
         );
         sb.append(").*");
 
@@ -201,5 +201,4 @@ public class FlightPlanRemarksRemoveAllFilter implements VerifiableClientFilter<
 
         return fieldsBefore + filteredFieldContent + fieldsAfter;
     }
-
 }

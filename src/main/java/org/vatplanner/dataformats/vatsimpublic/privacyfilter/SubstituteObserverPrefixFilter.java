@@ -17,7 +17,7 @@ import org.vatplanner.dataformats.vatsimpublic.parser.ClientFields;
 public class SubstituteObserverPrefixFilter implements VerifiableClientFilter<String> {
 
     private static final Set<ClientFields.FieldAccess<String>> AFFECTED_FIELDS = asUnmodifiableSet(
-        ClientFields.StringFields.CALLSIGN //
+        ClientFields.StringFields.CALLSIGN
     );
 
     private static final String OBSERVER_SUFFIX = "_OBS";
@@ -54,5 +54,4 @@ public class SubstituteObserverPrefixFilter implements VerifiableClientFilter<St
 
         return matcher.replaceFirst(PATTERN_REPLACEMENT);
     }
-
 }

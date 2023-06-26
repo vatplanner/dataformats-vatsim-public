@@ -46,11 +46,11 @@ public class LegacyDataFileWriter implements Writer<DataFile> {
     private static final String DEFAULT_CLIENT_QNH_HECTOPASCALS = "0";
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
-        .withZone(ZoneId.of("UTC"));
+                                                                             .withZone(ZoneId.of("UTC"));
 
-    private static final String CONTROLLER_MESSAGE_LINEBREAK = new String( //
-        new byte[] { (byte) 0x5E, (byte) 0xA7 },
-        Charset.forName("ISO-8859-1") //
+    private static final String CONTROLLER_MESSAGE_LINEBREAK = new String(
+        new byte[]{(byte) 0x5E, (byte) 0xA7},
+        Charset.forName("ISO-8859-1")
     );
 
     private final String header;
@@ -64,15 +64,15 @@ public class LegacyDataFileWriter implements Writer<DataFile> {
      * given header. The given header is automatically prefixed to indicate a
      * comment. Multiple lines can be provided; line end sequences are automatically
      * converted as needed.
-     * 
+     *
      * @param header header to be prepended to all output
      */
     public LegacyDataFileWriter(String header) {
         this.header = endWithEmptyCommentLine(
             StringUtils.prefixLines(
                 HEADER_PREFIX,
-                StringUtils.unifyLineEnds(LINE_END, header) //
-            ) //
+                StringUtils.unifyLineEnds(LINE_END, header)
+            )
         );
     }
 
@@ -97,7 +97,7 @@ public class LegacyDataFileWriter implements Writer<DataFile> {
 
         bw.append("RELOAD = ");
         bw.append(Integer.toString(
-            (int) Math.ceil(metaData.getMinimumDataFileRetrievalInterval().getSeconds() / 60.0) //
+            (int) Math.ceil(metaData.getMinimumDataFileRetrievalInterval().getSeconds() / 60.0)
         ));
         bw.append(LINE_END);
 
@@ -218,15 +218,15 @@ public class LegacyDataFileWriter implements Writer<DataFile> {
         bw.append(sanitize(client.getRawFlightPlanType()));
         bw.append(SEPARATOR);
 
-        bw.append(toStringOrDefaultIfNegative( //
-            client.getRawDepartureTimePlanned(), //
-            DEFAULT_CLIENT_DEPARTURE_TIME_PLANNED //
+        bw.append(toStringOrDefaultIfNegative(
+            client.getRawDepartureTimePlanned(),
+            DEFAULT_CLIENT_DEPARTURE_TIME_PLANNED
         ));
         bw.append(SEPARATOR);
 
-        bw.append(toStringOrDefaultIfNegative( //
-            client.getRawDepartureTimeActual(), //
-            DEFAULT_CLIENT_DEPARTURE_TIME_ACTUAL //
+        bw.append(toStringOrDefaultIfNegative(
+            client.getRawDepartureTimeActual(),
+            DEFAULT_CLIENT_DEPARTURE_TIME_ACTUAL
         ));
         bw.append(SEPARATOR);
 
@@ -458,14 +458,14 @@ public class LegacyDataFileWriter implements Writer<DataFile> {
             // was kept while other headers had been removed; maybe some client needs these?
             // Let's do some cargo cult...
             bw.append(
-                "; !CLIENTS section -         " //
-                    + "callsign:cid:realname:clienttype:frequency:latitude:longitude:altitude:groundspeed:" //
-                    + "planned_aircraft:planned_tascruise:planned_depairport:planned_altitude:planned_destairport:" //
-                    + "server:protrevision:rating:transponder:facilitytype:visualrange:" //
-                    + "planned_revision:planned_flighttype:planned_deptime:planned_actdeptime:planned_hrsenroute:planned_minenroute:" //
-                    + "planned_hrsfuel:planned_minfuel:planned_altairport:planned_remarks:planned_route:" //
-                    + "planned_depairport_lat:planned_depairport_lon:planned_destairport_lat:planned_destairport_lon:" //
-                    + "atis_message:time_last_atis_received:time_logon:heading:QNH_iHg:QNH_Mb:" //
+                "; !CLIENTS section -         "
+                    + "callsign:cid:realname:clienttype:frequency:latitude:longitude:altitude:groundspeed:"
+                    + "planned_aircraft:planned_tascruise:planned_depairport:planned_altitude:planned_destairport:"
+                    + "server:protrevision:rating:transponder:facilitytype:visualrange:"
+                    + "planned_revision:planned_flighttype:planned_deptime:planned_actdeptime:planned_hrsenroute:planned_minenroute:"
+                    + "planned_hrsfuel:planned_minfuel:planned_altairport:planned_remarks:planned_route:"
+                    + "planned_depairport_lat:planned_depairport_lon:planned_destairport_lat:planned_destairport_lon:"
+                    + "atis_message:time_last_atis_received:time_logon:heading:QNH_iHg:QNH_Mb:"
             );
             bw.append(LINE_END);
 
@@ -480,5 +480,4 @@ public class LegacyDataFileWriter implements Writer<DataFile> {
             LOGGER.warn("Serialization of legacy DataFile failed", ex);
         }
     }
-
 }

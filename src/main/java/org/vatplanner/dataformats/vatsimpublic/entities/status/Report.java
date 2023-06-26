@@ -55,7 +55,7 @@ public class Report {
      *
      * @param name facility name to look up, will be normalized
      * @return facility recorded under given name on this report; null if not
-     *         recorded
+     *     recorded
      */
     public Facility getFacilityByName(String name) {
         return facilitiesByName.get(normalizeFacilityName(name));
@@ -84,10 +84,10 @@ public class Report {
      * @return flights visible on this report
      */
     public Collection<Flight> getFlights() {
-        return flightsByCallsign.values() //
-            .stream() //
-            .flatMap(Set::stream) //
-            .collect(Collectors.toList());
+        return flightsByCallsign.values()
+                                .stream()
+                                .flatMap(Set::stream)
+                                .collect(Collectors.toList());
     }
 
     /**

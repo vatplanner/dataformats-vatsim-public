@@ -14,5 +14,4 @@ class Helper {
         }
         return Optional.of(s);
     }
-
 }

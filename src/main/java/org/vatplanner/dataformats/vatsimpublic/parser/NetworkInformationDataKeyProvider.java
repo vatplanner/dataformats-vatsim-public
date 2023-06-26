@@ -8,9 +8,8 @@ public interface NetworkInformationDataKeyProvider {
     /**
      * Returns the key used to identify a file/format on the <code>data</code> field
      * of JSON-based {@link NetworkInformation} files.
-     * 
-     * @return key used to identify files/formats on JSON-based
-     *         {@link NetworkInformation} files' <code>data</code> field
+     *
+     * @return key used to identify files/formats on JSON-based {@link NetworkInformation} files' <code>data</code> field
      */
     String getNetworkInformationDataKey();
 }

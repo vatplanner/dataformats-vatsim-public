@@ -17,7 +17,7 @@ import org.vatplanner.dataformats.vatsimpublic.parser.ClientFields;
 public class RemoveRealNameAndHomebaseFilter implements VerifiableClientFilter<String> {
 
     private static final Set<ClientFields.FieldAccess<String>> AFFECTED_FIELDS = asUnmodifiableSet(
-        ClientFields.StringFields.REAL_NAME //
+        ClientFields.StringFields.REAL_NAME
     );
 
     private static final Pattern PATTERN = Pattern.compile("^([^:]*:[^:]*:)[^:]*(:.*)$");

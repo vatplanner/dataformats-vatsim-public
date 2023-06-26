@@ -235,7 +235,7 @@ class FlightPlanRemarksRemoveAllFilterTest {
         boolean result = spyFilter.verifyAffectedField(
             ClientFields.StringFields.FLIGHT_PLAN_REMARKS,
             original,
-            filtered //
+            filtered
         );
 
         // Assert

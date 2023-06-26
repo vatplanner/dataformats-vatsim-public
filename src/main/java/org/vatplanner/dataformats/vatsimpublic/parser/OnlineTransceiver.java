@@ -15,10 +15,11 @@ public class OnlineTransceiver {
 
     /**
      * Returns the ID of this transceiver.
-     * 
+     * <p>
      * {@link #UNAVAILABLE_INTEGER} will be returned if unavailable.
-     * 
-     * @return transceiver ID, {@link #UNAVAILABLE_INTEGER} if unavailbale
+     * </p>
+     *
+     * @return transceiver ID, {@link #UNAVAILABLE_INTEGER} if unavailable
      */
     public int getId() {
         return id;
@@ -30,10 +31,11 @@ public class OnlineTransceiver {
 
     /**
      * Returns the frequency (in hertz) a transceiver is tuned to.
-     * 
+     * <p>
      * {@link #UNAVAILABLE_INTEGER} will be returned if unavailable.
-     * 
-     * @return frequency in hertz, {@link #UNAVAILABLE_INTEGER} if unavailbale
+     * </p>
+     *
+     * @return frequency in hertz, {@link #UNAVAILABLE_INTEGER} if unavailable
      */
     public int getFrequencyHertz() {
         return frequencyHertz;
@@ -45,7 +47,7 @@ public class OnlineTransceiver {
 
     /**
      * Returns the transceiver's latitude (north/south coordinate).
-     * 
+     *
      * @return transceiver latitude, {@link Double#NaN} if unavailable
      */
     public double getLatitude() {
@@ -58,7 +60,7 @@ public class OnlineTransceiver {
 
     /**
      * Returns the transceiver's longitude (east/west coordinate).
-     * 
+     *
      * @return transceiver longitude, {@link Double#NaN} if unavailable
      */
     public double getLongitude() {
@@ -71,9 +73,8 @@ public class OnlineTransceiver {
 
     /**
      * Returns the transceiver's height above ground in meters.
-     * 
-     * @return transceiver height above ground (metric), {@link Double#NaN} if
-     *         unavailable
+     *
+     * @return transceiver height above ground (metric), {@link Double#NaN} if unavailable
      * @see #getAltitudeMeters()
      */
     public double getHeightMeters() {
@@ -86,9 +87,8 @@ public class OnlineTransceiver {
 
     /**
      * Returns the transceiver's altitude above mean sea-level in meters.
-     * 
-     * @return transceiver altitude above mean sea-level (metric),
-     *         {@link Double#NaN} if unavailable
+     *
+     * @return transceiver altitude above mean sea-level (metric), {@link Double#NaN} if unavailable
      * @see #getHeightMeters()
      */
     public double getAltitudeMeters() {
@@ -98,5 +98,4 @@ public class OnlineTransceiver {
     public void setAltitudeMeters(double altitudeMeters) {
         this.altitudeMeters = altitudeMeters;
     }
-
 }

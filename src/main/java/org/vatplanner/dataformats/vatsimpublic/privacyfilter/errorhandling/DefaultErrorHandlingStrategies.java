@@ -15,5 +15,4 @@ public class DefaultErrorHandlingStrategies {
     private DefaultErrorHandlingStrategies() {
         // hide constructor
     }
-
 }

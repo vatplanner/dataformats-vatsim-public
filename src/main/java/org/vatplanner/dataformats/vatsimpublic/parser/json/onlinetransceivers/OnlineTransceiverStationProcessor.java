@@ -37,12 +37,12 @@ public class OnlineTransceiverStationProcessor {
     }
 
     public List<OnlineTransceiverStation> deserializeMultiple(JsonArray array, ParserLogEntryCollector logCollector) {
-        return JsonHelpers.processArraySkipOnError(//
-            array, //
-            JsonObject.class, //
-            SECTION_NAME, //
-            logCollector, //
-            x -> deserializeSingle(x, logCollector) //
+        return JsonHelpers.processArraySkipOnError(
+            array,
+            JsonObject.class,
+            SECTION_NAME,
+            logCollector,
+            x -> deserializeSingle(x, logCollector)
         );
     }
 
@@ -51,25 +51,25 @@ public class OnlineTransceiverStationProcessor {
 
         OnlineTransceiverStation out = new OnlineTransceiverStation();
 
-        JsonHelpers.processMandatory( //
-            object::getString, //
-            Key.CALLSIGN, //
-            SECTION_NAME, //
-            logCollector, //
-            out::setCallsign //
+        JsonHelpers.processMandatory(
+            object::getString,
+            Key.CALLSIGN,
+            SECTION_NAME,
+            logCollector,
+            out::setCallsign
         );
 
         String location = SECTION_NAME + " " + out.getCallsign();
 
-        JsonHelpers.processMandatory( //
-            object::getCollection, //
-            Key.TRANSCEIVERS, //
-            JsonArray.class, //
-            location, //
-            logCollector, //
+        JsonHelpers.processMandatory(
+            object::getCollection,
+            Key.TRANSCEIVERS,
+            JsonArray.class,
+            location,
+            logCollector,
             (Function<JsonArray, List<OnlineTransceiver>>) (array -> {
-                return transceiverProcessor.deserializeMultiple(array, location, logCollector); //
-            }) //
+                return transceiverProcessor.deserializeMultiple(array, location, logCollector);
+            })
         ).ifPresent(out::setTransceivers);
 
         return out;

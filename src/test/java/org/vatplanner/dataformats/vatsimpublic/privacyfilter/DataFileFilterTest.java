@@ -30,9 +30,8 @@ class DataFileFilterTest {
         // FIXME: temporarily, remove when feature is implemented
 
         // Arrange
-        DataFileFilterConfiguration configuration = //
-            new DataFileFilterConfiguration()
-                .setRemoveStreamingChannels(true);
+        DataFileFilterConfiguration configuration = new DataFileFilterConfiguration()
+            .setRemoveStreamingChannels(true);
 
         // Act
         ThrowingCallable action = () -> new DataFileFilter(configuration);

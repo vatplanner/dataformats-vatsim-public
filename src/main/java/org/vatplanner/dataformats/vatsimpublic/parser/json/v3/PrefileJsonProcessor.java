@@ -51,12 +51,12 @@ public class PrefileJsonProcessor {
     }
 
     public List<Client> deserializeMultiple(JsonArray array, ParserLogEntryCollector logCollector) {
-        return JsonHelpers.processArraySkipOnError(//
-            array, //
-            JsonObject.class, //
-            SECTION_NAME, //
-            logCollector, //
-            x -> deserializeSingle(x, logCollector) //
+        return JsonHelpers.processArraySkipOnError(
+            array,
+            JsonObject.class,
+            SECTION_NAME,
+            logCollector,
+            x -> deserializeSingle(x, logCollector)
         );
     }
 
@@ -66,47 +66,47 @@ public class PrefileJsonProcessor {
         out.setRawClientType(ClientType.PILOT_PREFILED);
         out.setEffectiveClientType(ClientType.PILOT_PREFILED);
 
-        JsonHelpers.processMandatory( //
-            object::getInteger, //
-            Key.VATSIM_ID, //
-            SECTION_NAME, //
-            logCollector, //
-            out::setVatsimID //
+        JsonHelpers.processMandatory(
+            object::getInteger,
+            Key.VATSIM_ID,
+            SECTION_NAME,
+            logCollector,
+            out::setVatsimID
         );
 
-        JsonHelpers.processMandatory( //
-            object::getString, //
-            Key.CALLSIGN, //
-            SECTION_NAME, //
-            logCollector, //
-            out::setCallsign //
+        JsonHelpers.processMandatory(
+            object::getString,
+            Key.CALLSIGN,
+            SECTION_NAME,
+            logCollector,
+            out::setCallsign
         );
 
         String location = SECTION_NAME + " " + out.getVatsimID() + " " + out.getCallsign();
 
-        JsonHelpers.processMandatory( //
-            object::getString, //
-            Key.REAL_NAME, //
-            location, //
-            logCollector, //
-            out::setRealName //
+        JsonHelpers.processMandatory(
+            object::getString,
+            Key.REAL_NAME,
+            location,
+            logCollector,
+            out::setRealName
         );
 
-        JsonHelpers.processMandatory( //
-            object::getString, //
-            Key.LAST_UPDATED, //
-            location, //
-            logCollector, //
-            ParserHelpers::parseToInstantUtc //
+        JsonHelpers.processMandatory(
+            object::getString,
+            Key.LAST_UPDATED,
+            location,
+            logCollector,
+            ParserHelpers::parseToInstantUtc
         ).ifPresent(out::setLastUpdated);
 
-        JsonHelpers.processMandatory( //
-            object::getMap, //
-            Key.FLIGHT_PLAN, //
-            JsonObject.class, //
-            location, //
-            logCollector, //
-            (Consumer<JsonObject>) x -> flightPlanProcessor.deserializeSingle(x, out, location, logCollector) //
+        JsonHelpers.processMandatory(
+            object::getMap,
+            Key.FLIGHT_PLAN,
+            JsonObject.class,
+            location,
+            logCollector,
+            (Consumer<JsonObject>) x -> flightPlanProcessor.deserializeSingle(x, out, location, logCollector)
         );
 
         return out;

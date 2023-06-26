@@ -11,11 +11,7 @@ import java.util.function.Function;
  * This is mainly (only?) useful to verify filter results.
  */
 public class ClientFields {
-    /*
-     * FIXME: write script to auto-generate
-     * https://area-51.blog/2009/11/07/using-groovy-to-generate-java-sources-in-
-     * maven/
-     */
+    // FIXME: write script to auto-generate https://area-51.blog/2009/11/07/using-groovy-to-generate-java-sources-in-maven/
 
     private ClientFields() {
         // utility class; hide constructor
@@ -25,19 +21,19 @@ public class ClientFields {
      * All {@link Client} object fields resulting in {@link String} return values.
      */
     public enum StringFields implements FieldAccess<String> {
-        CALLSIGN(Client::getCallsign), //
-        REAL_NAME(Client::getRealName), //
-        AIRCRAFT_TYPE(Client::getAircraftType), //
-        AIRCRAFT_TYPE_FAA(Client::getAircraftTypeFaa), //
-        AIRCRAFT_TYPE_SHORT(Client::getAircraftTypeShort), //
-        FILED_DEPARTURE_AIRPORT_CODE(Client::getFiledDepartureAirportCode), //
-        RAW_FILED_ALTITUDE(Client::getRawFiledAltitude), //
-        FILED_DESTINATION_AIRPORT_CODE(Client::getFiledDestinationAirportCode), //
-        SERVER_ID(Client::getServerId), //
-        RAW_FLIGHT_PLAN_TYPE(Client::getRawFlightPlanType), //
-        FILED_ALTERNATE_AIRPORT_CODE(Client::getFiledAlternateAirportCode), //
-        FLIGHT_PLAN_REMARKS(Client::getFlightPlanRemarks), //
-        FILED_ROUTE(Client::getFiledRoute), //
+        CALLSIGN(Client::getCallsign),
+        REAL_NAME(Client::getRealName),
+        AIRCRAFT_TYPE(Client::getAircraftType),
+        AIRCRAFT_TYPE_FAA(Client::getAircraftTypeFaa),
+        AIRCRAFT_TYPE_SHORT(Client::getAircraftTypeShort),
+        FILED_DEPARTURE_AIRPORT_CODE(Client::getFiledDepartureAirportCode),
+        RAW_FILED_ALTITUDE(Client::getRawFiledAltitude),
+        FILED_DESTINATION_AIRPORT_CODE(Client::getFiledDestinationAirportCode),
+        SERVER_ID(Client::getServerId),
+        RAW_FLIGHT_PLAN_TYPE(Client::getRawFlightPlanType),
+        FILED_ALTERNATE_AIRPORT_CODE(Client::getFiledAlternateAirportCode),
+        FLIGHT_PLAN_REMARKS(Client::getFlightPlanRemarks),
+        FILED_ROUTE(Client::getFiledRoute),
         ;
 
         private final Function<Client, String> getterMethod;
@@ -82,7 +78,6 @@ public class ClientFields {
         default T getFrom(Client client) {
             return getter().apply(client);
         }
-
     }
 
     /**
@@ -90,7 +85,7 @@ public class ClientFields {
      * regardless of their type.
      *
      * @param <T> abstract type forcing elements to be both {@link Enum} and
-     *        {@link FieldAccess}
+     *            {@link FieldAccess}
      * @return all {@link Client} fields
      */
     public static <T extends Enum & FieldAccess<?>> Set<T> getAllFields() {

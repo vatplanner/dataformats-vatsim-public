@@ -147,7 +147,7 @@ public enum ControllerRating {
      * @param statusFileId ID as used on data.txt status file
      * @return resolved enumeration object or null if unknown
      * @throws IllegalArgumentException if the ID is unknown and could not be
-     *         resolved
+     *                                  resolved
      */
     public static ControllerRating resolveStatusFileId(int statusFileId) throws IllegalArgumentException {
         ControllerRating resolved = ratingById.get(statusFileId);
@@ -190,7 +190,7 @@ public enum ControllerRating {
     /**
      * Returns the ID used to refer to this {@link ControllerRating} in legacy data
      * files.
-     * 
+     *
      * @return ID used in legacy data files
      */
     public int getLegacyId() {

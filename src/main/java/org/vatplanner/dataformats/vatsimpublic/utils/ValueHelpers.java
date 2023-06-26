@@ -12,7 +12,7 @@ public class ValueHelpers {
     /**
      * Checks if the given values are in specified range.
      *
-     * @param value value to check
+     * @param value        value to check
      * @param minimumValue minimum allowed value (inclusive)
      * @param maximumValue maximum allowed value (inclusive)
      * @return true if value is in range; false if not
@@ -20,5 +20,4 @@ public class ValueHelpers {
     public static boolean inRange(double value, double minimumValue, double maximumValue) {
         return (value >= minimumValue) && (value <= maximumValue);
     }
-
 }

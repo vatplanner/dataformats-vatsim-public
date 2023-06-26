@@ -130,8 +130,7 @@ public class Client {
     private String aircraftTypeShort = ""; // only ICAO aircraft type like B738, A332, B737
     private int filedTrueAirSpeed = 0;
     private String filedDepartureAirportCode = "";
-    private String rawFiledAltitude = ""; // 30000, FL300, F300, maybe even worse raw user input (don't pilot clients
-                                          // validate this field?!)
+    private String rawFiledAltitude = ""; // 30000, FL300, F300, maybe even worse raw user input (don't pilot clients validate this field?!)
     private String filedDestinationAirportCode = "";
 
     // actual data
@@ -144,11 +143,10 @@ public class Client {
 
     // filing
     private int flightPlanRevision = -1;
-    private String rawFlightPlanType = ""; // I = IFR, V = VFR
-                                           // unfortunately user-defined, e.g. also seen: S (scheduled)
+    private String rawFlightPlanType = ""; // I = IFR, V = VFR; unfortunately user-defined, e.g. also seen: S (scheduled)
     private int rawDepartureTimePlanned = -1; // may be 0; values can omit leading zeros! may contain garbage
-    private int rawDepartureTimeActual = -1; // may be 0, may be equal, may be actual value - who or what sets this?
-                                             // Values can omit leading zeros! may contain garbage
+    private int rawDepartureTimeActual = -1; /* may be 0, may be equal, may be actual value - who or what sets this?
+                                                Values can omit leading zeros! may contain garbage */
     private Duration filedTimeEnroute; // data: two fields, hours + minutes
     private Duration filedTimeFuel; // data: two fields, hours + minutes
     private String filedAlternateAirportCode = "";
@@ -169,8 +167,8 @@ public class Client {
     private double destinationAirportLongitude = Double.NaN; // seems unused, always 0
 
     // ATC only
-    private String controllerMessage = ""; // decode "atis_message": first line prefixed "$ " => voice URL; multi-line
-                                           // formatting with "^" and special character as CR LF?
+    private String controllerMessage = ""; /* decode "atis_message": first line prefixed "$ " => voice URL; multi-line
+                                              formatting with "^" and special character as CR LF? */
     private Instant lastUpdated; // time_last_atis_received
 
     // ATIS only
@@ -271,7 +269,7 @@ public class Client {
      * </p>
      *
      * @return raw type of client, may not match actual role of client; null if
-     *         unavailable
+     *     unavailable
      * @see #getEffectiveClientType()
      */
     public ClientType getRawClientType() {
@@ -319,7 +317,7 @@ public class Client {
      * </ul>
      *
      * @return type of client, may have been guessed from actual data; null if
-     *         unavailable and guessing failed
+     *     unavailable and guessing failed
      * @see #getRawClientType()
      */
     public ClientType getEffectiveClientType() {
@@ -342,7 +340,7 @@ public class Client {
      * number will be returned.
      *
      * @return frequency this client provides ATC service on; negative if not
-     *         serving
+     *     serving
      */
     public int getServedFrequencyKilohertz() {
         return servedFrequencyKilohertz;
@@ -371,7 +369,7 @@ public class Client {
      * </p>
      *
      * @return latitude the client is currently located at; {@link Double#NaN} if
-     *         unavailable
+     *     unavailable
      */
     public double getLatitude() {
         return latitude;
@@ -401,7 +399,7 @@ public class Client {
      * </p>
      *
      * @return longitude the client is currently located at; {@link Double#NaN} if
-     *         unavailable
+     *     unavailable
      */
     public double getLongitude() {
         return longitude;
@@ -423,7 +421,7 @@ public class Client {
      * </p>
      *
      * @return altitude the client is currently located at, measured in feet; 0 if
-     *         unavailable
+     *     unavailable
      */
     public int getAltitudeFeet() {
         return altitudeFeet;
@@ -502,7 +500,7 @@ public class Client {
      * </p>
      *
      * @return aircraft type; may deviate from wake/ICAO-type/equipment syntax and
-     *         value; empty if unavailable
+     *     value; empty if unavailable
      * @see AircraftTypeExtractor
      * @see #getAircraftTypeFaa()
      * @see #getAircraftTypeShort()
@@ -589,7 +587,7 @@ public class Client {
      * </p>
      *
      * @return true air speed (TAS, measured in knots) listed on flight plan; 0 if
-     *         unavailable
+     *     unavailable
      */
     public int getFiledTrueAirSpeed() {
         return filedTrueAirSpeed;
@@ -607,7 +605,7 @@ public class Client {
      * </p>
      *
      * @return departure airport code listed on flight plan of this client; empty if
-     *         unavailable
+     *     unavailable
      */
     public String getFiledDepartureAirportCode() {
         return filedDepartureAirportCode;
@@ -631,7 +629,7 @@ public class Client {
      * </p>
      *
      * @return unprocessed planned altitude listed on flight plan; empty if
-     *         unavailable
+     *     unavailable
      */
     public String getRawFiledAltitude() {
         return rawFiledAltitude;
@@ -649,7 +647,7 @@ public class Client {
      * </p>
      *
      * @return destination airport code listed on flight plan of this client; empty
-     *         if unavailable
+     *     if unavailable
      */
     public String getFiledDestinationAirportCode() {
         return filedDestinationAirportCode;
@@ -688,7 +686,7 @@ public class Client {
      * </p>
      *
      * @return protocol version of client; negative if unavailable (removed from
-     *         JSON v3 format)
+     *     JSON v3 format)
      */
     public int getProtocolVersion() {
         return protocolVersion;
@@ -714,7 +712,7 @@ public class Client {
      * </p>
      *
      * @return client's controller rating during this session; null if unavailable
-     *         (pilots/prefilings on JSON v3 or prefilings on legacy format)
+     *     (pilots/prefilings on JSON v3 or prefilings on legacy format)
      */
     public ControllerRating getControllerRating() {
         return controllerRating;
@@ -765,9 +763,9 @@ public class Client {
      * </p>
      *
      * @return decimal numeric transponder code as currently assigned to an aircraft
-     *         by its pilot, needs left-padding to 4 digits to reconstruct spoken
-     *         code; negative if unavailable; may exceed 4 digits (code is
-     *         supposedly invalid)
+     *     by its pilot, needs left-padding to 4 digits to reconstruct spoken
+     *     code; negative if unavailable; may exceed 4 digits (code is
+     *     supposedly invalid)
      * @see #getAssignedTransponderCodeDecimal()
      */
     public int getTransponderCodeDecimal() {
@@ -826,7 +824,7 @@ public class Client {
      * </p>
      *
      * @return revision of currently listed flight plan, counting starts at 0;
-     *         negative if unavailable (not available in early JSON v3 files)
+     *     negative if unavailable (not available in early JSON v3 files)
      */
     public int getFlightPlanRevision() {
         return flightPlanRevision;
@@ -892,7 +890,7 @@ public class Client {
      * </p>
      *
      * @return (unreliable) planned time of departure in UTC; negative if
-     *         unavailable; see full description for issues
+     *     unavailable; see full description for issues
      */
     public int getRawDepartureTimePlanned() {
         return rawDepartureTimePlanned;
@@ -929,7 +927,7 @@ public class Client {
      * </p>
      *
      * @return (unreliable) actual time of departure; negative if unavailable (no
-     *         longer available since JSON v3); see full description for issues
+     *     longer available since JSON v3); see full description for issues
      */
     public int getRawDepartureTimeActual() {
         return rawDepartureTimeActual;
@@ -979,7 +977,7 @@ public class Client {
      * </p>
      *
      * @return alternate airport code listed on flight plan of this client; empty if
-     *         unavailable
+     *     unavailable
      */
     public String getFiledAlternateAirportCode() {
         return filedAlternateAirportCode;
@@ -1039,7 +1037,7 @@ public class Client {
      *
      * @return departure airport latitude
      * @deprecated field has never been seen used since start of this library and
-     *             was removed in JSON v3; pending removal
+     *     was removed in JSON v3; pending removal
      */
     @Deprecated
     public double getDepartureAirportLatitude() {
@@ -1058,7 +1056,7 @@ public class Client {
      *
      * @return departure airport longitude
      * @deprecated field has never been seen used since start of this library and
-     *             was removed in JSON v3; pending removal
+     *     was removed in JSON v3; pending removal
      */
     @Deprecated
     public double getDepartureAirportLongitude() {
@@ -1077,7 +1075,7 @@ public class Client {
      *
      * @return destination airport latitude
      * @deprecated field has never been seen used since start of this library and
-     *             was removed in JSON v3; pending removal
+     *     was removed in JSON v3; pending removal
      */
     @Deprecated
     public double getDestinationAirportLatitude() {
@@ -1096,7 +1094,7 @@ public class Client {
      *
      * @return destination airport longitude
      * @deprecated field has never been seen used since start of this library and
-     *             was removed in JSON v3; pending removal
+     *     was removed in JSON v3; pending removal
      */
     @Deprecated
     public double getDestinationAirportLongitude() {
@@ -1139,7 +1137,7 @@ public class Client {
      * if unavailable.
      *
      * @return timestamp of last {@link #controllerMessage} update; null if
-     *         unavailable
+     *     unavailable
      * @deprecated use {@link #getLastUpdated()} instead
      */
     @Deprecated
@@ -1150,19 +1148,19 @@ public class Client {
     /**
      * Returns the "last updated" timestamp which has different meanings depending
      * on data file format and client type.
-     * 
+     *
      * <p>
      * If data has been read from a legacy format, the timestamp of last
      * {@link #controllerMessage} update will be returned. It is only supposed to
      * hold values for {@link ClientType#ATC_CONNECTED} (which includes ATIS
      * stations).
      * </p>
-     * 
+     *
      * <p>
      * If data has been read from JSON v3 format, timestamps will be available for
      * all client types but the meaning of this field is currently unknown.
      * </p>
-     * 
+     *
      * <p>
      * Returns null if unavailable.
      * </p>
@@ -1179,7 +1177,7 @@ public class Client {
 
     /**
      * Returns the ATIS designator (rotating code letter) or null if unavailable.
-     * 
+     *
      * @return ATIS designator; empty if unavailable
      */
     public String getAtisDesignator() {
@@ -1277,13 +1275,13 @@ public class Client {
     /**
      * Returns the pilot's rating at time of session. Pilot ratings are not
      * available from legacy data files.
-     * 
+     *
      * <p>
      * See {@link PilotRating} for a detailed explanation.
      * </p>
-     * 
+     *
      * @return pilot's rating at time of session; null if unavailable (only
-     *         available since JSON v3)
+     *     available since JSON v3)
      */
     public PilotRating getPilotRating() {
         return pilotRating;
@@ -1302,7 +1300,7 @@ public class Client {
      * </p>
      *
      * @return pilot's military rating at time of session; null if unavailable (only
-     * available since May 2023)
+     *     available since May 2023)
      */
     public MilitaryRating getMilitaryRating() {
         return militaryRating;
@@ -1330,10 +1328,10 @@ public class Client {
      * information has never been transported before and thus should not be
      * transferred to legacy formats.
      * </p>
-     * 
+     *
      * @return decimal numeric transponder code assigned (wanted) by ATC, needs
-     *         left-padding to 4 digits to reconstruct spoken code; negative if
-     *         unavailable, zero if not set
+     *     left-padding to 4 digits to reconstruct spoken code; negative if
+     *     unavailable, zero if not set
      * @see #getTransponderCodeDecimal()
      */
     public int getAssignedTransponderCodeDecimal() {

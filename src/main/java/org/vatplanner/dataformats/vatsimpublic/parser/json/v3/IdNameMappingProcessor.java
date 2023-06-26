@@ -16,7 +16,7 @@ import com.github.cliftonlabs.json_simple.JsonObject;
 
 /**
  * Generic processing of mappings with a structure of:
- * 
+ *
  * <ul>
  * <li><code>id</code> - integer representing a supposedly unique ID used to
  * refer to the described entry from other JSON objects</li>
@@ -44,7 +44,7 @@ public class IdNameMappingProcessor {
         /**
          * Returns a set of {@link ShortKey}s as used on JSON v3 format for facilities
          * and controller ratings.
-         * 
+         *
          * @return set of {@link ShortKey}s
          */
         public static JsonKeys shortKeys() {
@@ -54,7 +54,7 @@ public class IdNameMappingProcessor {
         /**
          * Returns a set of {@link LongKey}s as used on JSON v3 format for pilot
          * ratings.
-         * 
+         *
          * @return set of {@link LongKey}s
          */
         public static JsonKeys longKeys() {
@@ -140,29 +140,29 @@ public class IdNameMappingProcessor {
      * <code>expectedValues</code> using the provided <code>resolveShortName</code>
      * {@link Function} for lookups to a {@link Map} linking the read numeric IDs to
      * given values.
-     * 
+     *
      * <p>
      * {@link ParserLogEntry}s will be logged if data cannot be fully read:
      * </p>
-     * 
+     *
      * <ul>
      * <li>if deserialization of individual JSON entries fails</li>
      * <li>if resolution of a <code>short</code> name fails</li>
      * <li>if multiple entries refer to the same <code>id</code></li>
      * <li>if an expected value was not mapped</li>
      * </ul>
-     * 
-     * @param <T> type of values to resolve to
-     * @param array a {@link JsonArray} holding objects of required structure; see
-     *        class JavaDoc
+     *
+     * @param <T>              type of values to resolve to
+     * @param array            a {@link JsonArray} holding objects of required structure; see
+     *                         class JavaDoc
      * @param resolveShortName {@link Function} used to resolve a short name to an
-     *        expected value
-     * @param expectedValues all values expected to be mapped
-     * @param section description of section being worked on
-     * @param logCollector receives {@link ParserLogEntry}s for any issues being
-     *        found
+     *                         expected value
+     * @param expectedValues   all values expected to be mapped
+     * @param section          description of section being worked on
+     * @param logCollector     receives {@link ParserLogEntry}s for any issues being
+     *                         found
      * @return mapping from <code>array</code> item's <code>id</code> to resolved
-     *         values <code>T</code>
+     *     values <code>T</code>
      */
     public <T> Map<Integer, T> deserializeMappingFromJsonId(JsonArray array, Function<String, T> resolveShortName, T[] expectedValues, String section, ParserLogEntryCollector logCollector) {
         Map<Integer, T> out = new HashMap<Integer, T>();
@@ -171,26 +171,26 @@ public class IdNameMappingProcessor {
         for (JsonEntry jsonEntry : jsonEntries) {
             T resolvedValue = resolveShortName.apply(jsonEntry.shortName);
             if (resolvedValue == null) {
-                logCollector.addParserLogEntry(new ParserLogEntry( //
-                    section, //
-                    jsonEntry.toString(), //
-                    true, //
-                    "JSON object with short name " + jsonEntry.shortName + " could not be resolved", //
-                    null //
+                logCollector.addParserLogEntry(new ParserLogEntry(
+                    section,
+                    jsonEntry.toString(),
+                    true,
+                    "JSON object with short name " + jsonEntry.shortName + " could not be resolved",
+                    null
                 ));
                 continue;
             }
 
             T previousResolvedValue = out.put(jsonEntry.id, resolvedValue);
             if (previousResolvedValue != null) {
-                logCollector.addParserLogEntry(new ParserLogEntry( //
-                    section, //
-                    jsonEntry.toString(), //
-                    true, //
+                logCollector.addParserLogEntry(new ParserLogEntry(
+                    section,
+                    jsonEntry.toString(),
+                    true,
                     "JSON object with short name " + jsonEntry.shortName + " has same ID " + jsonEntry.id
                         + " as previous resolved value " + previousResolvedValue
-                        + "; previous entry has been overwritten", //
-                    null //
+                        + "; previous entry has been overwritten",
+                    null
                 ));
             }
         }
@@ -198,12 +198,12 @@ public class IdNameMappingProcessor {
         Collection<T> mappedValues = out.values();
         for (T expectedValue : expectedValues) {
             if (!mappedValues.contains(expectedValue)) {
-                logCollector.addParserLogEntry(new ParserLogEntry( //
-                    section, //
-                    "check for completion", //
-                    true, //
-                    "missing mapping for expected value " + expectedValue + ", value will not be used", //
-                    null //
+                logCollector.addParserLogEntry(new ParserLogEntry(
+                    section,
+                    "check for completion",
+                    true,
+                    "missing mapping for expected value " + expectedValue + ", value will not be used",
+                    null
                 ));
             }
         }
@@ -212,40 +212,40 @@ public class IdNameMappingProcessor {
     }
 
     private List<JsonEntry> deserializeMultiple(JsonArray array, String section, ParserLogEntryCollector logCollector) {
-        return JsonHelpers.processArraySkipOnError(//
-            array, //
-            JsonObject.class, //
-            section, //
-            logCollector, //
-            x -> deserializeSingle(x, section, logCollector) //
+        return JsonHelpers.processArraySkipOnError(
+            array,
+            JsonObject.class,
+            section,
+            logCollector,
+            x -> deserializeSingle(x, section, logCollector)
         );
     }
 
     private JsonEntry deserializeSingle(JsonObject object, String section, ParserLogEntryCollector logCollector) {
         JsonEntry out = new JsonEntry();
 
-        JsonHelpers.processMandatory( //
-            object::getInteger, //
-            jsonKeys.id, //
-            section, //
-            logCollector, //
-            out::setId //
+        JsonHelpers.processMandatory(
+            object::getInteger,
+            jsonKeys.id,
+            section,
+            logCollector,
+            out::setId
         );
 
-        JsonHelpers.processMandatory( //
-            object::getString, //
-            jsonKeys.shortName, //
-            section, //
-            logCollector, //
-            out::setShortName //
+        JsonHelpers.processMandatory(
+            object::getString,
+            jsonKeys.shortName,
+            section,
+            logCollector,
+            out::setShortName
         );
 
-        JsonHelpers.processMandatory( //
-            object::getString, //
-            jsonKeys.longName, //
-            section, //
-            logCollector, //
-            out::setLongName //
+        JsonHelpers.processMandatory(
+            object::getString,
+            jsonKeys.longName,
+            section,
+            logCollector,
+            out::setLongName
         );
 
         return out;

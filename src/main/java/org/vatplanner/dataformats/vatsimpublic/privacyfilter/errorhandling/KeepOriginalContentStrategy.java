@@ -16,5 +16,4 @@ public class KeepOriginalContentStrategy implements ErrorHandlingStrategy {
     public String handleError(String rawLine, String filteredLine, Collection<ClientFields.FieldAccess> affectedFields) {
         return rawLine;
     }
-
 }

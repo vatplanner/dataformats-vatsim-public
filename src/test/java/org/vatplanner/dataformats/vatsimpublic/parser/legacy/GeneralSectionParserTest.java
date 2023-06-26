@@ -114,7 +114,7 @@ class GeneralSectionParserTest {
     void testParse_withVersion_returnsDataFileMetaDataWithExpectedFormatVersion(int expectedVersion) {
         // Arrange
         Collection<String> lines = Collections.singletonList(
-            String.format("VERSION = %d", expectedVersion) //
+            String.format("VERSION = %d", expectedVersion)
         );
 
         // Act
@@ -129,7 +129,7 @@ class GeneralSectionParserTest {
     void testParse_withoutVersion_returnsDataFileMetaDataWithNegativeValueForFormatVersion() {
         // Arrange
         Collection<String> lines = Collections.singletonList(
-            "RELOAD = 123" //
+            "RELOAD = 123"
         );
 
         // Act
@@ -145,7 +145,7 @@ class GeneralSectionParserTest {
     void testParse_withReloadIntegerNumber_returnsDataFileMetaDataWithExpectedMinimumDataFileRetrievalInterval(int minimumIntervalMinutes) {
         // Arrange
         Collection<String> lines = Collections.singletonList(
-            String.format("RELOAD = %d", minimumIntervalMinutes) //
+            String.format("RELOAD = %d", minimumIntervalMinutes)
         );
 
         // Act
@@ -164,7 +164,7 @@ class GeneralSectionParserTest {
     void testParse_withReloadFloatingNumber_returnsDataFileMetaDataWithExpectedMinimumDataFileRetrievalInterval(String input, int expectedSeconds) {
         // Arrange
         Collection<String> lines = Collections.singletonList(
-            String.format("RELOAD = %s", input) //
+            String.format("RELOAD = %s", input)
         );
 
         // Act
@@ -179,7 +179,7 @@ class GeneralSectionParserTest {
     void testParse_withoutReload_returnsDataFileMetaDataWithNullForMinimumDataFileRetrievalInterval() {
         // Arrange
         Collection<String> lines = Collections.singletonList(
-            "VERSION = 123" //
+            "VERSION = 123"
         );
 
         // Act
@@ -195,7 +195,7 @@ class GeneralSectionParserTest {
     void testParse_withAtisAllowMin_returnsDataFileMetaDataWithExpectedMinimumAtisRetrievalInterval(int minimumIntervalMinutes) {
         // Arrange
         Collection<String> lines = Collections.singletonList(
-            String.format("ATIS ALLOW MIN = %d", minimumIntervalMinutes) //
+            String.format("ATIS ALLOW MIN = %d", minimumIntervalMinutes)
         );
 
         // Act
@@ -210,7 +210,7 @@ class GeneralSectionParserTest {
     void testParse_withoutAtisAllowMin_returnsDataFileMetaDataWithNullForMinimumAtisRetrievalInterval() {
         // Arrange
         Collection<String> lines = Collections.singletonList(
-            "VERSION = 123" //
+            "VERSION = 123"
         );
 
         // Act
@@ -226,7 +226,7 @@ class GeneralSectionParserTest {
     void testParse_withConnectedClients_returnsDataFileMetaDataWithExpectedNumberOfConnectedClients(int connectedClients) {
         // Arrange
         Collection<String> lines = Collections.singletonList(
-            String.format("CONNECTED CLIENTS = %d", connectedClients) //
+            String.format("CONNECTED CLIENTS = %d", connectedClients)
         );
 
         // Act
@@ -241,7 +241,7 @@ class GeneralSectionParserTest {
     void testParse_withoutConnectedClients_returnsDataFileMetaDataWithNegativeValueForNumberOfConnectedClients() {
         // Arrange
         Collection<String> lines = Collections.singletonList(
-            "VERSION = 123" //
+            "VERSION = 123"
         );
 
         // Act
@@ -257,7 +257,7 @@ class GeneralSectionParserTest {
     void testParse_withUniqueUsers_returnsDataFileMetaDataWithExpectedNumberOfConnectedUniqueUsers(int uniqueUsers) {
         // Arrange
         Collection<String> lines = Collections.singletonList(
-            String.format("UNIQUE USERS = %d", uniqueUsers) //
+            String.format("UNIQUE USERS = %d", uniqueUsers)
         );
 
         // Act
@@ -272,7 +272,7 @@ class GeneralSectionParserTest {
     void testParse_withoutUniqueUsers_returnsDataFileMetaDataWithNegativeValueForNumberOfConnectedUniqueUsers() {
         // Arrange
         Collection<String> lines = Collections.singletonList(
-            "VERSION = 123" //
+            "VERSION = 123"
         );
 
         // Act
@@ -291,7 +291,7 @@ class GeneralSectionParserTest {
     void testParse_withUpdate_returnsDataFileMetaDataWithExpectedTimestamp(String value, int valueEpochSeconds) {
         // Arrange
         Collection<String> lines = Collections.singletonList(
-            String.format("UPDATE = %s", value) //
+            String.format("UPDATE = %s", value)
         );
         Instant expectedInstant = Instant.ofEpochSecond(valueEpochSeconds);
 
@@ -307,7 +307,7 @@ class GeneralSectionParserTest {
     void testParse_withoutUpdate_returnsDataFileMetaDataWithNullForTimestamp() {
         // Arrange
         Collection<String> lines = Collections.singletonList(
-            "VERSION = 123" //
+            "VERSION = 123"
         );
 
         // Act
@@ -326,7 +326,7 @@ class GeneralSectionParserTest {
             "VERSION = 123",
             "CONNECTED CLIENTS = 20",
             "ATIS ALLOW MIN = 5",
-            "RELOAD = 2" //
+            "RELOAD = 2"
         );
 
         // Act

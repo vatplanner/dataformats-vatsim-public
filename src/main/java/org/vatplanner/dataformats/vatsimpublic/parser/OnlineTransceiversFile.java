@@ -37,7 +37,7 @@ public class OnlineTransceiversFile implements ParserLogEntryCollector {
 
     /**
      * Returns the {@link Format} of the parsed data source.
-     * 
+     *
      * @return {@link Format} of parsed data source
      */
     public Format getFormat() {
@@ -53,7 +53,7 @@ public class OnlineTransceiversFile implements ParserLogEntryCollector {
      * stations with the same call signs could theoretically repeat with a second
      * station having different transceivers. There is no upstream contract to avoid
      * such duplicates.
-     * 
+     *
      * @return all stations described by this file
      */
     public Collection<OnlineTransceiverStation> getStations() {

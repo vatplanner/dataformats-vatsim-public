@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 public class FlightInformationRegionParser implements Function<String, FlightInformationRegion> {
     private static final Pattern PATTERN = Pattern.compile(
         "([^|]+)\\|([^|]+)\\|([^|]*)\\|([^|]*)"
-            + SUBPATTERN_OPTIONAL_INLINE_COMMENT //
+            + SUBPATTERN_OPTIONAL_INLINE_COMMENT
     );
     private static final int ID = 1;
     private static final int NAME = 2;
@@ -27,8 +27,7 @@ public class FlightInformationRegionParser implements Function<String, FlightInf
             matcher.group(ID),
             matcher.group(NAME),
             matcher.group(CALLSIGN_PREFIX),
-            matcher.group(BOUNDARY_ID) //
+            matcher.group(BOUNDARY_ID)
         );
     }
-
 }

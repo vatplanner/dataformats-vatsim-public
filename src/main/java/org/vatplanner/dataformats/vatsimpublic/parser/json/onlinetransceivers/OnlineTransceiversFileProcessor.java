@@ -33,7 +33,7 @@ public class OnlineTransceiversFileProcessor implements Parser<OnlineTransceiver
             LOGGER.warn("Failed to parse JSON format on root level", ex);
 
             out.addParserLogEntry(
-                new ParserLogEntry("root", null, true, "Failed to parse JSON format on root level", ex) //
+                new ParserLogEntry("root", null, true, "Failed to parse JSON format on root level", ex)
             );
         }
 

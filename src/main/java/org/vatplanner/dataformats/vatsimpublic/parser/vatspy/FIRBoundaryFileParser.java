@@ -33,10 +33,10 @@ public class FIRBoundaryFileParser implements Parser<FIRBoundaryFile> {
 
     private static final Pattern PATTERN = Pattern.compile(
         "([^|]+)\\|([01])\\|([01])\\|(\\d+)"
-            + "\\|(" + SUBPATTERN_FLOATING_POINT + ")\\|(" + SUBPATTERN_FLOATING_POINT + ")" //
-            + "\\|(" + SUBPATTERN_FLOATING_POINT + ")\\|(" + SUBPATTERN_FLOATING_POINT + ")" //
-            + "\\|(" + SUBPATTERN_FLOATING_POINT + ")\\|(" + SUBPATTERN_FLOATING_POINT + ")" //
-            + SUBPATTERN_OPTIONAL_INLINE_COMMENT //
+            + "\\|(" + SUBPATTERN_FLOATING_POINT + ")\\|(" + SUBPATTERN_FLOATING_POINT + ")"
+            + "\\|(" + SUBPATTERN_FLOATING_POINT + ")\\|(" + SUBPATTERN_FLOATING_POINT + ")"
+            + "\\|(" + SUBPATTERN_FLOATING_POINT + ")\\|(" + SUBPATTERN_FLOATING_POINT + ")"
+            + SUBPATTERN_OPTIONAL_INLINE_COMMENT
     );
     private static final int ID = 1;
     private static final int OCEANIC = 2;
@@ -53,7 +53,7 @@ public class FIRBoundaryFileParser implements Parser<FIRBoundaryFile> {
     public FIRBoundaryFile deserialize(CharSequence s) {
         try (
             StringReader sr = new StringReader(s.toString());
-            BufferedReader br = new BufferedReader(sr) //
+            BufferedReader br = new BufferedReader(sr)
         ) {
             return deserialize(br);
         } catch (IOException ex) {
@@ -94,7 +94,7 @@ public class FIRBoundaryFileParser implements Parser<FIRBoundaryFile> {
                             line,
                             true,
                             "point could not be parsed",
-                            ex //
+                            ex
                         ));
 
                         // parsing could have failed due to premature end of point list
@@ -104,7 +104,7 @@ public class FIRBoundaryFileParser implements Parser<FIRBoundaryFile> {
                                 null,
                                 false,
                                 "missing " + remainingPoints + " points",
-                                null //
+                                null
                             ));
                             remainingPoints = 0;
                         }
@@ -123,7 +123,7 @@ public class FIRBoundaryFileParser implements Parser<FIRBoundaryFile> {
                             line,
                             true,
                             "unhandled data",
-                            null //
+                            null
                         ));
                         continue;
                     }
@@ -171,7 +171,7 @@ public class FIRBoundaryFileParser implements Parser<FIRBoundaryFile> {
                         boundsMinimum.get(),
                         boundsMaximum.get(),
                         center.get(),
-                        points //
+                        points
                     );
 
                     remainingPoints = Integer.parseUnsignedInt(matcher.group(POINTS));
@@ -185,7 +185,7 @@ public class FIRBoundaryFileParser implements Parser<FIRBoundaryFile> {
                     null,
                     false,
                     "missing " + remainingPoints + " points at end of file",
-                    null //
+                    null
                 ));
             }
         } catch (IOException ex) {
@@ -195,7 +195,7 @@ public class FIRBoundaryFileParser implements Parser<FIRBoundaryFile> {
                 null,
                 false,
                 "IOException while parsing",
-                ex //
+                ex
             ));
         }
 

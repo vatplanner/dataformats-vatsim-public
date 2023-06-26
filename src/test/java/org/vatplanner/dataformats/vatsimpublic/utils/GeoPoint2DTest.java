@@ -112,7 +112,7 @@ class GeoPoint2DTest {
         return Stream.of(
             Arguments.of(new GeoPoint2D(-90.0, -180.0), new GeoPoint2D(-90.0, -180.0)),
             Arguments.of(new GeoPoint2D(90.0, 180.0), new GeoPoint2D(90.0, 180.0)),
-            Arguments.of(new GeoPoint2D(0.1, 0.1), new GeoPoint2D(0.1, 0.1)) //
+            Arguments.of(new GeoPoint2D(0.1, 0.1), new GeoPoint2D(0.1, 0.1))
         );
     }
 
@@ -149,7 +149,7 @@ class GeoPoint2DTest {
             Arguments.of(new GeoPoint2D(0.0, 0.1), new GeoPoint2D(0.0, 0.0)),
 
             // crossed
-            Arguments.of(new GeoPoint2D(0.1, 0.0), new GeoPoint2D(0.0, 0.1)) //
+            Arguments.of(new GeoPoint2D(0.1, 0.0), new GeoPoint2D(0.0, 0.1))
         );
     }
 

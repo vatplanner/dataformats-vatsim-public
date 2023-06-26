@@ -68,7 +68,7 @@ public class TrackPoint {
      * to 0..359 degrees.
      *
      * @return heading the aircraft was pointing to (0..359 degrees), negative if
-     *         unavailable
+     *     unavailable
      */
     public int getHeading() {
         return heading;
@@ -102,7 +102,7 @@ public class TrackPoint {
      * 7777 = int 7777), not octal.
      *
      * @return transponder code as decimal integer (code 7777 = int 7777); may
-     *         exceed 4-octal limits, negative if unavailable
+     *     exceed 4-octal limits, negative if unavailable
      */
     public int getTransponderCode() {
         return transponderCode;

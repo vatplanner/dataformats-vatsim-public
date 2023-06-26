@@ -63,7 +63,7 @@ public enum CommunicationMode {
 
         if (remarksCode.length() != 1) {
             throw new IllegalArgumentException(
-                "communication mode code must only have one letter; was: \"" + remarksCode + "\"" //
+                "communication mode code must only have one letter; was: \"" + remarksCode + "\""
             );
         }
 

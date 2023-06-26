@@ -15,5 +15,4 @@ public class RemoveLineStrategy implements ErrorHandlingStrategy {
     public String handleError(String rawLine, String filteredLine, Collection<ClientFields.FieldAccess> affectedFields) {
         return null;
     }
-
 }

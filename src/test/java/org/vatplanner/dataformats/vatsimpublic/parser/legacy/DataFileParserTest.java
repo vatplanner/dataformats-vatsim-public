@@ -201,10 +201,10 @@ class DataFileParserTest {
 
         // Assert
         ArgumentCaptor<Collection<String>> captor = ArgumentCaptor.forClass(Collection.class);
-        verify(mockGeneralSectionParser, times(1)).parse( //
-                                                          captor.capture(),
-                                                          any(ParserLogEntryCollector.class),
-                                                          anyString() //
+        verify(mockGeneralSectionParser, times(1)).parse(
+            captor.capture(),
+            any(ParserLogEntryCollector.class),
+            anyString()
         );
         Collection<String> capturedCollection = captor.getValue();
 
@@ -226,10 +226,10 @@ class DataFileParserTest {
         spyParser.deserialize(lines);
 
         // Assert
-        verify(mockGeneralSectionParser, times(1)).parse( //
-                                                          anyCollection(),
-                                                          Mockito.same(mockDataFile),
-                                                          anyString()
+        verify(mockGeneralSectionParser, times(1)).parse(
+            anyCollection(),
+            Mockito.same(mockDataFile),
+            anyString()
         );
     }
 
@@ -248,10 +248,10 @@ class DataFileParserTest {
         spyParser.deserialize(lines);
 
         // Assert
-        verify(mockGeneralSectionParser, times(1)).parse( //
-                                                          anyCollection(),
-                                                          any(ParserLogEntryCollector.class),
-                                                          eq("GENERAL")
+        verify(mockGeneralSectionParser, times(1)).parse(
+            anyCollection(),
+            any(ParserLogEntryCollector.class),
+            eq("GENERAL")
         );
     }
 
@@ -294,10 +294,10 @@ class DataFileParserTest {
         String lines = buildDataFileForSection("GENERAL");
 
         DataFileMetaData expectedMetaData = new DataFileMetaData();
-        doReturn(expectedMetaData).when(mockGeneralSectionParser).parse( //
-                                                                         anyCollection(),
-                                                                         any(ParserLogEntryCollector.class),
-                                                                         anyString()
+        doReturn(expectedMetaData).when(mockGeneralSectionParser).parse(
+            anyCollection(),
+            any(ParserLogEntryCollector.class),
+            anyString()
         );
 
         // Act
@@ -313,10 +313,10 @@ class DataFileParserTest {
         // Arrange
         String lines = buildDataFileForSection("GENERAL");
 
-        doReturn(null).when(mockGeneralSectionParser).parse( //
-                                                             anyCollection(),
-                                                             any(ParserLogEntryCollector.class),
-                                                             anyString()
+        doReturn(null).when(mockGeneralSectionParser).parse(
+            anyCollection(),
+            any(ParserLogEntryCollector.class),
+            anyString()
         );
 
         // Act
@@ -324,8 +324,8 @@ class DataFileParserTest {
 
         // Assert
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
-        LoggingEvent expectedEvent = LoggingEvent.warn( //
-                                                        "unable to verify data format version, metadata is unavailable (null)" //
+        LoggingEvent expectedEvent = LoggingEvent.warn(
+            "unable to verify data format version, metadata is unavailable (null)"
         );
         assertThat(loggingEvents).contains(expectedEvent);
     }
@@ -335,10 +335,10 @@ class DataFileParserTest {
         // Arrange
         String lines = buildDataFileForSection("GENERAL");
 
-        doReturn(null).when(mockGeneralSectionParser).parse( //
-                                                             anyCollection(),
-                                                             any(ParserLogEntryCollector.class),
-                                                             anyString()
+        doReturn(null).when(mockGeneralSectionParser).parse(
+            anyCollection(),
+            any(ParserLogEntryCollector.class),
+            anyString()
         );
 
         // Act
@@ -366,10 +366,10 @@ class DataFileParserTest {
         String lines = buildDataFileForSection("GENERAL");
 
         DataFileMetaData mockMetaData = mockMetaDataWithFormatVersion(unsupportedFormatVersion);
-        doReturn(mockMetaData).when(mockGeneralSectionParser).parse( //
-                                                                     anyCollection(),
-                                                                     any(ParserLogEntryCollector.class),
-                                                                     anyString()
+        doReturn(mockMetaData).when(mockGeneralSectionParser).parse(
+            anyCollection(),
+            any(ParserLogEntryCollector.class),
+            anyString()
         );
 
         // Act
@@ -392,10 +392,10 @@ class DataFileParserTest {
         String lines = buildDataFileForSection("GENERAL");
 
         DataFileMetaData mockMetaData = mockMetaDataWithFormatVersion(unsupportedFormatVersion);
-        doReturn(mockMetaData).when(mockGeneralSectionParser).parse( //
-                                                                     anyCollection(),
-                                                                     any(ParserLogEntryCollector.class),
-                                                                     anyString()
+        doReturn(mockMetaData).when(mockGeneralSectionParser).parse(
+            anyCollection(),
+            any(ParserLogEntryCollector.class),
+            anyString()
         );
 
         // Act
@@ -424,10 +424,10 @@ class DataFileParserTest {
         String lines = buildDataFileForSection("GENERAL");
 
         DataFileMetaData mockMetaData = mockMetaDataWithFormatVersion(supportedFormatVersion);
-        doReturn(mockMetaData).when(mockGeneralSectionParser).parse( //
-                                                                     anyCollection(),
-                                                                     any(ParserLogEntryCollector.class),
-                                                                     anyString()
+        doReturn(mockMetaData).when(mockGeneralSectionParser).parse(
+            anyCollection(),
+            any(ParserLogEntryCollector.class),
+            anyString()
         );
 
         // Act
@@ -445,10 +445,10 @@ class DataFileParserTest {
         String lines = buildDataFileForSection("GENERAL");
 
         DataFileMetaData mockMetaData = mockMetaDataWithFormatVersion(supportedFormatVersion);
-        doReturn(mockMetaData).when(mockGeneralSectionParser).parse( //
-                                                                     anyCollection(),
-                                                                     any(ParserLogEntryCollector.class),
-                                                                     anyString()
+        doReturn(mockMetaData).when(mockGeneralSectionParser).parse(
+            anyCollection(),
+            any(ParserLogEntryCollector.class),
+            anyString()
         );
 
         // Act
@@ -499,9 +499,9 @@ class DataFileParserTest {
         Client mockExpected2 = mock(Client.class);
         doReturn(mockExpected2).when(mockOnlineClientParser).parse(":expected line:2:");
 
-        doThrow(new IllegalArgumentException("some error")) //
-                                                            .when(mockOnlineClientParser)
-                                                            .parse(Mockito.startsWith("trigger error"));
+        doThrow(new IllegalArgumentException("some error"))
+            .when(mockOnlineClientParser)
+            .parse(Mockito.startsWith("trigger error"));
 
         // Act
         DataFile dataFile = spyParser.deserialize(lines);
@@ -589,12 +589,12 @@ class DataFileParserTest {
         String section = "PREFILE";
         String triggerLine1 = "trigger error 1";
         String triggerLine2 = "trigger error 2";
-        String lines = buildDataFileForSection( //
-                                                section, //
-                                                ":expected line:1:", //
-                                                triggerLine1, //
-                                                ":expected line:2:", //
-                                                triggerLine2 //
+        String lines = buildDataFileForSection(
+            section,
+            ":expected line:1:",
+            triggerLine1,
+            ":expected line:2:",
+            triggerLine2
         );
 
         doReturn(mockMetaDataWithFormatVersion(HIGHEST_SUPPORTED_FORMAT_VERSION))
@@ -707,7 +707,7 @@ class DataFileParserTest {
                                                ":expected line:1:",
                                                "trigger error 1",
                                                ":expected line:2:",
-                                               "trigger error 2" //
+                                               "trigger error 2"
         );
 
         VoiceServer mockExpected1 = mock(VoiceServer.class);

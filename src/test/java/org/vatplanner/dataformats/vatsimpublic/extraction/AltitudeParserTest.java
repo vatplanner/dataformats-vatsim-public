@@ -76,7 +76,7 @@ class AltitudeParserTest {
             Arguments.of("S0610", 6100, false, 20013), // ICAO format
             Arguments.of("M0610", 6100, false, 20013), // ICAO format
             Arguments.of("61m", 61, false, 200), // minimum threshold
-            Arguments.of(" - 30.0, 0 M", 3000, false, 9843) //
+            Arguments.of(" - 30.0, 0 M", 3000, false, 9843)
         );
     }
 

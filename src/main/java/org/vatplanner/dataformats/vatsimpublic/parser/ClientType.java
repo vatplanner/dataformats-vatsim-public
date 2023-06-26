@@ -27,7 +27,7 @@ public enum ClientType {
      * ATIS stations are indicated separate from regular controller clients
      * ({@link #ATC_CONNECTED}) in JSON data files. Legacy format lists ATIS
      * stations as {@link #ATC_CONNECTED}.
-     * 
+     *
      * <p>
      * As of December 2020 every ATIS station still is provided by an active
      * controller but this might change in the future according to plans laid out at
@@ -37,7 +37,7 @@ public enum ClientType {
      * dedicated {@link ClientType} indication as already available on JSON v3
      * format.
      * </p>
-     * 
+     *
      * <p>
      * For compatibility, unless needed otherwise, {@link #ATIS} stations can be
      * processed as {@link #ATC_CONNECTED}.

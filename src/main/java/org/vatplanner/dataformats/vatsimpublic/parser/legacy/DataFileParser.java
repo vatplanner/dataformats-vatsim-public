@@ -49,9 +49,9 @@ public class DataFileParser implements Parser<DataFile> {
 
     private static final int LOWEST_SUPPORTED_FORMAT_VERSION = 8;
     private static final int HIGHEST_SUPPORTED_FORMAT_VERSION = 9;
-    private static final String SUPPORTED_FORMAT_VERSIONS_STRING = String.format( //
-        "%d..%d", //
-        LOWEST_SUPPORTED_FORMAT_VERSION, HIGHEST_SUPPORTED_FORMAT_VERSION //
+    private static final String SUPPORTED_FORMAT_VERSIONS_STRING = String.format(
+        "%d..%d",
+        LOWEST_SUPPORTED_FORMAT_VERSION, HIGHEST_SUPPORTED_FORMAT_VERSION
     );
 
     GeneralSectionParser getGeneralSectionParser() {
@@ -89,7 +89,7 @@ public class DataFileParser implements Parser<DataFile> {
     public DataFile deserialize(CharSequence s) {
         try (
             StringReader sr = new StringReader(s.toString());
-            BufferedReader br = new BufferedReader(sr) //
+            BufferedReader br = new BufferedReader(sr)
         ) {
             return deserialize(br);
         } catch (IOException ex) {
@@ -102,10 +102,10 @@ public class DataFileParser implements Parser<DataFile> {
      * {@link ParserLogEntryCollector}. Caught exceptions result in null being
      * returned instead.
      *
-     * @param <U> output type of wrapped function
+     * @param <U>             output type of wrapped function
      * @param wrappedFunction function to be wrapped by exception handling
-     * @param section parser section related to wrapped function
-     * @param collector collector for all generated {@link ParserLogEntry}s
+     * @param section         parser section related to wrapped function
+     * @param collector       collector for all generated {@link ParserLogEntry}s
      * @return function adding exception handling to original wrapped function
      */
     private <U> Function<String, U> logExceptionsFrom(Function<String, U> wrappedFunction, String section, ParserLogEntryCollector collector) {
@@ -135,7 +135,7 @@ public class DataFileParser implements Parser<DataFile> {
      * expected to have been opened with ISO8859-1 character set.
      *
      * @param reader {@link Reader} providing access to the complete file contents
-     *        to be parsed
+     *               to be parsed
      * @return all parsed information collected in one {@link DataFile} object
      */
     @Override
@@ -157,24 +157,24 @@ public class DataFileParser implements Parser<DataFile> {
 
         DataFile dataFile = createDataFile();
         dataFile.setFormat(DataFileFormat.LEGACY);
-        dataFile.setMetaData( //
-            generalSectionParser.parse( //
-                relevantLinesBySection.get(SECTION_NAME_GENERAL), //
-                dataFile, //
-                SECTION_NAME_GENERAL //
-            ) //
+        dataFile.setMetaData(
+            generalSectionParser.parse(
+                relevantLinesBySection.get(SECTION_NAME_GENERAL),
+                dataFile,
+                SECTION_NAME_GENERAL
+            )
         );
 
         verifyDataFormatVersion(dataFile);
 
         Stream<Client> onlineClientsStream = relevantLinesBySection
-            .getOrDefault(SECTION_NAME_CLIENTS, new ArrayList<>()) //
+            .getOrDefault(SECTION_NAME_CLIENTS, new ArrayList<>())
             .stream()
             .map(logExceptionsFrom(onlineClientParser::parse, SECTION_NAME_CLIENTS, dataFile))
             .filter(Objects::nonNull);
 
         Stream<Client> prefileClientsStream = relevantLinesBySection
-            .getOrDefault(SECTION_NAME_PREFILE, new ArrayList<>()) //
+            .getOrDefault(SECTION_NAME_PREFILE, new ArrayList<>())
             .stream()
             .map(logExceptionsFrom(prefileClientParser::parse, SECTION_NAME_PREFILE, dataFile))
             .filter(Objects::nonNull);
@@ -184,18 +184,18 @@ public class DataFileParser implements Parser<DataFile> {
 
         dataFile.setFsdServers(
             relevantLinesBySection.getOrDefault(SECTION_NAME_SERVERS, new ArrayList<>())
-                .stream()
-                .map(logExceptionsFrom(fsdServerParser::parse, SECTION_NAME_SERVERS, dataFile))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toCollection(ArrayList::new)) //
+                                  .stream()
+                                  .map(logExceptionsFrom(fsdServerParser::parse, SECTION_NAME_SERVERS, dataFile))
+                                  .filter(Objects::nonNull)
+                                  .collect(Collectors.toCollection(ArrayList::new))
         );
 
         dataFile.setVoiceServers(
             relevantLinesBySection.getOrDefault(SECTION_NAME_VOICE_SERVERS, new ArrayList<>())
-                .stream()
-                .map(logExceptionsFrom(voiceServerParser::parse, SECTION_NAME_VOICE_SERVERS, dataFile))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toCollection(ArrayList::new)) //
+                                  .stream()
+                                  .map(logExceptionsFrom(voiceServerParser::parse, SECTION_NAME_VOICE_SERVERS, dataFile))
+                                  .filter(Objects::nonNull)
+                                  .collect(Collectors.toCollection(ArrayList::new))
         );
 
         return dataFile;
@@ -207,7 +207,7 @@ public class DataFileParser implements Parser<DataFile> {
      *
      * @param br {@link BufferedReader} providing the lines to be read
      * @return a map grouping all lines by section (key: section name, value: list
-     *         of lines)
+     *     of lines)
      */
     private Map<String, List<String>> readRelevantLinesBySection(BufferedReader br) {
         String currentSectionName;
@@ -265,7 +265,7 @@ public class DataFileParser implements Parser<DataFile> {
             int actualVersion = metaData.getVersionFormat();
 
             if (actualVersion < LOWEST_SUPPORTED_FORMAT_VERSION || actualVersion > HIGHEST_SUPPORTED_FORMAT_VERSION) {
-                msg = "metadata reports unsupported format version " + actualVersion //
+                msg = "metadata reports unsupported format version " + actualVersion
                     + " (supported: " + SUPPORTED_FORMAT_VERSIONS_STRING + ")";
             }
         }
@@ -278,7 +278,7 @@ public class DataFileParser implements Parser<DataFile> {
                 null,
                 false,
                 msg,
-                null //
+                null
             ));
         }
     }

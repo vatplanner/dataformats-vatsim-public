@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 public class UpperInformationRegionParser implements Function<String, UpperInformationRegion> {
     private static final Pattern PATTERN = Pattern.compile(
         "([^|]+)\\|([^|]+)\\|([^|]+)"
-            + SUBPATTERN_OPTIONAL_INLINE_COMMENT //
+            + SUBPATTERN_OPTIONAL_INLINE_COMMENT
     );
     private static final int ID = 1;
     private static final int NAME = 2;
@@ -28,8 +28,7 @@ public class UpperInformationRegionParser implements Function<String, UpperInfor
         return new UpperInformationRegion(
             matcher.group(ID),
             matcher.group(NAME),
-            Arrays.asList(matcher.group(FIRS).split(FIR_SEPARATOR)) //
+            Arrays.asList(matcher.group(FIRS).split(FIR_SEPARATOR))
         );
     }
-
 }

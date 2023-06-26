@@ -57,10 +57,8 @@ public class DataFileMetaData {
      * you want to count users.
      * </p>
      *
-     * @return number of connected clients at time of update (includes duplicate
-     *         connections); negative if not set
-     * @see #getNumberOfUniqueConnectedUsers() for de-duplicated number of connected
-     *      users instead of clients
+     * @return number of connected clients at time of update (includes duplicate connections); negative if not set
+     * @see #getNumberOfUniqueConnectedUsers() for de-duplicated number of connected users instead of clients
      */
     public int getNumberOfConnectedClients() {
         return numberOfConnectedClients;
@@ -80,10 +78,8 @@ public class DataFileMetaData {
      * equivalent number.
      * </p>
      *
-     * @return number of unique connected users at time of update; negative if not
-     *         set
-     * @see #getNumberOfConnectedClients() for total number of connected clients
-     *      (not users)
+     * @return number of unique connected users at time of update; negative if not set
+     * @see #getNumberOfConnectedClients() for total number of connected clients (not users)
      */
     public int getNumberOfUniqueConnectedUsers() {
         return numberOfUniqueConnectedUsers;
@@ -164,19 +160,17 @@ public class DataFileMetaData {
 
         boolean isVersionFormatEqual = (this.getVersionFormat() == other.getVersionFormat());
         boolean isTimestampEqual = equalsNullSafe(this, other, DataFileMetaData::getTimestamp);
-        boolean isNumberOfConnectedClientsEqual = //
-            (this.getNumberOfConnectedClients() == other.getNumberOfConnectedClients());
-        boolean isNumberOfConnectedUniqueUsersEqual = //
-            (this.getNumberOfUniqueConnectedUsers() == other.getNumberOfUniqueConnectedUsers());
-        boolean isMinimumDataFileRetrievalIntervalEqual = equalsNullSafe( //
-            this, other, DataFileMetaData::getMinimumDataFileRetrievalInterval //
+        boolean isNumberOfConnectedClientsEqual = (this.getNumberOfConnectedClients() == other.getNumberOfConnectedClients());
+        boolean isNumberOfConnectedUniqueUsersEqual = (this.getNumberOfUniqueConnectedUsers() == other.getNumberOfUniqueConnectedUsers());
+        boolean isMinimumDataFileRetrievalIntervalEqual = equalsNullSafe(
+            this, other, DataFileMetaData::getMinimumDataFileRetrievalInterval
         );
-        boolean isMinimumAtisFileRetrievalIntervalEqual = equalsNullSafe( //
-            this, other, DataFileMetaData::getMinimumAtisRetrievalInterval //
+        boolean isMinimumAtisFileRetrievalIntervalEqual = equalsNullSafe(
+            this, other, DataFileMetaData::getMinimumAtisRetrievalInterval
         );
 
-        boolean isEqual = isVersionFormatEqual && isTimestampEqual //
-            && isNumberOfConnectedClientsEqual && isNumberOfConnectedUniqueUsersEqual //
+        boolean isEqual = isVersionFormatEqual && isTimestampEqual
+            && isNumberOfConnectedClientsEqual && isNumberOfConnectedUniqueUsersEqual
             && isMinimumDataFileRetrievalIntervalEqual && isMinimumAtisFileRetrievalIntervalEqual;
 
         return isEqual;

@@ -67,5 +67,4 @@ public class VatSpyFile implements ParserLogEntryCollector {
     public List<GeoPoint2D> getInternationalDateLine() {
         return internationalDateLine;
     }
-
 }

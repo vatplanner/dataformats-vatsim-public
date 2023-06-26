@@ -10,9 +10,9 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.CommunicationMode
  */
 public class RemarksExtractor {
 
-    private static final Pattern PATTERN_SPLIT = Pattern.compile(//
-        "^.*?/" + groupForCommunicationModes() + "/.*$", //
-        Pattern.CASE_INSENSITIVE //
+    private static final Pattern PATTERN_SPLIT = Pattern.compile(
+        "^.*?/" + groupForCommunicationModes() + "/.*$",
+        Pattern.CASE_INSENSITIVE
     );
     private static final int PATTERN_SPLIT_COMMUNICATION_MODE = 1;
 

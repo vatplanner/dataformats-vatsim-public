@@ -18,11 +18,11 @@ public class JsonHelpers {
 
         if (object == null) {
             logCollector.addParserLogEntry(new ParserLogEntry(
-                section, //
-                "content at key " + key.getKey(), //
-                true, //
-                "key " + key.getKey() + " is undefined", //
-                null //
+                section,
+                "content at key " + key.getKey(),
+                true,
+                "key " + key.getKey() + " is undefined",
+                null
             ));
         }
 
@@ -91,12 +91,12 @@ public class JsonHelpers {
     private static <T> Optional<T> cast(Object object, Class<T> targetClass, String section, String location, ParserLogEntryCollector logCollector) {
         if (!targetClass.isInstance(object)) {
             logCollector.addParserLogEntry(new ParserLogEntry(
-                section, //
-                "content at " + location, //
-                true, //
+                section,
+                "content at " + location,
+                true,
                 "value for " + location + " is " + object.getClass().getCanonicalName() + ", expected "
-                    + targetClass.getCanonicalName(), //
-                null //
+                    + targetClass.getCanonicalName(),
+                null
             ));
             return Optional.empty();
         }
@@ -149,7 +149,7 @@ public class JsonHelpers {
             String location = "index " + i;
             T itemCast = cast(item, itemTargetClass, section, location, logCollector).orElse(null);
             if (itemCast != null) {
-                applySafelyLogging(itemCast, section, location, logCollector, function) //
+                applySafelyLogging(itemCast, section, location, logCollector, function)
                     .ifPresent(out::add);
             }
         }
@@ -167,24 +167,24 @@ public class JsonHelpers {
 
             Optional<T> itemCast = cast(item, itemTargetClass, section, location, logCollector);
             if (!itemCast.isPresent()) {
-                logCollector.addParserLogEntry(new ParserLogEntry( //
-                    section, //
-                    location, //
-                    true, //
-                    "single item cast has failed, whole array will be discarded", //
-                    null //
+                logCollector.addParserLogEntry(new ParserLogEntry(
+                    section,
+                    location,
+                    true,
+                    "single item cast has failed, whole array will be discarded",
+                    null
                 ));
                 return Optional.empty();
             }
 
             Optional<U> result = applySafelyLogging(itemCast.get(), section, location, logCollector, function);
             if (!result.isPresent()) {
-                logCollector.addParserLogEntry(new ParserLogEntry( //
-                    section, //
-                    location, //
-                    true, //
-                    "single item function application has failed, whole array will be discarded", //
-                    null //
+                logCollector.addParserLogEntry(new ParserLogEntry(
+                    section,
+                    location,
+                    true,
+                    "single item function application has failed, whole array will be discarded",
+                    null
                 ));
                 return Optional.empty();
             }
@@ -200,11 +200,11 @@ public class JsonHelpers {
             return Optional.of(function.apply(object));
         } catch (Exception ex) {
             logCollector.addParserLogEntry(new ParserLogEntry(
-                section, //
-                "content at " + location, //
-                true, //
-                "processing data for " + location + " failed with " + ex.toString(), //
-                ex //
+                section,
+                "content at " + location,
+                true,
+                "processing data for " + location + " failed with " + ex.toString(),
+                ex
             ));
             return Optional.empty();
         }
@@ -215,11 +215,11 @@ public class JsonHelpers {
             consumer.accept(object);
         } catch (Exception ex) {
             logCollector.addParserLogEntry(new ParserLogEntry(
-                section, //
-                "content at " + location, //
-                true, //
-                "processing data for " + location + " failed with " + ex.toString(), //
-                ex //
+                section,
+                "content at " + location,
+                true,
+                "processing data for " + location + " failed with " + ex.toString(),
+                ex
             ));
         }
     }

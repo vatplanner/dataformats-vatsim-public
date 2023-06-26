@@ -40,24 +40,24 @@ class SubstituteObserverPrefixFilterTest {
         "'', '', true",
         "ABC123, ABC123, true",
         "OBS0815, OBS0815, true",
-        "A_OBSI, A_OBSI, true", //
+        "A_OBSI, A_OBSI, true",
 
         // _OBS suffix but unmodified => NOK
         "_OBS, _OBS, false",
-        "AB_OBS, AB_OBS, false", //
+        "AB_OBS, AB_OBS, false",
 
         // _OBS suffix and aliased => OK
         "_OBS, XX_OBS, true",
         "AB_OBS, XX_OBS, true",
-        "XX_OBS, XX_OBS, true", //
+        "XX_OBS, XX_OBS, true",
 
         // _OBS suffix but aliased wrongly => NOK
         "_OBS, XY_OBS, false",
         "AB_OBS, XY_OBS, false",
-        "XX_OBS, XY_OBS, false", //
+        "XX_OBS, XY_OBS, false",
 
         // no _OBS suffix but modified => NOK
-        "ABC123, XX_OBS, false", //
+        "ABC123, XX_OBS, false",
         "A_OBSI, XX_OBS, false"
     })
     void testVerify_handledField_returnsExpectedResult(String original, String filtered, boolean expectedResult) {
@@ -110,7 +110,7 @@ class SubstituteObserverPrefixFilterTest {
         ":, :",
         "A:, A:",
         "_OBS:, XX_OBS:",
-        "JD_OBS:, XX_OBS:", //
+        "JD_OBS:, XX_OBS:",
 
         // do not replace anywhere but in callsign
         "ABC:123:JD_OBS:, ABC:123:JD_OBS:",

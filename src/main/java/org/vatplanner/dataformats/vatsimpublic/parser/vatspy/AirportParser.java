@@ -11,10 +11,10 @@ import org.vatplanner.dataformats.vatsimpublic.utils.GeoPoint2D;
 
 public class AirportParser implements Function<String, Airport> {
     private static final Pattern PATTERN = Pattern.compile(
-        "([^|]+)\\|([^|]+)" //
-            + "\\|(" + SUBPATTERN_FLOATING_POINT + ")\\|(" + SUBPATTERN_FLOATING_POINT + ")" //
-            + "\\|([^|]*)\\|([^|]+)\\|([01])" //
-            + SUBPATTERN_OPTIONAL_INLINE_COMMENT //
+        "([^|]+)\\|([^|]+)"
+            + "\\|(" + SUBPATTERN_FLOATING_POINT + ")\\|(" + SUBPATTERN_FLOATING_POINT + ")"
+            + "\\|([^|]*)\\|([^|]+)\\|([01])"
+            + SUBPATTERN_OPTIONAL_INLINE_COMMENT
     );
     private static final int ICAO_CODE = 1;
     private static final int NAME = 2;
@@ -36,11 +36,11 @@ public class AirportParser implements Function<String, Airport> {
             matcher.group(NAME),
             new GeoPoint2D(
                 Double.parseDouble(matcher.group(LATITUDE)),
-                Double.parseDouble(matcher.group(LONGITUDE)) //
+                Double.parseDouble(matcher.group(LONGITUDE))
             ),
             matcher.group(ALTERNATIVE_CODE),
             matcher.group(FIR),
-            matcher.group(PSEUDO).equals("1") //
+            matcher.group(PSEUDO).equals("1")
         );
     }
 }

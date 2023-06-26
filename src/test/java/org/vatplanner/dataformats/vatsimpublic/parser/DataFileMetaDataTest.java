@@ -48,21 +48,21 @@ class DataFileMetaDataTest {
     )
     void testCheckEqualMetadata_equal_returnsTrue(int versionFormat, String timestampIso, int numberOfConnectedClients, int numberOfUniqueConnectedUsers, String minimumDataFileRetrievalIntervalIso, String minimumAtisRetrievalIntervalIso) {
         // Arrange
-        DataFileMetaData a = createMetaData(//
-                                            versionFormat, //
-                                            timestampIso, //
-                                            numberOfConnectedClients, //
-                                            numberOfUniqueConnectedUsers, //
-                                            minimumDataFileRetrievalIntervalIso, //
-                                            minimumAtisRetrievalIntervalIso //
+        DataFileMetaData a = createMetaData(
+            versionFormat,
+            timestampIso,
+            numberOfConnectedClients,
+            numberOfUniqueConnectedUsers,
+            minimumDataFileRetrievalIntervalIso,
+            minimumAtisRetrievalIntervalIso
         );
-        DataFileMetaData b = createMetaData( //
-                                             versionFormat, //
-                                             timestampIso, //
-                                             numberOfConnectedClients, //
-                                             numberOfUniqueConnectedUsers, //
-                                             minimumDataFileRetrievalIntervalIso, //
-                                             minimumAtisRetrievalIntervalIso //
+        DataFileMetaData b = createMetaData(
+            versionFormat,
+            timestampIso,
+            numberOfConnectedClients,
+            numberOfUniqueConnectedUsers,
+            minimumDataFileRetrievalIntervalIso,
+            minimumAtisRetrievalIntervalIso
         );
 
         // Act
@@ -113,21 +113,21 @@ class DataFileMetaDataTest {
     )
     void testCheckEqualMetadata_nonEqual_returnsFalse(int versionFormatA, String timestampIsoA, int numberOfConnectedClientsA, int numberOfUniqueConnectedUsersA, String minimumDataFileRetrievalIntervalIsoA, String minimumAtisRetrievalIntervalIsoA, int versionFormatB, String timestampIsoB, int numberOfConnectedClientsB, int numberOfUniqueConnectedUsersB, String minimumDataFileRetrievalIntervalIsoB, String minimumAtisRetrievalIntervalIsoB) {
         // Arrange
-        DataFileMetaData a = createMetaData( //
-                                             versionFormatA, //
-                                             timestampIsoA, //
-                                             numberOfConnectedClientsA, //
-                                             numberOfUniqueConnectedUsersA, //
-                                             minimumDataFileRetrievalIntervalIsoA, //
-                                             minimumAtisRetrievalIntervalIsoA //
+        DataFileMetaData a = createMetaData(
+            versionFormatA,
+            timestampIsoA,
+            numberOfConnectedClientsA,
+            numberOfUniqueConnectedUsersA,
+            minimumDataFileRetrievalIntervalIsoA,
+            minimumAtisRetrievalIntervalIsoA
         );
-        DataFileMetaData b = createMetaData( //
-                                             versionFormatB, //
-                                             timestampIsoB, //
-                                             numberOfConnectedClientsB, //
-                                             numberOfUniqueConnectedUsersB, //
-                                             minimumDataFileRetrievalIntervalIsoB, //
-                                             minimumAtisRetrievalIntervalIsoB //
+        DataFileMetaData b = createMetaData(
+            versionFormatB,
+            timestampIsoB,
+            numberOfConnectedClientsB,
+            numberOfUniqueConnectedUsersB,
+            minimumDataFileRetrievalIntervalIsoB,
+            minimumAtisRetrievalIntervalIsoB
         );
 
         // Act

@@ -45,8 +45,8 @@ public class StringUtils {
     /**
      * Returns the given content with all lines prefixed. Maintains line break
      * sequences and trailing line breaks.
-     * 
-     * @param prefix prefix to append to each line
+     *
+     * @param prefix  prefix to append to each line
      * @param content content to prefix lines for
      * @return content with prefixed lines
      */
@@ -108,7 +108,7 @@ public class StringUtils {
     /**
      * Returns the given content with all line end sequences unified to a single
      * sequence. Works for CR, LF and CR LF sequences.
-     * 
+     *
      * @param lineEnd wanted line end sequence
      * @param content content with varying line end sequences
      * @return content with unified line end sequences
@@ -132,7 +132,7 @@ public class StringUtils {
 
     /**
      * Returns true if the given string ends with a line break, false if not.
-     * 
+     *
      * @param s string to check for line break at end
      * @return true if the given string ends with a line break, false if not
      */

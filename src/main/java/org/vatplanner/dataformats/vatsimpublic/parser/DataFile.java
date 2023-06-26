@@ -64,7 +64,7 @@ public class DataFile implements ParserLogEntryCollector {
     /**
      * Returns the data file format. This is no official field but indicates which
      * parser was used to generate a parsed {@link DataFile} object.
-     * 
+     *
      * @return format of data file indicating applied parser
      */
     public DataFileFormat getFormat() {

@@ -49,22 +49,22 @@ public class NetworkInformationParser {
     private static final String PARAMETER_KEY_URL_DATA_FILE_JSON_1 = "json0";
     private static final String PARAMETER_KEY_URL_DATA_FILE_JSON_3 = "json3";
 
-    private static final Set<String> IGNORED_KEYS = new HashSet<String>(asList( //
-        "servers.live", //
-        "voice0" //
+    private static final Set<String> IGNORED_KEYS = new HashSet<String>(asList(
+        "servers.live",
+        "voice0"
     ));
 
     private static final Map<String, Pattern> expectedDefinitionPatternsByParameterKey = toStringPatternMap(
-        new Object[][] {
-            { NetworkInformation.PARAMETER_KEY_MESSAGE_STARTUP, Pattern.compile(".*application startup.*") },
-            { PARAMETER_KEY_URL_DATA_FILE_LEGACY, Pattern.compile(".*complete data.*") },
-            { PARAMETER_KEY_URL_DATA_FILE_JSON_1, Pattern.compile(".*JSON data file.*") },
-            { PARAMETER_KEY_URL_DATA_FILE_JSON_3, Pattern.compile(".*JSON.* 3.*") },
-            { NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, Pattern.compile(".*servers list.*") },
-            { NetworkInformation.PARAMETER_KEY_URL_MOVED, Pattern.compile(".*more updated status.*") },
-            { NetworkInformation.PARAMETER_KEY_URL_METAR, Pattern.compile(".*passing a parameter.*\\?id=.*") },
-            { NetworkInformation.PARAMETER_KEY_URL_ATIS, Pattern.compile(".*no longer available.*") },
-            { NetworkInformation.PARAMETER_KEY_URL_USER_STATISTICS, Pattern.compile(".*statistics.*page.*") }
+        new Object[][]{
+            {NetworkInformation.PARAMETER_KEY_MESSAGE_STARTUP, Pattern.compile(".*application startup.*")},
+            {PARAMETER_KEY_URL_DATA_FILE_LEGACY, Pattern.compile(".*complete data.*")},
+            {PARAMETER_KEY_URL_DATA_FILE_JSON_1, Pattern.compile(".*JSON data file.*")},
+            {PARAMETER_KEY_URL_DATA_FILE_JSON_3, Pattern.compile(".*JSON.* 3.*")},
+            {NetworkInformation.PARAMETER_KEY_URL_SERVERS_FILE, Pattern.compile(".*servers list.*")},
+            {NetworkInformation.PARAMETER_KEY_URL_MOVED, Pattern.compile(".*more updated status.*")},
+            {NetworkInformation.PARAMETER_KEY_URL_METAR, Pattern.compile(".*passing a parameter.*\\?id=.*")},
+            {NetworkInformation.PARAMETER_KEY_URL_ATIS, Pattern.compile(".*no longer available.*")},
+            {NetworkInformation.PARAMETER_KEY_URL_USER_STATISTICS, Pattern.compile(".*statistics.*page.*")}
         });
 
     private static Map<String, Pattern> toStringPatternMap(Object[][] pairs) {

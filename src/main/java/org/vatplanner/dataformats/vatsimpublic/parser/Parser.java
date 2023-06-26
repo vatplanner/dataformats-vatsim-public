@@ -5,13 +5,13 @@ import java.io.Reader;
 /**
  * Generic interface for a parser deserializing content to objects of type
  * <code>T</code>.
- * 
+ *
  * @param <T> type of deserialization result
  */
 public interface Parser<T> {
     /**
      * Parses the content of given {@link CharSequence} to an object.
-     * 
+     *
      * @param s content to be parsed
      * @return parsed content
      */
@@ -19,7 +19,7 @@ public interface Parser<T> {
 
     /**
      * Parses the content available from given {@link Reader} to an object.
-     * 
+     *
      * @param reader provides access to content to be parsed
      * @return parsed content
      */
@@ -27,7 +27,7 @@ public interface Parser<T> {
 
     /**
      * Proxy to {@link #deserialize(Reader)} for backwards-compatibility.
-     * 
+     *
      * @param reader provides access to content to be parsed
      * @return parsed content
      * @deprecated call {@link #deserialize(Reader)} instead
@@ -39,7 +39,7 @@ public interface Parser<T> {
 
     /**
      * Proxy to {@link #deserialize(CharSequence)} for backwards-compatibility.
-     * 
+     *
      * @param s content to be parsed
      * @return parsed content
      * @deprecated call {@link #deserialize(CharSequence)} instead

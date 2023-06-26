@@ -61,7 +61,7 @@ class ClientParserTest {
             // negative values are (unfortunately) also... valid :/
             Arguments.of(-8, 0, Duration.ofHours(-8)),
             Arguments.of(0, -2, Duration.ofMinutes(-2)),
-            Arguments.of(-8, -2, Duration.ofMinutes(-482)), //
+            Arguments.of(-8, -2, Duration.ofMinutes(-482)),
 
             // Since negative values don't make any sense we need to make sure
             // that such input does not mix up when using different signs per
@@ -242,7 +242,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:%d:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            expectedVatsimID //
+            expectedVatsimID
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -260,7 +260,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:%d:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            expectedVatsimID //
+            expectedVatsimID
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -278,7 +278,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:%d:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            expectedVatsimID //
+            expectedVatsimID
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -338,7 +338,7 @@ class ClientParserTest {
         // Arrange
         String erroneousLine = String.format(
             "ABC123:%s:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            invalidInput //
+            invalidInput
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -355,7 +355,7 @@ class ClientParserTest {
         // Arrange
         String erroneousLine = String.format(
             "ABC123:%s:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            invalidInput //
+            invalidInput
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -372,7 +372,7 @@ class ClientParserTest {
         // Arrange
         String erroneousLine = String.format(
             "ABC123:%s:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            invalidInput //
+            invalidInput
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -391,7 +391,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:%s:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            expectedRealName //
+            expectedRealName
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -409,7 +409,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:%s:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            expectedRealName //
+            expectedRealName
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -427,7 +427,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:%s:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            expectedRealName //
+            expectedRealName
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -522,7 +522,7 @@ class ClientParserTest {
         // Arrange
         String erroneousLine = String.format(
             "ABC123:123456:realname:%s::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            inputClientType //
+            inputClientType
         );
         parser.setIsParsingPrefileSection(isParsingPrefileSection);
 
@@ -555,7 +555,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT:%s:12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -580,7 +580,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT:%s:12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -634,7 +634,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:%s:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -652,7 +652,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:%s:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -699,7 +699,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::%s:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -746,7 +746,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::%s::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -805,7 +805,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:%s:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -855,7 +855,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:%s:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -902,7 +902,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname::::%s:::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -961,7 +961,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:%s:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -997,7 +997,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:%d:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            expectedAltitude //
+            expectedAltitude
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1015,7 +1015,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:%s:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1046,7 +1046,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::%d::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            altitude //
+            altitude
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -1063,7 +1063,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::%s::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -1094,7 +1094,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:%d:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            expectedAltitude //
+            expectedAltitude
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1112,7 +1112,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:%s:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1145,7 +1145,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:%d:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            expectedGroundSpeed //
+            expectedGroundSpeed
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1163,7 +1163,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:%s:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1208,7 +1208,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname::::::%d:B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            groundSpeed //
+            groundSpeed
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -1225,7 +1225,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname::::::%s:B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -1270,7 +1270,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:%d::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            groundSpeed //
+            groundSpeed
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1287,7 +1287,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:%s::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1320,7 +1320,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:%s:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            expectedAircraftType //
+            expectedAircraftType
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1338,7 +1338,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456::::::::%s:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            expectedAircraftType //
+            expectedAircraftType
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -1362,7 +1362,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0::%s:0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            expectedAircraftType //
+            expectedAircraftType
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1382,7 +1382,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:%d:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            expectedTAS //
+            expectedTAS
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1400,7 +1400,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:%d:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            expectedTAS //
+            expectedTAS
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -1418,7 +1418,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::%d::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            expectedTAS //
+            expectedTAS
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1478,7 +1478,7 @@ class ClientParserTest {
         // Arrange
         String erroneousLine = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:%s:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            invalidInput //
+            invalidInput
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1495,7 +1495,7 @@ class ClientParserTest {
         // Arrange
         String erroneousLine = String.format(
             "ABC123:123456:realname:::::::B738:%s:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            invalidInput //
+            invalidInput
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1512,7 +1512,7 @@ class ClientParserTest {
         // Arrange
         String erroneousLine = String.format(
             "ABC123:123456:realname:ATC:118.500:12.34567:12.34567:0:::%s::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            invalidInput //
+            invalidInput
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1531,7 +1531,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:%s:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            expectedAirportCode //
+            expectedAirportCode
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1549,7 +1549,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456::::::::B738:420:%s:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            expectedAirportCode //
+            expectedAirportCode
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -1573,7 +1573,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0:%s:::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            expectedAirportCode //
+            expectedAirportCode
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1593,7 +1593,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:%s:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            expectedRawFiledAltitude //
+            expectedRawFiledAltitude
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1611,7 +1611,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456::::::::B738:420:EDDT:%s:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            expectedRawFiledAltitude //
+            expectedRawFiledAltitude
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -1635,7 +1635,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::%s::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            expectedRawFiledAltitude //
+            expectedRawFiledAltitude
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1655,7 +1655,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:%s:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            expectedAirportCode //
+            expectedAirportCode
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1673,7 +1673,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456::::::::B738:420:EDDT:30000:%s:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            expectedAirportCode //
+            expectedAirportCode
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -1697,7 +1697,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0:::%s:SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            expectedAirportCode //
+            expectedAirportCode
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1717,7 +1717,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:%s:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            expectedServerId //
+            expectedServerId
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1748,7 +1748,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:%s::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            serverId //
+            serverId
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -1779,7 +1779,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::%s:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            expectedServerId //
+            expectedServerId
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1811,7 +1811,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:%d:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            expectedProtocolVersion //
+            expectedProtocolVersion
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1829,7 +1829,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:%s:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1860,7 +1860,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456::::::::B738:420:EDDT:30000:EHAM::%s:::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -1877,7 +1877,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456::::::::B738:420:EDDT:30000:EHAM::%d:::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            protocolVersion //
+            protocolVersion
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -1922,7 +1922,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:%d:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            expectedProtocolVersion //
+            expectedProtocolVersion
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1940,7 +1940,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:%s:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -1986,7 +1986,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:%d:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            controllerRatingId //
+            controllerRatingId
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2016,7 +2016,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:%s:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2066,7 +2066,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::%d::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            controllerRatingId //
+            controllerRatingId
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -2083,7 +2083,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::%s::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -2100,7 +2100,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:%d::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            controllerRatingId //
+            controllerRatingId
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2118,7 +2118,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:%s::4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2150,7 +2150,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:%d:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            expectedTransponderCodeDecimal //
+            expectedTransponderCodeDecimal
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2168,7 +2168,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:%s:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2199,7 +2199,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM::::%d:::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            transponderCodeNumeric //
+            transponderCodeNumeric
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -2216,7 +2216,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM::::%s:::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -2247,7 +2247,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::::::SERVER1:100:3:%d:4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            transponderCodeNumeric //
+            transponderCodeNumeric
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2264,7 +2264,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::::::SERVER1:100:3:%s:4:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2307,7 +2307,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:%d::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            id //
+            id
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2324,7 +2324,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:%s::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2373,7 +2373,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::%d::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            id //
+            id
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -2390,7 +2390,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::%s::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -2437,7 +2437,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::%d:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            id //
+            id
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2455,7 +2455,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::%s:50::::::::::::::::atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2488,7 +2488,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234::%d:1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            visualRange //
+            visualRange
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2506,7 +2506,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234::%s:1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2551,7 +2551,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456::::::::B738:420:EDDT:30000:EHAM::::::%d:1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            visualRange //
+            visualRange
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -2568,7 +2568,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456::::::::B738:420:EDDT:30000:EHAM::::::%s:1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -2613,7 +2613,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:%d::::::::::::::::atis message:20180101160000:20180101150000::::",
-            expectedVisualRange //
+            expectedVisualRange
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2631,7 +2631,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:%s::::::::::::::::atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2663,7 +2663,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::%d:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            expectedRevision //
+            expectedRevision
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2681,7 +2681,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::%s:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2712,7 +2712,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::%d:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            expectedRevision //
+            expectedRevision
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -2730,7 +2730,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::%s:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -2766,7 +2766,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:%d:::::::::::::::atis message:20180101160000:20180101150000::::",
-            expectedRevision //
+            expectedRevision
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2784,7 +2784,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567::::0::::SERVER1:100:3::4:50:%s:::::::::::::::atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2817,7 +2817,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:%s:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            expectedRawFlightPlanType //
+            expectedRawFlightPlanType
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2835,7 +2835,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:%s:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            expectedRawFlightPlanType //
+            expectedRawFlightPlanType
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -2859,7 +2859,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::%s::::::::::::::atis message:20180101160000:20180101150000::::",
-            expectedRawFlightPlanType //
+            expectedRawFlightPlanType
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2879,7 +2879,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:%d:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            rawValue //
+            rawValue
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2897,7 +2897,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:%s:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2928,7 +2928,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:%d:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            rawValue //
+            rawValue
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -2946,7 +2946,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:%s:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -2977,7 +2977,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::%d:::::::::::::atis message:20180101160000:20180101150000::::",
-            rawValue //
+            rawValue
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -2995,7 +2995,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::%s:::::::::::::atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3028,7 +3028,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:%d:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            rawValue //
+            rawValue
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3046,7 +3046,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:%s:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3077,7 +3077,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:%d:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            rawValue //
+            rawValue
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -3095,7 +3095,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:%s:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -3126,7 +3126,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::%d::::::::::::atis message:20180101160000:20180101150000::::",
-            rawValue //
+            rawValue
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3144,7 +3144,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::%s::::::::::::atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3177,7 +3177,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:%d:%d:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            hours, minutes //
+            hours, minutes
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3195,7 +3195,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:%s:0:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3212,7 +3212,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:0:%s:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3229,7 +3229,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:%d::3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            hours //
+            hours
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3246,7 +3246,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000::%d:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            minutes //
+            minutes
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3277,7 +3277,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:%d:%d:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            hours, minutes //
+            hours, minutes
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -3295,7 +3295,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:%s:0:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -3312,7 +3312,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:0:%s:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -3329,7 +3329,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:%d::3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            hours //
+            hours
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -3346,7 +3346,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000::%d:3:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            minutes //
+            minutes
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -3376,7 +3376,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::%d:%d::::::::::atis message:20180101160000:20180101150000::::",
-            hours, minutes //
+            hours, minutes
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3394,7 +3394,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::%s:0::::::::::atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3411,7 +3411,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::0:%s::::::::::atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3428,7 +3428,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::%d:::::::::::atis message:20180101160000:20180101150000::::",
-            hours //
+            hours
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3445,7 +3445,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::%d::::::::::atis message:20180101160000:20180101150000::::",
-            minutes //
+            minutes
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3478,7 +3478,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:%d:%d:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            hours, minutes //
+            hours, minutes
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3496,7 +3496,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:%s:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3513,7 +3513,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:0:%s:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3530,7 +3530,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:%d::EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            hours //
+            hours
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3547,7 +3547,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30::%d:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            minutes //
+            minutes
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3578,7 +3578,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:%d:%d:EDDW:remark:DCT:0:0:0:0:::::::",
-            hours, minutes //
+            hours, minutes
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -3596,7 +3596,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:%s:0:EDDW:remark:DCT:0:0:0:0:::::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -3613,7 +3613,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:0:%s:EDDW:remark:DCT:0:0:0:0:::::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -3630,7 +3630,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:%d::EDDW:remark:DCT:0:0:0:0:::::::",
-            hours //
+            hours
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -3647,7 +3647,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30::%d:EDDW:remark:DCT:0:0:0:0:::::::",
-            minutes //
+            minutes
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -3677,7 +3677,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::%d:%d::::::::atis message:20180101160000:20180101150000::::",
-            hours, minutes //
+            hours, minutes
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3695,7 +3695,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::%s:0::::::::atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3712,7 +3712,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::0:%s::::::::atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3729,7 +3729,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::%d:::::::::atis message:20180101160000:20180101150000::::",
-            hours //
+            hours
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3746,7 +3746,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::%d::::::::atis message:20180101160000:20180101150000::::",
-            minutes //
+            minutes
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3779,7 +3779,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:%s:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            expectedAirportCode //
+            expectedAirportCode
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3797,7 +3797,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:%s:remark:DCT:0:0:0:0:::::::",
-            expectedAirportCode //
+            expectedAirportCode
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -3821,7 +3821,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::::%s:::::::atis message:20180101160000:20180101150000::::",
-            expectedAirportCode //
+            expectedAirportCode
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3841,7 +3841,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:%s:DCT:0:0:0:0:::20180101094500:270:29.92:1013:",
-            expectedRemarks //
+            expectedRemarks
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3859,7 +3859,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:%s:DCT:0:0:0:0:::::::",
-            expectedRemarks //
+            expectedRemarks
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -3883,7 +3883,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::%s::::::atis message:20180101160000:20180101150000::::",
-            expectedRemarks //
+            expectedRemarks
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3903,7 +3903,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:%s:0:0:0:0:::20180101094500:270:29.92:1013:",
-            expectedRoute //
+            expectedRoute
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3921,7 +3921,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remarks:%s:0:0:0:0:::::::",
-            expectedRoute //
+            expectedRoute
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -3945,7 +3945,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::::::%s:::::atis message:20180101160000:20180101150000::::",
-            expectedRoute //
+            expectedRoute
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -3980,7 +3980,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:%s:0:0:0:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -4030,7 +4030,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:%s:0:0:0:::::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -4095,7 +4095,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::%s::::atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -4147,7 +4147,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:%s:0:0:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -4197,7 +4197,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:%s:0:0:::::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -4262,7 +4262,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::::::::%s:::atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -4314,7 +4314,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:%s:0:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -4364,7 +4364,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:%s:0:::::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -4429,7 +4429,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::%s::atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -4481,7 +4481,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:%s:::20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -4531,7 +4531,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:%s:::::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -4596,7 +4596,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50:::::::::::::::%s:atis message:20180101160000:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -4687,7 +4687,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::%s:20180101160000:20180101150000::::",
-            rawMessage //
+            rawMessage
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -4724,7 +4724,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0::%s:20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -4803,7 +4803,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:%s:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -4854,7 +4854,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0::%s:20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -4872,7 +4872,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0::%s:20180101094500:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -4917,7 +4917,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::%s:::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -4934,7 +4934,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::%s:::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -4979,7 +4979,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:%s:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -4997,7 +4997,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:%s:20180101150000::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -5042,7 +5042,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::%s:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -5060,7 +5060,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::%s:270:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -5090,7 +5090,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::%s::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -5107,7 +5107,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456::::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::%s::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -5138,7 +5138,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:20180101160000:%s::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -5156,7 +5156,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::atis message:20180101160000:%s::::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -5215,7 +5215,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_ATIS:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::someserver:100:3::4:50::::::::::::::::%s:20180101160000:20180101150000::::",
-            rawMessage //
+            rawMessage
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -5248,7 +5248,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:%d:29.92:1013:",
-            expectedHeading //
+            expectedHeading
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -5280,7 +5280,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:%s:29.92:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -5311,7 +5311,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::::%d:::",
-            heading //
+            heading
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -5328,7 +5328,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::::%s:::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -5359,7 +5359,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000:%d:::",
-            heading //
+            heading
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -5376,7 +5376,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000:%s:::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -5410,7 +5410,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:%s:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -5430,7 +5430,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:%s:1013:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -5462,7 +5462,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::%s::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -5479,7 +5479,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0:::::%s::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -5523,7 +5523,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000::%s::",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -5573,7 +5573,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:%d:",
-            expectedQnh //
+            expectedQnh
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -5591,7 +5591,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:PILOT::12.34567:12.34567:12345:123:B738:420:EDDT:30000:EHAM:someserver:1:1:1234:::1:I:1000:1000:1:30:3:0:EDDW:remarks:DCT:0:0:0:0:::20180101094500:270:29.92:%s:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -5622,7 +5622,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::::::%s:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -5640,7 +5640,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "ABC123:123456:realname:::::::B738:420:EDDT:30000:EHAM:::::::1:I:1000:1000:1:30:3:0:EDDW:remark:DCT:0:0:0:0::::::%s:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(true);
 
@@ -5671,7 +5671,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000:::%s:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 
@@ -5688,7 +5688,7 @@ class ClientParserTest {
         // Arrange
         String line = String.format(
             "EDDT_TWR:123456:realname:ATC:118.500:12.34567:12.34567:0:::0::::SERVER1:100:3::4:50::::::::::::::::atis message:20180101160000:20180101150000:::%s:",
-            input //
+            input
         );
         parser.setIsParsingPrefileSection(false);
 

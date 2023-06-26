@@ -72,12 +72,12 @@ public class PilotJsonProcessor {
     }
 
     public List<Client> deserializeMultiple(JsonArray array, ParserLogEntryCollector logCollector) {
-        return JsonHelpers.processArraySkipOnError(//
-            array, //
-            JsonObject.class, //
-            SECTION_NAME, //
-            logCollector, //
-            x -> deserializeSingle(x, logCollector) //
+        return JsonHelpers.processArraySkipOnError(
+            array,
+            JsonObject.class,
+            SECTION_NAME,
+            logCollector,
+            x -> deserializeSingle(x, logCollector)
         );
     }
 
@@ -87,143 +87,143 @@ public class PilotJsonProcessor {
         out.setRawClientType(ClientType.PILOT_CONNECTED);
         out.setEffectiveClientType(ClientType.PILOT_CONNECTED);
 
-        JsonHelpers.processMandatory( //
-            object::getInteger, //
-            Key.VATSIM_ID, //
-            SECTION_NAME, //
-            logCollector, //
-            out::setVatsimID //
+        JsonHelpers.processMandatory(
+            object::getInteger,
+            Key.VATSIM_ID,
+            SECTION_NAME,
+            logCollector,
+            out::setVatsimID
         );
 
-        JsonHelpers.processMandatory( //
-            object::getString, //
-            Key.CALLSIGN, //
-            SECTION_NAME, //
-            logCollector, //
-            out::setCallsign //
+        JsonHelpers.processMandatory(
+            object::getString,
+            Key.CALLSIGN,
+            SECTION_NAME,
+            logCollector,
+            out::setCallsign
         );
 
         String location = SECTION_NAME + " " + out.getVatsimID() + " " + out.getCallsign();
 
-        JsonHelpers.processMandatory( //
-            object::getString, //
-            Key.REAL_NAME, //
-            location, //
-            logCollector, //
-            out::setRealName //
+        JsonHelpers.processMandatory(
+            object::getString,
+            Key.REAL_NAME,
+            location,
+            logCollector,
+            out::setRealName
         );
 
-        JsonHelpers.processMandatory( //
-            object::getInteger, //
-            Key.PILOT_RATING, //
-            location, //
-            logCollector, //
-            pilotRatingByJsonId::get //
+        JsonHelpers.processMandatory(
+            object::getInteger,
+            Key.PILOT_RATING,
+            location,
+            logCollector,
+            pilotRatingByJsonId::get
         ).ifPresent(out::setPilotRating);
 
-        JsonHelpers.processMandatory( //
-            object::getInteger, //
-            Key.MILITARY_RATING, //
-            location, //
-            logCollector, //
-            militaryRatingByJsonId::get //
+        JsonHelpers.processMandatory(
+            object::getInteger,
+            Key.MILITARY_RATING,
+            location,
+            logCollector,
+            militaryRatingByJsonId::get
         ).ifPresent(out::setMilitaryRating);
 
-        JsonHelpers.processMandatory( //
-            object::getString, //
-            Key.SERVER_ID, //
-            location, //
-            logCollector, //
-            out::setServerId //
+        JsonHelpers.processMandatory(
+            object::getString,
+            Key.SERVER_ID,
+            location,
+            logCollector,
+            out::setServerId
         );
 
-        JsonHelpers.processMandatory( //
-            object::getDouble, //
-            Key.LATITUDE, //
-            location, //
-            logCollector, //
-            out::setLatitude //
+        JsonHelpers.processMandatory(
+            object::getDouble,
+            Key.LATITUDE,
+            location,
+            logCollector,
+            out::setLatitude
         );
 
-        JsonHelpers.processMandatory( //
-            object::getDouble, //
-            Key.LONGITUDE, //
-            location, //
-            logCollector, //
-            out::setLongitude //
+        JsonHelpers.processMandatory(
+            object::getDouble,
+            Key.LONGITUDE,
+            location,
+            logCollector,
+            out::setLongitude
         );
 
-        JsonHelpers.processMandatory( //
-            object::getInteger, //
-            Key.ALTITUDE, //
-            location, //
-            logCollector, //
-            out::setAltitudeFeet //
+        JsonHelpers.processMandatory(
+            object::getInteger,
+            Key.ALTITUDE,
+            location,
+            logCollector,
+            out::setAltitudeFeet
         );
 
-        JsonHelpers.processMandatory( //
-            object::getInteger, //
-            Key.GROUND_SPEED, //
-            location, //
-            logCollector, //
-            out::setGroundSpeed //
+        JsonHelpers.processMandatory(
+            object::getInteger,
+            Key.GROUND_SPEED,
+            location,
+            logCollector,
+            out::setGroundSpeed
         );
 
-        JsonHelpers.processMandatory( //
-            object::getString, //
-            Key.TRANSPONDER, //
-            location, //
-            logCollector, //
-            (Function<String, Integer>) Integer::parseUnsignedInt //
+        JsonHelpers.processMandatory(
+            object::getString,
+            Key.TRANSPONDER,
+            location,
+            logCollector,
+            (Function<String, Integer>) Integer::parseUnsignedInt
         ).ifPresent(out::setTransponderCodeDecimal);
 
-        JsonHelpers.processMandatory( //
-            object::getInteger, //
-            Key.HEADING, //
-            location, //
-            logCollector, //
-            this::limitHeading //
+        JsonHelpers.processMandatory(
+            object::getInteger,
+            Key.HEADING,
+            location,
+            logCollector,
+            this::limitHeading
         ).ifPresent(out::setHeading);
 
-        JsonHelpers.processMandatory( //
-            object::getDouble, //
-            Key.QNH_INCH_MERCURY, //
-            location, //
-            logCollector, //
-            out::setQnhInchMercury //
+        JsonHelpers.processMandatory(
+            object::getDouble,
+            Key.QNH_INCH_MERCURY,
+            location,
+            logCollector,
+            out::setQnhInchMercury
         );
 
-        JsonHelpers.processMandatory( //
-            object::getInteger, //
-            Key.QNH_HECTOPASCAL, //
-            location, //
-            logCollector, //
-            out::setQnhHectopascal //
+        JsonHelpers.processMandatory(
+            object::getInteger,
+            Key.QNH_HECTOPASCAL,
+            location,
+            logCollector,
+            out::setQnhHectopascal
         );
 
-        JsonHelpers.processMandatory( //
-            object::getString, //
-            Key.LOGON_TIME, //
-            location, //
-            logCollector, //
-            ParserHelpers::parseToInstantUtc //
+        JsonHelpers.processMandatory(
+            object::getString,
+            Key.LOGON_TIME,
+            location,
+            logCollector,
+            ParserHelpers::parseToInstantUtc
         ).ifPresent(out::setLogonTime);
 
-        JsonHelpers.processMandatory( //
-            object::getString, //
-            Key.LAST_UPDATED, //
-            location, //
-            logCollector, //
-            ParserHelpers::parseToInstantUtc //
+        JsonHelpers.processMandatory(
+            object::getString,
+            Key.LAST_UPDATED,
+            location,
+            logCollector,
+            ParserHelpers::parseToInstantUtc
         ).ifPresent(out::setLastUpdated);
 
-        JsonHelpers.processOptional( //
-            object::getMap, //
-            Key.FLIGHT_PLAN, //
-            JsonObject.class, //
-            location, //
-            logCollector, //
-            (Consumer<JsonObject>) x -> flightPlanProcessor.deserializeSingle(x, out, location, logCollector) //
+        JsonHelpers.processOptional(
+            object::getMap,
+            Key.FLIGHT_PLAN,
+            JsonObject.class,
+            location,
+            logCollector,
+            (Consumer<JsonObject>) x -> flightPlanProcessor.deserializeSingle(x, out, location, logCollector)
         );
 
         return out;

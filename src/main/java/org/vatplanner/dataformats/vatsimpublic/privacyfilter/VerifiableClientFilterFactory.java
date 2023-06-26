@@ -18,7 +18,7 @@ public class VerifiableClientFilterFactory {
      * @param configuration configuration describing filters to be instantiated
      * @return filters matching configuration
      * @throws UnconfiguredException when configuration does not request any feature
-     *         at all
+     *                               at all
      */
     public List<VerifiableClientFilter<?>> buildFromConfiguration(DataFileFilterConfiguration configuration) throws UnconfiguredException {
         if (configuration == null) {
@@ -38,7 +38,7 @@ public class VerifiableClientFilterFactory {
         if (configuration.isRemoveStreamingChannels()) {
             // TODO: remove when implemented
             throw new UnsupportedOperationException(
-                "a requested filter feature is still under development and cannot be used yet" //
+                "a requested filter feature is still under development and cannot be used yet"
             );
         }
 

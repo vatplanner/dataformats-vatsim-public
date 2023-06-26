@@ -13,7 +13,7 @@ public class OnlineTransceiverStation {
 
     /**
      * Returns this station's call sign.
-     * 
+     *
      * @return call sign of this station
      */
     public String getCallsign() {
@@ -27,7 +27,7 @@ public class OnlineTransceiverStation {
     /**
      * Returns all {@link OnlineTransceiver}s of this station. Note that some
      * stations are listed without actually having any transceivers.
-     * 
+     *
      * @return all {@link OnlineTransceiver}s of this station, may be empty
      */
     public Collection<OnlineTransceiver> getTransceivers() {

@@ -68,7 +68,7 @@ public class VatSpyFileParser implements Parser<VatSpyFile> {
     public VatSpyFile deserialize(CharSequence s) {
         try (
             StringReader sr = new StringReader(s.toString());
-            BufferedReader br = new BufferedReader(sr) //
+            BufferedReader br = new BufferedReader(sr)
         ) {
             return deserialize(br);
         } catch (IOException ex) {
@@ -107,7 +107,7 @@ public class VatSpyFileParser implements Parser<VatSpyFile> {
                             line,
                             true,
                             "unknown section",
-                            ex //
+                            ex
                         ));
                     }
                 } else if (section == null) {
@@ -116,7 +116,7 @@ public class VatSpyFileParser implements Parser<VatSpyFile> {
                         line,
                         true,
                         "data outside a supported section",
-                        null //
+                        null
                     ));
                 } else {
                     try {
@@ -127,7 +127,7 @@ public class VatSpyFileParser implements Parser<VatSpyFile> {
                             line,
                             true,
                             ex.toString(),
-                            ex //
+                            ex
                         ));
                     }
                 }
@@ -139,7 +139,7 @@ public class VatSpyFileParser implements Parser<VatSpyFile> {
                 null,
                 false,
                 "IOException while parsing",
-                ex //
+                ex
             ));
         }
 

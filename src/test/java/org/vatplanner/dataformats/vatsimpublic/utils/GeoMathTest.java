@@ -23,10 +23,10 @@ class GeoMathTest {
                 new GeoPoint2D(-14.9333, -177.992),
                 Arrays.asList(
                     new GeoPoint2D(-21.1333, -175.2),
-                    new GeoPoint2D(-8.53333, 179.2167) //
+                    new GeoPoint2D(-8.53333, 179.2167)
                 ),
                 Offset.offset(0.1) // >750km radius seems to cause high but relatively acceptable error
-            ), //
+            ),
 
             // 3km centered around EDDT
             Arguments.of(
@@ -36,18 +36,18 @@ class GeoMathTest {
                     new GeoPoint2D(52.559025, 13.334351), // east
                     new GeoPoint2D(52.558098, 13.246224), // west
                     new GeoPoint2D(52.531857, 13.291576) // south
-                ), //
-                Offset.offset(0.0001) //
-            ), //
+                ),
+                Offset.offset(0.0001)
+            ),
 
             // just EDDT (single point)
             Arguments.of(
                 new GeoPoint2D(52.558736, 13.290353),
                 Arrays.asList(
-                    new GeoPoint2D(52.558736, 13.290353) //
-                ), //
-                Offset.offset(0.000000001) //
-            ) //
+                    new GeoPoint2D(52.558736, 13.290353)
+                ),
+                Offset.offset(0.000000001)
+            )
         );
     }
 
@@ -65,15 +65,15 @@ class GeoMathTest {
 
     private void assertCloseTo(GeoPoint2D actual, GeoPoint2D expected, Offset<Double> acceptedError) {
         assertAll(
-            () -> assertThat(actual).extracting(GeoPoint2D::getLatitude) //
+            () -> assertThat(actual).extracting(GeoPoint2D::getLatitude)
                                     .describedAs("latitude")
-                                    .asInstanceOf(InstanceOfAssertFactories.DOUBLE) //
-                                    .isCloseTo(expected.getLatitude(), acceptedError), //
+                                    .asInstanceOf(InstanceOfAssertFactories.DOUBLE)
+                                    .isCloseTo(expected.getLatitude(), acceptedError),
 
-            () -> assertThat(actual).extracting(GeoPoint2D::getLongitude) //
-                                    .describedAs("longitude") //
-                                    .asInstanceOf(InstanceOfAssertFactories.DOUBLE) //
-                                    .isCloseTo(expected.getLongitude(), acceptedError) //
+            () -> assertThat(actual).extracting(GeoPoint2D::getLongitude)
+                                    .describedAs("longitude")
+                                    .asInstanceOf(InstanceOfAssertFactories.DOUBLE)
+                                    .isCloseTo(expected.getLongitude(), acceptedError)
         );
     }
 }

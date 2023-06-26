@@ -29,8 +29,7 @@ import org.vatplanner.dataformats.vatsimpublic.parser.DataFile;
 public class ClientParser {
 
     private static final String SUBPATTERN_TIMESTAMP = "\\d{14}";
-    private static final String SUBPATTERN_FLOAT_UNSIGNED = "\\d+(?:\\.\\d+|)(?:[eE][\\-+]?\\d+|)"; // integers are
-                                                                                                    // valid as well
+    private static final String SUBPATTERN_FLOAT_UNSIGNED = "\\d+(?:\\.\\d+|)(?:[eE][\\-+]?\\d+|)"; // integers are valid as well
     private static final String SUBPATTERN_GEOCOORDINATES = "\\-?" + SUBPATTERN_FLOAT_UNSIGNED;
 
     /*
@@ -56,10 +55,7 @@ public class ClientParser {
             "(\\-?" + SUBPATTERN_FLOAT_UNSIGNED + "|):(\\-?\\d+|):");
     // @formatter:on
 
-    /*
-     * TODO: allowed ATIS message to contain ":" in text as seen in the wild... may
-     * cause issues, keep an eye on it
-     */
+    // TODO: allowed ATIS message to contain ":" in text as seen in the wild... may cause issues, keep an eye on it
     private static final int PATTERN_LINE_CALLSIGN = 1;
     private static final int PATTERN_LINE_CID = 2;
     private static final int PATTERN_LINE_REALNAME = 3;
@@ -110,9 +106,9 @@ public class ClientParser {
     private static final DateTimeFormatter LOCAL_TIME_FORMATTER = DateTimeFormatter.ofPattern("HHmm");
     private static final DateTimeFormatter LOCAL_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
-    private static final String CONTROLLER_MESSAGE_LINEBREAK = new String( //
-        new byte[] { (byte) 0x5E, (byte) 0xA7 },
-        Charset.forName("ISO-8859-1") //
+    private static final String CONTROLLER_MESSAGE_LINEBREAK = new String(
+        new byte[]{(byte) 0x5E, (byte) 0xA7},
+        Charset.forName("ISO-8859-1")
     );
     private static final String LINEBREAK = "\n";
 
@@ -125,9 +121,9 @@ public class ClientParser {
      * <code>CLIENTS</code> or <code>PREFILE</code> section.
      *
      * @param isParsingPrefileSection Are following lines to be interpreted as
-     *        belonging to <code>PREFILE</code> section? Set true before parsing
-     *        lines from <code>PREFILE</code> and false before parsing lines from
-     *        <code>CLIENTS</code> section.
+     *                                belonging to <code>PREFILE</code> section? Set true before parsing
+     *                                lines from <code>PREFILE</code> and false before parsing lines from
+     *                                <code>CLIENTS</code> section.
      * @return this {@link ClientParser} instance (for method chaining)
      */
     public ClientParser setIsParsingPrefileSection(boolean isParsingPrefileSection) {
@@ -175,26 +171,26 @@ public class ClientParser {
             client.setCallsign(matcher.group(PATTERN_LINE_CALLSIGN));
             client.setVatsimID(parseIntWithDefault(matcher.group(PATTERN_LINE_CID), -1));
             client.setRealName(matcher.group(PATTERN_LINE_REALNAME));
-            client.setServedFrequencyKilohertz( //
-                parseServedFrequencyMegahertzToKilohertz( //
-                    matcher.group(PATTERN_LINE_FREQUENCY), isAllowedToServeFrequency //
-                ) //
+            client.setServedFrequencyKilohertz(
+                parseServedFrequencyMegahertzToKilohertz(
+                    matcher.group(PATTERN_LINE_FREQUENCY), isAllowedToServeFrequency
+                )
             );
-            client.setLatitude( //
-                parseOnlineGeoCoordinate( //
-                    matcher.group(PATTERN_LINE_LATITUDE), isEffectiveClientTypeOnline //
-                ) //
+            client.setLatitude(
+                parseOnlineGeoCoordinate(
+                    matcher.group(PATTERN_LINE_LATITUDE), isEffectiveClientTypeOnline
+                )
             );
-            client.setLongitude( //
-                parseOnlineGeoCoordinate( //
-                    matcher.group(PATTERN_LINE_LONGITUDE), //
-                    isEffectiveClientTypeOnline //
-                ) //
+            client.setLongitude(
+                parseOnlineGeoCoordinate(
+                    matcher.group(PATTERN_LINE_LONGITUDE),
+                    isEffectiveClientTypeOnline
+                )
             );
-            client.setAltitudeFeet( //
-                parseOnlineAltitude( //
-                    matcher.group(PATTERN_LINE_ALTITUDE), isEffectiveClientTypeOnline //
-                ) //
+            client.setAltitudeFeet(
+                parseOnlineAltitude(
+                    matcher.group(PATTERN_LINE_ALTITUDE), isEffectiveClientTypeOnline
+                )
             );
             client.setGroundSpeed(parseGroundSpeed(matcher.group(PATTERN_LINE_GROUNDSPEED), effectiveClientType));
             client.setAircraftType(matcher.group(PATTERN_LINE_PLANNED_AIRCRAFT));
@@ -202,88 +198,89 @@ public class ClientParser {
             client.setFiledDepartureAirportCode(matcher.group(PATTERN_LINE_PLANNED_DEPAIRPORT));
             client.setRawFiledAltitude(matcher.group(PATTERN_LINE_PLANNED_ALTITUDE));
             client.setFiledDestinationAirportCode(matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT));
-            client.setServerId( //
-                filterServerId( //
-                    matcher.group(PATTERN_LINE_SERVER), //
-                    isEffectiveClientTypeOnline, //
-                    hasChangedOnlineStateByGuessing //
-                ) //
+            client.setServerId(
+                filterServerId(
+                    matcher.group(PATTERN_LINE_SERVER),
+                    isEffectiveClientTypeOnline,
+                    hasChangedOnlineStateByGuessing
+                )
             );
-            client.setProtocolVersion( //
-                parseOnlineProtocolVersion( //
-                    matcher.group(PATTERN_LINE_PROTREVISION), isEffectiveClientTypeOnline //
-                ) //
+            client.setProtocolVersion(
+                parseOnlineProtocolVersion(
+                    matcher.group(PATTERN_LINE_PROTREVISION), isEffectiveClientTypeOnline
+                )
             );
             client.setControllerRating(parseControllerRating(matcher.group(PATTERN_LINE_RATING), effectiveClientType));
-            client.setTransponderCodeDecimal( //
-                parseTransponderCodeDecimal( //
-                    matcher.group(PATTERN_LINE_TRANSPONDER), effectiveClientType //
-                ) //
+            client.setTransponderCodeDecimal(
+                parseTransponderCodeDecimal(
+                    matcher.group(PATTERN_LINE_TRANSPONDER), effectiveClientType
+                )
             );
             client.setFacilityType(parseFacilityType(matcher.group(PATTERN_LINE_FACILITYTYPE), rawClientType));
             client.setVisualRange(parseVisualRange(matcher.group(PATTERN_LINE_VISUALRANGE), rawClientType));
-            client.setFlightPlanRevision( //
-                parseFlightPlanRevision( //
-                    matcher.group(PATTERN_LINE_PLANNED_REVISION), effectiveClientType //
-                ) //
+            client.setFlightPlanRevision(
+                parseFlightPlanRevision(
+                    matcher.group(PATTERN_LINE_PLANNED_REVISION), effectiveClientType
+                )
             );
             client.setRawFlightPlanType(matcher.group(PATTERN_LINE_PLANNED_FLIGHTTYPE));
             client.setRawDepartureTimePlanned(parseIntWithDefault(matcher.group(PATTERN_LINE_PLANNED_DEPTIME), -1));
             client.setRawDepartureTimeActual(parseIntWithDefault(matcher.group(PATTERN_LINE_PLANNED_ACTDEPTIME), -1));
-            client.setFiledTimeEnroute( //
-                parseDuration( //
-                    matcher.group(PATTERN_LINE_PLANNED_HRSENROUTE), //
-                    matcher.group(PATTERN_LINE_PLANNED_MINENROUTE), //
-                    isFiledTimeMandatory //
-                ) //
+            client.setFiledTimeEnroute(
+                parseDuration(
+                    matcher.group(PATTERN_LINE_PLANNED_HRSENROUTE),
+                    matcher.group(PATTERN_LINE_PLANNED_MINENROUTE),
+                    isFiledTimeMandatory
+                )
             );
-            client.setFiledTimeFuel( //
-                parseDuration( //
-                    matcher.group(PATTERN_LINE_PLANNED_HRSFUEL), //
-                    matcher.group(PATTERN_LINE_PLANNED_MINFUEL), //
-                    isFiledTimeMandatory //
-                ) //
+            client.setFiledTimeFuel(
+                parseDuration(
+                    matcher.group(PATTERN_LINE_PLANNED_HRSFUEL),
+                    matcher.group(PATTERN_LINE_PLANNED_MINFUEL),
+                    isFiledTimeMandatory
+                )
             );
             client.setFiledAlternateAirportCode(matcher.group(PATTERN_LINE_PLANNED_ALTAIRPORT));
             client.setFlightPlanRemarks(matcher.group(PATTERN_LINE_PLANNED_REMARKS));
             client.setFiledRoute(matcher.group(PATTERN_LINE_PLANNED_ROUTE));
             client.setDepartureAirportLatitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DEPAIRPORT_LAT)));
             client.setDepartureAirportLongitude(parseGeoCoordinate(matcher.group(PATTERN_LINE_PLANNED_DEPAIRPORT_LON)));
-            client.setDestinationAirportLatitude( //
-                parseGeoCoordinate( //
-                    matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT_LAT) //
-                ) //
+            client.setDestinationAirportLatitude(
+                parseGeoCoordinate(
+                    matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT_LAT)
+                )
             );
-            client.setDestinationAirportLongitude( //
-                parseGeoCoordinate( //
-                    matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT_LON) //
-                ) //
+            client.setDestinationAirportLongitude(
+                parseGeoCoordinate(
+                    matcher.group(PATTERN_LINE_PLANNED_DESTAIRPORT_LON)
+                )
             );
             client.setControllerMessage(decodeControllerMessage(matcher.group(PATTERN_LINE_ATIS_MESSAGE), isATC));
 
-            Instant lastAtisReceived = parseFullTimestamp( //
-                matcher.group(PATTERN_LINE_TIME_LAST_ATIS_RECEIVED), !isPrefiling //
+            Instant lastAtisReceived = parseFullTimestamp(
+                matcher.group(PATTERN_LINE_TIME_LAST_ATIS_RECEIVED), !isPrefiling
             );
             if (!isATC) {
                 lastAtisReceived = null;
             }
             client.setLastUpdated(lastAtisReceived);
 
-            client.setLogonTime( //
-                requireNonNullIf( //
-                    "logon time", //
+            client.setLogonTime(
+                requireNonNullIf(
+                    "logon time",
                     isEffectiveClientTypeOnline,
-                    parseFullTimestamp( //
-                        matcher.group(PATTERN_LINE_TIME_LOGON), isEffectiveClientTypeOnline //
-                    ) //
-                ) //
+                    parseFullTimestamp(
+                        matcher.group(PATTERN_LINE_TIME_LOGON), isEffectiveClientTypeOnline
+                    )
+                )
             );
             client.setHeading(parseHeading(matcher.group(PATTERN_LINE_HEADING), effectiveClientType));
-            client.setQnhInchMercury( //
-                requireNaNIf( //
+            client.setQnhInchMercury(
+                requireNaNIf(
                     "QNH Inch Mercury",
-                    !(isConnectedPilot || isZeroOrEmpty(matcher.group(PATTERN_LINE_QNH_IHG))), //
-                    parseDouble(matcher.group(PATTERN_LINE_QNH_IHG))) //
+                    !(isConnectedPilot || isZeroOrEmpty(matcher.group(PATTERN_LINE_QNH_IHG))),
+                    parseDouble(matcher.group(PATTERN_LINE_QNH_IHG))
+                )
             );
 
             int qnhHectopascals = parseIntWithDefault(matcher.group(PATTERN_LINE_QNH_MB), -1);
@@ -298,7 +295,8 @@ public class ClientParser {
                     + " section, error while parsing individual fields: \""
                     + line
                     + "\"",
-                ex);
+                ex
+            );
         }
 
         return client;
@@ -365,8 +363,8 @@ public class ClientParser {
      * connecting to the network.</li>
      * </ul>
      *
-     * @param matcher matcher retrieved via {@link #PATTERN_LINE}, containing all
-     *        field information in matcher groups
+     * @param matcher       matcher retrieved via {@link #PATTERN_LINE}, containing all
+     *                      field information in matcher groups
      * @param rawClientType raw client type as available from data file
      * @return most-likely client type, null if no decision could be made
      */
@@ -375,12 +373,12 @@ public class ClientParser {
         // TODO: only online pilots have GS >0 (implement only if necessary)
 
         if (!isParsingPrefileSection) {
-            boolean hasAtLeastOneFilledPilotField = !( //
-            isZeroOrEmpty(matcher.group(PATTERN_LINE_HEADING))
-                && isZeroOrEmpty(matcher.group(PATTERN_LINE_GROUNDSPEED))
-                && isZeroOrEmpty(matcher.group(PATTERN_LINE_QNH_IHG))
-                && isZeroOrEmpty(matcher.group(PATTERN_LINE_QNH_MB))
-                && isZeroOrEmpty(matcher.group(PATTERN_LINE_TRANSPONDER)) //
+            boolean hasAtLeastOneFilledPilotField = !(
+                isZeroOrEmpty(matcher.group(PATTERN_LINE_HEADING))
+                    && isZeroOrEmpty(matcher.group(PATTERN_LINE_GROUNDSPEED))
+                    && isZeroOrEmpty(matcher.group(PATTERN_LINE_QNH_IHG))
+                    && isZeroOrEmpty(matcher.group(PATTERN_LINE_QNH_MB))
+                    && isZeroOrEmpty(matcher.group(PATTERN_LINE_TRANSPONDER))
             );
 
             if (hasAtLeastOneFilledPilotField) {
@@ -408,11 +406,11 @@ public class ClientParser {
      * {@link IllegalArgumentException} will also be thrown if the specified
      * frequency does not make any sense, for example if it is negative or zero.
      *
-     * @param s string to be parsed, formatted as floating number in MHz
+     * @param s            string to be parsed, formatted as floating number in MHz
      * @param allowServing Is serving a frequency allowed?
      * @return frequency in kHz (may be an unserved placeholder frequency)
      * @throws IllegalArgumentException if serving a frequency while not allowed or
-     *         frequency does not make any sense
+     *                                  frequency does not make any sense
      */
     private int parseServedFrequencyMegahertzToKilohertz(String s, boolean allowServing) throws IllegalArgumentException {
         if (s.isEmpty()) {
@@ -422,14 +420,14 @@ public class ClientParser {
 
             if (frequencyKilohertz <= 0) {
                 throw new IllegalArgumentException(
-                    "served frequency is given as \"" + s + "\" which does not make any sense" //
+                    "served frequency is given as \"" + s + "\" which does not make any sense"
                 );
             }
 
             boolean isServedFrequency = frequencyKilohertz < Client.FREQUENCY_KILOHERTZ_PLACEHOLDER_MINIMUM;
             if (isServedFrequency && !allowServing) {
                 throw new IllegalArgumentException(
-                    "serving a frequency is not allowed but still encountered \"" + s + "\" as being served by client" //
+                    "serving a frequency is not allowed but still encountered \"" + s + "\" as being served by client"
                 );
             }
 
@@ -444,11 +442,11 @@ public class ClientParser {
      * allowed in that case, any other input will throw an
      * {@link IllegalArgumentException}.
      *
-     * @param s string to be parsed
+     * @param s        string to be parsed
      * @param isOnline Is the client we are parsing for online?
      * @return geo coordinate or {@link Double#NaN} if not available
      * @throws IllegalArgumentException if client is not online but still provides a
-     *         geo coordinate
+     *                                  geo coordinate
      */
     private double parseOnlineGeoCoordinate(String s, boolean isOnline) throws IllegalArgumentException {
         if (isOnline) {
@@ -457,7 +455,7 @@ public class ClientParser {
             return Double.NaN;
         } else {
             throw new IllegalArgumentException(
-                "client is not online but still provides a geo coordinate (latitude/longitude)" //
+                "client is not online but still provides a geo coordinate (latitude/longitude)"
             );
         }
     }
@@ -484,19 +482,19 @@ public class ClientParser {
      * altitude other than {@link #DEFAULT_ALTITUDE} an
      * {@link IllegalArgumentException} will be thrown.
      *
-     * @param s string to be parsed, plain integer
+     * @param s        string to be parsed, plain integer
      * @param isOnline Is the client we are parsing for online?
      * @return altitude; {@link #DEFAULT_ALTITUDE} if not specified or number
-     *         parsing error
+     *     parsing error
      * @throws IllegalArgumentException if client is not online but still defines an
-     *         altitude other than our default value
+     *                                  altitude other than our default value
      */
     private int parseOnlineAltitude(String s, boolean isOnline) throws IllegalArgumentException {
         int altitude = parseIntWithDefault(s, DEFAULT_ALTITUDE);
 
         if (!isOnline && altitude != DEFAULT_ALTITUDE) {
             throw new IllegalArgumentException(
-                "client is not online (prefiled flight plan?) but still defines altitude \"" + s + "\"" //
+                "client is not online (prefiled flight plan?) but still defines altitude \"" + s + "\""
             );
         }
 
@@ -516,12 +514,12 @@ public class ClientParser {
      * indicating 0) will return a negative value.
      * </p>
      *
-     * @param s string to parse
+     * @param s          string to parse
      * @param clientType type of client the string belongs to
      * @return ground speed >= 0 for connected pilots; negative value if
-     *         unspecified, only prefiled or ATC
+     *     unspecified, only prefiled or ATC
      * @throws IllegalArgumentException if client is not a connected pilot but still
-     *         indicates movement
+     *                                  indicates movement
      */
     private int parseGroundSpeed(String s, ClientType clientType) throws IllegalArgumentException {
         int groundSpeed = parseIntWithDefault(s, -1);
@@ -530,7 +528,7 @@ public class ClientParser {
             return groundSpeed;
         } else if (groundSpeed > 0) {
             throw new IllegalArgumentException(
-                clientType.name() + " must not have a ground speed greater zero (was: \"" + s + "\")" //
+                clientType.name() + " must not have a ground speed greater zero (was: \"" + s + "\")"
             );
         }
 
@@ -542,9 +540,9 @@ public class ClientParser {
      * empty. Non-empty values will throw an {@link IllegalArgumentException} if not
      * permitted. Returns verbatim value if filling flight plan fields is allowed.
      *
-     * @param flightPlanValue value of flight plan field to filter
+     * @param flightPlanValue           value of flight plan field to filter
      * @param isAllowedToFillFlightPlan Is client permitted to fill this flight plan
-     *        field?
+     *                                  field?
      * @return original value if allowed, null if not allowed and empty
      * @throws IllegalArgumentException if not allowed and not empty
      */
@@ -559,7 +557,7 @@ public class ClientParser {
             return null;
         } else {
             throw new IllegalArgumentException(
-                "client is not permitted to fill flight plan fields but shows \"" + flightPlanValue + "\"" //
+                "client is not permitted to fill flight plan fields but shows \"" + flightPlanValue + "\""
             );
         }
     }
@@ -588,13 +586,13 @@ public class ClientParser {
      * when such guessing may occur.
      * </p>
      *
-     * @param serverId server ID
-     * @param isEffectiveClientTypeOnline Is the client online by effective client
-     *        type?
+     * @param serverId                        server ID
+     * @param isEffectiveClientTypeOnline     Is the client online by effective client
+     *                                        type?
      * @param hasChangedOnlineStateByGuessing Did online state change by guessing of
-     *        effective client type?
+     *                                        effective client type?
      * @return server ID if expectation matches, null for offline clients or if not
-     *         set
+     *     set
      * @throws IllegalArgumentException if expectation of server ID is violated
      */
     private String filterServerId(String serverId, boolean isEffectiveClientTypeOnline, boolean hasChangedOnlineStateByGuessing) throws IllegalArgumentException {
@@ -609,7 +607,7 @@ public class ClientParser {
                     + (hasNoServerId ? "no" : "a")
                     + " server ID assigned: \""
                     + serverId
-                    + "\"" //
+                    + "\""
             );
         }
 
@@ -637,12 +635,12 @@ public class ClientParser {
      * otherwise the parsed value will be returned.
      * </p>
      *
-     * @param s protocol version as string
+     * @param s        protocol version as string
      * @param isOnline Is the client online?
      * @return protocol version number if expectation matches, negative number for
-     *         offline clients
+     *     offline clients
      * @throws IllegalArgumentException if expectation of server ID is violated or
-     *         error occurs while parsing the value
+     *                                  error occurs while parsing the value
      */
     private int parseOnlineProtocolVersion(String s, boolean isOnline) throws IllegalArgumentException {
         boolean hasEmptyOrZeroProtocolVersion = isZeroOrEmpty(s);
@@ -672,18 +670,18 @@ public class ClientParser {
      * will be thrown. Only {@link ClientType#PILOT_PREFILED} is allowed not to
      * specify any rating, so only prefilings can return null.
      *
-     * @param s string to be parsed into controller rating
+     * @param s          string to be parsed into controller rating
      * @param clientType session client type
      * @return controller rating; null on prefiling
      * @throws IllegalArgumentException if specified rating does not match
-     *         expectations for client type
+     *                                  expectations for client type
      */
     private ControllerRating parseControllerRating(String s, ClientType clientType) throws IllegalArgumentException {
         if (clientType == ClientType.PILOT_PREFILED) {
             if (!isZeroOrEmpty(s)) {
                 throw new IllegalArgumentException(
-                    "prefiled flight plans are not expected to indicate any controller rating but rating is \"" //
-                        + s + "\"" //
+                    "prefiled flight plans are not expected to indicate any controller rating but rating is \""
+                        + s + "\""
                 );
             }
 
@@ -695,7 +693,7 @@ public class ClientParser {
         if ((clientType == ClientType.PILOT_CONNECTED) && (rating != ControllerRating.OBS)) {
             throw new IllegalArgumentException(
                 "connected pilots are not expected to indicate any controller rating except observer/pilot but actual rating is \""
-                    + s + "\"" //
+                    + s + "\""
             );
         }
 
@@ -715,10 +713,10 @@ public class ClientParser {
      * {@link IllegalArgumentException} if set.
      * </p>
      *
-     * @param s string to parse
+     * @param s          string to parse
      * @param clientType type of client
      * @return positive transponder code in decimal numeric representation; negative
-     *         value if unavailable
+     *     value if unavailable
      * @throws IllegalArgumentException if set although not allowed or parsing error
      */
     private int parseTransponderCodeDecimal(String s, ClientType clientType) throws IllegalArgumentException {
@@ -728,7 +726,7 @@ public class ClientParser {
 
         if ((clientType != ClientType.PILOT_CONNECTED) && !"0".equals(s)) {
             throw new IllegalArgumentException(
-                "Only connected pilots are allowed to list a transponder code but code was: \"" + s + "\"" //
+                "Only connected pilots are allowed to list a transponder code but code was: \"" + s + "\""
             );
         }
 
@@ -747,11 +745,11 @@ public class ClientParser {
      * Returns null if undefined.
      * </p>
      *
-     * @param s string to parse
+     * @param s             string to parse
      * @param rawClientType raw type of client, must not be effective type
      * @return facility type; null if unavailable
      * @throws IllegalArgumentException if set although not allowed, unknown ID or
-     *         parsing error
+     *                                  parsing error
      */
     private FacilityType parseFacilityType(String s, ClientType rawClientType) throws IllegalArgumentException {
         boolean isATC = (rawClientType == ClientType.ATC_CONNECTED);
@@ -762,7 +760,7 @@ public class ClientParser {
             return null;
         } else {
             throw new IllegalArgumentException(
-                "Only ATC stations are allowed to list a facility type but type was: \"" + s + "\"" //
+                "Only ATC stations are allowed to list a facility type but type was: \"" + s + "\""
             );
         }
     }
@@ -780,7 +778,7 @@ public class ClientParser {
      * pilots are ignored and a negative value is returned instead.
      * </p>
      *
-     * @param s string to parse
+     * @param s             string to parse
      * @param rawClientType raw type of client, must not be effective type
      * @return visual range; negative if unavailable
      * @throws IllegalArgumentException if set although not allowed or parsing error
@@ -795,7 +793,7 @@ public class ClientParser {
             return -1;
         } else {
             throw new IllegalArgumentException(
-                "Prefilings are not allowed to indicate a visual range; found: \"" + s + "\"" //
+                "Prefilings are not allowed to indicate a visual range; found: \"" + s + "\""
             );
         }
     }
@@ -809,11 +807,11 @@ public class ClientParser {
      * Returns negative value if undefined.
      * </p>
      *
-     * @param s string to parse
+     * @param s          string to parse
      * @param clientType type of client
      * @return flight plan revision; negative if unavailable
      * @throws IllegalArgumentException if missing although mandatory or parsing
-     *         error
+     *                                  error
      */
     private int parseFlightPlanRevision(String s, ClientType clientType) throws IllegalArgumentException {
         boolean isPrefiling = (clientType == ClientType.PILOT_PREFILED);
@@ -868,7 +866,7 @@ public class ClientParser {
      * readable Java String. If messages are not allowed, anything but empty
      * messages will throw an {@link IllegalArgumentException}.
      *
-     * @param s original representation as in data.txt file
+     * @param s            original representation as in data.txt file
      * @param allowMessage Is a non-empty message allowed?
      * @return controller message decoded to a Java String
      * @throws IllegalArgumentException if a message is not allowed but not empty
@@ -889,7 +887,7 @@ public class ClientParser {
      * Returns null if not set. If no timestamp is allowed but still set, an
      * {@link IllegalArgumentException} will be thrown.
      *
-     * @param s string to parse
+     * @param s         string to parse
      * @param isAllowed Is a timestamp allowed?
      * @return timestamp as {@link Instant} referenced to UTC
      * @throws IllegalArgumentException if not allowed but set or parsing error
@@ -913,11 +911,11 @@ public class ClientParser {
     /**
      * Requires the given object to be not null if condition is true.
      *
-     * @param <T> class of object to be checked
+     * @param <T>         class of object to be checked
      * @param description description of object value (used for exception message)
-     * @param condition condition which has to be true for object to be required not
-     *        to be null
-     * @param obj object to be checked
+     * @param condition   condition which has to be true for object to be required not
+     *                    to be null
+     * @param obj         object to be checked
      * @return original object
      * @throws IllegalArgumentException if condition is true and object is null
      */
@@ -933,11 +931,11 @@ public class ClientParser {
      * Parses the given string as a heading in degrees. Returns negative value if
      * not set.
      *
-     * @param s string to be parsed
+     * @param s          string to be parsed
      * @param clientType client type string is to be parsed for
      * @return heading value; negative if not set
      * @throws IllegalArgumentException if not permitted but still defined or value
-     *         is out of range
+     *                                  is out of range
      */
     private int parseHeading(String s, ClientType clientType) throws IllegalArgumentException {
         if (s.isEmpty()) {
@@ -965,12 +963,12 @@ public class ClientParser {
      * Violation will cause {@link IllegalArgumentException} to be thrown.
      *
      * @param description description of value (used for exception message)
-     * @param condition condition which has to be true for value to be required to
-     *        be {@link Double#NaN}
-     * @param value value to be checked
+     * @param condition   condition which has to be true for value to be required to
+     *                    be {@link Double#NaN}
+     * @param value       value to be checked
      * @return original value
      * @throws IllegalArgumentException if condition is true and value is not
-     *         {@link Double#NaN}
+     *                                  {@link Double#NaN}
      */
     private double requireNaNIf(String description, boolean condition, double value) throws IllegalArgumentException {
         if (condition && !Double.isNaN(value)) {
@@ -978,7 +976,7 @@ public class ClientParser {
                 "expected "
                     + description
                     + " to be NaN but was "
-                    + Double.toString(value) //
+                    + Double.toString(value)
             );
         }
 
@@ -990,12 +988,12 @@ public class ClientParser {
      * cause {@link IllegalArgumentException} to be thrown.
      *
      * @param description description of value (used for exception message)
-     * @param condition condition which has to be true for value to be required to
-     *        be negative
-     * @param value value to be checked
+     * @param condition   condition which has to be true for value to be required to
+     *                    be negative
+     * @param value       value to be checked
      * @return original value
      * @throws IllegalArgumentException if condition is true and value is not
-     *         negative
+     *                                  negative
      */
     private int requireNegativeIf(String description, boolean condition, int value) throws IllegalArgumentException {
         if (condition && (value >= 0)) {
@@ -1003,7 +1001,7 @@ public class ClientParser {
                 "expected "
                     + description
                     + " to be negative but was "
-                    + Integer.toString(value) //
+                    + Integer.toString(value)
             );
         }
 

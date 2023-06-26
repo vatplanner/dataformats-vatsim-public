@@ -116,28 +116,28 @@ class VerifiableClientFilterFactoryTest {
             Arguments.of(false, asList("abc"), false, false, true,
                          asList(
                              FlightPlanRemarksRemoveAllFilter.class,
-                             SubstituteObserverPrefixFilter.class //
+                             SubstituteObserverPrefixFilter.class
                          )
             ),
 
             Arguments.of(true, asList("abc"), true, false, false,
                          asList(
                              FlightPlanRemarksRemoveAllFilter.class,
-                             RemoveRealNameAndHomebaseFilter.class //
+                             RemoveRealNameAndHomebaseFilter.class
                          )
             ),
 
             Arguments.of(true, asList("abc"), false, false, true,
                          asList(
                              FlightPlanRemarksRemoveAllFilter.class,
-                             SubstituteObserverPrefixFilter.class //
+                             SubstituteObserverPrefixFilter.class
                          )
             ),
 
             Arguments.of(false, EMPTY, true, false, true,
                          asList(
                              RemoveRealNameAndHomebaseFilter.class,
-                             SubstituteObserverPrefixFilter.class //
+                             SubstituteObserverPrefixFilter.class
                          )
             ),
 
@@ -146,7 +146,7 @@ class VerifiableClientFilterFactoryTest {
                          asList(
                              FlightPlanRemarksRemoveAllFilter.class,
                              RemoveRealNameAndHomebaseFilter.class,
-                             SubstituteObserverPrefixFilter.class //
+                             SubstituteObserverPrefixFilter.class
                          )
             ),
 
@@ -154,7 +154,7 @@ class VerifiableClientFilterFactoryTest {
                          asList(
                              FlightPlanRemarksRemoveAllFilter.class,
                              RemoveRealNameAndHomebaseFilter.class,
-                             SubstituteObserverPrefixFilter.class //
+                             SubstituteObserverPrefixFilter.class
                          )
             ),
 
@@ -162,7 +162,7 @@ class VerifiableClientFilterFactoryTest {
                          asList(
                              FlightPlanRemarksRemoveAllFilter.class,
                              RemoveRealNameAndHomebaseFilter.class,
-                             SubstituteObserverPrefixFilter.class //
+                             SubstituteObserverPrefixFilter.class
                          )
             )
         );

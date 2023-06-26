@@ -14,13 +14,12 @@ public class ThrowExceptionStrategy implements ErrorHandlingStrategy {
 
     @Override
     public String handleError(String rawLine, String filteredLine, Collection<ClientFields.FieldAccess> affectedFields) {
-        throw new FailWithException( //
+        throw new FailWithException(
             "Filtering failed on client fields: "
-                + affectedFields //
-                    .stream() //
-                    .map(ClientFields.FieldAccess::name)
-                    .collect(Collectors.joining(", ")) //
+                + affectedFields
+                .stream()
+                .map(ClientFields.FieldAccess::name)
+                .collect(Collectors.joining(", "))
         );
     }
-
 }

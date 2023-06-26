@@ -38,15 +38,15 @@ public class LegacyNetworkInformationWriter implements Writer<NetworkInformation
      * with the given header. The given header is automatically prefixed to indicate
      * a comment. Multiple lines can be provided; line end sequences are
      * automatically converted as needed.
-     * 
+     *
      * @param header header to be prepended to all output
      */
     public LegacyNetworkInformationWriter(String header) {
         this.header = endWithEmptyCommentLine(
             StringUtils.prefixLines(
                 HEADER_PREFIX,
-                StringUtils.unifyLineEnds(LINE_END, header) //
-            ) //
+                StringUtils.unifyLineEnds(LINE_END, header)
+            )
         );
     }
 
@@ -110,5 +110,4 @@ public class LegacyNetworkInformationWriter implements Writer<NetworkInformation
     private void encodeAllUrls(String key, List<URL> urls, BufferedWriter bw) throws IOException {
         encodeAll(key, urls.stream().map(URL::toString).collect(Collectors.toList()), bw);
     }
-
 }

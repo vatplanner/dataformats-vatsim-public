@@ -69,9 +69,9 @@ public class Flight {
      * report by a tuple of both member/VATSIM ID and callsign. See class JavaDoc
      * for further information.
      *
-     * @param member member performing or filing this flight
+     * @param member   member performing or filing this flight
      * @param callsign actual (connected) or intended (pre-filed) callsign to be
-     *        used on this flight
+     *                 used on this flight
      */
     public Flight(Member member, String callsign) {
         this.member = member;
@@ -95,7 +95,7 @@ public class Flight {
      * sorted by their log on time in ascending order.
      *
      * @return all connections related to this flight ordered by log on time; never
-     *         null
+     *     null
      */
     public SortedSet<Connection> getConnections() {
         if (connections == null) {
@@ -109,7 +109,7 @@ public class Flight {
      * Returns the latest connection determined by log on time.
      *
      * @return latest connection by log on time; null if no connection has been
-     *         recorded
+     *     recorded
      */
     public Connection getLatestConnection() {
         if (connections == null) {
@@ -158,7 +158,7 @@ public class Flight {
      * @param flightPlan flight plan to be added
      * @return this instance for method-chaining
      * @throws UnsupportedOperationException if a different flight plan of that
-     *         revision has already been added
+     *                                       revision has already been added
      */
     public Flight addFlightPlan(FlightPlan flightPlan) {
         // TODO: check if flight plan already exists and fail if other instance
@@ -203,7 +203,7 @@ public class Flight {
      * @param point point to add to this flight's track
      * @return this instance for method-chaining
      * @throws IllegalArgumentException if given track point does not reference a
-     *         timed {@link Report}
+     *                                  timed {@link Report}
      */
     public Flight addTrackPoint(TrackPoint point) {
         if (track == null) {
@@ -290,7 +290,7 @@ public class Flight {
      * flight plan to last seen record of connection.
      *
      * @return time span between first connection or pre-filing to last seen
-     *         connection record
+     *     connection record
      */
     public TimeSpan getVisibleTimeSpan() {
         TimeSpan timeSpan = new TimeSpan();
@@ -317,7 +317,7 @@ public class Flight {
      *
      * @param report report to check for reconstruction
      * @return true if flight data needed reconstruction for given report, false if
-     *         not
+     *     not
      */
     public boolean isReconstructed(Report report) {
         if (reconstructedReports == null) {
@@ -359,9 +359,9 @@ public class Flight {
      * event assigned.
      *
      * @param trackPoint track point to record event for
-     * @param event event to be recorded
+     * @param event      event to be recorded
      * @throws IllegalArgumentException if any argument is null, point is not on
-     *         track or point already has an event assigned
+     *                                  track or point already has an event assigned
      */
     public void markEvent(TrackPoint trackPoint, FlightEvent event) {
         if (event == null) {
@@ -381,12 +381,12 @@ public class Flight {
         }
 
         if (events.containsKey(trackPoint)) {
-            throw new IllegalArgumentException(//
+            throw new IllegalArgumentException(
                 "track point is already marked with another event (old "
-                    + events.get(trackPoint) //
-                    + ", new " //
-                    + event //
-                    + ")" //
+                    + events.get(trackPoint)
+                    + ", new "
+                    + event
+                    + ")"
             );
         }
 

@@ -10,10 +10,10 @@ import org.junit.jupiter.params.provider.CsvSource;
 class RemoveLineStrategyTest {
 
     @ParameterizedTest
-    @CsvSource({ //
-        "unwanted, ''", //
-        "abc:def, de:abc:f", //
-        "original, Z", //
+    @CsvSource({
+        "unwanted, ''",
+        "abc:def, de:abc:f",
+        "original, Z",
     })
     void testHandleError_always_returnsNull(String rawLine, String filteredLine) {
         // Arrange

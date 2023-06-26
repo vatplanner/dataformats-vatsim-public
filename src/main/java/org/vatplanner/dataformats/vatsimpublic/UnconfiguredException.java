@@ -9,5 +9,4 @@ public class UnconfiguredException extends RuntimeException {
     public UnconfiguredException(String msg) {
         super(msg);
     }
-
 }

@@ -16,9 +16,9 @@ public class ParserLogFilter {
      * <code>[123 characters removed]</code>.
      * </p>
      *
-     * @param dataFile data file to shorten log lines for
+     * @param dataFile            data file to shorten log lines for
      * @param maxRawLogLineLength maximum number of characters in raw log lines to
-     *        keep, 0 to clear completely
+     *                            keep, 0 to clear completely
      * @return {@link DataFile} holding shortened log lines only
      */
     public DataFile shortenLogLineContent(DataFile dataFile, int maxRawLogLineLength) {

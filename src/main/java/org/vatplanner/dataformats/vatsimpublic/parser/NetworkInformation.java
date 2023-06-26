@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  * may only be provided by a specific file (such as legacy data file URLs only
  * being available from legacy <code>status.txt</code>). Information from both
  * sources can be combined using {@link #addAll(NetworkInformation)}.
- * 
+ *
  * <p>
  * Note that there is a difference between <code>data</code> and parameter URLs:
  * Historically, information was only keyed on root-level which this
@@ -36,13 +36,13 @@ import org.slf4j.LoggerFactory;
  * field is now tracked as "data" by this class to make sense of that
  * restructuring.
  * </p>
- * 
+ *
  * <p>
  * The original policy stated on the file itself was to fetch that information
  * only once "on application start" to reduce server load. For current policy
  * check the original files regularly.
  * </p>
- * 
+ *
  * <p>
  * All URLs should be accessed in a random, round-robin fashion. Documentation
  * of getter methods is based on self-documentation of the original unparsed
@@ -86,7 +86,7 @@ public class NetworkInformation {
      * Parses and remembers the given URL string for the given parameter key. URLs
      * will retain their order of insertion.
      *
-     * @param key key to identify list of URLs by
+     * @param key   key to identify list of URLs by
      * @param value URL string to parse
      * @return Could the URL be parsed and has it been registered to the given key?
      */
@@ -111,7 +111,7 @@ public class NetworkInformation {
         try {
             return new URL(value);
         } catch (MalformedURLException ex) {
-            LOGGER.warn("URL for \"{}\" is malformed: \"{}\"", new Object[] { logSource, value }, ex);
+            LOGGER.warn("URL for \"{}\" is malformed: \"{}\"", new Object[]{logSource, value}, ex);
         }
 
         return null;
@@ -122,17 +122,17 @@ public class NetworkInformation {
      * be exactly the one used on <code>data</code> field of JSON
      * {@link NetworkInformation} files for JSON information. URLs will retain their
      * order of insertion.
-     * 
+     *
      * <p>
      * {@link NetworkInformationDataKeyProvider#getNetworkInformationDataKey()}
      * should be used to retrieve the matching key constants. The pseudo-key
      * returned by {@link DataFileFormat#LEGACY} is the only allowed key not present
      * on actual JSON {@link NetworkInformation} files.
      * </p>
-     * 
+     *
      * @param jsonKey key used to indicate the referenced file/format in JSON-based
-     *        {@link NetworkInformation} files
-     * @param value URL string to parse
+     *                {@link NetworkInformation} files
+     * @param value   URL string to parse
      * @return Could the URL be parsed and has it been registered to the given key?
      */
     public boolean addAsDataUrl(String jsonKey, String value) {
@@ -186,10 +186,10 @@ public class NetworkInformation {
      * multiple appear.
      *
      * @return URLs to retrieve ATIS information from by adding
-     *         <code>?callsign=...</code>
+     *     <code>?callsign=...</code>
      * @deprecated as of October 2018 network information file header states service
-     *             has been discontinued, controller info and ATIS should be read
-     *             from data file instead
+     *     has been discontinued, controller info and ATIS should be read
+     *     from data file instead
      */
     public List<URL> getAtisUrls() {
         return getParameterUrls(PARAMETER_KEY_URL_ATIS);
@@ -206,7 +206,7 @@ public class NetworkInformation {
      *
      * @return URLs to retrieve a copy of the current data file from
      * @deprecated use {@link #getDataUrls(NetworkInformationDataKeyProvider)} or
-     *             {@link #getAllUrlsByDataKey()} instead
+     *     {@link #getAllUrlsByDataKey()} instead
      */
     @Deprecated
     public List<URL> getDataFileUrls() {
@@ -228,8 +228,8 @@ public class NetworkInformation {
         return unmodifiableList(
             urlsByDataKey.getOrDefault(
                 keyProvider.getNetworkInformationDataKey(),
-                emptyList() //
-            ) //
+                emptyList()
+            )
         );
     }
 
@@ -237,15 +237,14 @@ public class NetworkInformation {
      * Returns all data URLs (i.e. URLs from the <code>data</code> field) indexed by
      * the key by which they are referenced in JSON-based {@link NetworkInformation}
      * files.
-     * 
+     *
      * <p>
      * Legacy data files are not referenced in JSON-based {@link NetworkInformation}
      * and are referred to by {@link DataFileFormat.Constants#LEGACY_JSON_KEY}
      * instead.
      * </p>
-     * 
-     * @return all data URLs indexed by the key used in JSON-based
-     *         {@link NetworkInformation} files
+     *
+     * @return all data URLs indexed by the key used in JSON-based {@link NetworkInformation} files
      */
     public Map<String, List<URL>> getAllUrlsByDataKey() {
         return unmodifiableMap(urlsByDataKey);
@@ -258,8 +257,7 @@ public class NetworkInformation {
      * documentation from the file header, be prepared to choose one randomly if
      * multiple appear.
      *
-     * @return URLs to retrieve METAR information from by adding
-     *         <code>?id=...</code>
+     * @return URLs to retrieve METAR information from by adding <code>?id=...</code>
      */
     public List<URL> getMetarUrls() {
         return getParameterUrls(PARAMETER_KEY_URL_METAR);
@@ -304,12 +302,12 @@ public class NetworkInformation {
      * Copies all data from another {@link NetworkInformation} instance to this one,
      * resulting in a combination of data from both instances. Data will be
      * deduplicated, no order of items can be guaranteed.
-     * 
+     *
      * <p>
      * {@link #getWhazzUpString()} will still retain current instance's value if
      * already set, otherwise it will get copied from the other instance.
      * </p>
-     * 
+     *
      * @param other other instance to copy information from
      * @return this instance for method-chaining
      */

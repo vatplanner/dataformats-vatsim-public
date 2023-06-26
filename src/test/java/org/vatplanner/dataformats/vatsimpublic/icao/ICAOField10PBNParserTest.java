@@ -200,11 +200,11 @@ class ICAOField10PBNParserTest {
         "/C, true",
         "/H, true",
         "/LB1D1, true",
-        "/X, true", //
+        "/X, true",
 
         // ambiguous information should assume transponder supported
-        "/NC, true", //
-        "/CN, true", //
+        "/NC, true",
+        "/CN, true",
     })
     void testHasTransponder_validData_returnsExpectedResult(String combinedField10, boolean expectedResult) {
         // Arrange

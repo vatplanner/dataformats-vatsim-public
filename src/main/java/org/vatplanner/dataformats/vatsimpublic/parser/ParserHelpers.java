@@ -21,12 +21,12 @@ public class ParserHelpers {
      * strings must not be empty or {@link IllegalArgumentException} will be thrown.
      * Excessive values for minutes (&gt;59) are valid and add to hours.
      *
-     * @param hoursString string containing hours to be parsed
+     * @param hoursString   string containing hours to be parsed
      * @param minutesString string containing minutes to be parsed
-     * @param isMandatory Is the duration mandatory?
+     * @param isMandatory   Is the duration mandatory?
      * @return strings interpreted as duration; null if unavailable
      * @throws IllegalArgumentException if mandatory but not available, only one
-     *         string is empty or parsing error
+     *                                  string is empty or parsing error
      */
     public static Duration parseDuration(String hoursString, String minutesString, boolean isMandatory) throws IllegalArgumentException {
         boolean emptyHours = hoursString.isEmpty();
@@ -73,24 +73,24 @@ public class ParserHelpers {
      * Parses the given string for hours and minutes to a {@link Duration} object.
      * String is expected to be directly concatenated without separator; negative
      * values are accepted.
-     * 
+     *
      * <p>
      * This method provides compatibility for JSON data files to adapt the original
      * {@link #parseDuration(String, String, boolean)} as used on legacy data file
      * formats.
      * </p>
-     * 
+     *
      * <p>
      * If duration is mandatory, strings must not be empty or
      * {@link IllegalArgumentException} will be thrown. Excessive values for minutes
      * (&gt;59) are valid and add to hours.
      * </p>
      *
-     * @param s string containing hours and minutes to be parsed
+     * @param s           string containing hours and minutes to be parsed
      * @param isMandatory Is the duration mandatory?
      * @return string interpreted as duration; null if unavailable
      * @throws IllegalArgumentException if mandatory but not available, only one
-     *         string is empty or parsing error
+     *                                  string is empty or parsing error
      * @see #parseDuration(String, String, boolean)
      */
     public static Duration parseDirectConcatenatedDuration(String s, boolean isMandatory) throws IllegalArgumentException {
@@ -119,7 +119,7 @@ public class ParserHelpers {
      * updates to all clients) started showing up in data files omitting the time
      * zone information.
      * </p>
-     * 
+     *
      * @param s string to be parsed
      * @return parsed {@link Instant}, assuming UTC for {@link LocalDateTime}s
      */
@@ -130,5 +130,4 @@ public class ParserHelpers {
             return LocalDateTime.parse(s).toInstant(ZoneOffset.UTC);
         }
     }
-
 }

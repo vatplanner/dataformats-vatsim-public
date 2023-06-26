@@ -77,7 +77,7 @@ public class AircraftTypeExtractor implements ParsedTypeData {
      * interpreted further.
      *
      * @return aircraft type (should but may not be an ICAO code); null if
-     *         unavailable
+     *     unavailable
      */
     @Override
     public String getAircraftType() {

@@ -29,5 +29,4 @@ public class FIRBoundaryFile implements ParserLogEntryCollector {
     public Collection<ParserLogEntry> getParserLogEntries() {
         return Collections.unmodifiableCollection(parserLogEntries);
     }
-
 }

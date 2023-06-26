@@ -90,7 +90,7 @@ public enum FacilityType {
      * @param statusFileId ID as used on data.txt status file
      * @return resolved enumeration object
      * @throws IllegalArgumentException if the ID is unknown and could not be
-     *         resolved
+     *                                  resolved
      */
     public static FacilityType resolveStatusFileId(int statusFileId) throws IllegalArgumentException {
         FacilityType resolved = typeById.get(statusFileId);
@@ -115,7 +115,7 @@ public enum FacilityType {
     /**
      * Returns the ID used to refer to this {@link FacilityType} in legacy data
      * files.
-     * 
+     *
      * @return ID used in legacy data files
      */
     public int getLegacyId() {

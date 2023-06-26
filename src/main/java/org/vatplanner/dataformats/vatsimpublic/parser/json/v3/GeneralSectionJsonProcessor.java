@@ -17,10 +17,9 @@ import com.github.cliftonlabs.json_simple.JsonKey;
 import com.github.cliftonlabs.json_simple.JsonObject;
 
 public class GeneralSectionJsonProcessor {
-    private static final DateTimeFormatter UPDATE_DTF = new DateTimeFormatterBuilder() //
-        .appendPattern("yyyyMMddHHmmss") //
-        .toFormatter() //
-        .withZone(ZoneOffset.UTC);
+    private static final DateTimeFormatter UPDATE_DTF = new DateTimeFormatterBuilder().appendPattern("yyyyMMddHHmmss")
+                                                                                      .toFormatter()
+                                                                                      .withZone(ZoneOffset.UTC);
 
     static final String SECTION_NAME = "general";
 
@@ -57,19 +56,19 @@ public class GeneralSectionJsonProcessor {
         DataFileMetaData out = new DataFileMetaData();
 
         JsonHelpers.getMandatory(generalRoot::getInteger, Key.CONNECTED_CLIENTS, SECTION_NAME, logCollector)
-            .ifPresent(out::setNumberOfConnectedClients);
+                   .ifPresent(out::setNumberOfConnectedClients);
 
         JsonHelpers.getMandatory(generalRoot::getInteger, Key.RELOAD, SECTION_NAME, logCollector)
-            .ifPresent(x -> out.setMinimumDataFileRetrievalInterval(Duration.ofMinutes(x)));
+                   .ifPresent(x -> out.setMinimumDataFileRetrievalInterval(Duration.ofMinutes(x)));
 
         JsonHelpers.getMandatory(generalRoot::getInteger, Key.UNIQUE_USERS, SECTION_NAME, logCollector)
-            .ifPresent(out::setNumberOfUniqueConnectedUsers);
+                   .ifPresent(out::setNumberOfUniqueConnectedUsers);
 
-        getUpdateTimestamp(generalRoot, logCollector) //
+        getUpdateTimestamp(generalRoot, logCollector)
             .ifPresent(out::setTimestamp);
 
         JsonHelpers.getMandatory(generalRoot::getInteger, Key.VERSION, SECTION_NAME, logCollector)
-            .ifPresent(out::setVersionFormat);
+                   .ifPresent(out::setVersionFormat);
 
         return out;
     }
@@ -97,44 +96,48 @@ public class GeneralSectionJsonProcessor {
      * ({@link #TIMESTAMP_DIFFERENCE_WARNING_THRESHOLD}), a {@link ParserLogEntry}
      * will be logged. The ISO timestamp will be trusted in that case.
      * </p>
-     * 
-     * @param generalRoot JSON object of general section
+     *
+     * @param generalRoot  JSON object of general section
      * @param logCollector receives log
-     * @return
+     * @return best available update timestamp
      */
     private Optional<Instant> getUpdateTimestamp(JsonObject generalRoot, ParserLogEntryCollector logCollector) {
-        Optional<Instant> customTimestamp = JsonHelpers.processMandatory(generalRoot::getString, Key.UPDATE,
-            SECTION_NAME, logCollector, this::parseCustomTimestamp);
-        Optional<Instant> isoTimestamp = JsonHelpers.processMandatory(generalRoot::getString, Key.UPDATE_TIMESTAMP,
-            SECTION_NAME, logCollector, ParserHelpers::parseToInstantUtc);
+        Optional<Instant> customTimestamp = JsonHelpers.processMandatory(
+            generalRoot::getString, Key.UPDATE,
+            SECTION_NAME, logCollector, this::parseCustomTimestamp
+        );
+        Optional<Instant> isoTimestamp = JsonHelpers.processMandatory(
+            generalRoot::getString, Key.UPDATE_TIMESTAMP,
+            SECTION_NAME, logCollector, ParserHelpers::parseToInstantUtc
+        );
 
         if (!customTimestamp.isPresent() && isoTimestamp.isPresent()) {
-            logCollector.addParserLogEntry(new ParserLogEntry( //
-                SECTION_NAME, //
-                generalRoot.toJson(), //
-                false, //
-                "custom-format update timestamp (" + Key.UPDATE.getKey() + ") is missing, using ISO timestamp", //
-                null //
+            logCollector.addParserLogEntry(new ParserLogEntry(
+                SECTION_NAME,
+                generalRoot.toJson(),
+                false,
+                "custom-format update timestamp (" + Key.UPDATE.getKey() + ") is missing, using ISO timestamp",
+                null
             ));
             return isoTimestamp;
         } else if (customTimestamp.isPresent() && !isoTimestamp.isPresent()) {
-            logCollector.addParserLogEntry(new ParserLogEntry( //
-                SECTION_NAME, //
-                generalRoot.toJson(), //
-                false, //
+            logCollector.addParserLogEntry(new ParserLogEntry(
+                SECTION_NAME,
+                generalRoot.toJson(),
+                false,
                 "ISO update timestamp (" + Key.UPDATE_TIMESTAMP.getKey()
-                    + ") is missing, using custom-format timestamp", //
-                null //
+                    + ") is missing, using custom-format timestamp",
+                null
             ));
             return customTimestamp;
         } else if (!customTimestamp.isPresent() && !isoTimestamp.isPresent()) {
-            logCollector.addParserLogEntry(new ParserLogEntry( //
-                SECTION_NAME, //
-                generalRoot.toJson(), //
-                true, //
+            logCollector.addParserLogEntry(new ParserLogEntry(
+                SECTION_NAME,
+                generalRoot.toJson(),
+                true,
                 "update timestamps (" + Key.UPDATE.getKey() + " and " + Key.UPDATE_TIMESTAMP.getKey()
-                    + ") are both missing, unable to tell what time the data file was generated at", //
-                null //
+                    + ") are both missing, unable to tell what time the data file was generated at",
+                null
             ));
             return Optional.empty();
         }
@@ -143,16 +146,15 @@ public class GeneralSectionJsonProcessor {
 
         Duration difference = Duration.between(customTimestamp.get(), isoTimestamp.get());
         if (difference.abs().compareTo(TIMESTAMP_DIFFERENCE_WARNING_THRESHOLD) > 0) {
-            // TODO: add error flags/categories to log entries to indicate machine-readable
-            // that timestamp is unreliable
-            logCollector.addParserLogEntry(new ParserLogEntry( //
-                SECTION_NAME, //
-                generalRoot.toJson(), //
-                false, //
+            // TODO: add error flags/categories to log entries to indicate machine-readable that timestamp is unreliable
+            logCollector.addParserLogEntry(new ParserLogEntry(
+                SECTION_NAME,
+                generalRoot.toJson(),
+                false,
                 "update timestamps are inconsistent (custom-format " + Key.UPDATE.getKey() + " = "
                     + customTimestamp.get() + ", ISO format " + Key.UPDATE_TIMESTAMP.getKey()
-                    + " = " + isoTimestamp.get() + "), will continue with ISO timestamp", //
-                null //
+                    + " = " + isoTimestamp.get() + "), will continue with ISO timestamp",
+                null
             ));
         }
 

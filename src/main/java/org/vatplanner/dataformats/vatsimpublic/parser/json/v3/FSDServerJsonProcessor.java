@@ -45,83 +45,83 @@ public class FSDServerJsonProcessor {
     }
 
     public List<FSDServer> deserializeMultiple(JsonArray array, ParserLogEntryCollector logCollector) {
-        return JsonHelpers.processArraySkipOnError(//
-            array, //
-            JsonObject.class, //
-            SECTION_NAME, //
-            logCollector, //
-            x -> deserializeSingle(x, logCollector) //
+        return JsonHelpers.processArraySkipOnError(
+            array,
+            JsonObject.class,
+            SECTION_NAME,
+            logCollector,
+            x -> deserializeSingle(x, logCollector)
         );
     }
 
     public FSDServer deserializeSingle(JsonObject object, ParserLogEntryCollector logCollector) {
         FSDServer out = new FSDServer();
 
-        JsonHelpers.processMandatory( //
-            object::getString, //
-            Key.ID, //
-            SECTION_NAME, //
-            logCollector, //
-            out::setId //
+        JsonHelpers.processMandatory(
+            object::getString,
+            Key.ID,
+            SECTION_NAME,
+            logCollector,
+            out::setId
         );
 
-        JsonHelpers.processMandatory( //
-            object::getString, //
-            Key.NAME, //
-            SECTION_NAME, //
-            logCollector, //
-            out::setName //
+        JsonHelpers.processMandatory(
+            object::getString,
+            Key.NAME,
+            SECTION_NAME,
+            logCollector,
+            out::setName
         );
 
-        JsonHelpers.processMandatory( //
-            object::getString, //
-            Key.ADDRESS, //
-            SECTION_NAME, //
-            logCollector, //
-            out::setAddress //
+        JsonHelpers.processMandatory(
+            object::getString,
+            Key.ADDRESS,
+            SECTION_NAME,
+            logCollector,
+            out::setAddress
         );
 
-        JsonHelpers.processMandatory( //
-            object::getString, //
-            Key.LOCATION, //
-            SECTION_NAME, //
-            logCollector, //
-            out::setLocation //
+        JsonHelpers.processMandatory(
+            object::getString,
+            Key.LOCATION,
+            SECTION_NAME,
+            logCollector,
+            out::setLocation
         );
 
-        JsonHelpers.processOptional( //
-            object::getBoolean, //
-            Key.SWEATBOX, //
-            SECTION_NAME, //
-            logCollector, //
-            out::setSweatbox //
+        JsonHelpers.processOptional(
+            object::getBoolean,
+            Key.SWEATBOX,
+            SECTION_NAME,
+            logCollector,
+            out::setSweatbox
         );
 
-        JsonHelpers.processMandatory( //
-            object::getInteger, //
-            Key.CLIENT_CONNECTION_ALLOWED_INTEGER, //
-            SECTION_NAME, //
-            logCollector, //
-            this::parseClientConnectionAllowedInteger //
+        JsonHelpers.processMandatory(
+            object::getInteger,
+            Key.CLIENT_CONNECTION_ALLOWED_INTEGER,
+            SECTION_NAME,
+            logCollector,
+            this::parseClientConnectionAllowedInteger
         ).ifPresent(out::setClientConnectionAllowed);
 
-        JsonHelpers.getOptional( //
-            object::getBoolean, //
-            Key.CLIENT_CONNECTION_ALLOWED_BOOLEAN, //
-            SECTION_NAME, //
-            logCollector //
+        JsonHelpers.getOptional(
+            object::getBoolean,
+            Key.CLIENT_CONNECTION_ALLOWED_BOOLEAN,
+            SECTION_NAME,
+            logCollector
         ).ifPresent(booleanAllowed -> {
             // Extra check: This field duplicates the legacy one for which we could only
             // guess what the integer meant. Report any ambiguity but always trust the
             // boolean if present.
             if (booleanAllowed != out.isClientConnectionAllowed()) {
                 logCollector.addParserLogEntry(new ParserLogEntry(
-                    SECTION_NAME, //
-                    "content at " + Key.CLIENT_CONNECTION_ALLOWED_BOOLEAN.key, //
-                    false, //
+                    SECTION_NAME,
+                    "content at " + Key.CLIENT_CONNECTION_ALLOWED_BOOLEAN.key,
+                    false,
                     "server \"" + out.getId()
-                        + "\" has a different boolean indication for allowed client connections than legacy integer value suggests; trusting the boolean", //
-                    null //
+                        + "\" has a different boolean indication for allowed client connections than legacy integer value suggests; trusting the boolean",
+                    null
                 ));
             }
             out.setClientConnectionAllowed(booleanAllowed);
@@ -148,10 +148,10 @@ public class FSDServerJsonProcessor {
                 return true;
 
             default:
-                LOGGER.warn( //
-                    "Unknown value {} for {}, assuming connections are allowed.", //
-                    clientConnectionAllowed, //
-                    Key.CLIENT_CONNECTION_ALLOWED_INTEGER.getKey() //
+                LOGGER.warn(
+                    "Unknown value {} for {}, assuming connections are allowed.",
+                    clientConnectionAllowed,
+                    Key.CLIENT_CONNECTION_ALLOWED_INTEGER.getKey()
                 );
                 return true;
         }

@@ -87,7 +87,7 @@ public class DataFileFilterConfiguration {
      * </p>
      *
      * @param substituteObserverPrefix Substitute all callsigns ending in "_OBS" by
-     *        a generic alias "XX_OBS"?
+     *                                 a generic alias "XX_OBS"?
      * @return this instance for method-chaining
      */
     public DataFileFilterConfiguration setSubstituteObserverPrefix(boolean substituteObserverPrefix) {
@@ -115,7 +115,7 @@ public class DataFileFilterConfiguration {
      * </p>
      *
      * @param removeStreamingChannels Attempt to remove streaming service
-     *        channel/user names?
+     *                                channel/user names?
      * @return this instance for method-chaining
      */
     public DataFileFilterConfiguration setRemoveStreamingChannels(boolean removeStreamingChannels) {
@@ -152,7 +152,7 @@ public class DataFileFilterConfiguration {
      * </p>
      *
      * @param flightPlanRemarksRemoveAll Clear free-text flight plan remarks without
-     *        replacement? (communication type flag is kept)
+     *                                   replacement? (communication type flag is kept)
      * @return this instance for method-chaining
      */
     public DataFileFilterConfiguration setFlightPlanRemarksRemoveAll(boolean flightPlanRemarksRemoveAll) {
@@ -198,13 +198,13 @@ public class DataFileFilterConfiguration {
      * </p>
      *
      * @param flightPlanRemarksRemoveAllIfContaining case-insensitive strings
-     *        triggering removal of free-text flight plan remarks if found
+     *                                               triggering removal of free-text flight plan remarks if found
      * @return this instance for method-chaining
      */
     public DataFileFilterConfiguration setFlightPlanRemarksRemoveAllIfContaining(Collection<String> flightPlanRemarksRemoveAllIfContaining) {
         if (flightPlanRemarksRemoveAllIfContaining == null) {
             throw new IllegalArgumentException(
-                "list of search strings must not be null; set to empty list instead if you want to disable the feature" //
+                "list of search strings must not be null; set to empty list instead if you want to disable the feature"
             );
         }
 
@@ -222,7 +222,7 @@ public class DataFileFilterConfiguration {
      * Provides a strategy to be called when filtering modified unexpected fields.
      *
      * @param unwantedModificationErrorHandlingStrategy called on modification to
-     *        unexpected fields
+     *                                                  unexpected fields
      */
     public void setUnwantedModificationErrorHandlingStrategy(ErrorHandlingStrategy unwantedModificationErrorHandlingStrategy) {
         this.unwantedModificationErrorHandlingStrategy = unwantedModificationErrorHandlingStrategy;
@@ -237,7 +237,7 @@ public class DataFileFilterConfiguration {
      * verification of affected fields still indicates that unwanted data remained.
      *
      * @param incompleteFilteringErrorHandlingStrategy called when unwanted data
-     *        remains after filtering
+     *                                                 remains after filtering
      */
     public void setIncompleteFilteringErrorHandlingStrategy(ErrorHandlingStrategy incompleteFilteringErrorHandlingStrategy) {
         this.incompleteFilteringErrorHandlingStrategy = incompleteFilteringErrorHandlingStrategy;
@@ -252,10 +252,9 @@ public class DataFileFilterConfiguration {
      * result yields a different, thus unstable output.
      *
      * @param unstableResultErrorHandlingStrategy called when filter produces
-     *        unstable results
+     *                                            unstable results
      */
     public void setUnstableResultErrorHandlingStrategy(ErrorHandlingStrategy unstableResultErrorHandlingStrategy) {
         this.unstableResultErrorHandlingStrategy = unstableResultErrorHandlingStrategy;
     }
-
 }

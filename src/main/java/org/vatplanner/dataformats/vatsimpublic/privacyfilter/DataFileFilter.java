@@ -69,7 +69,7 @@ public class DataFileFilter {
      * apply to this filter instance or yield unexpected results.
      *
      * @param configuration configuration for this filter instance, must be final
-     *        and not null
+     *                      and not null
      */
     public DataFileFilter(DataFileFilterConfiguration configuration) {
         if (configuration == null) {
@@ -94,7 +94,7 @@ public class DataFileFilter {
      *
      * @param formatVersion version to query support for
      * @return Is given format version supported? (true = supported, false =
-     *         unsupported)
+     *     unsupported)
      */
     public boolean isFormatVersionSupported(int formatVersion) {
         return (formatVersion == SUPPORTED_FORMAT_VERSION);
@@ -114,8 +114,8 @@ public class DataFileFilter {
      * </p>
      *
      * @param formatVersion format version as available from
-     *        {@link DataFileMetaData#getVersionFormat()} after parsing
-     * @param original raw data file to apply filter to
+     *                      {@link DataFileMetaData#getVersionFormat()} after parsing
+     * @param original      raw data file to apply filter to
      * @return filtered data file (may be erroneous or incompletely filtered!)
      */
     public String filter(int formatVersion, String original) {
@@ -136,10 +136,10 @@ public class DataFileFilter {
      * @param original file parsed from original raw data
      * @param filtered file parsed from filtered output
      * @return Is all non-filtered data still present 1:1 on filtered DataFile?
-     *         (true = all data OK; false = filtered file lost data which should not
-     *         have been removed)
+     *     (true = all data OK; false = filtered file lost data which should not
+     *     have been removed)
      * @deprecated always verified; configurable by
-     *             {@link DataFileFilterConfiguration#setUnwantedModificationErrorHandlingStrategy(ErrorHandlingStrategy)}
+     *     {@link DataFileFilterConfiguration#setUnwantedModificationErrorHandlingStrategy(ErrorHandlingStrategy)}
      */
     @Deprecated
     public boolean verifyOnlyWantedModifications(DataFile original, DataFile filtered) {
@@ -154,7 +154,7 @@ public class DataFileFilter {
      * @param original file parsed from original raw data
      * @param filtered file parsed from filtered output
      * @return Are no additional log messages found in filtered DataFile? (true = no
-     *         additional log messages; false = additional log messages found)
+     *     additional log messages; false = additional log messages found)
      */
     public boolean verifyNoAdditionalLogMessages(DataFile original, DataFile filtered) {
         // FIXME: implement

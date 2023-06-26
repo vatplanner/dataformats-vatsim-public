@@ -30,7 +30,7 @@ import java.util.Set;
 public enum NavigationApproachCapability {
     NONE('N', -1),
     OTHER('Z', -1),
-    //
+
     GBAS_LANDING_SYSTEM('A', -1),
     RNAV10('A', 1),
     LPV('B', -1),
@@ -98,7 +98,7 @@ public enum NavigationApproachCapability {
             NavigationApproachCapability previous = BY_DESIGNATOR.put(capability.designator, capability);
             if (previous != null) {
                 throw new RuntimeException(
-                    "ambiguous designator " + capability.designator + " for " + previous + " and " + capability //
+                    "ambiguous designator " + capability.designator + " for " + previous + " and " + capability
                 );
             }
         }

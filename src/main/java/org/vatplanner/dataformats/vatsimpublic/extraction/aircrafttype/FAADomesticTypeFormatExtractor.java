@@ -51,9 +51,9 @@ import org.vatplanner.dataformats.vatsimpublic.extraction.AircraftTypeExtractor;
 public class FAADomesticTypeFormatExtractor implements ParsedTypeData {
 
     // FIXME: type should be trimmed
-    private static final Pattern PATTERN_SPLIT = Pattern.compile(//
+    private static final Pattern PATTERN_SPLIT = Pattern.compile(
         "^\\s*([A-Z]/|)([^/]*?)(/[A-Z]|)\\s*$",
-        Pattern.CASE_INSENSITIVE //
+        Pattern.CASE_INSENSITIVE
     );
     private static final int PATTERN_SPLIT_WAKE_CATEGORY = 1;
     private static final int PATTERN_SPLIT_AIRCRAFT_TYPE = 2;
@@ -108,7 +108,7 @@ public class FAADomesticTypeFormatExtractor implements ParsedTypeData {
      * interpreted further.
      *
      * @return aircraft type (should but may not be an ICAO code); null if
-     *         unavailable
+     *     unavailable
      */
     @Override
     public String getAircraftType() {

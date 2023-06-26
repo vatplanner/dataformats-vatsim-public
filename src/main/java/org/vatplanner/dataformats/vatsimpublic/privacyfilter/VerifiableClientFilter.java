@@ -62,11 +62,11 @@ public interface VerifiableClientFilter<T> extends UnaryOperator<String> {
      * </p>
      *
      * @param fieldAccess can be used to identify the field, content was retrieved
-     *        for
-     * @param original content before filter was applied
-     * @param filtered content after filter was applied
+     *                    for
+     * @param original    content before filter was applied
+     * @param filtered    content after filter was applied
      * @return true if field was only modified in the expected way, false if not
-     *         filtered correctly or unintentional modification occurred
+     *     filtered correctly or unintentional modification occurred
      */
     public boolean verifyAffectedField(ClientFields.FieldAccess<T> fieldAccess, T original, T filtered);
 }

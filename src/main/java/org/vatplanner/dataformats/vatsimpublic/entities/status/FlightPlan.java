@@ -39,7 +39,7 @@ public class FlightPlan {
      * Creates a new flight plan. Flight plans always require a revision number for
      * indexing and a flight as reference.
      *
-     * @param flight the flight described by this flight plan
+     * @param flight   the flight described by this flight plan
      * @param revision revision number to index flight plans by
      */
     public FlightPlan(Flight flight, int revision) {
@@ -190,7 +190,7 @@ public class FlightPlan {
      * is potentially unreliable.
      *
      * @return wake turbulence category of the filed aircraft (information may be
-     *         unreliable)
+     *     unreliable)
      */
     public WakeTurbulenceCategory getWakeTurbulenceCategory() {
         return wakeTurbulenceCategory;
@@ -227,7 +227,7 @@ public class FlightPlan {
      * {@link SimpleEquipmentSpecification} for details.
      *
      * @return equipment specification as determined by single-letter code, null if
-     *         unavailable or invalid
+     *     unavailable or invalid
      * @see SimpleEquipmentSpecification
      */
     public SimpleEquipmentSpecification getSimpleEquipmentSpecification() {
@@ -302,7 +302,7 @@ public class FlightPlan {
      * (generally 4 letters), not IATA (3 letter).
      *
      * @return departure airport code (usually ICAO), normalized (trimmed
-     *         upper-case)
+     *     upper-case)
      */
     public String getDepartureAirportCode() {
         return departureAirportCode;
@@ -318,7 +318,7 @@ public class FlightPlan {
      * (generally 4 letters), not IATA (3 letter).
      *
      * @return destination airport code (usually ICAO), normalized (trimmed
-     *         upper-case)
+     *     upper-case)
      */
     public String getDestinationAirportCode() {
         return destinationAirportCode;
@@ -334,7 +334,7 @@ public class FlightPlan {
      * should usually be an ICAO code (generally 4 letters), not IATA (3 letter).
      *
      * @return alternate airport code (usually ICAO), normalized (trimmed
-     *         upper-case)
+     *     upper-case)
      */
     public String getAlternateAirportCode() {
         return alternateAirportCode;
@@ -353,7 +353,7 @@ public class FlightPlan {
      *
      * @param departureAirportCode code of departure airport, will be normalized
      * @return true if this flight plan matches the given departure airport, false
-     *         if not; true if input and flight plan airport code are null
+     *     if not; true if input and flight plan airport code are null
      */
     public boolean equalsDepartureAirportCode(String departureAirportCode) {
         if (this.departureAirportCode == null) {
@@ -371,7 +371,7 @@ public class FlightPlan {
      *
      * @param destinationAirportCode code of destination airport, will be normalized
      * @return true if this flight plan matches the given destination airport, false
-     *         if not; true if input and flight plan airport code are null
+     *     if not; true if input and flight plan airport code are null
      */
     public boolean equalsDestinationAirportCode(String destinationAirportCode) {
         if (this.destinationAirportCode == null) {
@@ -397,9 +397,6 @@ public class FlightPlan {
         return airportCode.trim().toUpperCase();
     }
 
-    /*
-     * TODO: could also have real name and home base (no connection if only
-     * prefiled)
-     */
+    // TODO: could also have real name and home base (no connection if only prefiled)
     // TODO: unit tests
 }

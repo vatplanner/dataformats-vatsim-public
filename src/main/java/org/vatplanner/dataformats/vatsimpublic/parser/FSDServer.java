@@ -81,8 +81,7 @@ public class FSDServer {
     /**
      * Returns if clients are allowed to connect to this server.
      *
-     * @return Are clients allowed to connect to this server? (true = allowed, false
-     *         = not allowed)
+     * @return Are clients allowed to connect to this server? (true = allowed, false = not allowed)
      */
     public boolean isClientConnectionAllowed() {
         return clientConnectionAllowed;
@@ -101,7 +100,7 @@ public class FSDServer {
      * sweatbox servers were not announced publicly at all in data files, so the
      * default if the field is not available is to indicate false.
      * </p>
-     * 
+     *
      * @return true if this is a sweatbox server, false if not
      */
     public boolean isSweatbox() {
@@ -124,10 +123,8 @@ public class FSDServer {
         boolean isAddressEqual = equalsNullSafe(this, other, FSDServer::getAddress);
         boolean isLocationEqual = equalsNullSafe(this, other, FSDServer::getLocation);
         boolean isNameEqual = equalsNullSafe(this, other, FSDServer::getName);
-        boolean isClientConnectionAllowedEqual = //
-            (this.isClientConnectionAllowed() == other.isClientConnectionAllowed());
+        boolean isClientConnectionAllowedEqual = (this.isClientConnectionAllowed() == other.isClientConnectionAllowed());
 
         return isIdEqual && isAddressEqual && isLocationEqual && isNameEqual && isClientConnectionAllowedEqual;
     }
-
 }

@@ -48,9 +48,9 @@ import org.vatplanner.dataformats.vatsimpublic.extraction.AircraftTypeExtractor;
  */
 public class ICAOTypeFormatExtractor implements ParsedTypeData {
 
-    private static final Pattern PATTERN_SPLIT = Pattern.compile(//
-        "^\\s*([^/]+)/([A-Z])\\-([A-Z0-9]+(?:/[A-Z0-9]*|))\\s*$", //
-        Pattern.CASE_INSENSITIVE //
+    private static final Pattern PATTERN_SPLIT = Pattern.compile(
+        "^\\s*([^/]+)/([A-Z])\\-([A-Z0-9]+(?:/[A-Z0-9]*|))\\s*$",
+        Pattern.CASE_INSENSITIVE
     );
 
     private static final int PATTERN_SPLIT_AIRCRAFT_TYPE = 1;
@@ -76,7 +76,7 @@ public class ICAOTypeFormatExtractor implements ParsedTypeData {
      *
      * @param s aircraft type field as provided by data files
      * @throws IllegalArgumentException if input does not match expected ICAO-style
-     *         format or input was null
+     *                                  format or input was null
      */
     public ICAOTypeFormatExtractor(String s) throws IllegalArgumentException {
         if (s == null) {

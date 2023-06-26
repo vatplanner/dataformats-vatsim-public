@@ -41,11 +41,12 @@ public class ICAOField10PBNParser {
     /**
      * Parses the given combined field 10 information, also supporting PBN codes to
      * be used in field 10a.
-     *
+     * <p>
      * Field 10b will not be fully parsed as it makes no sense on VATSIM.
+     * </p>
      *
      * @param combinedField10 combined field 10 information; a and b are separated
-     *        by a slash /
+     *                        by a slash /
      */
     public ICAOField10PBNParser(String combinedField10) {
         if (combinedField10 == null) {
@@ -93,5 +94,4 @@ public class ICAOField10PBNParser {
     public boolean hasTransponder() {
         return hasTransponder;
     }
-
 }

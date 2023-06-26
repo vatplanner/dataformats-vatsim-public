@@ -20,7 +20,7 @@ public interface StatusEntityFactory {
      * complete documentation.
      * </p>
      *
-     * @param member member holding this connection
+     * @param member    member holding this connection
      * @param logonTime timestamp of this connection's login
      * @return new instance of {@link Connection} created with given arguments
      * @see Connection#Connection(Member, Instant)
@@ -63,9 +63,9 @@ public interface StatusEntityFactory {
      * documentation.
      * </p>
      *
-     * @param member member performing or filing this flight
+     * @param member   member performing or filing this flight
      * @param callsign actual (connected) or intended (pre-filed) callsign to be
-     *        used on this flight
+     *                 used on this flight
      * @return new instance of {@link Flight} created with given arguments
      * @see Flight#Flight(Member, String)
      */
@@ -79,7 +79,7 @@ public interface StatusEntityFactory {
      * complete documentation.
      * </p>
      *
-     * @param flight the flight described by this flight plan
+     * @param flight   the flight described by this flight plan
      * @param revision revision number to index flight plans by
      * @return new instance of {@link FlightPlan} created with given arguments
      * @see FlightPlan#FlightPlan(Flight, int)
@@ -123,8 +123,6 @@ public interface StatusEntityFactory {
      *
      * @param report report where this point appeared in
      * @return new instance of {@link TrackPoint} created with given argument
-     *
      */
     TrackPoint createTrackPoint(Report report);
-
 }

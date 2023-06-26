@@ -28,9 +28,9 @@ public class GeoCoordinates {
     /**
      * Creates a new geographic coordinate.
      *
-     * @param latitude latitude in degrees (positive = north, negative = south)
-     * @param longitude longitude in degrees (positive = east, negative = west)
-     * @param altitude altitude value
+     * @param latitude           latitude in degrees (positive = north, negative = south)
+     * @param longitude          longitude in degrees (positive = east, negative = west)
+     * @param altitude           altitude value
      * @param isAltitudeUnitFeet altitude unit; use constants
      * @see #UNIT_FEET
      * @see #UNIT_METERS
@@ -117,10 +117,10 @@ public class GeoCoordinates {
 
     @Override
     public String toString() {
-        return String.format(//
-            "GeoCoordinates(%.5f, %.5f, %d%s)", //
+        return String.format(
+            "GeoCoordinates(%.5f, %.5f, %d%s)",
             latitude, longitude, altitude,
-            isAltitudeUnitFeet ? "ft" : "m" //
+            isAltitudeUnitFeet ? "ft" : "m"
         );
     }
 

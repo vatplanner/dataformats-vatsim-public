@@ -14,8 +14,8 @@ public class GeoPoint2DParser implements Function<String, GeoPoint2D> {
     private final GeoPoint2DMode mode;
 
     private static final Pattern PATTERN = Pattern.compile(
-        "(" + SUBPATTERN_FLOATING_POINT + ")\\|(" + SUBPATTERN_FLOATING_POINT + ")" //
-            + SUBPATTERN_OPTIONAL_INLINE_COMMENT //
+        "(" + SUBPATTERN_FLOATING_POINT + ")\\|(" + SUBPATTERN_FLOATING_POINT + ")"
+            + SUBPATTERN_OPTIONAL_INLINE_COMMENT
     );
     private static final int LATITUDE = 1;
     private static final int LONGITUDE = 2;

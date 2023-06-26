@@ -70,33 +70,33 @@ public class NetworkInformationProcessor implements Parser<NetworkInformation> {
         try {
             JsonObject root = (JsonObject) Jsoner.deserialize(reader);
 
-            JsonHelpers.processMandatoryUnsafe( //
-                root::getMap, //
+            JsonHelpers.processMandatoryUnsafe(
+                root::getMap,
                 RootLevelKey.DATA, // not necessarily DataFiles, see JavaDoc
                 (Consumer<Map<String, JsonArray>>) x -> addAllAsStringsToMapping(
                     x,
-                    out::addAsDataUrl //
-                ) //
+                    out::addAsDataUrl
+                )
             );
 
-            JsonHelpers.processMandatoryUnsafe( //
-                root::getCollection, //
-                RootLevelKey.METAR, //
+            JsonHelpers.processMandatoryUnsafe(
+                root::getCollection,
+                RootLevelKey.METAR,
                 (Consumer<JsonArray>) x -> addAllAsStringsToMapping(
                     x,
                     out::addAsUrl,
-                    NetworkInformation.PARAMETER_KEY_URL_METAR //
-                ) //
+                    NetworkInformation.PARAMETER_KEY_URL_METAR
+                )
             );
 
-            JsonHelpers.processMandatoryUnsafe( //
-                root::getCollection, //
-                RootLevelKey.USER_STATISTICS, //
+            JsonHelpers.processMandatoryUnsafe(
+                root::getCollection,
+                RootLevelKey.USER_STATISTICS,
                 (Consumer<JsonArray>) x -> addAllAsStringsToMapping(
                     x,
                     out::addAsUrl,
-                    NetworkInformation.PARAMETER_KEY_URL_USER_STATISTICS //
-                ) //
+                    NetworkInformation.PARAMETER_KEY_URL_USER_STATISTICS
+                )
             );
         } catch (JsonException | ClassCastException ex) {
             LOGGER.warn("Failed to parse JSON format on root level", ex);
@@ -116,7 +116,7 @@ public class NetworkInformationProcessor implements Parser<NetworkInformation> {
             addAllAsStringsToMapping(
                 entry.getValue(),
                 mappingConsumer,
-                entry.getKey() //
+                entry.getKey()
             );
         }
     }

@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 public class CountryParser implements Function<String, Country> {
     private static final Pattern PATTERN = Pattern.compile(
         "([^|]+)\\|([^|]+)\\|([^|]*)"
-            + SUBPATTERN_OPTIONAL_INLINE_COMMENT //
+            + SUBPATTERN_OPTIONAL_INLINE_COMMENT
     );
     private static final int NAME = 1;
     private static final int ICAO_PREFIX = 2;
@@ -25,7 +25,7 @@ public class CountryParser implements Function<String, Country> {
         return new Country(
             matcher.group(NAME),
             matcher.group(ICAO_PREFIX),
-            matcher.group(RADAR_NAME) //
+            matcher.group(RADAR_NAME)
         );
     }
 }

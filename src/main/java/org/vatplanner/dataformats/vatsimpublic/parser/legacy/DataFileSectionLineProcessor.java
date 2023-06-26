@@ -98,9 +98,9 @@ public class DataFileSectionLineProcessor {
      * specified section.
      *
      * @param sectionName section to apply function to; must neither be null nor
-     *        empty
-     * @param function will be applied to every non-empty, non-comment line; must
-     *        not be null
+     *                    empty
+     * @param function    will be applied to every non-empty, non-comment line; must
+     *                    not be null
      * @return this processor instance for method-chaining
      * @throws IllegalArgumentException if requirements are not fulfilled
      */

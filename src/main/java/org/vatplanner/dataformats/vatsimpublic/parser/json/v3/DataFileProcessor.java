@@ -65,10 +65,10 @@ public class DataFileProcessor implements Parser<DataFile> {
         GeneralSectionJsonProcessor generalSectionProcessor = new GeneralSectionJsonProcessor();
         FSDServerJsonProcessor fsdServerProcessor = new FSDServerJsonProcessor();
         IdNameMappingProcessor shortKeyIdNameMappingProcessor = new IdNameMappingProcessor(
-            IdNameMappingProcessor.JsonKeys.shortKeys() //
+            IdNameMappingProcessor.JsonKeys.shortKeys()
         );
         IdNameMappingProcessor longKeyIdNameMappingProcessor = new IdNameMappingProcessor(
-            IdNameMappingProcessor.JsonKeys.longKeys() //
+            IdNameMappingProcessor.JsonKeys.longKeys()
         );
         FlightPlanJsonProcessor flightPlanProcessor = new FlightPlanJsonProcessor();
         PrefileJsonProcessor prefileProcessor = new PrefileJsonProcessor(flightPlanProcessor);
@@ -80,129 +80,135 @@ public class DataFileProcessor implements Parser<DataFile> {
         try {
             JsonObject root = (JsonObject) Jsoner.deserialize(reader);
 
-            JsonHelpers.processMandatory( //
-                root::getMap, //
-                RootLevelKey.GENERAL, //
-                JsonObject.class, //
-                GeneralSectionJsonProcessor.SECTION_NAME, //
-                out, //
-                (Consumer<JsonObject>) x -> out.setMetaData(generalSectionProcessor.deserialize(x, out)) //
+            JsonHelpers.processMandatory(
+                root::getMap,
+                RootLevelKey.GENERAL,
+                JsonObject.class,
+                GeneralSectionJsonProcessor.SECTION_NAME,
+                out,
+                (Consumer<JsonObject>) x -> out.setMetaData(generalSectionProcessor.deserialize(x, out))
             );
 
-            JsonHelpers.processMandatory( //
-                root::getCollection, //
-                RootLevelKey.SERVERS, //
-                JsonArray.class, //
-                FSDServerJsonProcessor.SECTION_NAME, //
-                out, //
-                (Consumer<JsonArray>) x -> out.setFsdServers(fsdServerProcessor.deserializeMultiple(x, out)) //
+            JsonHelpers.processMandatory(
+                root::getCollection,
+                RootLevelKey.SERVERS,
+                JsonArray.class,
+                FSDServerJsonProcessor.SECTION_NAME,
+                out,
+                (Consumer<JsonArray>) x -> out.setFsdServers(fsdServerProcessor.deserializeMultiple(x, out))
             );
 
-            Map<Integer, FacilityType> facilityTypeByJsonId = JsonHelpers.processMandatory( //
-                root::getCollection, //
-                RootLevelKey.FACILITIES, //
-                JsonArray.class, //
-                RootLevelKey.FACILITIES.getKey(), //
-                out, //
+            Map<Integer, FacilityType> facilityTypeByJsonId = JsonHelpers.processMandatory(
+                root::getCollection,
+                RootLevelKey.FACILITIES,
+                JsonArray.class,
+                RootLevelKey.FACILITIES.getKey(),
+                out,
                 (Function<JsonArray, Map<Integer, FacilityType>>) x -> shortKeyIdNameMappingProcessor
-                    .deserializeMappingFromJsonId( //
-                        x, //
-                        FacilityType::resolveShortName, //
-                        FacilityType.values(), //
-                        RootLevelKey.FACILITIES.getKey(), //
-                        out //
-                    ) //
+                    .deserializeMappingFromJsonId(
+                        x,
+                        FacilityType::resolveShortName,
+                        FacilityType.values(),
+                        RootLevelKey.FACILITIES.getKey(),
+                        out
+                    )
             ).orElse(new HashMap<Integer, FacilityType>());
 
-            Map<Integer, ControllerRating> controllerRatingByJsonId = JsonHelpers.processMandatory( //
-                root::getCollection, //
-                RootLevelKey.RATINGS, //
-                JsonArray.class, //
-                RootLevelKey.RATINGS.getKey(), //
-                out, //
+            Map<Integer, ControllerRating> controllerRatingByJsonId = JsonHelpers.processMandatory(
+                root::getCollection,
+                RootLevelKey.RATINGS,
+                JsonArray.class,
+                RootLevelKey.RATINGS.getKey(),
+                out,
                 (Function<JsonArray, Map<Integer, ControllerRating>>) x -> shortKeyIdNameMappingProcessor
-                    .deserializeMappingFromJsonId( //
-                        x, //
-                        ControllerRating::resolveShortName, //
-                        ControllerRating.values(), //
-                        RootLevelKey.RATINGS.getKey(), //
-                        out //
-                    ) //
+                    .deserializeMappingFromJsonId(
+                        x,
+                        ControllerRating::resolveShortName,
+                        ControllerRating.values(),
+                        RootLevelKey.RATINGS.getKey(),
+                        out
+                    )
             ).orElse(new HashMap<Integer, ControllerRating>());
 
-            Map<Integer, PilotRating> pilotRatingByJsonId = JsonHelpers.processMandatory( //
-                root::getCollection, //
-                RootLevelKey.PILOT_RATINGS, //
-                JsonArray.class, //
-                RootLevelKey.PILOT_RATINGS.getKey(), //
-                out, //
+            Map<Integer, PilotRating> pilotRatingByJsonId = JsonHelpers.processMandatory(
+                root::getCollection,
+                RootLevelKey.PILOT_RATINGS,
+                JsonArray.class,
+                RootLevelKey.PILOT_RATINGS.getKey(),
+                out,
                 (Function<JsonArray, Map<Integer, PilotRating>>) x -> longKeyIdNameMappingProcessor
-                    .deserializeMappingFromJsonId( //
-                        x, //
-                        PilotRating::resolveShortName, //
-                        PilotRating.values(), //
-                        RootLevelKey.PILOT_RATINGS.getKey(), //
-                        out //
-                    ) //
+                    .deserializeMappingFromJsonId(
+                        x,
+                        PilotRating::resolveShortName,
+                        PilotRating.values(),
+                        RootLevelKey.PILOT_RATINGS.getKey(),
+                        out
+                    )
             ).orElse(new HashMap<Integer, PilotRating>());
 
-            Map<Integer, MilitaryRating> militaryRatingByJsonId = JsonHelpers.processMandatory( //
-                root::getCollection, //
-                RootLevelKey.MILITARY_RATINGS, //
-                JsonArray.class, //
-                RootLevelKey.MILITARY_RATINGS.getKey(), //
-                out, //
+            Map<Integer, MilitaryRating> militaryRatingByJsonId = JsonHelpers.processMandatory(
+                root::getCollection,
+                RootLevelKey.MILITARY_RATINGS,
+                JsonArray.class,
+                RootLevelKey.MILITARY_RATINGS.getKey(),
+                out,
                 (Function<JsonArray, Map<Integer, MilitaryRating>>) x -> longKeyIdNameMappingProcessor
-                    .deserializeMappingFromJsonId( //
-                        x, //
-                        MilitaryRating::resolveShortName, //
-                        MilitaryRating.values(), //
-                        RootLevelKey.MILITARY_RATINGS.getKey(), //
-                        out //
-                    ) //
+                    .deserializeMappingFromJsonId(
+                        x,
+                        MilitaryRating::resolveShortName,
+                        MilitaryRating.values(),
+                        RootLevelKey.MILITARY_RATINGS.getKey(),
+                        out
+                    )
             ).orElse(new HashMap<Integer, MilitaryRating>());
 
             ArrayList<Client> clients = new ArrayList<Client>();
-            ControllerAtisJsonProcessor atisProcessor = new ControllerAtisJsonProcessor(ClientType.ATIS,
-                facilityTypeByJsonId, controllerRatingByJsonId);
-            ControllerAtisJsonProcessor controllerProcessor = new ControllerAtisJsonProcessor(ClientType.ATC_CONNECTED,
-                facilityTypeByJsonId, controllerRatingByJsonId);
+            ControllerAtisJsonProcessor atisProcessor = new ControllerAtisJsonProcessor(
+                ClientType.ATIS,
+                facilityTypeByJsonId,
+                controllerRatingByJsonId
+            );
+            ControllerAtisJsonProcessor controllerProcessor = new ControllerAtisJsonProcessor(
+                ClientType.ATC_CONNECTED,
+                facilityTypeByJsonId,
+                controllerRatingByJsonId
+            );
             PilotJsonProcessor pilotProcessor = new PilotJsonProcessor(flightPlanProcessor, pilotRatingByJsonId, militaryRatingByJsonId);
 
-            JsonHelpers.processMandatory( //
-                root::getCollection, //
-                RootLevelKey.ATIS, //
-                JsonArray.class, //
-                ControllerAtisJsonProcessor.SECTION_NAME_ATIS, //
-                out, //
-                (Consumer<JsonArray>) x -> clients.addAll(atisProcessor.deserializeMultiple(x, out)) //
+            JsonHelpers.processMandatory(
+                root::getCollection,
+                RootLevelKey.ATIS,
+                JsonArray.class,
+                ControllerAtisJsonProcessor.SECTION_NAME_ATIS,
+                out,
+                (Consumer<JsonArray>) x -> clients.addAll(atisProcessor.deserializeMultiple(x, out))
             );
 
-            JsonHelpers.processMandatory( //
-                root::getCollection, //
-                RootLevelKey.CONTROLLERS, //
-                JsonArray.class, //
-                ControllerAtisJsonProcessor.SECTION_NAME_CONTROLLERS, //
-                out, //
-                (Consumer<JsonArray>) x -> clients.addAll(controllerProcessor.deserializeMultiple(x, out)) //
+            JsonHelpers.processMandatory(
+                root::getCollection,
+                RootLevelKey.CONTROLLERS,
+                JsonArray.class,
+                ControllerAtisJsonProcessor.SECTION_NAME_CONTROLLERS,
+                out,
+                (Consumer<JsonArray>) x -> clients.addAll(controllerProcessor.deserializeMultiple(x, out))
             );
 
-            JsonHelpers.processMandatory( //
-                root::getCollection, //
-                RootLevelKey.PILOTS, //
-                JsonArray.class, //
-                PilotJsonProcessor.SECTION_NAME, //
-                out, //
-                (Consumer<JsonArray>) x -> clients.addAll(pilotProcessor.deserializeMultiple(x, out)) //
+            JsonHelpers.processMandatory(
+                root::getCollection,
+                RootLevelKey.PILOTS,
+                JsonArray.class,
+                PilotJsonProcessor.SECTION_NAME,
+                out,
+                (Consumer<JsonArray>) x -> clients.addAll(pilotProcessor.deserializeMultiple(x, out))
             );
 
-            JsonHelpers.processMandatory( //
-                root::getCollection, //
-                RootLevelKey.PREFILES, //
-                JsonArray.class, //
-                PrefileJsonProcessor.SECTION_NAME, //
-                out, //
-                (Consumer<JsonArray>) x -> clients.addAll(prefileProcessor.deserializeMultiple(x, out)) //
+            JsonHelpers.processMandatory(
+                root::getCollection,
+                RootLevelKey.PREFILES,
+                JsonArray.class,
+                PrefileJsonProcessor.SECTION_NAME,
+                out,
+                (Consumer<JsonArray>) x -> clients.addAll(prefileProcessor.deserializeMultiple(x, out))
             );
 
             out.setClients(clients);
@@ -223,5 +229,4 @@ public class DataFileProcessor implements Parser<DataFile> {
     }
 
     // TODO: unit tests
-
 }

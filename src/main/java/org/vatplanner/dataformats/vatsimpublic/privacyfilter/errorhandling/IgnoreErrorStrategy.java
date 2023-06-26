@@ -14,5 +14,4 @@ public class IgnoreErrorStrategy implements ErrorHandlingStrategy {
     public String handleError(String rawLine, String filteredLine, Collection<ClientFields.FieldAccess> affectedFields) {
         return filteredLine;
     }
-
 }

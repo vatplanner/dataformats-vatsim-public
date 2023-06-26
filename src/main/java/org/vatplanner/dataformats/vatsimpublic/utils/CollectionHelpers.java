@@ -41,9 +41,9 @@ public class CollectionHelpers {
      * Comparison is performed by object reference match.
      * </p>
      *
-     * @param <T> type of elements
+     * @param <T>      type of elements
      * @param haystack collection of elements to search through
-     * @param needle element to search
+     * @param needle   element to search
      * @return element just before needle; empty if not found, never null
      */
     public static <T> Optional<T> findPrevious(Collection<T> haystack, T needle) {

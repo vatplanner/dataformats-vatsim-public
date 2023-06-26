@@ -83,7 +83,7 @@ class NetworkInformationParserTest {
         LoggingEvent expectedEvent = LoggingEvent.warn(
             "Unrecognized key \"{}\", value \"{}\"",
             "unknownTestKey",
-            "This is the value" //
+            "This is the value"
         );
         assertThat(loggingEvents).containsExactly(expectedEvent);
     }
@@ -142,7 +142,7 @@ class NetworkInformationParserTest {
         LoggingEvent expectedEvent = LoggingEvent.warn(
             "Mismatch in definition comment for key \"{}\": \"{}\"",
             key,
-            definition //
+            definition
         );
         assertThat(loggingEvents).containsExactly(expectedEvent);
     }
@@ -159,7 +159,7 @@ class NetworkInformationParserTest {
         LoggingEvent expectedEvent = LoggingEvent.info(
             "Definition comment found for unknown key \"{}\": \"{}\"",
             "somethingNew",
-            "we should inform user about the change" //
+            "we should inform user about the change"
         );
         assertThat(loggingEvents).containsExactly(expectedEvent);
     }
@@ -211,7 +211,7 @@ class NetworkInformationParserTest {
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
         LoggingEvent expectedEvent = LoggingEvent.warn(
             "Uninterpretable line in network file: \"{}\"",
-            "some unexpected line" //
+            "some unexpected line"
         );
         assertThat(loggingEvents).containsExactly(expectedEvent);
     }
@@ -239,7 +239,7 @@ class NetworkInformationParserTest {
         List<LoggingEvent> loggingEvents = testLogger.getLoggingEvents();
         LoggingEvent expectedEvent = LoggingEvent.warn(
             "WhazzUp format may have changed, header definition: \"{}\"",
-            "ABC.:12-34:.." //
+            "ABC.:12-34:.."
         );
         assertThat(loggingEvents).containsExactly(expectedEvent);
     }
@@ -442,7 +442,7 @@ class NetworkInformationParserTest {
 
         // Act
         NetworkInformation res = NetworkInformationParser.parse(
-            "; " + definition + "         - used by WhazzUp only\n" + expected //
+            "; " + definition + "         - used by WhazzUp only\n" + expected
         );
 
         // Assert

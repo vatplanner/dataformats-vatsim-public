@@ -25,8 +25,8 @@ public class Facility {
     private Connection connection;
     private final String name;
     private FacilityType type;
-    private int frequencyKilohertz = -1; // NOTE: information may change or be multiplied with future "Audio for VATSIM"
-                                         // developments (frequency coupling etc.)
+    private int frequencyKilohertz = -1; /* NOTE: information may change or be multiplied with future "Audio for VATSIM"
+                                                  developments (frequency coupling etc.) */
     private final SortedSet<FacilityMessage> messagesSortedByRecordTime = new TreeSet<>(
         COMPARATOR_MESSAGE_REPORT_RECORD_TIME);
 
@@ -61,7 +61,7 @@ public class Facility {
      * Returns the associated client connection.
      *
      * @return associated client connection; may be null if information has been
-     *         removed
+     *     removed
      */
     public Connection getConnection() {
         return connection;
@@ -133,7 +133,7 @@ public class Facility {
      * </p>
      *
      * @return first seen frequency in kilohertz (kHz); may be zero or negative if
-     *         information has been removed
+     *     information has been removed
      */
     public int getFrequencyKilohertz() {
         return frequencyKilohertz;
@@ -148,7 +148,7 @@ public class Facility {
      * Remembers the given frequency if no valid frequency has been set yet.
      *
      * @param frequencyKilohertz frequency to set if previously set frequency was
-     *        invalid
+     *                           invalid
      * @return this instance for method-chaining
      */
     public Facility seenOnFrequencyKilohertz(int frequencyKilohertz) {
@@ -157,9 +157,9 @@ public class Facility {
         if (!isValidFrequency(this.frequencyKilohertz)) {
             setFrequencyKilohertz(frequencyKilohertz);
         } else if (frequencyKilohertz != this.frequencyKilohertz) {
-            LOGGER.trace( //
-                "facility {} already recorded with frequency {}, ignoring change to {}", //
-                name, this.frequencyKilohertz, frequencyKilohertz //
+            LOGGER.trace(
+                "facility {} already recorded with frequency {}, ignoring change to {}",
+                name, this.frequencyKilohertz, frequencyKilohertz
             );
         }
 
@@ -204,7 +204,7 @@ public class Facility {
      * Checks if the message is already known and updates it, otherwise adds it to
      * the facility.
      *
-     * @param report report the message appears in
+     * @param report  report the message appears in
      * @param content message content
      * @param factory to instantiate new message if needed
      * @return this instance for method-chaining
@@ -223,8 +223,8 @@ public class Facility {
         } else {
             messagesSortedByRecordTime.add(
                 factory.createFacilityMessage(this)
-                    .setMessage(content)
-                    .seenInReport(report));
+                       .setMessage(content)
+                       .seenInReport(report));
         }
 
         return this;

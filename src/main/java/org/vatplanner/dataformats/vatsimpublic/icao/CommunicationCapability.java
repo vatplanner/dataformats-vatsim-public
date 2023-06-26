@@ -108,11 +108,11 @@ public enum CommunicationCapability {
     private static final Map<String, CommunicationCapability> BY_DESIGNATOR = new HashMap<>();
 
     public static final Set<CommunicationCapability> STANDARD_EXPANDED = unmodifiableSet(
-        new HashSet<CommunicationCapability>( //
-            asList( //
-                VHF_RTF //
-            ) //
-        ) //
+        new HashSet<CommunicationCapability>(
+            asList(
+                VHF_RTF
+            )
+        )
     );
 
     static {

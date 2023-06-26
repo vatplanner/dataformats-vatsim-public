@@ -45,14 +45,14 @@ public enum SimpleEquipmentSpecification {
     I(false, Navigation.RNAV_WITHOUT_GNSS, Transponder.MODE_C),
     V(false, Navigation.GNSS, Transponder.NONE),
     S(false, Navigation.GNSS, Transponder.NO_MODE_C),
-    G(false, Navigation.GNSS, Transponder.MODE_C), //
+    G(false, Navigation.GNSS, Transponder.MODE_C),
 
     // additional "legacy" VATSIM codes
     E(false, Navigation.RNAV_FMS_DME_DME, Transponder.MODE_C),
     F(false, Navigation.RNAV_FMS_DME_DME_IRU, Transponder.MODE_C),
-    R(false, Navigation.GNSS, Transponder.MODE_C), // alias to G, only difference: confirming ANP meets RNP; ICAO field
-                                                   // 10 specification: field 18 (remarks) must contain PBN/ (not
-                                                   // mandatory on VATSIM)
+    R(false, Navigation.GNSS, Transponder.MODE_C), /* alias to G, only difference: confirming ANP meets RNP; ICAO field
+                                                                   10 specification: field 18 (remarks) must contain PBN/ (not
+                                                                   mandatory on VATSIM) */
     J(true, Navigation.RNAV_FMS_DME_DME, Transponder.MODE_C),
     K(true, Navigation.RNAV_FMS_DME_DME_IRU, Transponder.MODE_C),
     Q(true, Navigation.GNSS, Transponder.MODE_C); // alias to L, only difference: confirming ANP meets RNP
@@ -124,7 +124,7 @@ public enum SimpleEquipmentSpecification {
      * </p>
      *
      * @return true if equipment indicates Basic Area Navigation (B-RNAV)
-     *         capability, false if not
+     *     capability, false if not
      */
     public boolean hasBasicAreaNavigation() {
         return (navigationCapability >= Navigation.MINIMUM_LEVEL_BRNAV);
@@ -146,7 +146,7 @@ public enum SimpleEquipmentSpecification {
      * </p>
      *
      * @return true if equipment indicates Precision Area Navigation (P-RNAV)
-     *         capability, false if not
+     *     capability, false if not
      */
     public boolean hasPrecisionAreaNavigation() {
         return (navigationCapability >= Navigation.MINIMUM_LEVEL_PRNAV);
@@ -158,7 +158,7 @@ public enum SimpleEquipmentSpecification {
      * to reduce vertical separation without compromising safety.
      *
      * @return true if equipment indicates Reduced Vertical Separation Minimum
-     *         (RVSM) capability, false if not
+     *     (RVSM) capability, false if not
      */
     public boolean hasReducedVerticalSeparationMinimum() {
         return isRvsmCapable;
@@ -187,7 +187,7 @@ public enum SimpleEquipmentSpecification {
      *
      * @param flightPlanCode flight plan code to resolve
      * @return specification matching the code; null if not found or no code was
-     *         entered
+     *     entered
      * @throws IllegalArgumentException if code exceeds one letter
      */
     public static SimpleEquipmentSpecification resolveFlightPlanCode(String flightPlanCode) {

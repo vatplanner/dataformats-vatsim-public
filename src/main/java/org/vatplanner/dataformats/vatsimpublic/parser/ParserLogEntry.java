@@ -19,11 +19,11 @@ public class ParserLogEntry {
     /**
      * Instantiates a new log entry.
      *
-     * @param section description of section message refers to, may be null
-     * @param lineContent line content message refers to, may be null
+     * @param section        description of section message refers to, may be null
+     * @param lineContent    line content message refers to, may be null
      * @param isLineRejected Has line been rejected (was line deemed unparseable)?
-     * @param message log message (must not be null!)
-     * @param throwable throwable/exception (may be null)
+     * @param message        log message (must not be null!)
+     * @param throwable      throwable/exception (may be null)
      */
     public ParserLogEntry(String section, String lineContent, boolean isLineRejected, String message, Throwable throwable) {
         if (message == null) {
@@ -66,7 +66,7 @@ public class ParserLogEntry {
      * </p>
      *
      * @return Has the line been rejected by parser? (true = rejected; if false, you
-     *         still may want to check other entries)
+     *     still may want to check other entries)
      */
     public boolean isLineRejected() {
         return isLineRejected;
@@ -89,8 +89,7 @@ public class ParserLogEntry {
      * {@link #isLineRejected()} if you want to know if parsing was able to
      * continue.
      *
-     * @return Associated {@link Throwable} - not to be used as an indication of
-     *         rejecting lines! May be null.
+     * @return Associated {@link Throwable} - not to be used as an indication of rejecting lines! May be null.
      */
     public Throwable getThrowable() {
         return throwable;
@@ -104,7 +103,7 @@ public class ParserLogEntry {
             section,
             isLineRejected,
             (throwable != null) ? throwable : "none",
-            (lineContent != null) ? "\"" + lineContent + "\"" : "null" //
+            (lineContent != null) ? "\"" + lineContent + "\"" : "null"
         );
     }
 }

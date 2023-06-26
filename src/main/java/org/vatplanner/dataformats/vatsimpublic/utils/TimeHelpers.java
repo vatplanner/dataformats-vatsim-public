@@ -15,11 +15,9 @@ import org.vatplanner.dataformats.vatsimpublic.entities.status.Flight;
 public class TimeHelpers {
 
     private static final int DAY_MINUTES = 24 * 60;
-    private static final Duration MAX_FLIGHT_PLAN_RETENTION_TIME = Duration.ofHours(2); // as per VATSIM
-                                                                                        // policies/documentation
+    private static final Duration MAX_FLIGHT_PLAN_RETENTION_TIME = Duration.ofHours(2); // as per VATSIM policies/documentation
     private static final int MIN_FLIGHT_PLAN_DAY_MINUTES = 0;
-    private static final int MAX_FLIGHT_PLAN_DAY_MINUTES = DAY_MINUTES + 59; // 24:xx time is a valid input to
-                                                                             // circumvent zero hour detection issue
+    private static final int MAX_FLIGHT_PLAN_DAY_MINUTES = DAY_MINUTES + 59; // 24:xx time is a valid input to circumvent zero hour detection issue
 
     private TimeHelpers() {
         // utility class; hide constructor
@@ -28,9 +26,9 @@ public class TimeHelpers {
     /**
      * Searches for a timestamp that seems plausible for the user input.
      *
-     * @param flight flight the timestamp should be interpreted for
+     * @param flight     flight the timestamp should be interpreted for
      * @param fieldValue minutes of day as available from a VATSIM flight plan field
-     *        in data files
+     *                   in data files
      * @return plausible timestamp for given flight plan field; null if unknown
      */
     public static Instant findClosestPlausibleTimestampForFlightPlanField(Flight flight, int fieldValue) {
@@ -83,8 +81,7 @@ public class TimeHelpers {
      *
      * @param a left operand
      * @param b right operand
-     * @return true if <code>a</code>&le;<code>b</code>, false if
-     *         <code>a</code>&gt;<code>b</code>
+     * @return true if <code>a</code>&le;<code>b</code>, false if <code>a</code>&gt;<code>b</code>
      */
     public static boolean isLessOrEqualThan(Duration a, Duration b) {
         return a.compareTo(b) <= 0;
@@ -96,8 +93,7 @@ public class TimeHelpers {
      *
      * @param a left operand
      * @param b right operand
-     * @return true if <code>a</code>&lt;<code>b</code>, false if
-     *         <code>a</code>&ge;<code>b</code>
+     * @return true if <code>a</code>&lt;<code>b</code>, false if <code>a</code>&ge;<code>b</code>
      */
     public static boolean isLessThan(Duration a, Duration b) {
         return a.compareTo(b) < 0;

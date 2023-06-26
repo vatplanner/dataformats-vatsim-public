@@ -32,5 +32,4 @@ public class FlightInformationRegion {
     public Optional<String> getBoundaryId() {
         return boundaryId;
     }
-
 }

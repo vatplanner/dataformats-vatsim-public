@@ -23,12 +23,12 @@ class StringUtilsTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { //
-        "", //
-        " ", //
-        "a\nb\r\nc\rd", //
-        "this\nis\na\ntest", //
-        "trailing line end\n" //
+    @ValueSource(strings = {
+        "",
+        " ",
+        "a\nb\r\nc\rd",
+        "this\nis\na\ntest",
+        "trailing line end\n"
     })
     void testPrefixLines_emptyPrefix_returnsOriginalContent(String expectedContent) {
         // Arrange (nothing to do)
@@ -41,104 +41,104 @@ class StringUtilsTest {
     }
 
     static Stream<Arguments> dataProviderPrefixAndContentWithExpectedResult() {
-        return Stream.of( //
-                          Arguments.of(
-                              "; ",
-                              "This is\n"
-                                  + "a simple\n"
-                                  + "test",
-                              "; This is\n"
-                                  + "; a simple\n"
-                                  + "; test" //
-                          ), //
+        return Stream.of(
+            Arguments.of(
+                "; ",
+                "This is\n"
+                    + "a simple\n"
+                    + "test",
+                "; This is\n"
+                    + "; a simple\n"
+                    + "; test"
+            ),
 
-                          // trailing whitespace
-                          Arguments.of(
-                              "; ",
-                              "trailing space \n"
-                                  + "trailing line end\n",
-                              "; trailing space \n"
-                                  + "; trailing line end\n" //
-                          ), //
+            // trailing whitespace
+            Arguments.of(
+                "; ",
+                "trailing space \n"
+                    + "trailing line end\n",
+                "; trailing space \n"
+                    + "; trailing line end\n"
+            ),
 
-                          // maintain all whitespace
-                          Arguments.of(
-                              "  ",
-                              "\n"
-                                  + " \n"
-                                  + "  ",
-                              "  \n"
-                                  + "   \n"
-                                  + "    " //
-                          ), //
+            // maintain all whitespace
+            Arguments.of(
+                "  ",
+                "\n"
+                    + " \n"
+                    + "  ",
+                "  \n"
+                    + "   \n"
+                    + "    "
+            ),
 
-                          // process and maintain different line end sequences
-                          Arguments.of(
-                              "-",
-                              "CRLF\r\n"
-                                  + "LF\n"
-                                  + "CR\r"
-                                  + "none",
-                              "-CRLF\r\n"
-                                  + "-LF\n"
-                                  + "-CR\r"
-                                  + "-none"//
-                          ), //
+            // process and maintain different line end sequences
+            Arguments.of(
+                "-",
+                "CRLF\r\n"
+                    + "LF\n"
+                    + "CR\r"
+                    + "none",
+                "-CRLF\r\n"
+                    + "-LF\n"
+                    + "-CR\r"
+                    + "-none"
+            ),
 
-                          // consecutive whitespace
-                          Arguments.of(
-                              "-",
-                              "\r\n"
-                                  + "\n",
-                              "-\r\n"
-                                  + "-\n" //
-                          ),
-                          Arguments.of(
-                              "-",
-                              "\n"
-                                  + "\r\n",
-                              "-\n"
-                                  + "-\r\n" //
-                          ),
-                          Arguments.of(
-                              "-",
-                              "\r"
-                                  + "\r\n",
-                              "-\r"
-                                  + "-\r\n" //
-                          ),
-                          Arguments.of(
-                              "-",
-                              "\r\n"
-                                  + "\r",
-                              "-\r\n"
-                                  + "-\r" //
-                          ),
-                          Arguments.of(
-                              "-",
-                              "\n"
-                                  + "\n"
-                                  + "\n"
-                                  + "\r"
-                                  + "\r"
-                                  + "\r"
-                                  + "\r\n"
-                                  + "\r\n"
-                                  + "\r\n"
-                                  + "\n"
-                                  + "\n", //
-                              "-\n"
-                                  + "-\n"
-                                  + "-\n"
-                                  + "-\r"
-                                  + "-\r"
-                                  + "-\r"
-                                  + "-\r\n"
-                                  + "-\r\n"
-                                  + "-\r\n"
-                                  + "-\n"
-                                  + "-\n"//
-                          ) //
+            // consecutive whitespace
+            Arguments.of(
+                "-",
+                "\r\n"
+                    + "\n",
+                "-\r\n"
+                    + "-\n"
+            ),
+            Arguments.of(
+                "-",
+                "\n"
+                    + "\r\n",
+                "-\n"
+                    + "-\r\n"
+            ),
+            Arguments.of(
+                "-",
+                "\r"
+                    + "\r\n",
+                "-\r"
+                    + "-\r\n"
+            ),
+            Arguments.of(
+                "-",
+                "\r\n"
+                    + "\r",
+                "-\r\n"
+                    + "-\r"
+            ),
+            Arguments.of(
+                "-",
+                "\n"
+                    + "\n"
+                    + "\n"
+                    + "\r"
+                    + "\r"
+                    + "\r"
+                    + "\r\n"
+                    + "\r\n"
+                    + "\r\n"
+                    + "\n"
+                    + "\n",
+                "-\n"
+                    + "-\n"
+                    + "-\n"
+                    + "-\r"
+                    + "-\r"
+                    + "-\r"
+                    + "-\r\n"
+                    + "-\r\n"
+                    + "-\r\n"
+                    + "-\n"
+                    + "-\n"
+            )
         );
     }
 
@@ -160,51 +160,51 @@ class StringUtilsTest {
             Arguments.of(
                 "\n",
                 "",
-                "" //
+                ""
             ),
             Arguments.of(
                 "\r",
                 "",
-                "" //
+                ""
             ),
             Arguments.of(
                 "\r\n",
                 "",
-                "" //
+                ""
             ),
 
             // no line end
             Arguments.of(
                 "\n",
                 "abc",
-                "abc" //
+                "abc"
             ),
             Arguments.of(
                 "\r",
                 "abc",
-                "abc" //
+                "abc"
             ),
             Arguments.of(
                 "\r\n",
                 "abc",
-                "abc" //
+                "abc"
             ),
 
             // trailing line ends
             Arguments.of(
                 "\n",
                 " \r\n",
-                " \n" //
+                " \n"
             ),
             Arguments.of(
                 "\r",
                 " \r\n",
-                " \r" //
+                " \r"
             ),
             Arguments.of(
                 "\r\n",
                 " \r\n",
-                " \r\n" //
+                " \r\n"
             ),
 
             // varying line ends
@@ -217,7 +217,7 @@ class StringUtilsTest {
                 " CR LF \n"
                     + " CR \n"
                     + " LF \n"
-                    + " trailing " //
+                    + " trailing "
             ),
             Arguments.of(
                 "\r",
@@ -228,7 +228,7 @@ class StringUtilsTest {
                 " CR LF \r"
                     + " CR \r"
                     + " LF \r"
-                    + " trailing " //
+                    + " trailing "
             ),
             Arguments.of(
                 "\r\n",
@@ -239,8 +239,8 @@ class StringUtilsTest {
                 " CR LF \r\n"
                     + " CR \r\n"
                     + " LF \r\n"
-                    + " trailing " //
-            ) //
+                    + " trailing "
+            )
         );
     }
 
@@ -257,12 +257,12 @@ class StringUtilsTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { //
-        "\n", //
-        "\r", //
-        "\r\n", //
-        "Something in front\n", //
-        "Multiple\nLines\n" //
+    @ValueSource(strings = {
+        "\n",
+        "\r",
+        "\r\n",
+        "Something in front\n",
+        "Multiple\nLines\n"
     })
     void testEndsWithLineBreak_endingWithLineBreak_returnsTrue(String s) {
         // Arrange (nothing to do)
@@ -275,14 +275,14 @@ class StringUtilsTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { //
-        "", //
-        "no line break at all", //
-        "\n ", //
-        "\r ", //
-        "\r\n ", //
-        "Something in front\n ", //
-        "Multiple\nLines\n " //
+    @ValueSource(strings = {
+        "",
+        "no line break at all",
+        "\n ",
+        "\r ",
+        "\r\n ",
+        "Something in front\n ",
+        "Multiple\nLines\n "
     })
     void testEndsWithLineBreak_endingWithoutLineBreak_returnsFalse(String s) {
         // Arrange (nothing to do)

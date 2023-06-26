@@ -22,8 +22,7 @@ public class VoiceServer {
     private String location;
     private String name;
     private boolean clientConnectionAllowed;
-    private String rawServerType; // raw because I couldn't find any information on what values are allowed and
-                                  // what they are supposed to mean
+    private String rawServerType; // raw because I couldn't find any information on what values are allowed and what they are supposed to mean
 
     /**
      * Returns the server's network address. May be a host name or IP address. May
@@ -74,7 +73,7 @@ public class VoiceServer {
      * Returns if clients are allowed to connect to this server.
      *
      * @return Are clients allowed to connect to this server? (true = allowed, false
-     *         = not allowed)
+     *     = not allowed)
      */
     public boolean isClientConnectionAllowed() {
         return clientConnectionAllowed;
@@ -92,8 +91,7 @@ public class VoiceServer {
      * pilot/ATC client and have the required protocol documentation. Will be null
      * if type has not been specified.
      *
-     * @return raw (uninterpreted) information about the type of voice server; may
-     *         be null if missing
+     * @return raw (uninterpreted) information about the type of voice server; may be null if missing
      */
     public String getRawServerType() {
         return rawServerType;
@@ -115,11 +113,9 @@ public class VoiceServer {
         boolean isAddressEqual = equalsNullSafe(this, other, VoiceServer::getAddress);
         boolean isLocationEqual = equalsNullSafe(this, other, VoiceServer::getLocation);
         boolean isNameEqual = equalsNullSafe(this, other, VoiceServer::getName);
-        boolean isClientConnectionAllowedEqual = //
-            (this.isClientConnectionAllowed() == other.isClientConnectionAllowed());
+        boolean isClientConnectionAllowedEqual = (this.isClientConnectionAllowed() == other.isClientConnectionAllowed());
         boolean isRawServerTypeEqual = equalsNullSafe(this, other, VoiceServer::getRawServerType);
 
-        return isAddressEqual && isLocationEqual && isNameEqual && isClientConnectionAllowedEqual
-            && isRawServerTypeEqual;
+        return isAddressEqual && isLocationEqual && isNameEqual && isClientConnectionAllowedEqual && isRawServerTypeEqual;
     }
 }
