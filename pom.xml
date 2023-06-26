@@ -109,10 +109,21 @@
         </dependency>
 
         <dependency>
+            <!-- NOTE: IDEA reports security issues coming from Guava 14.0.1 - there is no update for slf4j-test and
+                       jumping straight to latest Guava doesn't look like a viable option. slf4j-test is only a test
+                       dependency, as long as Guava does not "leak" to become a runtime dependency this should be fine.
+            -->
             <groupId>uk.org.lidalia</groupId>
             <artifactId>slf4j-test</artifactId>
             <version>${slf4jTest.version}</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <!-- conflict reported by IDEA (wants 1.7.5, we want 1.7.36) -->
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -120,6 +131,13 @@
             <artifactId>mockito-core</artifactId>
             <version>${mockito.version}</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <!-- version conflict (1.12.19) with AssertJ (1.12.21) -->
+                    <groupId>net.bytebuddy</groupId>
+                    <artifactId>byte-buddy</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
