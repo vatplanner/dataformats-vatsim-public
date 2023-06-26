@@ -188,6 +188,7 @@ class DataFileParserTest {
                             .isSameAs(DataFileFormat.LEGACY);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void testDeserialize_generalSection_forwardsCleanedSectionRelevantLinesToGeneralSectionParserExactlyOnce() {
         // Arrange

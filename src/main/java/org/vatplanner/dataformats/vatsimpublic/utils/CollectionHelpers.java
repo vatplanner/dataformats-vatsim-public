@@ -27,6 +27,7 @@ public class CollectionHelpers {
      * @param arr values to be added
      * @return unmodifiable {@link Set} holding given values
      */
+    @SafeVarargs
     public static <T> Set<T> asUnmodifiableSet(T... arr) {
         return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(arr)));
     }

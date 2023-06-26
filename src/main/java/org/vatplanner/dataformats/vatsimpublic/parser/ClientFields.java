@@ -88,7 +88,8 @@ public class ClientFields {
      *            {@link FieldAccess}
      * @return all {@link Client} fields
      */
-    public static <T extends Enum & FieldAccess<?>> Set<T> getAllFields() {
+    @SuppressWarnings("unchecked")
+    public static <T extends Enum<?> & FieldAccess<?>> Set<T> getAllFields() {
         Set<T> all = new HashSet<>();
 
         all.addAll((Collection<T>) Arrays.asList(StringFields.values()));

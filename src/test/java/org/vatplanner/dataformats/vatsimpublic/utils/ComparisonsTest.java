@@ -22,6 +22,7 @@ class ComparisonsTest {
 
     private Function<Object, Object> mockGetter;
 
+    @SuppressWarnings("unchecked")
     @BeforeEach
     public void setUp() {
         attributeA = mock(Object.class);
