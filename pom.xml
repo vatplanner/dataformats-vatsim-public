@@ -1,264 +1,264 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.vatplanner</groupId>
-	<artifactId>dataformats-vatsim-public</artifactId>
-	<name>VATSIM Public Data Formats</name>
-	<description>library for parsing and processing publicly accessible VATSIM data formats</description>
-	<version>0.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.vatplanner</groupId>
+    <artifactId>dataformats-vatsim-public</artifactId>
+    <name>VATSIM Public Data Formats</name>
+    <description>library for parsing and processing publicly accessible VATSIM data formats</description>
+    <version>0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
-	<url>https://github.com/vatplanner/dataformats-vatsim-public</url>
+    <url>https://github.com/vatplanner/dataformats-vatsim-public</url>
 
-	<licenses>
-		<license>
-			<name>MIT</name>
-			<url>https://opensource.org/licenses/MIT</url>
-		</license>
-	</licenses>
+    <licenses>
+        <license>
+            <name>MIT</name>
+            <url>https://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
 
-		<!-- runtime dependencies -->
-		<slf4j.version>[1.7.21,1.7.999]</slf4j.version>
-		<jsonSimple.version>[3.1.1,4.0.999]</jsonSimple.version>
+        <!-- runtime dependencies -->
+        <slf4j.version>[1.7.21,1.7.999]</slf4j.version>
+        <jsonSimple.version>[3.1.1,4.0.999]</jsonSimple.version>
 
-		<!-- test dependencies -->
-		<junit.version>5.9.3</junit.version>
-		<assertj.version>3.24.2</assertj.version>
-		<mockito.version>4.11.0</mockito.version> <!-- Mockito 5 requires Java 11 -->
-		<slf4jTest.version>1.2.0</slf4jTest.version>
+        <!-- test dependencies -->
+        <junit.version>5.9.3</junit.version>
+        <assertj.version>3.24.2</assertj.version>
+        <mockito.version>4.11.0</mockito.version> <!-- Mockito 5 requires Java 11 -->
+        <slf4jTest.version>1.2.0</slf4jTest.version>
 
-		<!-- build dependencies -->
-		<maven.compiler.version>3.8.1</maven.compiler.version>
-		<maven.source.version>3.2.0</maven.source.version>
-		<maven.javadoc.version>3.2.0</maven.javadoc.version>
-		<maven.gpg.version>1.6</maven.gpg.version>
-		<maven.nexusStaging.version>1.6.7</maven.nexusStaging.version>
-		<maven.surefire.version>3.0.0-M5</maven.surefire.version>
+        <!-- build dependencies -->
+        <maven.compiler.version>3.8.1</maven.compiler.version>
+        <maven.source.version>3.2.0</maven.source.version>
+        <maven.javadoc.version>3.2.0</maven.javadoc.version>
+        <maven.gpg.version>1.6</maven.gpg.version>
+        <maven.nexusStaging.version>1.6.7</maven.nexusStaging.version>
+        <maven.surefire.version>3.0.0-M5</maven.surefire.version>
 
-		<!-- QA -->
-		<jacoco.version>0.8.0</jacoco.version>
-		<sonar.organization>vatplanner</sonar.organization>
-		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
-	</properties>
+        <!-- QA -->
+        <jacoco.version>0.8.0</jacoco.version>
+        <sonar.organization>vatplanner</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    </properties>
 
-	<scm>
-		<connection>scm:git:git://github.com/vatplanner/dataformats-vatsim-public.git</connection>
-		<developerConnection>scm:git:ssh://github.com:vatplanner/dataformats-vatsim-public.git</developerConnection>
-		<url>https://github.com/vatplanner/dataformats-vatsim-public</url>
-	</scm>
+    <scm>
+        <connection>scm:git:git://github.com/vatplanner/dataformats-vatsim-public.git</connection>
+        <developerConnection>scm:git:ssh://github.com:vatplanner/dataformats-vatsim-public.git</developerConnection>
+        <url>https://github.com/vatplanner/dataformats-vatsim-public</url>
+    </scm>
 
-	<developers>
-		<developer>
-			<name>Daniel Neugebauer</name>
-			<email>dneuge@energiequant.de</email>
-			<url>http://www.energiequant.de/</url>
-		</developer>
-	</developers>
+    <developers>
+        <developer>
+            <name>Daniel Neugebauer</name>
+            <email>dneuge@energiequant.de</email>
+            <url>http://www.energiequant.de/</url>
+        </developer>
+    </developers>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.junit</groupId>
-				<artifactId>junit-bom</artifactId>
-				<version>${junit.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
-	<dependencies>
-		<!-- runtime dependencies -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j.version}</version>
-		</dependency>
+    <dependencies>
+        <!-- runtime dependencies -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
 
-		<dependency>
-			<groupId>com.github.cliftonlabs</groupId>
-			<artifactId>json-simple</artifactId>
-			<version>${jsonSimple.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>com.github.cliftonlabs</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>${jsonSimple.version}</version>
+        </dependency>
 
-		<!-- test dependencies -->
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter</artifactId>
-			<scope>test</scope>
-		</dependency>
+        <!-- test dependencies -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>org.assertj</groupId>
-			<artifactId>assertj-core</artifactId>
-			<version>${assertj.version}</version>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
+            <scope>test</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>uk.org.lidalia</groupId>
-			<artifactId>slf4j-test</artifactId>
-			<version>${slf4jTest.version}</version>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>uk.org.lidalia</groupId>
+            <artifactId>slf4j-test</artifactId>
+            <version>${slf4jTest.version}</version>
+            <scope>test</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<version>${mockito.version}</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>${maven.surefire.version}</version>
-			</plugin>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven.surefire.version}</version>
+            </plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>${maven.source.version}</version>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar-no-fork</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<excludes>
-						<exclude>**/ManualTest*</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>${maven.source.version}</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <excludes>
+                        <exclude>**/ManualTest*</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>${maven.javadoc.version}</version>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<sourceFileExcludes>
-						<sourceFileExcludes>**/ManualTest*</sourceFileExcludes>
-					</sourceFileExcludes>
-				</configuration>
-			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven.javadoc.version}</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <sourceFileExcludes>
+                        <sourceFileExcludes>**/ManualTest*</sourceFileExcludes>
+                    </sourceFileExcludes>
+                </configuration>
+            </plugin>
 
-			<plugin>
-				<groupId>org.eluder.coveralls</groupId>
-				<artifactId>coveralls-maven-plugin</artifactId>
-				<version>4.3.0</version>
-				<configuration>
-					<branch>${env.coveralls_branch}</branch>
-					<repoToken>${env.coveralls_token}</repoToken>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+            <plugin>
+                <groupId>org.eluder.coveralls</groupId>
+                <artifactId>coveralls-maven-plugin</artifactId>
+                <version>4.3.0</version>
+                <configuration>
+                    <branch>${env.coveralls_branch}</branch>
+                    <repoToken>${env.coveralls_token}</repoToken>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
-	<profiles>
-		<profile>
-			<id>jacoco</id>
-			<activation>
-				<!-- use -P !jacoco to disable -->
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.jacoco</groupId>
-						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>${jacoco.version}</version>
-						<executions>
-							<execution>
-								<id>prepare-agent</id>
-								<goals>
-									<goal>prepare-agent</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>release</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-compiler-plugin</artifactId>
-						<version>${maven.compiler.version}</version>
-						<configuration>
-							<excludes>
-								<exclude>**/ManualTest*</exclude>
-							</excludes>
-						</configuration>
-					</plugin>
+    <profiles>
+        <profile>
+            <id>jacoco</id>
+            <activation>
+                <!-- use -P !jacoco to disable -->
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco.version}</version>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <version>${maven.compiler.version}</version>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/ManualTest*</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
 
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<version>${maven.gpg.version}</version>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-								<configuration>
-									<keyname>${gpg.keyname}</keyname>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.sonatype.plugins</groupId>
-						<artifactId>nexus-staging-maven-plugin</artifactId>
-						<version>${maven.nexusStaging.version}</version>
-						<extensions>true</extensions>
-						<configuration>
-							<serverId>ossrh</serverId>
-							<nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-							<!--<autoReleaseAfterClose>true</autoReleaseAfterClose> -->
-							<autoReleaseAfterClose>false</autoReleaseAfterClose>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${maven.gpg.version}</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <keyname>${gpg.keyname}</keyname>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>${maven.nexusStaging.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                            <!--<autoReleaseAfterClose>true</autoReleaseAfterClose> -->
+                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
-	<distributionManagement>
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>
