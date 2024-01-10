@@ -15,9 +15,9 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vatplanner.commons.geo.GeoPoint2DMode;
 import org.vatplanner.dataformats.vatsimpublic.parser.Parser;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
-import org.vatplanner.dataformats.vatsimpublic.utils.GeoPoint2DMode;
 
 public class VatSpyFileParser implements Parser<VatSpyFile> {
     private static final Logger LOGGER = LoggerFactory.getLogger(VatSpyFileParser.class);

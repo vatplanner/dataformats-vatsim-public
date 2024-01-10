@@ -25,6 +25,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <!-- runtime dependencies -->
+        <vatplanner.commons.version>0.1-SNAPSHOT</vatplanner.commons.version>
         <slf4j.version>[1.7.21,1.7.999]</slf4j.version>
         <jsonSimple.version>[3.1.1,4.0.999]</jsonSimple.version>
 
@@ -76,6 +77,19 @@
 
     <dependencies>
         <!-- runtime dependencies -->
+        <dependency>
+            <groupId>org.vatplanner.commons</groupId>
+            <artifactId>vatplanner-commons-base</artifactId>
+            <version>${vatplanner.commons.version}</version>
+
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

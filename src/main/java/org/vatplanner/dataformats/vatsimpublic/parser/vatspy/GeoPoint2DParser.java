@@ -7,8 +7,8 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.vatplanner.dataformats.vatsimpublic.utils.GeoPoint2D;
-import org.vatplanner.dataformats.vatsimpublic.utils.GeoPoint2DMode;
+import org.vatplanner.commons.geo.GeoPoint2D;
+import org.vatplanner.commons.geo.GeoPoint2DMode;
 
 public class GeoPoint2DParser implements Function<String, GeoPoint2D> {
     private final GeoPoint2DMode mode;

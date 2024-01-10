@@ -18,12 +18,12 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vatplanner.commons.exceptions.OutOfRange;
+import org.vatplanner.commons.geo.GeoPoint2D;
+import org.vatplanner.commons.geo.GeoPoint2DMode;
 import org.vatplanner.dataformats.vatsimpublic.parser.Parser;
 import org.vatplanner.dataformats.vatsimpublic.parser.ParserLogEntry;
-import org.vatplanner.dataformats.vatsimpublic.utils.GeoPoint2D;
-import org.vatplanner.dataformats.vatsimpublic.utils.GeoPoint2DMode;
 import org.vatplanner.dataformats.vatsimpublic.utils.Optionals;
-import org.vatplanner.dataformats.vatsimpublic.utils.OutOfRange;
 
 /**
  * Parser for the <code>FIRBoundaries.dat</code> file of VAT-Spy.

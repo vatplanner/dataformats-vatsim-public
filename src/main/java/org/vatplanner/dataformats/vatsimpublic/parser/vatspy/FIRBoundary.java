@@ -3,7 +3,7 @@ package org.vatplanner.dataformats.vatsimpublic.parser.vatspy;
 import java.util.Collections;
 import java.util.List;
 
-import org.vatplanner.dataformats.vatsimpublic.utils.GeoPoint2D;
+import org.vatplanner.commons.geo.GeoPoint2D;
 
 public class FIRBoundary {
     private final String id;
