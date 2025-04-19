@@ -47,11 +47,6 @@ Planned:
     - *do not use the existing implementation* (it was never ready for production) as it is subject to a full rewrite
       because the old approach can no longer be applied to JSON formats
 
-## Build instructions
-
-Due to recent ongoing refactoring you will need to locally install the latest development version (`0.1-SNAPSHOT`)
-of [VATPlanner Commons](https://github.com/vatplanner/vatplanner-commons) until it gets published to Maven Central.
-
 ## Current API State
 
 API is currently not stable and may change without notice. Restructuring of the whole project is currently pending
