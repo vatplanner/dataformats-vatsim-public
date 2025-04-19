@@ -40,8 +40,8 @@
         <maven.source.version>3.2.0</maven.source.version>
         <maven.javadoc.version>3.2.0</maven.javadoc.version>
         <maven.gpg.version>1.6</maven.gpg.version>
-        <maven.nexusStaging.version>1.6.7</maven.nexusStaging.version>
         <maven.surefire.version>3.0.0-M5</maven.surefire.version>
+        <sonatype.plugin.centralPublishing.version>0.7.0</sonatype.plugin.centralPublishing.version>
 
         <!-- QA -->
         <jacoco.version>0.8.11</jacoco.version>
@@ -271,26 +271,16 @@
                         </executions>
                     </plugin>
                     <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>${maven.nexusStaging.version}</version>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${sonatype.plugin.centralPublishing.version}</version>
                         <extensions>true</extensions>
                         <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-                            <!--<autoReleaseAfterClose>true</autoReleaseAfterClose> -->
-                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                            <publishingServerId>central</publishingServerId>
                         </configuration>
                     </plugin>
                 </plugins>
             </build>
         </profile>
     </profiles>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
 </project>
