@@ -49,12 +49,12 @@ Planned:
 
 ## Current API State
 
-API is currently not stable and may change without notice. Restructuring of the whole project is currently pending
-(#18). A stable release should be expected after restructuring is complete; `0.1-pre`-releases are published prior to
-that.
+In theory, the API is currently not stable and may change without notice. Restructuring of the whole project is still
+pending (#18). However, it has been in the current state for so long, that it no longer makes sense to delay proper
+releases to some uncertain date, especially with only occasional work on this library.
 
-**Privacy filter was under construction and is now deprecated as it requires a major rework due to JSON format
-introduction. It should not be used in current state.**
+**Please keep in mind that the privacy filter was under construction and is now deprecated as it requires a major rework
+due to JSON format introduction. It should not be used in current state.**
 
 ## Examples and Development Tools
 
