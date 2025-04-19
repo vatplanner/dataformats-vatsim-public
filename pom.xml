@@ -219,6 +219,8 @@
                     <sourceFileExcludes>
                         <sourceFileExcludes>**/ManualTest*</sourceFileExcludes>
                     </sourceFileExcludes>
+                    <!-- detectOfflineLinks needs to be disabled or artifacts will link to invalid URLs derived from project.url -->
+                    <detectOfflineLinks>false</detectOfflineLinks>
                 </configuration>
             </plugin>
 
