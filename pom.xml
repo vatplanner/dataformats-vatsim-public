@@ -36,11 +36,11 @@
         <slf4jTest.version>1.2.0</slf4jTest.version>
 
         <!-- build dependencies -->
-        <maven.compiler.version>3.8.1</maven.compiler.version>
-        <maven.source.version>3.2.0</maven.source.version>
-        <maven.javadoc.version>3.2.0</maven.javadoc.version>
-        <maven.gpg.version>1.6</maven.gpg.version>
-        <maven.surefire.version>3.0.0-M5</maven.surefire.version>
+        <maven.plugin.compiler.version>3.8.1</maven.plugin.compiler.version>
+        <maven.plugin.gpg.version>1.6</maven.plugin.gpg.version>
+        <maven.plugin.javadoc.version>3.2.0</maven.plugin.javadoc.version>
+        <maven.plugin.source.version>3.2.0</maven.plugin.source.version>
+        <maven.plugin.surefire.version>3.0.0-M5</maven.plugin.surefire.version>
         <sonatype.plugin.centralPublishing.version>0.7.0</sonatype.plugin.centralPublishing.version>
 
         <!-- QA -->
@@ -160,13 +160,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven.surefire.version}</version>
+                <version>${maven.plugin.surefire.version}</version>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>${maven.source.version}</version>
+                <version>${maven.plugin.source.version}</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -185,7 +185,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>${maven.javadoc.version}</version>
+                <version>${maven.plugin.javadoc.version}</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -245,7 +245,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
-                        <version>${maven.compiler.version}</version>
+                        <version>${maven.plugin.compiler.version}</version>
                         <configuration>
                             <excludes>
                                 <exclude>**/ManualTest*</exclude>
@@ -256,7 +256,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>${maven.gpg.version}</version>
+                        <version>${maven.plugin.gpg.version}</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
