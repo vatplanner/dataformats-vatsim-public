@@ -30,17 +30,17 @@
         <jsonSimple.version>[3.1.1,4.0.999]</jsonSimple.version>
 
         <!-- test dependencies -->
-        <junit.version>5.9.3</junit.version>
-        <assertj.version>3.24.2</assertj.version>
+        <junit.version>5.12.2</junit.version>
+        <assertj.version>3.27.3</assertj.version> <!-- AssertJ 4 requires Java 17 -->
         <mockito.version>4.11.0</mockito.version> <!-- Mockito 5 requires Java 11 -->
         <slf4jTest.version>1.2.0</slf4jTest.version>
 
         <!-- build dependencies -->
-        <maven.plugin.compiler.version>3.8.1</maven.plugin.compiler.version>
-        <maven.plugin.gpg.version>1.6</maven.plugin.gpg.version>
+        <maven.plugin.compiler.version>3.14.0</maven.plugin.compiler.version>
+        <maven.plugin.gpg.version>3.2.7</maven.plugin.gpg.version>
         <maven.plugin.javadoc.version>3.2.0</maven.plugin.javadoc.version>
         <maven.plugin.source.version>3.2.0</maven.plugin.source.version>
-        <maven.plugin.surefire.version>3.0.0-M5</maven.plugin.surefire.version>
+        <maven.plugin.surefire.version>3.2.5</maven.plugin.surefire.version>
         <sonatype.plugin.centralPublishing.version>0.7.0</sonatype.plugin.centralPublishing.version>
 
         <!-- QA -->
