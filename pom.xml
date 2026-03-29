@@ -32,7 +32,7 @@
 
         <!-- test dependencies -->
         <junit.version>5.12.2</junit.version>
-        <assertj.version>3.27.3</assertj.version> <!-- AssertJ 4 requires Java 17 -->
+        <assertj.version>3.27.7</assertj.version> <!-- AssertJ 4 requires Java 17 -->
         <mockito.version>4.11.0</mockito.version> <!-- Mockito 5 requires Java 11 -->
         <slf4jTest.version>1.2.0</slf4jTest.version>
 
